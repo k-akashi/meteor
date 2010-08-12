@@ -1,0 +1,241 @@
+
+QOMET v1.5 (March 2009)
+---------------------------
+
+In QOMET v1.5 the focus was not on adding new features, but mainly on
+improving the performance of QOMET. As QOMET grew to represent a set
+of tools, the meaning of the acronym QOMET was changed to "Quality
+Observation adn Mobility Experiment Tools". The process of optimizing
+and restructuring QOMET will continue.
+
+Nevertheless, several new features do exist, as follows:
+  * New node attribute value:
+    - dei80211mr: reproduce the characteristics of the homonymous
+      model that enables multi rate simulations in NS-2
+  * New object attribute and attribute values:
+    - type: specify the type of an object (available choices are
+      'builidng' and 'road')
+  * Added support for outputing motion data in NS-2 format, for use in
+    NS-2 simulations, via the option '-s' of 'qomet'; the option '-m'
+    still produces NAM format output
+  * The 'do_wireconf' program was made more user friendly by improving
+    support for OLSR routing, while retaining also the previous
+    flexible configuration features
+
+
+
+QOMET v1.4 (September 2008)
+---------------------------
+
+In QOMET v1.4, support for new wireless technologies was not
+added. However, the existing features were extended so as to allow a
+wider range of experiments. For example, 3D environments can now be
+represented. In addition, JPGIS map information can be imported and
+used as the source of bulding coordinates.
+
+New features:
+  * Added several command-line arguments to allow finer control of the
+    generated output and of the computation
+  * New scenario attributes:
+    - coordinate_system: specify the coordinate system used in the
+      scenario (available choices are 'cartesian' and
+      'latitude/longitude/altitude' systems)
+    - jpgis_filename: specify the name of the JPGIS file from which
+      object coordinates are to be loaded (UTF-8 encoding is
+      required)
+    - motion_step_divider: divider that should be applied to deltaQ
+      calculation step; used for motion computations, so that motion
+      time step can be sufficiently small to produce correct
+      results, independently on the deltaQ calculation step
+  * New node attributes and values:
+    - s_node: value of attribute 'adapter', used to emulate S-NODE
+      active tag devices
+    - elevation_orientation: antenna orientation in elevation
+      (vertical) plane in degrees
+    - elevation_beamwidth: antenna beamwidth in elevation (vertical)
+      plane in degrees
+  * New object attributes:
+    - height: specify the height of a (3D) object
+    - load_from_jpgis_file: specify that object coordinates should
+      be loaded from a JPGIS file
+    - make_polygon: specify that the object should be considered as
+      a polygon by connecting its last and first vertices
+  * Added a new element, coordinate, used to represent the 2D
+    coordinates of a building contour as it could be seen on a
+    map. The object attribute height can be used to construct a 3D
+    object.
+  * New motion attributes and attribute values:
+    - rotation: new value for 'type' attribute that specifies a node
+      should rotate at its present position, thus changing its
+      antenna orientation; both rotations in horizontal and vertical
+      planes are supported
+    - rotation_angle_horizontal: new attribute specifying the
+      rotation angle in horizontal plane
+    - rotation_angle_vertical: new attribute specifying the
+      rotation angle in vertical plane
+  * New connection attribute values:
+    - auto_connect: new value for 'to_node' attribute; can be used
+      to indicate that the from_node should be automatically
+      connected to all the node in the scenario that were defined up
+      to that point in the scenario
+    - "smart_tag" value of attribute 'standard' was renamed to
+      "active_tag"
+
+
+QOMET v1.3 (March 2008)
+-----------------------
+
+QOMET v1.3 is the forth release of the emulation tool. In addition to
+802.11a/b/g and Ethernet network emulation capabilities, QOMET now
+supports active tag emulation and ZigBee.
+
+New features:
+  * Added support for active tag communication
+  * Added support for ZigBee communication
+  * New scenario attributes:
+    - start_time: specify starting time in seconds (can be negative)
+  * New node attribute value:
+    - jennic: value of attribute 'adapter', used to emulate JENNIC
+      ZigBee devices
+    - azimuth_orientation: antenna orientation in azimuth
+      (horizontal) plane in degrees
+    - azimuth_beamwidth: antenna beamwidth in azimuth (horizontal)
+      plane in degrees
+  * New motion attributes and values:
+    - behavioral: value of attribute 'type', specify the use of
+      behavioral model for motion generation
+    - destination_x, destination_y, destination_z: specify the
+      destination for motion for linear or behavioral models
+  * New connection attributes and values:
+    - to_node attribute can now take a list of nodes spearated by
+      space to specify multiple receiving nodes
+    - smart_tag: value of attribute 'standard' used to specify
+      active tag connections
+    - zigbee: value of attribute 'standard' used to specify ZigBee
+      connections
+    - consider_interference: specify whether interference between
+      nodes is to be taken into account when computing communication
+      conditions
+  * A new library called 'routing' was introduced to facilitate routing
+    calculation
+  * A new library called 'chanel' was introduced to facilitate
+    experiments with non-IP networks, such as active tags or ZigBee
+  * Automatic scenario generation was implemented
+  * QOMET output is now also written in binary format, therefore in
+    addition to .out files, .bin files will also be produced after running
+    QOMET
+  * To facilitate display of motion, QOMET creates a mobility trace in
+    NAM format (NS-2 Network Animator); files have the extension .nam
+
+
+QOMET v1.2 (September 2007)
+---------------------------
+
+QOMET v1.2 is the third release of the emulation tool and it has now
+802.11a/b/g and Ethernet network emulation capabilities.
+
+New features:
+  * Improved model of WLAN, using an equation based on
+    receiver-sensitivity thresholds (available from most
+    manufacturers), and that includes effects of noise
+  * Added support for 802.11a, thus permitting complete emulation of
+    802.11 WLANs
+  * Added support for 802.11g stations operating in compatibility mode
+    (i.e., when in the presence of 802.11b stations)
+  * New node attributes:
+    - adapter: select a parametrized model from the various WLAN
+      adapters supported (Cisco Aironet 802.11a/b/g, Cisco Aironet 340,
+      ORiNOCO 802.11b)
+    - antenna_gain: specify the tranceiver antenna gain in dBi
+  * New connection attribute
+    - channel: used to model interference between nodes that
+      operate in the same area; if nodes operate on the same channel
+      interference is highest, and it decreases as the channel
+      separation increases
+  * Background noise and noise caused by inter-channel interference
+    are both included in the model for calculating frame error rate
+  * Intra-channel interference is taken into account through the use
+    of an analytical model (proposed by Gupta)
+  * A new library, wireconf, was introduced, which makes it easy to
+    configure a wired-network emulator and run a QOMET emulation
+    experiment. At the moment only dummynet on FreeBSD is
+    supported. Wireconf is accompanied by a timer library, that ensure
+    that dummynet configuration is changed at accurate time
+    intervals. The timer library also is only available for FreeBSD so
+    far.
+    
+Changes compared to previous version:
+  * The attribute 'fixed_delay' of the 'node' element was renamed to
+    'internal_delay', which better reflects the meaning of this
+    attribute
+
+
+QOMET v1.1 (February 2007)
+--------------------------
+
+QOMET v1.1 is the second release of the emulation tool and it has now
+802.11g and Ethernet network emulation capabilities as well. In
+addition objects (obstacles) can be defined and the communication
+environment can be computed dynamically so as to increase the realism
+of emulation.
+
+New features:
+  * Define the SSID for nodes, so that they can connect only to some
+    networks 
+    - New node properties: ssid
+  * Added a new element, object, which allows creation of topologies
+    in which nodes can move 
+    - Objects can only have rectangular shape
+    - Environments are associated to objects; these environments can
+      be used to dynamically determine the communication conditions
+      for a connection depending on the position of the connected
+      nodes and the objects between them
+    - Full list of object properties: name, environment, x1, y1,
+      x2, y2
+  * The environment associated to a connection can be computed in a
+    dynamic manner if its attribute "is_dynamic" is set to "true"
+    - New environment properties: is_dynamic
+  * Added the random-walk motion type
+    - New motion properties: min_speed, max_speed, walk_time
+  * Added support for 802.11g and Ethernet connections
+    - New connection properties: standard, RTS_CTS_threshold
+  * User can now specify the bandwith, loss rate and delay & jitter
+    associated to a connection. This is particularly useful for
+    defining the conditions of Ethernet connections
+  * The average number of retransmissions of a frame is now outputted
+    as well under the column "num_retr"
+
+
+QOMET v1.0 - Initial release (October 2006)
+-------------------------------------------
+
+QOMET v1.0 is the first release of the WLAN emulation tool. It makes
+it possible to build simple scenarios involving WLAN nodes and compute
+the network quality degradation effects that correspond to these
+scenarios. Subsequently the computed results can be used to reproduce
+the effects in a real wired-network environment.
+
+Features:
+  * Define a scenario with nodes, environments, motions and
+    connections
+  * Specify duration and step of emulation
+    - Qomet_scenario properties: duration, step
+  * Specify properties of nodes, such as type, position, transmitting
+    power
+    - Full list of node properties: name, type, connection, id, x,
+      y, z, Pt, fixed_delay
+  * Specify properties of environments, such as attenuation, shadowing
+    - Full list of environment properties: name, type (not used yet),
+      alpha, sigma, W, noise_power
+  * Specify properties of motions, such as type (linear, circular),
+    start and stop time, etc.
+    - Full list of motion properties: node_name, type, speed_x,
+      speed_y, speed_z, center_x, center_y, velocity, start_time,
+      stop_time
+  * Specify properties of connections, such as the connected nodes and 
+    the environment used, packet size
+    - Full list of connection properties: from_node, to_node,
+      through_environment, packet_size
+    - Only 802.11b WLAN is supported in this version
+  * A script is provided to demonstrate how one can use QOMET to
+    conduct WLAN emulation experiments

@@ -1,0 +1,1568 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.6	//
+ACCELERATED_MOTION	deltaQ/motion.h	64;"	d
+ACCEPTED_ERROR	chanel/chanel_space.c	96;"	d	file:
+ACCESS_POINT_NODE	deltaQ/scenario.h	77;"	d
+ACTIVE_TAG	deltaQ/deltaQ.h	95;"	d
+AD_HOC_CONNECTION	deltaQ/scenario.h	80;"	d
+ANTENNA_MAX_ATTENUATION	deltaQ/generic.h	55;"	d
+ANY_CONNECTION	deltaQ/scenario.h	82;"	d
+ANY_OS_TARGETS	Makefile	/^ANY_OS_TARGETS = qomet generate_scenario ${DELTAQ_PATH}\/libdeltaQ.a ${CHANEL_PATH}\/do_chanel ${CHANEL_PATH}\/chanel_config$/;"	m
+ARF_FER_DOWN_THRESHOLD	deltaQ/wlan.h	249;"	d
+ARF_FER_KEEP_THRESHOLD	deltaQ/wlan.h	252;"	d
+ARF_FER_UP_THRESHOLD	deltaQ/wlan.h	251;"	d
+A_RATES_NUMBER	deltaQ/wlan.h	227;"	d
+A_RATE_12MBPS	deltaQ/wlan.h	219;"	d
+A_RATE_18MBPS	deltaQ/wlan.h	220;"	d
+A_RATE_24MBPS	deltaQ/wlan.h	221;"	d
+A_RATE_36MBPS	deltaQ/wlan.h	222;"	d
+A_RATE_48MBPS	deltaQ/wlan.h	223;"	d
+A_RATE_54MBPS	deltaQ/wlan.h	224;"	d
+A_RATE_6MBPS	deltaQ/wlan.h	217;"	d
+A_RATE_9MBPS	deltaQ/wlan.h	218;"	d
+BANDWIDTH	wireconf/do_wireconf.c	99;"	d	file:
+BEHAVIORAL_MOTION	deltaQ/scenario.h	93;"	d
+BINARY_INPUT	chanel/chanel_space.c	75;"	d	file:
+BIT	chanel/pic16f648.h	139;"	d
+BROADCAST_ID	chanel/chanel.h	68;"	d
+BUFFER_SIZE	deltaQ/xml_jpgis.h	74;"	d
+BUFFER_SIZE	deltaQ/xml_scenario.h	71;"	d
+BUFFER_SIZE	routing/route_xml.h	75;"	d
+BUFLEN	routing/routing.h	84;"	d
+BUILDING_EDGE_LABEL	deltaQ/xml_jpgis.h	87;"	d
+BUILDING_ENV_NAME	generate_scenario.c	115;"	d	file:
+BUILDING_ENV_NAME	generate_scenario.c	141;"	d	file:
+BUILDING_ENV_NAME	generate_scenario.c	85;"	d	file:
+BUILDING_OBJECT	deltaQ/scenario.h	85;"	d
+B_RATES_NUMBER	deltaQ/wlan.h	148;"	d
+B_RATE_11MBPS	deltaQ/wlan.h	145;"	d
+B_RATE_1MBPS	deltaQ/wlan.h	142;"	d
+B_RATE_2MPBS	deltaQ/wlan.h	143;"	d
+B_RATE_5MBPS	deltaQ/wlan.h	144;"	d
+CCP1CON	chanel/pic16f648.h	37;"	d
+CCPR1H	chanel/pic16f648.h	36;"	d
+CCPR1L	chanel/pic16f648.h	35;"	d
+CFLAGS	wireconf/Makefile	/^CFLAGS	= -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
+CHANEL_PATH	Makefile	/^CHANEL_PATH=.\/chanel$/;"	m
+CIRCULAR_MOTION	deltaQ/scenario.h	90;"	d
+CISCO_340	deltaQ/wlan.h	288;"	d
+CISCO_ABG	deltaQ/wlan.h	289;"	d
+CLRCF	chanel/pic16f648.h	101;"	d
+CLRDC	chanel/pic16f648.h	108;"	d
+CLRGIE	chanel/pic16f648.h	121;"	d
+CLRPD	chanel/pic16f648.h	133;"	d
+CLRTO	chanel/pic16f648.h	130;"	d
+CLRWDTPS	chanel/pic16f648.h	136;"	d
+CLRZF	chanel/pic16f648.h	115;"	d
+CMCON	chanel/pic16f648.h	41;"	d
+COMPILE_TYPE	Makefile	/^COMPILE_TYPE=release$/;"	m
+COMPILE_TYPE	chanel/Makefile	/^COMPILE_TYPE=debug$/;"	m
+COMPILE_TYPE	deltaQ/Makefile	/^COMPILE_TYPE=profile$/;"	m
+CONFLICT	chanel/pic16f648.h	/^enum stat {NODATA, PENDING, CONFLICT, READY};$/;"	e	enum:stat
+CONNECTION_BANDWIDTH_STRING	deltaQ/xml_scenario.h	221;"	d
+CONNECTION_CHANNEL_STRING	deltaQ/xml_scenario.h	218;"	d
+CONNECTION_CONSIDER_INTERFERENCE_STRING	deltaQ/xml_scenario.h	225;"	d
+CONNECTION_DELAY_STRING	deltaQ/xml_scenario.h	223;"	d
+CONNECTION_FROM_NODE_STRING	deltaQ/xml_scenario.h	204;"	d
+CONNECTION_JITTER_STRING	deltaQ/xml_scenario.h	224;"	d
+CONNECTION_LOSS_RATE_STRING	deltaQ/xml_scenario.h	222;"	d
+CONNECTION_PACKET_SIZE_STRING	deltaQ/xml_scenario.h	220;"	d
+CONNECTION_RTS_CTS_THRESHOLD_STRING	deltaQ/xml_scenario.h	219;"	d
+CONNECTION_STANDARD_802_11A_STRING	deltaQ/xml_scenario.h	212;"	d
+CONNECTION_STANDARD_802_11B_STRING	deltaQ/xml_scenario.h	210;"	d
+CONNECTION_STANDARD_802_11G_STRING	deltaQ/xml_scenario.h	211;"	d
+CONNECTION_STANDARD_ACTIVE_TAG_STRING	deltaQ/xml_scenario.h	216;"	d
+CONNECTION_STANDARD_ETH_1000_STRING	deltaQ/xml_scenario.h	215;"	d
+CONNECTION_STANDARD_ETH_100_STRING	deltaQ/xml_scenario.h	214;"	d
+CONNECTION_STANDARD_ETH_10_STRING	deltaQ/xml_scenario.h	213;"	d
+CONNECTION_STANDARD_STRING	deltaQ/xml_scenario.h	209;"	d
+CONNECTION_STANDARD_ZIGBEE_STRING	deltaQ/xml_scenario.h	217;"	d
+CONNECTION_STRING	deltaQ/xml_scenario.h	203;"	d
+CONNECTION_THROUGH_ENVIRONMENT_STRING	deltaQ/xml_scenario.h	208;"	d
+CONNECTION_TO_NODE_AUTO_CONNECT_STRING	deltaQ/xml_scenario.h	207;"	d
+CONNECTION_TO_NODE_STRING	deltaQ/xml_scenario.h	205;"	d
+COORDINATE_NAME_STRING	deltaQ/xml_scenario.h	155;"	d
+COORDINATE_NUMBER	deltaQ/xml_scenario.h	290;"	d
+COORDINATE_STRING	deltaQ/xml_scenario.h	154;"	d
+COUNTSTEP	chanel/pic16f648.h	149;"	d
+COUNTSTEP	chanel/pic16f648.h	151;"	d
+DATA_TYPE_BIT	chanel/chanel.h	/^  DATA_TYPE_BIT=0, DATA_TYPE_BYTE$/;"	e	enum:__anon5
+DATA_TYPE_BYTE	chanel/chanel.h	/^  DATA_TYPE_BIT=0, DATA_TYPE_BYTE$/;"	e	enum:__anon5
+DEBUG	deltaQ/message.h	75;"	d
+DEBUG	deltaQ/message.h	80;"	d
+DEBUG	qomet.c	132;"	d	file:
+DEBUG	qomet.c	137;"	d	file:
+DEBUG	routing/do_routing.c	73;"	d	file:
+DEBUG	routing/do_routing.c	78;"	d	file:
+DEBUG	routing/message.h	75;"	d
+DEBUG	routing/message.h	80;"	d
+DEBUG	wireconf/message.h	56;"	d
+DEBUG	wireconf/message.h	61;"	d
+DEBUG	wireconf/wireconf.c	87;"	d	file:
+DEBUG	wireconf/wireconf.c	92;"	d	file:
+DEBUGMSG	chanel/pic16f648.h	162;"	d
+DEBUGMSG	chanel/pic16f648.h	165;"	d
+DEBUG_	chanel/message.h	75;"	d
+DEBUG_	chanel/message.h	80;"	d
+DEFAULT_ADAPTER_TYPE	deltaQ/wlan.h	274;"	d
+DEFAULT_ALPHA	deltaQ/wlan.h	280;"	d
+DEFAULT_CHANNEL_A	deltaQ/wlan.h	272;"	d
+DEFAULT_CHANNEL_BG	deltaQ/wlan.h	273;"	d
+DEFAULT_CONNECTION_CHANNEL	deltaQ/xml_scenario.h	273;"	d
+DEFAULT_CONNECTION_CONSIDER_INTERFERENCE	deltaQ/xml_scenario.h	275;"	d
+DEFAULT_CONNECTION_PACKET_SIZE	deltaQ/xml_scenario.h	271;"	d
+DEFAULT_CONNECTION_PARAMETER	deltaQ/xml_scenario.h	270;"	d
+DEFAULT_CONNECTION_RTS_CTS_THRESHOLD	deltaQ/xml_scenario.h	274;"	d
+DEFAULT_CONNECTION_STANDARD	deltaQ/xml_scenario.h	272;"	d
+DEFAULT_COORDINATE_NAME	deltaQ/coordinate.h	59;"	d
+DEFAULT_ENVIRONMENT_ALPHA	deltaQ/xml_scenario.h	255;"	d
+DEFAULT_ENVIRONMENT_COORD_1	deltaQ/xml_scenario.h	259;"	d
+DEFAULT_ENVIRONMENT_COORD_2	deltaQ/xml_scenario.h	260;"	d
+DEFAULT_ENVIRONMENT_NAME	deltaQ/xml_scenario.h	253;"	d
+DEFAULT_ENVIRONMENT_NOISE_POWER	deltaQ/xml_scenario.h	258;"	d
+DEFAULT_ENVIRONMENT_SIGMA	deltaQ/xml_scenario.h	256;"	d
+DEFAULT_ENVIRONMENT_TYPE	deltaQ/xml_scenario.h	254;"	d
+DEFAULT_ENVIRONMENT_WALL_ATTENUATION	deltaQ/xml_scenario.h	257;"	d
+DEFAULT_MOTION_CENTER	deltaQ/xml_scenario.h	265;"	d
+DEFAULT_MOTION_MAX_SPEED	deltaQ/xml_scenario.h	266;"	d
+DEFAULT_MOTION_NODE_NAME	deltaQ/xml_scenario.h	262;"	d
+DEFAULT_MOTION_SPEED	deltaQ/xml_scenario.h	264;"	d
+DEFAULT_MOTION_TIME	deltaQ/xml_scenario.h	268;"	d
+DEFAULT_MOTION_TYPE	deltaQ/xml_scenario.h	263;"	d
+DEFAULT_MOTION_WALK_TIME	deltaQ/xml_scenario.h	267;"	d
+DEFAULT_NODE	routing/route_xml.h	114;"	d
+DEFAULT_NODE_ADAPTER_TYPE	deltaQ/xml_scenario.h	243;"	d
+DEFAULT_NODE_ANTENNA_GAIN	deltaQ/xml_scenario.h	244;"	d
+DEFAULT_NODE_CONNECTION	deltaQ/xml_scenario.h	241;"	d
+DEFAULT_NODE_COORDINATE	deltaQ/xml_scenario.h	245;"	d
+DEFAULT_NODE_ID	deltaQ/xml_scenario.h	239;"	d
+DEFAULT_NODE_INTERNAL_DELAY	deltaQ/xml_scenario.h	247;"	d
+DEFAULT_NODE_NAME	deltaQ/xml_scenario.h	237;"	d
+DEFAULT_NODE_PT	deltaQ/xml_scenario.h	246;"	d
+DEFAULT_NODE_SSID	deltaQ/xml_scenario.h	240;"	d
+DEFAULT_NODE_TYPE	deltaQ/xml_scenario.h	238;"	d
+DEFAULT_NOISE_POWER	deltaQ/wlan.h	283;"	d
+DEFAULT_NS2_SPEED	deltaQ/io.h	55;"	d
+DEFAULT_OBJECT_COORD_1	deltaQ/xml_scenario.h	250;"	d
+DEFAULT_OBJECT_COORD_2	deltaQ/xml_scenario.h	251;"	d
+DEFAULT_OBJECT_NAME	deltaQ/xml_scenario.h	249;"	d
+DEFAULT_PACKET_SIZE	deltaQ/wlan.h	270;"	d
+DEFAULT_PARAMETER	deltaQ/wlan.h	269;"	d
+DEFAULT_RTS_CTS_THRESHOLD	deltaQ/wlan.h	275;"	d
+DEFAULT_SIGMA	deltaQ/wlan.h	281;"	d
+DEFAULT_STANDARD	deltaQ/wlan.h	271;"	d
+DEFAULT_STRING	deltaQ/xml_scenario.h	235;"	d
+DEFAULT_W	deltaQ/wlan.h	282;"	d
+DEI80211MR	deltaQ/wlan.h	287;"	d
+DELAY	wireconf/do_wireconf.c	100;"	d	file:
+DELTAQ_INC	Makefile	/^DELTAQ_INC=-I${DELTAQ_PATH}$/;"	m
+DELTAQ_INC	chanel/Makefile	/^DELTAQ_INC=-I${DELTAQ_PATH}$/;"	m
+DELTAQ_LIB	Makefile	/^DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ$/;"	m
+DELTAQ_LIB	chanel/Makefile	/^DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ$/;"	m
+DELTAQ_PATH	Makefile	/^DELTAQ_PATH=.\/deltaQ$/;"	m
+DELTAQ_PATH	chanel/Makefile	/^DELTAQ_PATH=..\/deltaQ$/;"	m
+DELTA_Q_OBJECTS	deltaQ/Makefile	/^DELTA_Q_OBJECTS = node.o object.o coordinate.o environment.o motion.o connection.o scenario.o xml_scenario.o wlan.o ethernet.o active_tag.o zigbee.o generic.o stack.o io.o xml_jpgis.o$/;"	m
+DESTINATION_DISTANCE_THRESHOLD	deltaQ/motion.h	66;"	d
+DIRECTION_BOTH	wireconf/wireconf.h	64;"	d
+DIRECTION_IN	wireconf/wireconf.h	65;"	d
+DIRECTION_OUT	wireconf/wireconf.h	66;"	d
+DISTANCE_SCALING	deltaQ/active_tag.c	61;"	d	file:
+DST	chanel/pic16f648.h	138;"	d
+DTAG_LOGFILE	chanel/tag_private.h	12;"	d
+EEADR	chanel/pic16f648.h	51;"	d
+EECON1	chanel/pic16f648.h	52;"	d
+EECON2	chanel/pic16f648.h	53;"	d
+EEDATA	chanel/pic16f648.h	50;"	d
+ELEMENT_CONNECTION	deltaQ/xml_scenario.h	288;"	d
+ELEMENT_COORDINATE	deltaQ/xml_scenario.h	285;"	d
+ELEMENT_ENVIRONMENT	deltaQ/xml_scenario.h	286;"	d
+ELEMENT_MOTION	deltaQ/xml_scenario.h	287;"	d
+ELEMENT_NODE	deltaQ/xml_scenario.h	283;"	d
+ELEMENT_OBJECT	deltaQ/xml_scenario.h	284;"	d
+ELEMENT_XML_SCENARIO	deltaQ/xml_scenario.h	282;"	d
+EMPTY_STACK	deltaQ/stack.h	55;"	d
+ENABLE_OUTPUT_THREAD	chanel/chanel.c	61;"	d	file:
+ENVIRONMENT_ALPHA_STRING	deltaQ/xml_scenario.h	165;"	d
+ENVIRONMENT_IS_DYNAMIC_STRING	deltaQ/xml_scenario.h	164;"	d
+ENVIRONMENT_NAME_STRING	deltaQ/xml_scenario.h	162;"	d
+ENVIRONMENT_NOISE_POWER_STRING	deltaQ/xml_scenario.h	168;"	d
+ENVIRONMENT_SIGMA_STRING	deltaQ/xml_scenario.h	166;"	d
+ENVIRONMENT_STRING	deltaQ/xml_scenario.h	161;"	d
+ENVIRONMENT_TYPE_STRING	deltaQ/xml_scenario.h	163;"	d
+ENVIRONMENT_W_STRING	deltaQ/xml_scenario.h	167;"	d
+EPSILON	deltaQ/deltaQ.h	85;"	d
+EPSILON	qomet.c	76;"	d	file:
+ERROR	chanel/global.h	54;"	d
+ERROR	chanel/pic16f648.h	169;"	d
+ERROR	deltaQ/global.h	59;"	d
+ERROR	routing/global.h	54;"	d
+ERROR	routing/qomet_routing.h	53;"	d
+ERROR	wireconf/global.h	54;"	d
+ETHERNET_10	deltaQ/deltaQ.h	92;"	d
+ETHERNET_100	deltaQ/deltaQ.h	93;"	d
+ETHERNET_1000	deltaQ/deltaQ.h	94;"	d
+ETH_RATE_1000MBPS	deltaQ/ethernet.h	53;"	d
+ETH_RATE_100MBPS	deltaQ/ethernet.h	52;"	d
+ETH_RATE_10MBPS	deltaQ/ethernet.h	51;"	d
+EXPAT_INC	Makefile	/^EXPAT_INC=-I${EXPAT_PATH}\/include$/;"	m
+EXPAT_INC	chanel/Makefile	/^EXPAT_INC=-I${EXPAT_PATH}\/include$/;"	m
+EXPAT_INC	deltaQ/Makefile	/^EXPAT_INC=-I${EXPAT_PATH}\/include$/;"	m
+EXPAT_INC	routing/Makefile	/^EXPAT_INC=-I${EXPAT_PATH}\/include$/;"	m
+EXPAT_LIB	Makefile	/^EXPAT_LIB=-L${EXPAT_PATH}\/lib -lexpat$/;"	m
+EXPAT_LIB	chanel/Makefile	/^EXPAT_LIB=-L${EXPAT_PATH}\/lib -lexpat$/;"	m
+EXPAT_LIB	routing/Makefile	/^EXPAT_LIB=-L${EXPAT_PATH}\/lib$/;"	m
+EXPAT_PATH	Makefile	/^EXPAT_PATH=\/usr\/local$/;"	m
+EXPAT_PATH	chanel/Makefile	/^EXPAT_PATH=\/usr\/local$/;"	m
+EXPAT_PATH	deltaQ/Makefile	/^EXPAT_PATH=\/usr\/local$/;"	m
+EXPAT_PATH	routing/Makefile	/^EXPAT_PATH=\/usr\/local$/;"	m
+FALSE	chanel/global.h	51;"	d
+FALSE	deltaQ/global.h	56;"	d
+FALSE	routing/generate_aodv.c	55;"	d	file:
+FALSE	routing/global.h	51;"	d
+FALSE	routing/qomet_routing.h	56;"	d
+FALSE	wireconf/global.h	51;"	d
+FALSE_STRING	deltaQ/xml_scenario.h	85;"	d
+FINAL_SLEEP_TIME	chanel/do_chanel.c	82;"	d	file:
+FIRST_NODE_ID	wireconf/global.h	60;"	d
+FREEBSD_TARGETS	Makefile	/^FREEBSD_TARGETS = ${WIRECONF_PATH}\/wireconf ${ROUTING_PATH}\/routing$/;"	m
+FREQUENCY_A	deltaQ/wlan.h	75;"	d
+FREQUENCY_BG	deltaQ/wlan.h	70;"	d
+FSR	chanel/pic16f648.h	24;"	d
+GCC_FLAGS	Makefile	/^GCC_FLAGS = $(GENERAL_FLAGS)       # no additional info$/;"	m
+GCC_FLAGS	Makefile	/^GCC_FLAGS = $(GENERAL_FLAGS) -g    # generate debugging info$/;"	m
+GCC_FLAGS	Makefile	/^GCC_FLAGS = $(GENERAL_FLAGS) -pg   # generate profiling info$/;"	m
+GCC_FLAGS	chanel/Makefile	/^GCC_FLAGS = $(GENERAL_FLAGS)       # no additional info$/;"	m
+GCC_FLAGS	chanel/Makefile	/^GCC_FLAGS = $(GENERAL_FLAGS) -g    # generate debugging info$/;"	m
+GCC_FLAGS	chanel/Makefile	/^GCC_FLAGS = $(GENERAL_FLAGS) -pg   # generate profiling info$/;"	m
+GCC_FLAGS	deltaQ/Makefile	/^GCC_FLAGS = -Wall ${WIN_FLAGS} -Werror   # no additional info$/;"	m
+GCC_FLAGS	deltaQ/Makefile	/^GCC_FLAGS = -g -Wall ${WIN_FLAGS} -Werror     # generate debugging info$/;"	m
+GCC_FLAGS	deltaQ/Makefile	/^GCC_FLAGS = -pg -Wall ${WIN_FLAGS} -Werror    # generate profiling info$/;"	m
+GCC_FLAGS	routing/Makefile	/^GCC_FLAGS = -g -Wall -Werror$/;"	m
+GENERAL_FLAGS	Makefile	/^GENERAL_FLAGS=$(SVN_DEFINE) -Wall -Werror$/;"	m
+GENERAL_FLAGS	chanel/Makefile	/^GENERAL_FLAGS= -Wall -Werror$/;"	m
+GEOID_A	deltaQ/deltaQ.h	112;"	d
+GEOID_A	deltaQ/deltaQ.h	116;"	d
+GEOID_A	deltaQ/deltaQ.h	119;"	d
+GEOID_A	deltaQ/deltaQ.h	122;"	d
+GEOID_COORD_E0	deltaQ/deltaQ.h	133;"	d
+GEOID_COORD_E0	deltaQ/deltaQ.h	141;"	d
+GEOID_COORD_F0	deltaQ/deltaQ.h	135;"	d
+GEOID_COORD_F0	deltaQ/deltaQ.h	143;"	d
+GEOID_COORD_LAMBDA0	deltaQ/deltaQ.h	138;"	d
+GEOID_COORD_LAMBDA0	deltaQ/deltaQ.h	146;"	d
+GEOID_COORD_N0	deltaQ/deltaQ.h	134;"	d
+GEOID_COORD_N0	deltaQ/deltaQ.h	142;"	d
+GEOID_COORD_PHI0	deltaQ/deltaQ.h	137;"	d
+GEOID_COORD_PHI0	deltaQ/deltaQ.h	145;"	d
+GEOID_F	deltaQ/deltaQ.h	114;"	d
+GEOID_F	deltaQ/deltaQ.h	117;"	d
+GEOID_F	deltaQ/deltaQ.h	120;"	d
+GEOID_F	deltaQ/deltaQ.h	123;"	d
+GEOID_WGS84	deltaQ/deltaQ.h	105;"	d
+GETCF	chanel/pic16f648.h	97;"	d
+GETDC	chanel/pic16f648.h	104;"	d
+GETZF	chanel/pic16f648.h	111;"	d
+GIE	chanel/pic16f648.h	56;"	d
+GRID_SIZE_X	chanel/io_chanel.c	53;"	d	file:
+GRID_SIZE_X	deltaQ/io.c	53;"	d	file:
+GRID_SIZE_Y	chanel/io_chanel.c	54;"	d	file:
+GRID_SIZE_Y	deltaQ/io.c	54;"	d	file:
+G_RATES_NUMBER	deltaQ/wlan.h	191;"	d
+G_RATE_11MBPS	deltaQ/wlan.h	182;"	d
+G_RATE_12MBPS	deltaQ/wlan.h	183;"	d
+G_RATE_18MBPS	deltaQ/wlan.h	184;"	d
+G_RATE_1MBPS	deltaQ/wlan.h	177;"	d
+G_RATE_24MBPS	deltaQ/wlan.h	185;"	d
+G_RATE_2MPBS	deltaQ/wlan.h	178;"	d
+G_RATE_36MBPS	deltaQ/wlan.h	186;"	d
+G_RATE_48MBPS	deltaQ/wlan.h	187;"	d
+G_RATE_54MBPS	deltaQ/wlan.h	188;"	d
+G_RATE_5MBPS	deltaQ/wlan.h	179;"	d
+G_RATE_6MBPS	deltaQ/wlan.h	180;"	d
+G_RATE_9MBPS	deltaQ/wlan.h	181;"	d
+Host_serv	routing/routing.c	/^struct addrinfo * Host_serv(const char *host, const char *serv, int family, $/;"	f
+INCPC	chanel/pic16f648.h	92;"	d
+INCS	Makefile	/^INCS=${EXPAT_INC} ${DELTAQ_INC}$/;"	m
+INCS	chanel/Makefile	/^INCS=${EXPAT_INC} ${DELTAQ_INC}$/;"	m
+INCS	deltaQ/Makefile	/^INCS=${EXPAT_INC}$/;"	m
+INCS	routing/Makefile	/^INCS=${EXPAT_INC}$/;"	m
+INFO	deltaQ/message.h	85;"	d
+INFO	deltaQ/message.h	90;"	d
+INFO	qomet.c	141;"	d	file:
+INFO	qomet.c	145;"	d	file:
+INFO	routing/do_routing.c	82;"	d	file:
+INFO	routing/do_routing.c	86;"	d	file:
+INFO	routing/message.h	85;"	d
+INFO	routing/message.h	90;"	d
+INFO	wireconf/message.h	65;"	d
+INFO	wireconf/message.h	69;"	d
+INFO	wireconf/wireconf.c	101;"	d	file:
+INFO	wireconf/wireconf.c	96;"	d	file:
+INFO_	chanel/message.h	85;"	d
+INFO_	chanel/message.h	90;"	d
+INFRASTRUCTURE_CONNECTION	deltaQ/scenario.h	81;"	d
+INTCON	chanel/pic16f648.h	28;"	d
+INTVEC	chanel/pic16f648.h	20;"	d
+INVALID_INDEX	deltaQ/scenario.h	73;"	d
+IP_ADDR_SIZE	wireconf/global.h	58;"	d
+IRP	chanel/pic16f648.h	55;"	d
+IS_BETA	qomet.c	68;"	d	file:
+JAPAN_IX_COORDINATES	deltaQ/deltaQ.h	129;"	d
+JENNIC	deltaQ/zigbee.h	155;"	d
+LDFLAGS	routing/Makefile	/^LDFLAGS	= -L. ${EXPAT_LIB}$/;"	m
+LDFLAGS	wireconf/Makefile	/^LDFLAGS	= -L.$/;"	m
+LDLIBS	chanel/Makefile	/^LDLIBS=-lpthread ${RT_LIB} -lm ${EXPAT_LIB} ${DELTAQ_LIB}$/;"	m
+LDLIBS	routing/Makefile	/^LDLIBS	= -lqomet_routing -lexpat$/;"	m
+LDLIBS	wireconf/Makefile	/^LDLIBS	= -lwireconf -ltimer -lm$/;"	m
+LIBS	Makefile	/^LIBS=-lm ${EXPAT_LIB} ${DELTAQ_LIB}$/;"	m
+LINEAR_MOTION	deltaQ/scenario.h	89;"	d
+LOOP_COUNT	wireconf/do_wireconf.c	102;"	d	file:
+Linux	wireconf/timer.h	49;"	d
+MAJOR_VERSION	qomet.c	65;"	d	file:
+MAKE_CMD	Makefile	/^MAKE_CMD = gmake$/;"	m
+MAKE_CMD	Makefile	/^MAKE_CMD = make$/;"	m
+MAXIMUM_ERROR_RATE	deltaQ/wlan.h	299;"	d
+MAXIMUM_ERROR_RATE	deltaQ/zigbee.h	164;"	d
+MAXIMUM_PRECOMPUTE	deltaQ/wlan.h	303;"	d
+MAXIMUM_PRECOMPUTE	deltaQ/zigbee.h	168;"	d
+MAX_ACC_MAGN	deltaQ/motion.h	77;"	d
+MAX_CHANNEL	deltaQ/wlan.h	96;"	d
+MAX_CONNECTIONS	deltaQ/scenario.h	61;"	d
+MAX_COORDINATES	deltaQ/coordinate.h	54;"	d
+MAX_COORDINATES_2D	deltaQ/coordinate.h	57;"	d
+MAX_DATA_BUFFER_SIZE	chanel/chanel.h	55;"	d
+MAX_DATA_ITEMS	chanel/do_chanel.c	73;"	d	file:
+MAX_DATA_ITEMS	chanel/do_chanel.c	78;"	d	file:
+MAX_DATA_SIZE	chanel/chanel.h	57;"	d
+MAX_DESTINATIONS	chanel/chanel.h	61;"	d
+MAX_ELEMENTS	deltaQ/stack.h	54;"	d
+MAX_ENVIRONMENTS	deltaQ/scenario.h	59;"	d
+MAX_IP_ADDRESS_LENGTH	routing/qomet_routing.h	51;"	d
+MAX_METRIC	routing/generate_aodv.c	59;"	d	file:
+MAX_MOTIONS	deltaQ/scenario.h	60;"	d
+MAX_NODES	deltaQ/scenario.h	57;"	d
+MAX_NODES	routing/generate_aodv.c	58;"	d	file:
+MAX_NODES	wireconf/global.h	62;"	d
+MAX_OBJECTS	deltaQ/scenario.h	58;"	d
+MAX_PSDU_SIZE_AG	deltaQ/wlan.h	92;"	d
+MAX_PSDU_SIZE_B	deltaQ/wlan.h	89;"	d
+MAX_RAND_SPEED	deltaQ/motion.h	72;"	d
+MAX_RECORDS	chanel/global.h	56;"	d
+MAX_ROUTING_TABLE	routing/qomet_routing.h	50;"	d
+MAX_RULE_NUM	wireconf/do_wireconf.c	77;"	d	file:
+MAX_SEGMENTS	deltaQ/environment.h	56;"	d
+MAX_SPEED_MAGN	deltaQ/motion.h	78;"	d
+MAX_STRING	chanel/chanel.h	59;"	d
+MAX_STRING	deltaQ/global.h	61;"	d
+MAX_STRING	routing/generate_aodv.c	56;"	d	file:
+MAX_TRANSMISSIONS	deltaQ/wlan.h	85;"	d
+MAX_TRANSMISSIONS_RTS_CTS	deltaQ/wlan.h	86;"	d
+MAX_VERTICES	deltaQ/object.h	51;"	d
+MEASURE_ALL	chanel/chanel_space.c	98;"	d	file:
+MESSAGE_DEBUG	deltaQ/message.h	55;"	d
+MESSAGE_DEBUG	routing/do_routing.c	60;"	d	file:
+MESSAGE_INFO	chanel/message.h	56;"	d
+MESSAGE_INFO	deltaQ/message.h	56;"	d
+MESSAGE_INFO	qomet.c	120;"	d	file:
+MESSAGE_INFO	routing/do_routing.c	61;"	d	file:
+MESSAGE_INFO	routing/message.h	56;"	d
+MESSAGE_WARNING	chanel/message.h	54;"	d
+MESSAGE_WARNING	deltaQ/message.h	54;"	d
+MESSAGE_WARNING	qomet.c	118;"	d	file:
+MESSAGE_WARNING	routing/do_routing.c	59;"	d	file:
+MESSAGE_WARNING	routing/message.h	54;"	d
+MINIMUM_DISTANCE	deltaQ/scenario.h	70;"	d
+MINIMUM_NOISE_POWER	deltaQ/wlan.h	297;"	d
+MINOR_VERSION	qomet.c	66;"	d	file:
+MIN_CHANNEL	deltaQ/wlan.h	95;"	d
+MIN_DBL	chanel/chanel_space.c	94;"	d	file:
+MIN_PIPE_ID_IN	wireconf/do_wireconf.c	73;"	d	file:
+MIN_PIPE_ID_IN_BCAST	wireconf/do_wireconf.c	74;"	d	file:
+MIN_PIPE_ID_OUT	wireconf/do_wireconf.c	75;"	d	file:
+MIN_RAND_SPEED	deltaQ/motion.h	71;"	d
+MODEL1_W_NOISE	deltaQ/wlan.h	61;"	d
+MOTION_AVG_SPEED	generate_scenario.c	124;"	d	file:
+MOTION_AVG_SPEED	generate_scenario.c	149;"	d	file:
+MOTION_AVG_SPEED	generate_scenario.c	95;"	d	file:
+MOTION_CENTER_X_STRING	deltaQ/xml_scenario.h	185;"	d
+MOTION_CENTER_Y_STRING	deltaQ/xml_scenario.h	186;"	d
+MOTION_CLOCKWISE	deltaQ/motion.h	81;"	d
+MOTION_COUNTERWISE	deltaQ/motion.h	82;"	d
+MOTION_DESTINATION_X_STRING	deltaQ/xml_scenario.h	191;"	d
+MOTION_DESTINATION_Y_STRING	deltaQ/xml_scenario.h	192;"	d
+MOTION_DESTINATION_Z_STRING	deltaQ/xml_scenario.h	193;"	d
+MOTION_MAX_SPEED	generate_scenario.c	123;"	d	file:
+MOTION_MAX_SPEED	generate_scenario.c	148;"	d	file:
+MOTION_MAX_SPEED	generate_scenario.c	94;"	d	file:
+MOTION_MAX_SPEED_STRING	deltaQ/xml_scenario.h	189;"	d
+MOTION_MIN_SPEED_STRING	deltaQ/xml_scenario.h	188;"	d
+MOTION_NODE_NAME_STRING	deltaQ/xml_scenario.h	175;"	d
+MOTION_OUTPUT_NAM	qomet.c	78;"	d	file:
+MOTION_OUTPUT_NS2	qomet.c	79;"	d	file:
+MOTION_ROTATION_ANGLE_HORIZONTAL_STRING	deltaQ/xml_scenario.h	194;"	d
+MOTION_ROTATION_ANGLE_VERTICAL_STRING	deltaQ/xml_scenario.h	195;"	d
+MOTION_SPEED_X_STRING	deltaQ/xml_scenario.h	182;"	d
+MOTION_SPEED_Y_STRING	deltaQ/xml_scenario.h	183;"	d
+MOTION_SPEED_Z_STRING	deltaQ/xml_scenario.h	184;"	d
+MOTION_START_OFFSET	generate_scenario.c	119;"	d	file:
+MOTION_START_TIME	generate_scenario.c	118;"	d	file:
+MOTION_START_TIME	generate_scenario.c	144;"	d	file:
+MOTION_START_TIME	generate_scenario.c	90;"	d	file:
+MOTION_START_TIME_STRING	deltaQ/xml_scenario.h	196;"	d
+MOTION_STEP_DIVIDER	generate_scenario.c	104;"	d	file:
+MOTION_STOP_TIME	generate_scenario.c	120;"	d	file:
+MOTION_STOP_TIME	generate_scenario.c	145;"	d	file:
+MOTION_STOP_TIME	generate_scenario.c	91;"	d	file:
+MOTION_STOP_TIME_STRING	deltaQ/xml_scenario.h	197;"	d
+MOTION_STRING	deltaQ/xml_scenario.h	174;"	d
+MOTION_TYPE	generate_scenario.c	117;"	d	file:
+MOTION_TYPE	generate_scenario.c	143;"	d	file:
+MOTION_TYPE	generate_scenario.c	88;"	d	file:
+MOTION_TYPE_BEHAVIORAL_STRING	deltaQ/xml_scenario.h	181;"	d
+MOTION_TYPE_CIRCULAR_STRING	deltaQ/xml_scenario.h	178;"	d
+MOTION_TYPE_LINEAR_STRING	deltaQ/xml_scenario.h	177;"	d
+MOTION_TYPE_RANDOM_WALK_STRING	deltaQ/xml_scenario.h	180;"	d
+MOTION_TYPE_ROTATION_STRING	deltaQ/xml_scenario.h	179;"	d
+MOTION_TYPE_STRING	deltaQ/xml_scenario.h	176;"	d
+MOTION_UNDECIDED	deltaQ/motion.h	80;"	d
+MOTION_USE_SPEED	generate_scenario.c	121;"	d	file:
+MOTION_USE_SPEED	generate_scenario.c	146;"	d	file:
+MOTION_USE_SPEED	generate_scenario.c	92;"	d	file:
+MOTION_VELOCITY_STRING	deltaQ/xml_scenario.h	187;"	d
+MOTION_WALK_TIME_STRING	deltaQ/xml_scenario.h	190;"	d
+NAME_WAS_PROVIDED	deltaQ/coordinate.h	62;"	d
+NEXT_SA	routing/routing.h	99;"	d
+NEXT_SA	wireconf/routing_info.h	83;"	d
+NODATA	chanel/pic16f648.h	/^enum stat {NODATA, PENDING, CONFLICT, READY};$/;"	e	enum:stat
+NODE_ADAPTER_CISCO_340_STRING	deltaQ/xml_scenario.h	116;"	d
+NODE_ADAPTER_CISCO_ABG_STRING	deltaQ/xml_scenario.h	117;"	d
+NODE_ADAPTER_DEI80211MR_STRING	deltaQ/xml_scenario.h	115;"	d
+NODE_ADAPTER_JENNIC_STRING	deltaQ/xml_scenario.h	118;"	d
+NODE_ADAPTER_ORINOCO_STRING	deltaQ/xml_scenario.h	114;"	d
+NODE_ADAPTER_STRING	deltaQ/xml_scenario.h	113;"	d
+NODE_ADAPTER_S_NODE_STRING	deltaQ/xml_scenario.h	119;"	d
+NODE_ANTENNA_GAIN_STRING	deltaQ/xml_scenario.h	124;"	d
+NODE_AZIMUTH_BEAMWIDTH_STRING	deltaQ/xml_scenario.h	126;"	d
+NODE_AZIMUTH_ORIENTATION_STRING	deltaQ/xml_scenario.h	125;"	d
+NODE_BASE_NAME	generate_scenario.c	114;"	d	file:
+NODE_BASE_NAME	generate_scenario.c	140;"	d	file:
+NODE_BASE_NAME	generate_scenario.c	84;"	d	file:
+NODE_CONNECTION_AD_HOC_STRING	deltaQ/xml_scenario.h	110;"	d
+NODE_CONNECTION_ANY_STRING	deltaQ/xml_scenario.h	112;"	d
+NODE_CONNECTION_INFRASTRUCTURE_STRING	deltaQ/xml_scenario.h	111;"	d
+NODE_CONNECTION_STRING	deltaQ/xml_scenario.h	109;"	d
+NODE_ELEVATION_BEAMWIDTH_STRING	deltaQ/xml_scenario.h	128;"	d
+NODE_ELEVATION_ORIENTATION_STRING	deltaQ/xml_scenario.h	127;"	d
+NODE_ID_STRING	deltaQ/xml_scenario.h	107;"	d
+NODE_INTERNAL_DELAY_STRING	deltaQ/xml_scenario.h	129;"	d
+NODE_NAME_STRING	deltaQ/xml_scenario.h	103;"	d
+NODE_PT_STRING	deltaQ/xml_scenario.h	123;"	d
+NODE_RADIUS	chanel/io_chanel.c	55;"	d	file:
+NODE_RADIUS	deltaQ/io.c	55;"	d	file:
+NODE_SSID_STRING	deltaQ/xml_scenario.h	108;"	d
+NODE_STRING	deltaQ/xml_scenario.h	102;"	d
+NODE_TYPE_ACCESS_POINT_STRING	deltaQ/xml_scenario.h	106;"	d
+NODE_TYPE_REGULAR_STRING	deltaQ/xml_scenario.h	105;"	d
+NODE_TYPE_STRING	deltaQ/xml_scenario.h	104;"	d
+NODE_X_STRING	deltaQ/xml_scenario.h	120;"	d
+NODE_Y_STRING	deltaQ/xml_scenario.h	121;"	d
+NODE_Z_STRING	deltaQ/xml_scenario.h	122;"	d
+NOISE_DEFAULT	qomet.c	93;"	d	file:
+NOISE_LEVEL1	qomet.c	96;"	d	file:
+NOISE_LEVEL2	qomet.c	100;"	d	file:
+NOISE_START1	qomet.c	94;"	d	file:
+NOISE_START2	qomet.c	98;"	d	file:
+NOISE_STOP1	qomet.c	95;"	d	file:
+NOISE_STOP2	qomet.c	99;"	d	file:
+NUMBER_BUILDINGS	generate_scenario.c	110;"	d	file:
+NUMBER_BUILDINGS	generate_scenario.c	136;"	d	file:
+NUMBER_BUILDINGS	generate_scenario.c	69;"	d	file:
+NUMBER_DESTINATIONS	generate_scenario.c	112;"	d	file:
+NUMBER_DESTINATIONS	generate_scenario.c	138;"	d	file:
+NUMBER_DESTINATIONS	generate_scenario.c	82;"	d	file:
+NUMBER_NODES	chanel/chanel_space.c	85;"	d	file:
+NUMBER_NODES	generate_scenario.c	106;"	d	file:
+NUMBER_NODES	generate_scenario.c	133;"	d	file:
+NUMBER_NODES	generate_scenario.c	66;"	d	file:
+NUMBER_SOURCES	generate_scenario.c	111;"	d	file:
+NUMBER_SOURCES	generate_scenario.c	137;"	d	file:
+NUMBER_SOURCES	generate_scenario.c	81;"	d	file:
+Net_rt_iflist	routing/routing.c	/^char *Net_rt_iflist(int family, int flags, size_t *lenp)$/;"	f
+OBJECTS	deltaQ/Makefile	/^OBJECTS = deltaQ.o ${DELTA_Q_OBJECTS}$/;"	m
+OBJECT_AVOIDANCE_THRESHOLD	deltaQ/motion.h	68;"	d
+OBJECT_ENVIRONMENT_STRING	deltaQ/xml_scenario.h	140;"	d
+OBJECT_HEIGHT_STRING	deltaQ/xml_scenario.h	145;"	d
+OBJECT_LOAD_FROM_JPGIS_FILE_STRING	deltaQ/xml_scenario.h	146;"	d
+OBJECT_MAKE_POLYGON_STRING	deltaQ/xml_scenario.h	147;"	d
+OBJECT_NAME_STRING	deltaQ/xml_scenario.h	136;"	d
+OBJECT_STRING	deltaQ/xml_scenario.h	135;"	d
+OBJECT_TYPE_BUILDING_STRING	deltaQ/xml_scenario.h	138;"	d
+OBJECT_TYPE_ROAD_STRING	deltaQ/xml_scenario.h	139;"	d
+OBJECT_TYPE_STRING	deltaQ/xml_scenario.h	137;"	d
+OBJECT_X1_STRING	deltaQ/xml_scenario.h	141;"	d
+OBJECT_X2_STRING	deltaQ/xml_scenario.h	143;"	d
+OBJECT_Y1_STRING	deltaQ/xml_scenario.h	142;"	d
+OBJECT_Y2_STRING	deltaQ/xml_scenario.h	144;"	d
+OPTREG	chanel/pic16f648.h	42;"	d
+ORINOCO	deltaQ/wlan.h	286;"	d
+OS_NAME	Makefile	/^OS_NAME=$(shell uname)$/;"	m
+OS_NAME	chanel/Makefile	/^OS_NAME=$(shell uname)$/;"	m
+OUT	generate_scenario.c	154;"	d	file:
+OUTPUT_SLEEP_TIME	chanel/chanel_space.c	83;"	d	file:
+OUTPUT_SLEEP_TIME	chanel/do_chanel.c	72;"	d	file:
+OUTPUT_SLEEP_TIME	chanel/do_chanel.c	77;"	d	file:
+PACKET_LOSS_RATE	wireconf/do_wireconf.c	101;"	d	file:
+PADDR	chanel/pic16f648.h	75;"	d
+PARAMETERS_TOTAL	chanel/chanel_space.c	93;"	d	file:
+PARAMETERS_TOTAL	wireconf/do_wireconf.c	70;"	d	file:
+PARAMETERS_UNUSED	chanel/chanel_space.c	92;"	d	file:
+PARAMETERS_UNUSED	wireconf/do_wireconf.c	71;"	d	file:
+PCL	chanel/pic16f648.h	22;"	d
+PCLATH	chanel/pic16f648.h	27;"	d
+PCON	chanel/pic16f648.h	46;"	d
+PENDING	chanel/pic16f648.h	/^enum stat {NODATA, PENDING, CONFLICT, READY};$/;"	e	enum:stat
+PHY_OVERHEAD_802_11BG_LONG	deltaQ/wlan.h	126;"	d
+PHY_OVERHEAD_802_11BG_SHORT	deltaQ/wlan.h	129;"	d
+PIE1	chanel/pic16f648.h	45;"	d
+PIPE_NAME_BASE	chanel/chanel.h	77;"	d
+PIR1	chanel/pic16f648.h	29;"	d
+POP	chanel/pic16f648.h	144;"	d
+PORTA	chanel/pic16f648.h	25;"	d
+PORTB	chanel/pic16f648.h	26;"	d
+PR2	chanel/pic16f648.h	47;"	d
+PSA	chanel/pic16f648.h	57;"	d
+PSDU_DSSS	deltaQ/wlan.h	80;"	d
+PSDU_OFDM	deltaQ/wlan.h	81;"	d
+PUSH	chanel/pic16f648.h	140;"	d
+Pr	deltaQ/connection.h	/^  double Pr;$/;"	m	struct:connection_class_s
+Pr0_a	deltaQ/node.h	/^  double Pr0_a, Pr0_bg;$/;"	m	struct:node_class_s
+Pr0_active_tag	deltaQ/node.h	/^  double Pr0_active_tag;$/;"	m	struct:node_class_s
+Pr0_bg	deltaQ/node.h	/^  double Pr0_a, Pr0_bg;$/;"	m	struct:node_class_s
+Pr0_zigbee	deltaQ/node.h	/^  double Pr0_zigbee;$/;"	m	struct:node_class_s
+Pr_threshold_fer	deltaQ/active_tag.h	/^  float Pr_threshold_fer; \/\/ FER at the Pr-threshold$/;"	m	struct:__anon25
+Pr_threshold_fer	deltaQ/wlan.h	/^  float Pr_threshold_fer;  \/\/ FER at the Pr-threshold (valid for DSSS $/;"	m	struct:__anon27
+Pr_threshold_fer	deltaQ/wlan.h	/^  float Pr_threshold_fer; \/\/ FER at the Pr-threshold (valid for DSSS $/;"	m	struct:__anon26
+Pr_threshold_fer	deltaQ/zigbee.h	/^  float Pr_threshold_fer; \/\/ FER at the Pr-threshold (valid for DSSS $/;"	m	struct:__anon29
+Pr_threshold_per	deltaQ/wlan.h	/^  float Pr_threshold_per;  \/\/ PER at the Pr-threshold (valid for OFDM$/;"	m	struct:__anon27
+Pr_threshold_per	deltaQ/wlan.h	/^  float Pr_threshold_per; \/\/ PER at the Pr-threshold (valid for OFDM$/;"	m	struct:__anon28
+Pr_thresholds	deltaQ/active_tag.h	/^  float Pr_thresholds[1]; \/\/ receive sensitivity thresholds$/;"	m	struct:__anon25
+Pr_thresholds	deltaQ/wlan.h	/^  float Pr_thresholds[A_RATES_NUMBER]; \/\/ receive sensitivity thresholds$/;"	m	struct:__anon28
+Pr_thresholds	deltaQ/wlan.h	/^  float Pr_thresholds[B_RATES_NUMBER]; \/\/ receive sensitivity thresholds$/;"	m	struct:__anon26
+Pr_thresholds	deltaQ/wlan.h	/^  float Pr_thresholds[G_RATES_NUMBER]; \/\/ receive sensitivity thresholds$/;"	m	struct:__anon27
+Pr_thresholds	deltaQ/zigbee.h	/^  float Pr_thresholds[ZIGBEE_RATES_NUMBER]; \/\/ receive sensitivity thresholds$/;"	m	struct:__anon29
+Pt	deltaQ/node.h	/^  double Pt;$/;"	m	struct:node_class_s
+QOMET_FILENAME	chanel/chanel_config.c	62;"	d	file:
+QOMET_FILENAME	chanel/chanel_space.c	86;"	d	file:
+RANDOM_WALK_MOTION	deltaQ/scenario.h	92;"	d
+RCREG	chanel/pic16f648.h	40;"	d
+RCSTA	chanel/pic16f648.h	38;"	d
+RD	chanel/pic16f648.h	70;"	d
+READY	chanel/pic16f648.h	/^enum stat {NODATA, PENDING, CONFLICT, READY};$/;"	e	enum:stat
+READ_FROM_FILE	chanel/chanel_config.c	61;"	d	file:
+REG	chanel/pic16f648.h	71;"	d
+REGD	chanel/pic16f648.h	73;"	d
+REGULAR_NODE	deltaQ/scenario.h	76;"	d
+ROAD_EDGE_LABEL	deltaQ/xml_jpgis.h	88;"	d
+ROAD_OBJECT	deltaQ/scenario.h	86;"	d
+ROTATION_MOTION	deltaQ/scenario.h	91;"	d
+ROUNDUP	routing/routing.h	91;"	d
+ROUNDUP	wireconf/routing_info.h	80;"	d
+ROUTE_BUFFER_SIZE	wireconf/routing_info.h	69;"	d
+ROUTING_PATH	Makefile	/^ROUTING_PATH=.\/routing$/;"	m
+ROUTING_TABLE_ALIAS_IP_HEAD_STRING	routing/route_xml.h	96;"	d
+ROUTING_TABLE_NUMBER_NODES_STRING	routing/route_xml.h	95;"	d
+ROUTING_TABLE_STRING	routing/route_xml.h	94;"	d
+ROUTING_TABLE_TUNNEL_IP_HEAD_STRING	routing/route_xml.h	97;"	d
+RSTVEC	chanel/pic16f648.h	19;"	d
+RTCTL_ADD	routing/routing.h	74;"	d
+RTCTL_CHANGE	routing/routing.h	76;"	d
+RTCTL_CMD_LEN	routing/routing.h	81;"	d
+RTCTL_DELETE	routing/routing.h	75;"	d
+RTCTL_GATEWAY	routing/routing.h	77;"	d
+RTCTL_IF	routing/routing.h	78;"	d
+RTCTL_NETMASK	routing/routing.h	79;"	d
+RTCTL_UNKNOWN	routing/routing.h	80;"	d
+RTM_SEQ_CT	wireconf/routing_info.h	72;"	d
+RTS_CTS_threshold	deltaQ/connection.h	/^  int RTS_CTS_threshold;$/;"	m	struct:connection_class_s
+RT_LIB	chanel/Makefile	/^RT_LIB = -lrt$/;"	m
+RULE_FROM_NODE_STRING	routing/route_xml.h	100;"	d
+RULE_NEXT_HOP_STRING	routing/route_xml.h	102;"	d
+RULE_STRING	routing/route_xml.h	99;"	d
+RULE_TO_NODE_STRING	routing/route_xml.h	101;"	d
+SAME_SIGNS	deltaQ/environment.c	163;"	d	file:
+SCALING_FACTOR	chanel/chanel_space.c	89;"	d	file:
+SCENARIO_DURATION	generate_scenario.c	108;"	d	file:
+SCENARIO_DURATION	generate_scenario.c	134;"	d	file:
+SCENARIO_DURATION	generate_scenario.c	67;"	d	file:
+SCENARIO_START	generate_scenario.c	107;"	d	file:
+SCENARIO_STEP	generate_scenario.c	103;"	d	file:
+SCENARIO_STEP	generate_scenario.c	131;"	d	file:
+SCENARIO_STEP	generate_scenario.c	60;"	d	file:
+SEQ	routing/routing.h	86;"	d
+SETACC	chanel/pic16f648.h	90;"	d
+SETCF	chanel/pic16f648.h	98;"	d
+SETDC	chanel/pic16f648.h	105;"	d
+SETGIE	chanel/pic16f648.h	118;"	d
+SETPC	chanel/pic16f648.h	85;"	d
+SETPD	chanel/pic16f648.h	127;"	d
+SETTO	chanel/pic16f648.h	124;"	d
+SETZF	chanel/pic16f648.h	112;"	d
+SHOWMSG	chanel/pic16f648.h	154;"	d
+SIFS_802_11A	deltaQ/wlan.h	116;"	d
+SIFS_802_11B	deltaQ/wlan.h	110;"	d
+SIFS_802_11G	deltaQ/wlan.h	113;"	d
+SLEEP_TIME	chanel/chanel_space.c	80;"	d	file:
+SLOT_802_11A	deltaQ/wlan.h	107;"	d
+SLOT_802_11B	deltaQ/wlan.h	99;"	d
+SLOT_802_11G_LONG	deltaQ/wlan.h	103;"	d
+SLOT_802_11G_SHORT	deltaQ/wlan.h	104;"	d
+SMALL_EXPERIMENT	generate_scenario.c	52;"	d	file:
+SNR	deltaQ/connection.h	/^  double SNR;$/;"	m	struct:connection_class_s
+SPBRG	chanel/pic16f648.h	49;"	d
+SPEED_LIGHT	deltaQ/generic.h	54;"	d
+STANDARD_NOISE	deltaQ/wlan.h	135;"	d
+START_AREA_EPSILON	generate_scenario.c	55;"	d	file:
+STATUS	chanel/pic16f648.h	23;"	d
+SUBMINOR_VERSION	qomet.c	67;"	d	file:
+SUCCESS	chanel/global.h	53;"	d
+SUCCESS	deltaQ/global.h	58;"	d
+SUCCESS	routing/global.h	53;"	d
+SUCCESS	routing/qomet_routing.h	52;"	d
+SUCCESS	wireconf/global.h	53;"	d
+SVN_DEFINE	Makefile	/^SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'$/;"	m
+SVN_REVISION	Makefile	/^SVN_REVISION := "$(shell cat svn_revision.txt)"$/;"	m
+SVN_REVISION	Makefile	/^SVN_REVISION := "$(shell svnversion -n .)"$/;"	m
+S_NODE	deltaQ/active_tag.h	51;"	d
+Sock_ntop_host	routing/routing.c	/^char * Sock_ntop_host(const struct sockaddr *sa, socklen_t salen)$/;"	f
+T0CS	chanel/pic16f648.h	58;"	d
+T0IE	chanel/pic16f648.h	59;"	d
+T0IF	chanel/pic16f648.h	60;"	d
+T1CON	chanel/pic16f648.h	32;"	d
+T2CKPS0	chanel/pic16f648.h	69;"	d
+T2CKPS1	chanel/pic16f648.h	68;"	d
+T2CON	chanel/pic16f648.h	34;"	d
+TARGETS	chanel/Makefile	/^TARGETS	= do_chanel chanel_config$/;"	m
+TARGETS	routing/Makefile	/^TARGETS	= do_routing libqomet_routing.a routing_tester generate_aodv$/;"	m
+TARGETS	wireconf/Makefile	/^TARGETS	= libwireconf.a libtimer.a do_wireconf$/;"	m
+TIME_SUBSTRACT	chanel/chanel.h	/^  double TIME_SUBSTRACT;$/;"	m	struct:__anon10
+TIME_SUBSTRACT	chanel/chanel_space.c	/^  double TIME_SUBSTRACT;$/;"	m	struct:__anon13	file:
+TMR0	chanel/pic16f648.h	21;"	d
+TMR1CS	chanel/pic16f648.h	61;"	d
+TMR1H	chanel/pic16f648.h	31;"	d
+TMR1IE	chanel/pic16f648.h	62;"	d
+TMR1IF	chanel/pic16f648.h	63;"	d
+TMR1L	chanel/pic16f648.h	30;"	d
+TMR1ON	chanel/pic16f648.h	64;"	d
+TMR2	chanel/pic16f648.h	33;"	d
+TMR2IE	chanel/pic16f648.h	65;"	d
+TMR2IF	chanel/pic16f648.h	66;"	d
+TMR2ON	chanel/pic16f648.h	67;"	d
+TRISA	chanel/pic16f648.h	43;"	d
+TRISB	chanel/pic16f648.h	44;"	d
+TRUE	chanel/global.h	50;"	d
+TRUE	deltaQ/global.h	55;"	d
+TRUE	routing/generate_aodv.c	54;"	d	file:
+TRUE	routing/global.h	50;"	d
+TRUE	routing/qomet_routing.h	55;"	d
+TRUE	wireconf/global.h	50;"	d
+TRUE_STRING	deltaQ/xml_scenario.h	84;"	d
+TXREG	chanel/pic16f648.h	39;"	d
+TXSTA	chanel/pic16f648.h	48;"	d
+UNDEFINED_ID	chanel/chanel.h	69;"	d
+UNDEFINED_VALUE	deltaQ/deltaQ.h	83;"	d
+USE_SHORT_PREAMBLE	deltaQ/wlan.h	123;"	d
+V0	deltaQ/motion.h	75;"	d
+VRCON	chanel/pic16f648.h	54;"	d
+W	deltaQ/environment.h	/^  double W[MAX_SEGMENTS];$/;"	m	struct:environment_class_s
+WALL_REJECTION_THRESHOLD	deltaQ/motion.h	67;"	d
+WARNING	chanel/timer.c	61;"	d	file:
+WARNING	chanel/timer.c	66;"	d	file:
+WARNING	deltaQ/message.h	65;"	d
+WARNING	deltaQ/message.h	70;"	d
+WARNING	qomet.c	123;"	d	file:
+WARNING	qomet.c	128;"	d	file:
+WARNING	routing/do_routing.c	64;"	d	file:
+WARNING	routing/do_routing.c	69;"	d	file:
+WARNING	routing/message.h	65;"	d
+WARNING	routing/message.h	70;"	d
+WARNING	wireconf/message.h	47;"	d
+WARNING	wireconf/message.h	52;"	d
+WARNING	wireconf/timer.c	61;"	d	file:
+WARNING	wireconf/timer.c	66;"	d	file:
+WARNING	wireconf/wireconf.c	78;"	d	file:
+WARNING	wireconf/wireconf.c	83;"	d	file:
+WARNINGMSG	chanel/pic16f648.h	163;"	d
+WARNINGMSG	chanel/pic16f648.h	166;"	d
+WARNING_	chanel/message.h	65;"	d
+WARNING_	chanel/message.h	70;"	d
+WDT	chanel/pic16f648.h	/^	uint8_t WDT;$/;"	m	struct:__anon1
+WIRECONF_PATH	Makefile	/^WIRECONF_PATH=.\/wireconf$/;"	m
+WLAN_802_11A	deltaQ/deltaQ.h	91;"	d
+WLAN_802_11B	deltaQ/deltaQ.h	89;"	d
+WLAN_802_11G	deltaQ/deltaQ.h	90;"	d
+XML_FMT_INT_MOD	deltaQ/xml_jpgis.h	65;"	d
+XML_FMT_INT_MOD	deltaQ/xml_jpgis.h	67;"	d
+XML_FMT_INT_MOD	deltaQ/xml_jpgis.h	70;"	d
+XML_FMT_INT_MOD	deltaQ/xml_scenario.h	62;"	d
+XML_FMT_INT_MOD	deltaQ/xml_scenario.h	64;"	d
+XML_FMT_INT_MOD	deltaQ/xml_scenario.h	67;"	d
+XML_FMT_INT_MOD	routing/route_xml.h	66;"	d
+XML_FMT_INT_MOD	routing/route_xml.h	68;"	d
+XML_FMT_INT_MOD	routing/route_xml.h	71;"	d
+XML_SCENARIO_COORD_SYST_CARTESIAN_STRING	deltaQ/xml_scenario.h	94;"	d
+XML_SCENARIO_COORD_SYST_LAT_LON_ALT_STRING	deltaQ/xml_scenario.h	95;"	d
+XML_SCENARIO_COORD_SYST_STRING	deltaQ/xml_scenario.h	93;"	d
+XML_SCENARIO_DURATION_STRING	deltaQ/xml_scenario.h	90;"	d
+XML_SCENARIO_JPGIS_FILENAME_STRING	deltaQ/xml_scenario.h	96;"	d
+XML_SCENARIO_MOTION_STEP_DIVIDER_STRING	deltaQ/xml_scenario.h	92;"	d
+XML_SCENARIO_START_TIME_STRING	deltaQ/xml_scenario.h	89;"	d
+XML_SCENARIO_STEP_STRING	deltaQ/xml_scenario.h	91;"	d
+XML_SCENARIO_STRING	deltaQ/xml_scenario.h	88;"	d
+ZIGBEE	deltaQ/deltaQ.h	96;"	d
+ZIGBEE_DEFAULT_ADAPTER_TYPE	deltaQ/zigbee.h	144;"	d
+ZIGBEE_DEFAULT_ALPHA	deltaQ/zigbee.h	149;"	d
+ZIGBEE_DEFAULT_CHANNEL	deltaQ/zigbee.h	143;"	d
+ZIGBEE_DEFAULT_NOISE_POWER	deltaQ/zigbee.h	152;"	d
+ZIGBEE_DEFAULT_PACKET_SIZE	deltaQ/zigbee.h	141;"	d
+ZIGBEE_DEFAULT_PARAMETER	deltaQ/zigbee.h	140;"	d
+ZIGBEE_DEFAULT_SIGMA	deltaQ/zigbee.h	150;"	d
+ZIGBEE_DEFAULT_STANDARD	deltaQ/zigbee.h	142;"	d
+ZIGBEE_DEFAULT_W	deltaQ/zigbee.h	151;"	d
+ZIGBEE_FREQUENCY	deltaQ/zigbee.h	64;"	d
+ZIGBEE_MAX_CHANNEL	deltaQ/zigbee.h	82;"	d
+ZIGBEE_MAX_CSMA_BACKOFFS	deltaQ/zigbee.h	78;"	d
+ZIGBEE_MAX_TRANSMISSIONS	deltaQ/zigbee.h	74;"	d
+ZIGBEE_MINIMUM_NOISE_POWER	deltaQ/zigbee.h	163;"	d
+ZIGBEE_MIN_CHANNEL	deltaQ/zigbee.h	81;"	d
+ZIGBEE_PSDU	deltaQ/zigbee.h	69;"	d
+ZIGBEE_RATE	deltaQ/zigbee.h	106;"	d
+ZIGBEE_RATES_NUMBER	deltaQ/zigbee.h	109;"	d
+ZIGBEE_STANDARD_NOISE	deltaQ/zigbee.h	97;"	d
+_LIBPIC16F648_H_	chanel/pic16f648.h	9;"	d
+_TAG_PRIVATE_H_	chanel/tag_public.h	9;"	d
+__ACTIVE_TAG_H	deltaQ/active_tag.h	47;"	d
+__CHANEL_H	chanel/chanel.h	47;"	d
+__CONNECTION_H	deltaQ/connection.h	47;"	d
+__COORDINATE_H	deltaQ/coordinate.h	47;"	d
+__DELTAQ_H	deltaQ/deltaQ.h	48;"	d
+__ENVIRONMENT_H	deltaQ/environment.h	47;"	d
+__ETHERNET_H	deltaQ/ethernet.h	47;"	d
+__GENERIC_H	deltaQ/generic.h	47;"	d
+__GLOBAL_H	deltaQ/global.h	47;"	d
+__IO_CHANEL_H	chanel/io_chanel.h	46;"	d
+__IO_H	deltaQ/io.h	46;"	d
+__MESSAGE_H	chanel/message.h	47;"	d
+__MESSAGE_H	deltaQ/message.h	47;"	d
+__MESSAGE_H	routing/message.h	47;"	d
+__MOTION_H	deltaQ/motion.h	47;"	d
+__NODE_H	deltaQ/node.h	47;"	d
+__OBJECT_H	deltaQ/object.h	47;"	d
+__QOMET_ROUTING_H	routing/qomet_routing.h	47;"	d
+__ROUTE_XML_H	routing/route_xml.h	47;"	d
+__ROUTING_H	routing/routing.h	47;"	d
+__SCENARIO_H	deltaQ/scenario.h	47;"	d
+__STACK_H	deltaQ/stack.h	47;"	d
+__TIMER_H	chanel/timer.h	46;"	d
+__TIMER_H	wireconf/timer.h	42;"	d
+__WIRECONF_H_	wireconf/wireconf.h	47;"	d
+__WLAN_H	deltaQ/wlan.h	47;"	d
+__XML_JPGIS_H	deltaQ/xml_jpgis.h	47;"	d
+__XML_SCENARIO_H	deltaQ/xml_scenario.h	47;"	d
+__ZIGBEE_H	deltaQ/zigbee.h	46;"	d
+a_operating_rates	deltaQ/wlan.c	/^double a_operating_rates[]={6e6, 9e6, 12e6, 18e6, 24e6, 36e6, 48e6, 54e6};$/;"	v
+accumulator	chanel/pic16f648.h	/^	uint8_t accumulator;$/;"	m	struct:__anon1
+active_destinations	chanel/chanel.h	/^  int active_destinations[MAX_DESTINATIONS];$/;"	m	struct:__anon10
+active_tag_bandwidth	deltaQ/active_tag.c	/^int active_tag_bandwidth(connection_class *connection, $/;"	f
+active_tag_compute_interference	deltaQ/active_tag.c	/^int active_tag_compute_interference(connection_class *connection, $/;"	f
+active_tag_connection_update	deltaQ/active_tag.c	/^int active_tag_connection_update(connection_class *connection, $/;"	f
+active_tag_delay_jitter	deltaQ/active_tag.c	/^int active_tag_delay_jitter(connection_class *connection, $/;"	f
+active_tag_fer	deltaQ/active_tag.c	/^int active_tag_fer(connection_class *connection, scenario_class *scenario, $/;"	f
+active_tag_frequencies	deltaQ/active_tag.c	/^double active_tag_frequencies[]={303.2e6};$/;"	v
+active_tag_get_node_adapter	deltaQ/active_tag.c	/^parameters_active_tag *active_tag_get_node_adapter(node_class *node)$/;"	f
+active_tag_interference	deltaQ/active_tag.c	/^int active_tag_interference(connection_class *connection, $/;"	f
+active_tag_loss_rate	deltaQ/active_tag.c	/^int active_tag_loss_rate(connection_class *connection, $/;"	f
+active_tag_node_update_Pr0	deltaQ/active_tag.c	/^void active_tag_node_update_Pr0(node_class *node)$/;"	f
+active_tag_operating_rate	deltaQ/active_tag.c	/^int active_tag_operating_rate(connection_class *connection, $/;"	f
+active_tag_print_parameters	deltaQ/active_tag.c	/^void active_tag_print_parameters(parameters_active_tag *params)$/;"	f
+adapter_type	deltaQ/node.h	/^  int adapter_type; $/;"	m	struct:node_class_s
+addWait	chanel/libpic16f648.c	/^addWait(pic16f648_t *p)$/;"	f
+add_powers	deltaQ/generic.c	/^double add_powers(double power1, double power2, double minimum_noise_power)$/;"	f
+add_rule	wireconf/wireconf.c	/^int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, $/;"	f
+alias_ip_head	routing/qomet_routing.h	/^  char alias_ip_head[MAX_IP_ADDRESS_LENGTH];$/;"	m	struct:__anon31
+alpha	deltaQ/environment.h	/^  double alpha[MAX_SEGMENTS];$/;"	m	struct:environment_class_s
+angle	deltaQ/motion.h	/^  double angle; $/;"	m	struct:motion_class_s
+antenna_azimuth_attenuation	deltaQ/generic.c	/^double antenna_azimuth_attenuation(node_class *node_tx, node_class *node_rx)$/;"	f
+antenna_directional_attenuation	deltaQ/generic.c	/^double antenna_directional_attenuation(node_class *node_tx, $/;"	f
+antenna_elevation_attenuation	deltaQ/generic.c	/^double antenna_elevation_attenuation(node_class *node_tx, node_class *node_rx)$/;"	f
+antenna_gain	deltaQ/node.h	/^  double antenna_gain; \/\/ gain expressed in dBi$/;"	m	struct:node_class_s
+aodv_is_connected	routing/generate_aodv.c	/^int aodv_is_connected(float loss_rate)$/;"	f
+apply_socket_options	wireconf/wireconf.c	/^static int apply_socket_options(int s, int option_id, void *option, $/;"	f	file:
+atoaddr	wireconf/wireconf.c	/^static int atoaddr(char *array_address, in4_addr *ipv4_address, uint16_t *port)$/;"	f	file:
+azimuth_beamwidth	deltaQ/node.h	/^  double azimuth_beamwidth; \/\/ beamwidth in horizontal plane$/;"	m	struct:node_class_s
+azimuth_orientation	deltaQ/node.h	/^  double azimuth_orientation; \/\/ orientation in horizontal plane wrt 0x axis$/;"	m	struct:node_class_s
+b_operating_rates	deltaQ/wlan.c	/^double b_operating_rates[]={1e6, 2e6, 5.5e6, 11e6};$/;"	v
+bandwidth	chanel/chanel.h	/^  double bandwidth;$/;"	m	struct:__anon8
+bandwidth	chanel/chanel_space.c	/^  float time, bandwidth[NUMBER_NODES], delay[NUMBER_NODES], $/;"	m	struct:__anon13	file:
+bandwidth	deltaQ/connection.h	/^  double loss_rate, delay, jitter, bandwidth;$/;"	m	struct:connection_class_s
+bandwidth	wireconf/do_wireconf.c	/^  float bandwidth;$/;"	m	struct:__anon36	file:
+bandwidth_configured	chanel/chanel.h	/^  int bandwidth_configured;$/;"	m	struct:__anon8
+bandwidth_defined	deltaQ/connection.h	/^  int loss_rate_defined, delay_defined, jitter_defined, bandwidth_defined;$/;"	m	struct:connection_class_s
+bank0	chanel/pic16f648.h	/^			uint8_t bank0[0x80];$/;"	m	struct:__anon1::__anon2::__anon3
+bank1	chanel/pic16f648.h	/^			uint8_t bank1[0x80];$/;"	m	struct:__anon1::__anon2::__anon3
+bank2	chanel/pic16f648.h	/^			uint8_t bank2[0x80];$/;"	m	struct:__anon1::__anon2::__anon3
+bank3	chanel/pic16f648.h	/^			uint8_t bank3[0x80];$/;"	m	struct:__anon1::__anon2::__anon3
+binary_header	chanel/chanel_space.c	/^  binary_header_class binary_header;$/;"	m	struct:__anon13	file:
+binary_header_class	chanel/io_chanel.h	/^} binary_header_class;$/;"	t	typeref:struct:__anon14
+binary_header_class	deltaQ/io.h	/^} binary_header_class;$/;"	t	typeref:struct:__anon21
+binary_record_class	chanel/io_chanel.h	/^} binary_record_class;$/;"	t	typeref:struct:__anon16
+binary_record_class	deltaQ/io.h	/^} binary_record_class;$/;"	t	typeref:struct:__anon23
+binary_records	deltaQ/io.h	/^  binary_record_class binary_records[MAX_CONNECTIONS];$/;"	m	struct:__anon24
+binary_time_record	deltaQ/io.h	/^  binary_time_record_class binary_time_record;$/;"	m	struct:__anon24
+binary_time_record_class	chanel/io_chanel.h	/^} binary_time_record_class;$/;"	t	typeref:struct:__anon15
+binary_time_record_class	deltaQ/io.h	/^} binary_time_record_class;$/;"	t	typeref:struct:__anon22
+blh2xyz	deltaQ/deltaQ.c	/^int blh2xyz(const coordinate_class *point_blh, coordinate_class *point_xyz)$/;"	f
+buffer	deltaQ/xml_scenario.h	/^  char buffer[MAX_STRING];$/;"	m	struct:xml_scenario_class_s
+building_names	generate_scenario.c	/^char *building_names[]={$/;"	v
+c	deltaQ/coordinate.h	/^  double c[3];\/\/[MAX_COORDINATES]; \/\/ don't use constant yet, $/;"	m	struct:__anon18
+callback_recv_function	chanel/chanel.h	/^  void (*callback_recv_function)(void*,data_class*);$/;"	m	struct:__anon10
+callback_recv_function	chanel/do_chanel.c	/^void callback_recv_function(void *callback_data, data_class *data_object)$/;"	f
+cartesian_coord_syst	deltaQ/xml_scenario.h	/^  int cartesian_coord_syst;$/;"	m	struct:xml_scenario_class_s
+center	deltaQ/motion.h	/^  coordinate_class center;$/;"	m	struct:motion_class_s
+chanel	chanel/chanel_space.c	/^  chanel_class chanel;$/;"	m	struct:__anon13	file:
+chanel_class	chanel/chanel.h	/^} chanel_class;$/;"	t	typeref:struct:__anon10
+chanel_configuration_pipe_open	chanel/chanel.c	/^int chanel_configuration_pipe_open(int chanel_source)$/;"	f
+chanel_configuration_pipe_open	chanel/chanel.for-rune.c	/^int chanel_configuration_pipe_open(int chanel_source)$/;"	f
+chanel_configuration_pipe_write	chanel/chanel.c	/^int chanel_configuration_pipe_write(int chanel_pipe_id, $/;"	f
+chanel_configuration_pipe_write	chanel/chanel.for-rune.c	/^int chanel_configuration_pipe_write(int chanel_pipe_id, $/;"	f
+chanel_configuration_thread	chanel/chanel.c	/^void *chanel_configuration_thread(void *arg)$/;"	f
+chanel_configuration_thread	chanel/chanel.for-rune.c	/^void *chanel_configuration_thread(void *arg)$/;"	f
+chanel_execute	chanel/chanel.c	/^int chanel_execute(chanel_class *chanel, int init_source_id,$/;"	f
+chanel_execute	chanel/chanel.for-rune.c	/^int chanel_execute(chanel_class *chanel, int init_source_id,$/;"	f
+chanel_finalize	chanel/chanel.c	/^int chanel_finalize(chanel_class *chanel)$/;"	f
+chanel_finalize	chanel/chanel.for-rune.c	/^int chanel_finalize(chanel_class *chanel)$/;"	f
+chanel_output_step	chanel/chanel.c	/^int chanel_output_step(chanel_class *chanel, void *callback_data)$/;"	f
+chanel_output_step	chanel/chanel.for-rune.c	/^int chanel_output_step(chanel_class *chanel, void *callback_data)$/;"	f
+chanel_output_thread	chanel/chanel.c	/^void *chanel_output_thread(void *arg)$/;"	f
+chanel_output_thread	chanel/chanel.for-rune.c	/^void *chanel_output_thread(void *arg)$/;"	f
+chanel_recv_data	chanel/chanel.c	/^int chanel_recv_data(chanel_class *chanel, void *callback_data)$/;"	f
+chanel_recv_data	chanel/chanel.for-rune.c	/^int chanel_recv_data(chanel_class *chanel, void *callback_data)$/;"	f
+chanel_send_data	chanel/chanel.c	/^int chanel_send_data(chanel_class *chanel, data_class *data_object)$/;"	f
+chanel_send_data	chanel/chanel.for-rune.c	/^int chanel_send_data(chanel_class *chanel, data_class *data_object)$/;"	f
+chanel_set_deltaQ	chanel/chanel.c	/^int chanel_set_deltaQ(chanel_class *chanel, int chanel_destination, $/;"	f
+chanel_set_deltaQ	chanel/chanel.for-rune.c	/^int chanel_set_deltaQ(chanel_class *chanel, int chanel_destination, $/;"	f
+chanel_source	chanel/chanel.h	/^  int chanel_source;$/;"	m	struct:__anon10
+chanel_space_class	chanel/chanel_space.c	/^}chanel_space_class;$/;"	t	typeref:struct:__anon13	file:
+chanel_space_fin	chanel/chanel_space.c	/^void chanel_space_fin(void *p)$/;"	f
+chanel_space_init	chanel/chanel_space.c	/^void *chanel_space_init(int gsid)$/;"	f
+chanel_space_read	chanel/chanel_space.c	/^void *chanel_space_read(void *p, void *a)$/;"	f
+chanel_space_recv_data	chanel/chanel_space.c	/^void chanel_space_recv_data(void *p, data_class *data_object)$/;"	f
+chanel_space_step	chanel/chanel_space.c	/^int chanel_space_step(void *p)$/;"	f
+chanel_space_write	chanel/chanel_space.c	/^void *chanel_space_write(void *p, void *a)$/;"	f
+chanel_stop	chanel/chanel.c	/^void chanel_stop(chanel_class *chanel)$/;"	f
+chanel_stop	chanel/chanel.for-rune.c	/^void chanel_stop(chanel_class *chanel)$/;"	f
+channel	deltaQ/connection.h	/^  int channel;$/;"	m	struct:connection_class_s
+character_data	deltaQ/xml_scenario.c	/^static void XMLCALL character_data (void *data, const XML_Char *string, $/;"	f	file:
+cisco_aironet_340	deltaQ/wlan.c	/^parameters_802_11b cisco_aironet_340 = $/;"	v
+cisco_aironet_abg_a	deltaQ/wlan.c	/^parameters_802_11a cisco_aironet_abg_a = $/;"	v
+cisco_aironet_abg_b	deltaQ/wlan.c	/^parameters_802_11b cisco_aironet_abg_b = $/;"	v
+cisco_aironet_abg_bg	deltaQ/wlan.c	/^parameters_802_11g cisco_aironet_abg_bg = $/;"	v
+close_socket	wireconf/wireconf.c	/^void close_socket(int socket_id)$/;"	f
+compatibility_mode	deltaQ/connection.h	/^  int compatibility_mode;$/;"	m	struct:connection_class_s
+compute_channel_interference	deltaQ/wlan.c	/^int compute_channel_interference(connection_class *connection, $/;"	f
+compute_detour_distance	deltaQ/motion.c	/^double compute_detour_distance(object_class *object, int vertex_index, $/;"	f
+compute_route	routing/generate_aodv.c	/^int compute_route(graph_class *graph, int traversed[MAX_NODES],$/;"	f
+concurrent_stations	deltaQ/connection.h	/^  int concurrent_stations;$/;"	m	struct:connection_class_s
+config	chanel/pic16f648.h	/^	uint16_t config;$/;"	m	struct:__anon1
+configuration_mutex	chanel/chanel.h	/^  pthread_mutex_t configuration_mutex;$/;"	m	struct:__anon10
+configuration_thread	chanel/chanel.h	/^  pthread_t configuration_thread;$/;"	m	struct:__anon10
+configurations	chanel/chanel.h	/^  deltaQ_class configurations[MAX_DESTINATIONS];$/;"	m	struct:__anon10
+configure_pipe	wireconf/wireconf.c	/^int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)$/;"	f
+connection	deltaQ/node.h	/^  int connection;$/;"	m	struct:node_class_s
+connection_class	deltaQ/global.h	/^typedef struct connection_class_s connection_class;$/;"	t	typeref:struct:connection_class_s
+connection_class_s	deltaQ/connection.h	/^struct connection_class_s$/;"	s
+connection_copy	deltaQ/connection.c	/^void connection_copy(connection_class *connection_dest, $/;"	f
+connection_deltaQ	deltaQ/connection.c	/^int connection_deltaQ(connection_class *connection, scenario_class *scenario,$/;"	f
+connection_do_compute	deltaQ/connection.c	/^int connection_do_compute(connection_class *connection, $/;"	f
+connection_init	deltaQ/connection.c	/^int connection_init(connection_class *connection, char *from_node, $/;"	f
+connection_init_indexes	deltaQ/connection.c	/^int connection_init_indexes(connection_class *connection, $/;"	f
+connection_init_standard	deltaQ/connection.c	/^int connection_init_standard(connection_class *connection, int standard)$/;"	f
+connection_number	deltaQ/scenario.h	/^  int connection_number;$/;"	m	struct:scenario_class_s
+connection_operating_rate	deltaQ/connection.c	/^double connection_operating_rate(connection_class *connection)$/;"	f
+connection_print	deltaQ/connection.c	/^void connection_print(connection_class *connection)$/;"	f
+connection_standards	deltaQ/connection.c	/^char *connection_standards[]={"802.11b", "802.11g", "802.11a", "Eth-10Mbps",$/;"	v
+connections	deltaQ/scenario.h	/^  connection_class connections[MAX_CONNECTIONS];$/;"	m	struct:scenario_class_s
+consider_interference	deltaQ/connection.h	/^  int consider_interference;$/;"	m	struct:connection_class_s
+coordinate	deltaQ/xml_scenario.h	/^  coordinate_class coordinate;$/;"	m	struct:xml_scenario_class_s
+coordinate_are_equal	deltaQ/coordinate.c	/^int coordinate_are_equal(const coordinate_class *point1, $/;"	f
+coordinate_class	deltaQ/coordinate.h	/^} coordinate_class;$/;"	t	typeref:struct:__anon18
+coordinate_copy	deltaQ/coordinate.c	/^void coordinate_copy(coordinate_class *coord_dest, $/;"	f
+coordinate_distance	deltaQ/coordinate.c	/^double coordinate_distance(const coordinate_class *point1, $/;"	f
+coordinate_distance_2D	deltaQ/coordinate.c	/^double coordinate_distance_2D(const coordinate_class *point1, $/;"	f
+coordinate_distance_to_segment	deltaQ/coordinate.c	/^int coordinate_distance_to_segment(const coordinate_class *point, $/;"	f
+coordinate_distance_to_segment_2D	deltaQ/coordinate.c	/^int coordinate_distance_to_segment_2D(const coordinate_class *point, $/;"	f
+coordinate_found	deltaQ/xml_jpgis.h	/^  int coordinate_found;$/;"	m	struct:xml_jpgis_class_s
+coordinate_i	deltaQ/xml_jpgis.h	/^  int coordinate_i;$/;"	m	struct:xml_jpgis_class_s
+coordinate_init	deltaQ/coordinate.c	/^void coordinate_init(coordinate_class *coordinate, const char *name,$/;"	f
+coordinate_multiply_scalar	deltaQ/coordinate.c	/^void coordinate_multiply_scalar(coordinate_class *result, $/;"	f
+coordinate_print	deltaQ/coordinate.c	/^void coordinate_print(const coordinate_class *coordinate)$/;"	f
+coordinate_text	deltaQ/xml_jpgis.h	/^  char coordinate_text[MAX_STRING];$/;"	m	struct:xml_jpgis_class_s
+coordinate_vector_difference	deltaQ/coordinate.c	/^void coordinate_vector_difference(coordinate_class *result, $/;"	f
+coordinate_vector_difference_2D	deltaQ/coordinate.c	/^void coordinate_vector_difference_2D(coordinate_class *result, $/;"	f
+coordinate_vector_magnitude	deltaQ/coordinate.c	/^double coordinate_vector_magnitude(const coordinate_class *vector)$/;"	f
+coordinate_vector_sum	deltaQ/coordinate.c	/^void coordinate_vector_sum(coordinate_class *result, $/;"	f
+cpu	chanel/tag_private.h	/^	pic16f648_t *cpu;$/;"	m	struct:__anon17
+cpu_frequency	chanel/timer.h	/^  uint32_t cpu_frequency;$/;"	m	struct:__anon4
+cpu_frequency	wireconf/timer.h	/^  uint32_t cpu_frequency;$/;"	m	struct:__anon34
+current_time	chanel/chanel_space.c	/^  double current_time, deadline_time;$/;"	m	struct:__anon13	file:
+current_walk_time	deltaQ/motion.h	/^  double walk_time, current_walk_time;$/;"	m	struct:motion_class_s
+data	chanel/chanel.h	/^  char data[MAX_DATA_SIZE];$/;"	m	struct:__anon6
+data_buffer	chanel/chanel.h	/^  data_class data_buffer[MAX_DATA_BUFFER_SIZE];$/;"	m	struct:__anon7
+data_class	chanel/chanel.h	/^} data_class;$/;"	t	typeref:struct:__anon6
+data_copy	chanel/chanel.c	/^int data_copy(data_class *data_dst, data_class *data_src)$/;"	f
+data_copy	chanel/chanel.for-rune.c	/^int data_copy(data_class *data_dst, data_class *data_src)$/;"	f
+data_count	chanel/chanel.h	/^  int data_count;$/;"	m	struct:__anon7
+data_head	chanel/chanel.h	/^  int data_head;$/;"	m	struct:__anon7
+data_init	chanel/chanel.c	/^int data_init(data_class *data_object, int from_node, int to_node, $/;"	f
+data_init	chanel/chanel.for-rune.c	/^int data_init(data_class *data_object, int from_node, int to_node, $/;"	f
+data_introduce_error	chanel/chanel.c	/^int data_introduce_error(data_class *data_object)$/;"	f
+data_introduce_error	chanel/chanel.for-rune.c	/^int data_introduce_error(data_class *data_object)$/;"	f
+data_length	chanel/chanel.h	/^  size_t data_length;$/;"	m	struct:__anon6
+data_mutex	chanel/chanel.h	/^  pthread_mutex_t data_mutex;$/;"	m	struct:__anon10
+data_node_id	chanel/chanel_space.c	/^  int data_node_id;$/;"	m	struct:__anon13	file:
+data_print	chanel/chanel.c	/^int data_print(data_class *data_object)$/;"	f
+data_print	chanel/chanel.for-rune.c	/^int data_print(data_class *data_object)$/;"	f
+data_queue	chanel/chanel.h	/^  data_queue_class data_queue;$/;"	m	struct:__anon10
+data_queue_class	chanel/chanel.h	/^} data_queue_class;$/;"	t	typeref:struct:__anon7
+data_queue_dequeue	chanel/chanel.c	/^int data_queue_dequeue(data_queue_class *data_queue, data_class *data_object)$/;"	f
+data_queue_dequeue	chanel/chanel.for-rune.c	/^int data_queue_dequeue(data_queue_class *data_queue, data_class *data_object)$/;"	f
+data_queue_enqueue	chanel/chanel.c	/^int data_queue_enqueue(data_queue_class *data_queue, data_class *data_object)$/;"	f
+data_queue_enqueue	chanel/chanel.for-rune.c	/^int data_queue_enqueue(data_queue_class *data_queue, data_class *data_object)$/;"	f
+data_queue_init	chanel/chanel.c	/^void data_queue_init(data_queue_class *data_queue)$/;"	f
+data_queue_init	chanel/chanel.for-rune.c	/^void data_queue_init(data_queue_class *data_queue)$/;"	f
+data_queue_is_empty	chanel/chanel.c	/^int data_queue_is_empty(data_queue_class *data_queue)$/;"	f
+data_queue_is_empty	chanel/chanel.for-rune.c	/^int data_queue_is_empty(data_queue_class *data_queue)$/;"	f
+data_queue_is_full	chanel/chanel.c	/^int data_queue_is_full(data_queue_class *data_queue)$/;"	f
+data_queue_is_full	chanel/chanel.for-rune.c	/^int data_queue_is_full(data_queue_class *data_queue)$/;"	f
+data_queue_tail	chanel/chanel.c	/^int data_queue_tail(data_queue_class *data_queue,  data_class *data_object)$/;"	f
+data_queue_tail	chanel/chanel.for-rune.c	/^int data_queue_tail(data_queue_class *data_queue,  data_class *data_object)$/;"	f
+data_type	chanel/chanel.h	/^  data_type_enum data_type;$/;"	m	struct:__anon6
+data_type_enum	chanel/chanel.h	/^} data_type_enum;$/;"	t	typeref:enum:__anon5
+deadline_time	chanel/chanel_space.c	/^  double current_time, deadline_time;$/;"	m	struct:__anon13	file:
+dei80211mr	deltaQ/wlan.c	/^parameters_802_11b dei80211mr =$/;"	v
+delay	chanel/chanel.h	/^  double delay;$/;"	m	struct:__anon8
+delay	chanel/chanel_space.c	/^  float time, bandwidth[NUMBER_NODES], delay[NUMBER_NODES], $/;"	m	struct:__anon13	file:
+delay	deltaQ/connection.h	/^  double loss_rate, delay, jitter, bandwidth;$/;"	m	struct:connection_class_s
+delay	wireconf/do_wireconf.c	/^  float delay;$/;"	m	struct:__anon36	file:
+delay_defined	deltaQ/connection.h	/^  int loss_rate_defined, delay_defined, jitter_defined, bandwidth_defined;$/;"	m	struct:connection_class_s
+delay_jitter_configured	chanel/chanel.h	/^  int delay_jitter_configured;$/;"	m	struct:__anon8
+delete_rule	wireconf/wireconf.c	/^int delete_rule(uint s, u_int32_t rule_number)$/;"	f
+deltaQ	chanel/chanel.h	/^  deltaQ_class deltaQ;$/;"	m	struct:__anon9
+deltaQ_class	chanel/chanel.h	/^} deltaQ_class;$/;"	t	typeref:struct:__anon8
+deltaQ_clear	chanel/chanel.c	/^void deltaQ_clear(deltaQ_class *deltaQ)$/;"	f
+deltaQ_clear	chanel/chanel.for-rune.c	/^void deltaQ_clear(deltaQ_class *deltaQ)$/;"	f
+deltaQ_copy	chanel/chanel.c	/^void deltaQ_copy(deltaQ_class *deltaQ_dst, deltaQ_class *deltaQ_src)$/;"	f
+deltaQ_copy	chanel/chanel.for-rune.c	/^void deltaQ_copy(deltaQ_class *deltaQ_dst, deltaQ_class *deltaQ_src)$/;"	f
+deltaQ_pipe_id	chanel/chanel.h	/^  int deltaQ_pipe_id;$/;"	m	struct:__anon10
+deltaQ_print	chanel/chanel.c	/^void deltaQ_print(deltaQ_class *deltaQ)$/;"	f
+deltaQ_print	chanel/chanel.for-rune.c	/^void deltaQ_print(deltaQ_class *deltaQ)$/;"	f
+deltaQ_set_all	chanel/chanel.c	/^void deltaQ_set_all(deltaQ_class *deltaQ, double bandwidth, $/;"	f
+deltaQ_set_all	chanel/chanel.for-rune.c	/^void deltaQ_set_all(deltaQ_class *deltaQ, double bandwidth, $/;"	f
+deltaQ_set_bandwidth	chanel/chanel.c	/^void deltaQ_set_bandwidth(deltaQ_class *deltaQ, double bandwidth)$/;"	f
+deltaQ_set_bandwidth	chanel/chanel.for-rune.c	/^void deltaQ_set_bandwidth(deltaQ_class *deltaQ, double bandwidth)$/;"	f
+deltaQ_set_delay_jitter	chanel/chanel.c	/^void deltaQ_set_delay_jitter(deltaQ_class *deltaQ, double delay, double jitter)$/;"	f
+deltaQ_set_delay_jitter	chanel/chanel.for-rune.c	/^void deltaQ_set_delay_jitter(deltaQ_class *deltaQ, double delay, double jitter)$/;"	f
+deltaQ_set_frame_error_rate	chanel/chanel.c	/^void deltaQ_set_frame_error_rate(deltaQ_class *deltaQ, $/;"	f
+deltaQ_set_frame_error_rate	chanel/chanel.for-rune.c	/^void deltaQ_set_frame_error_rate(deltaQ_class *deltaQ, $/;"	f
+destination	chanel/chanel.h	/^  int destination;$/;"	m	struct:__anon9
+destination	deltaQ/motion.h	/^  coordinate_class destination;$/;"	m	struct:motion_class_s
+distance	deltaQ/connection.h	/^  double distance;$/;"	m	struct:connection_class_s
+do_interrupt	chanel/chanel.h	/^  int do_interrupt;$/;"	m	struct:__anon10
+double_value	deltaQ/generic.c	/^double double_value(const char *string)$/;"	f
+dump_param_table	wireconf/do_wireconf.c	/^void dump_param_table(qomet_param *p, int rule_count)$/;"	f
+duration	deltaQ/xml_scenario.h	/^  double duration;$/;"	m	struct:xml_scenario_class_s
+eeprom	chanel/pic16f648.h	/^	uint8_t eeprom[0x0100];$/;"	m	struct:__anon1
+element	deltaQ/stack.h	/^  void *element;$/;"	m	struct:__anon19
+element_class	deltaQ/stack.h	/^} element_class;$/;"	t	typeref:struct:__anon19
+element_type	deltaQ/stack.h	/^  int element_type;$/;"	m	struct:__anon19
+elements	deltaQ/stack.h	/^  element_class elements[MAX_ELEMENTS];$/;"	m	struct:__anon20
+elevation_beamwidth	deltaQ/node.h	/^  double elevation_beamwidth; \/\/ beamwidth in vertical plane$/;"	m	struct:node_class_s
+elevation_orientation	deltaQ/node.h	/^  double elevation_orientation; \/\/ orientation in vertical plane wrt 0x axis$/;"	m	struct:node_class_s
+en2ll	deltaQ/deltaQ.c	/^void en2ll(coordinate_class  *point_xyz, coordinate_class *point_blh)$/;"	f
+end_element	deltaQ/xml_scenario.c	/^static void XMLCALL end_element(void *data, const char *element)$/;"	f	file:
+end_element	routing/route_xml.c	/^static void XMLCALL end_element(void *data, const char *element)$/;"	f	file:
+environment	deltaQ/object.h	/^  char environment[MAX_STRING];$/;"	m	struct:object_class_s
+environment_check_valid	deltaQ/environment.c	/^int environment_check_valid(environment_class *environments, $/;"	f
+environment_class	deltaQ/global.h	/^typedef struct environment_class_s environment_class;$/;"	t	typeref:struct:environment_class_s
+environment_class_s	deltaQ/environment.h	/^struct environment_class_s$/;"	s
+environment_copy	deltaQ/environment.c	/^void environment_copy(environment_class *environment_dest, $/;"	f
+environment_dynamic_init	deltaQ/environment.c	/^void environment_dynamic_init(environment_class *environment, char *name, $/;"	f
+environment_index	deltaQ/object.h	/^  int environment_index;$/;"	m	struct:object_class_s
+environment_init	deltaQ/environment.c	/^void environment_init(environment_class *environment, char *name, char *type, $/;"	f
+environment_number	deltaQ/scenario.h	/^  int environment_number;$/;"	m	struct:scenario_class_s
+environment_print	deltaQ/environment.c	/^void environment_print(environment_class *environment)$/;"	f
+environment_update	deltaQ/environment.c	/^int environment_update(environment_class *environment, $/;"	f
+environments	deltaQ/scenario.h	/^  environment_class environments[MAX_ENVIRONMENTS];$/;"	m	struct:scenario_class_s
+ep	chanel/chanel_space.c	/^entryPoints ep = $/;"	v
+ep	chanel/tag.c	/^entryPoints ep = {$/;"	v
+error	chanel/chanel_space.c	/^  double error;$/;"	m	struct:__anon13	file:
+error	deltaQ/xml_jpgis.h	/^  int error;$/;"	m	struct:xml_jpgis_class_s
+error_data_count	chanel/do_chanel.c	/^int error_data_count=0;$/;"	v
+eth_operating_rates	deltaQ/ethernet.c	/^double eth_operating_rates[]={10e6, 100e6, 1000e6};$/;"	v
+ethernet_bandwidth	deltaQ/ethernet.c	/^int ethernet_bandwidth(connection_class *connection, $/;"	f
+ethernet_delay_jitter	deltaQ/ethernet.c	/^int ethernet_delay_jitter(connection_class *connection, $/;"	f
+ethernet_fer	deltaQ/ethernet.c	/^int ethernet_fer(connection_class *connection, scenario_class *scenario, $/;"	f
+ethernet_loss_rate	deltaQ/ethernet.c	/^int ethernet_loss_rate(connection_class *connection, $/;"	f
+ethernet_operating_rate	deltaQ/ethernet.c	/^int ethernet_operating_rate(connection_class *connection, $/;"	f
+extracycle	chanel/pic16f648.h	/^	int extracycle;$/;"	m	struct:__anon1
+fd	chanel/chanel_space.c	/^  FILE *fd;$/;"	m	struct:__anon13	file:
+fer_configured	chanel/chanel.h	/^  int fer_configured;$/;"	m	struct:__anon8
+frame	chanel/tag_private.h	/^	tagframe frame;$/;"	m	struct:__anon17
+frame_error_rate	chanel/chanel.h	/^  double frame_error_rate;$/;"	m	struct:__anon8
+frame_error_rate	deltaQ/connection.h	/^  double frame_error_rate;$/;"	m	struct:connection_class_s
+from	chanel/chanel_space.c	/^  int from, to;$/;"	m	struct:__anon13	file:
+from_node	chanel/chanel.h	/^  int from_node;$/;"	m	struct:__anon6
+from_node	chanel/io_chanel.h	/^  int from_node;$/;"	m	struct:__anon16
+from_node	deltaQ/connection.h	/^  char from_node[MAX_STRING];$/;"	m	struct:connection_class_s
+from_node	deltaQ/io.h	/^  int from_node;$/;"	m	struct:__anon23
+from_node	routing/qomet_routing.h	/^  int from_node;$/;"	m	struct:__anon30
+from_node_index	deltaQ/connection.h	/^  int from_node_index;$/;"	m	struct:connection_class_s
+from_nodes	routing/qomet_routing.h	/^  int from_nodes[MAX_ROUTING_TABLE];$/;"	m	struct:__anon31
+g_operating_rates	deltaQ/wlan.c	/^double g_operating_rates[]={1e6, 2e6, 5.5e6, 6e6, 9e6, 11e6,$/;"	v
+generate_point_in_object3d	generate_scenario.c	/^int generate_point_in_object3d(object_class *object, coordinate_class *point)$/;"	f
+generate_x_in_object	generate_scenario.c	/^double generate_x_in_object(object_class *object)$/;"	f
+generate_y_in_object	generate_scenario.c	/^double generate_y_in_object(object_class *object)$/;"	f
+getCpuFreq	chanel/libpic16f648.c	/^getCpuFreq(void)$/;"	f	file:
+get_cpu_frequency	chanel/timer.c	/^unsigned int get_cpu_frequency(void)$/;"	f
+get_cpu_frequency	wireconf/timer.c	/^unsigned int get_cpu_frequency(void)$/;"	f
+get_id_from_ip	wireconf/routing_info.c	/^int get_id_from_ip(in_addr_t *IP_addresses, char *s)$/;"	f
+get_ip_from_id	wireconf/routing_info.c	/^int get_ip_from_id(char *IP_char_addresses, int id, char *ip)$/;"	f
+get_next_hop_id	wireconf/routing_info.c	/^int get_next_hop_id(in_addr_t *IP_addresses, char *IP_char_addresses, $/;"	f
+get_next_hop_ip	wireconf/routing_info.c	/^int get_next_hop_ip(char *dst, char *next_hop)$/;"	f
+get_routing_table_addr	wireconf/routing_info.c	/^void get_routing_table_addr(int addrs, struct sockaddr *sa, $/;"	f
+get_rtaddrs	routing/routing.c	/^void get_rtaddrs(int addrs, struct sockaddr *sa, struct sockaddr **rti_info)$/;"	f
+get_rule	wireconf/wireconf.c	/^int get_rule(uint s, int16_t rulenum)$/;"	f
+get_socket	wireconf/wireconf.c	/^int get_socket(void)$/;"	f
+getrt	routing/routing.c	/^int getrt(char *ipaddr)$/;"	f
+graph_class	routing/generate_aodv.c	/^}graph_class;$/;"	t	typeref:struct:__anon32	file:
+graph_clear	routing/generate_aodv.c	/^void graph_clear(graph_class *graph)$/;"	f
+graph_print	routing/generate_aodv.c	/^void graph_print(graph_class *graph)$/;"	f
+gsid	chanel/chanel_space.c	/^  int gsid;$/;"	m	struct:__anon13	file:
+gsid	chanel/pic16f648.h	/^	uint32_t gsid;$/;"	m	struct:__anon1
+gsid	chanel/tag_private.h	/^	int gsid;$/;"	m	struct:__anon17
+height	deltaQ/object.h	/^  double height;$/;"	m	struct:object_class_s
+hexStrToByte	chanel/libpic16f648.c	/^hexStrToByte(char *str)$/;"	f	file:
+hexStrToWord	chanel/libpic16f648.c	/^hexStrToWord(char *str)$/;"	f	file:
+host_serv	routing/routing.c	/^struct addrinfo * host_serv(const char *host, const char *serv, int family, $/;"	f
+id	deltaQ/node.h	/^  int id;$/;"	m	struct:node_class_s
+if_nametoindex	routing/routing.c	/^unsigned int if_nametoindex(const char *name)$/;"	f
+in4_addr	wireconf/wireconf.c	/^} in4_addr;$/;"	t	typeref:union:__anon35	file:
+initial_latitude	deltaQ/deltaQ.c	/^double initial_latitude(double North, double n0, double aF0, double phi0,$/;"	f
+int_value	routing/route_xml.c	/^int int_value(const char *string)$/;"	f
+interference_accounted	deltaQ/node.h	/^  int interference_accounted;$/;"	m	struct:node_class_s
+interference_fer	deltaQ/connection.h	/^  double interference_fer;$/;"	m	struct:connection_class_s
+interference_noise	deltaQ/connection.h	/^  double interference_noise;$/;"	m	struct:connection_class_s
+internal_delay	deltaQ/node.h	/^  double internal_delay;$/;"	m	struct:node_class_s
+internal_point_on_object_edge	deltaQ/environment.c	/^int internal_point_on_object_edge(double xn, double yn, double xo1, $/;"	f
+intersection_add_point	deltaQ/environment.c	/^int intersection_add_point(double *intersections_x, double *intersections_y, $/;"	f
+intersection_do_insert	deltaQ/environment.c	/^int intersection_do_insert(double *intersections_x, double *intersections_y, $/;"	f
+intersection_print	deltaQ/environment.c	/^void intersection_print(double *intersections_x, double *intersections_y, $/;"	f
+intr	chanel/pic16f648.h	/^	int intr;$/;"	m	struct:__anon1
+io_binary_build_record	deltaQ/io.c	/^void io_binary_build_record(binary_record_class *binary_record, $/;"	f
+io_binary_compare_record	deltaQ/io.c	/^int io_binary_compare_record(binary_record_class *binary_record, $/;"	f
+io_binary_print_header	chanel/io_chanel.c	/^void io_binary_print_header(binary_header_class *binary_header)$/;"	f
+io_binary_print_header	deltaQ/io.c	/^void io_binary_print_header(binary_header_class *binary_header)$/;"	f
+io_binary_print_record	chanel/io_chanel.c	/^void io_binary_print_record(binary_record_class *binary_record)$/;"	f
+io_binary_print_record	deltaQ/io.c	/^void io_binary_print_record(binary_record_class *binary_record)$/;"	f
+io_binary_print_time_record	chanel/io_chanel.c	/^void io_binary_print_time_record(binary_time_record_class *binary_time_record)$/;"	f
+io_binary_print_time_record	deltaQ/io.c	/^void io_binary_print_time_record(binary_time_record_class *binary_time_record)$/;"	f
+io_connection_state_class	deltaQ/io.h	/^} io_connection_state_class;$/;"	t	typeref:struct:__anon24
+io_read_binary_header_from_file	chanel/io_chanel.c	/^int io_read_binary_header_from_file(binary_header_class *binary_header,$/;"	f
+io_read_binary_header_from_file	deltaQ/io.c	/^int io_read_binary_header_from_file(binary_header_class *binary_header,$/;"	f
+io_read_binary_record_from_file	chanel/io_chanel.c	/^int io_read_binary_record_from_file(binary_record_class *binary_record,$/;"	f
+io_read_binary_record_from_file	deltaQ/io.c	/^int io_read_binary_record_from_file(binary_record_class *binary_record,$/;"	f
+io_read_binary_records_from_file	chanel/io_chanel.c	/^int io_read_binary_records_from_file(binary_record_class *binary_records,$/;"	f
+io_read_binary_records_from_file	deltaQ/io.c	/^int io_read_binary_records_from_file(binary_record_class *binary_records,$/;"	f
+io_read_binary_time_record_from_file	chanel/io_chanel.c	/^int io_read_binary_time_record_from_file(binary_time_record_class *$/;"	f
+io_read_binary_time_record_from_file	deltaQ/io.c	/^int io_read_binary_time_record_from_file(binary_time_record_class *$/;"	f
+io_write_binary_header_to_file	deltaQ/io.c	/^int io_write_binary_header_to_file(long int time_record_number, $/;"	f
+io_write_binary_record_to_file	deltaQ/io.c	/^int io_write_binary_record_to_file(connection_class *connection,$/;"	f
+io_write_binary_record_to_file2	deltaQ/io.c	/^int io_write_binary_record_to_file2(binary_record_class *binary_record,$/;"	f
+io_write_binary_time_record_to_file	deltaQ/io.c	/^int io_write_binary_time_record_to_file(float time, int record_number,$/;"	f
+io_write_binary_time_record_to_file2	deltaQ/io.c	/^int io_write_binary_time_record_to_file2(binary_time_record_class *$/;"	f
+io_write_header_to_file	deltaQ/io.c	/^void io_write_header_to_file(FILE *file_global, char *qomet_name)$/;"	f
+io_write_nam_motion_header_to_file	deltaQ/io.c	/^int io_write_nam_motion_header_to_file(scenario_class *scenario, $/;"	f
+io_write_nam_motion_info_to_file	deltaQ/io.c	/^int io_write_nam_motion_info_to_file(scenario_class *scenario, $/;"	f
+io_write_ns2_motion_header_to_file	deltaQ/io.c	/^int io_write_ns2_motion_header_to_file(scenario_class *scenario, $/;"	f
+io_write_ns2_motion_info_to_file	deltaQ/io.c	/^int io_write_ns2_motion_info_to_file(scenario_class *scenario, $/;"	f
+io_write_to_file	deltaQ/io.c	/^void io_write_to_file(connection_class *connection,$/;"	f
+is_dynamic	deltaQ/environment.h	/^  int is_dynamic;$/;"	m	struct:environment_class_s
+is_filled	chanel/chanel_space.c	/^  int is_filled[NUMBER_NODES]; \/\/ CAN BE REMOVED TO IMPROVE SPEED!!!!!!!$/;"	m	struct:__anon13	file:
+is_metric	deltaQ/object.h	/^  int is_metric;$/;"	m	struct:object_class_s
+jennic	deltaQ/zigbee.c	/^parameters_zigbee jennic =$/;"	v
+jitter	chanel/chanel.h	/^  double jitter;$/;"	m	struct:__anon8
+jitter	deltaQ/connection.h	/^  double loss_rate, delay, jitter, bandwidth;$/;"	m	struct:connection_class_s
+jitter_defined	deltaQ/connection.h	/^  int loss_rate_defined, delay_defined, jitter_defined, bandwidth_defined;$/;"	m	struct:connection_class_s
+jpgis_filename	deltaQ/xml_scenario.h	/^  char jpgis_filename[MAX_STRING];$/;"	m	struct:xml_scenario_class_s
+jpgis_filename_provided	deltaQ/xml_scenario.h	/^  int jpgis_filename_provided;$/;"	m	struct:xml_scenario_class_s
+latitude	deltaQ/xml_jpgis.h	/^  double latitude;$/;"	m	struct:xml_jpgis_class_s
+len	chanel/tag_public.h	/^	uint32_t len;$/;"	m	struct:__anon11
+length	deltaQ/environment.h	/^  double length[MAX_SEGMENTS];$/;"	m	struct:environment_class_s
+license	qomet.c	/^static void license(FILE *f)$/;"	f	file:
+ll2en	deltaQ/deltaQ.c	/^void ll2en(coordinate_class  *point_blh, coordinate_class *point_xyz)$/;"	f
+load_from_jpgis_file	deltaQ/object.h	/^  int load_from_jpgis_file;$/;"	m	struct:object_class_s
+loaded	chanel/pic16f648.h	/^	int loaded;$/;"	m	struct:__anon1
+lock	chanel/pic16f648.h	/^	pthread_mutex_t lock;$/;"	m	struct:__anon1
+log2	deltaQ/generic.c	/^double log2(double x)$/;"	f
+logfd	chanel/pic16f648.h	/^	FILE *logfd;$/;"	m	struct:__anon1
+long_int_value	deltaQ/generic.c	/^long int long_int_value(const char *string)$/;"	f
+long_options	qomet.c	/^static struct option long_options[] = {$/;"	v	typeref:struct:option	file:
+longitude	deltaQ/xml_jpgis.h	/^  double longitude;$/;"	m	struct:xml_jpgis_class_s
+lookup_param	wireconf/do_wireconf.c	/^int lookup_param(int next_hop_id, qomet_param *p, int rule_count)$/;"	f
+loss_rate	chanel/io_chanel.h	/^  float loss_rate;$/;"	m	struct:__anon16
+loss_rate	deltaQ/connection.h	/^  double loss_rate, delay, jitter, bandwidth;$/;"	m	struct:connection_class_s
+loss_rate	deltaQ/io.h	/^  float loss_rate;$/;"	m	struct:__anon23
+loss_rate_defined	deltaQ/connection.h	/^  int loss_rate_defined, delay_defined, jitter_defined, bandwidth_defined;$/;"	m	struct:connection_class_s
+lossrate	chanel/chanel_space.c	/^    lossrate[NUMBER_NODES];$/;"	m	struct:__anon13	file:
+lossrate	wireconf/do_wireconf.c	/^  float lossrate;$/;"	m	struct:__anon36	file:
+m	chanel/pic16f648.h	/^		uint8_t	m[0x0200];$/;"	m	union:__anon1::__anon2
+m_crtm	chanel/pic16f648.h	/^	uint64_t m_crtm;$/;"	m	struct:__anon1
+m_freq	chanel/pic16f648.h	/^	uint64_t m_freq;$/;"	m	struct:__anon1
+m_int0	chanel/pic16f648.h	/^	uint64_t m_int0;$/;"	m	struct:__anon1
+m_int1	chanel/pic16f648.h	/^	uint64_t m_int1;$/;"	m	struct:__anon1
+m_int2	chanel/pic16f648.h	/^	uint64_t m_int2;$/;"	m	struct:__anon1
+m_step	chanel/pic16f648.h	/^	uint64_t m_step;$/;"	m	struct:__anon1
+m_sttm	chanel/pic16f648.h	/^	uint64_t m_sttm;$/;"	m	struct:__anon1
+main	chanel/chanel_config.c	/^int main(void)$/;"	f
+main	chanel/do_chanel.c	/^int main(void)$/;"	f
+main	generate_scenario.c	/^int main()$/;"	f
+main	qomet.c	/^int main(int argc, char *argv[])$/;"	f
+main	routing/do_routing.c	/^int main(int argc, char *argv[])$/;"	f
+main	routing/generate_aodv.c	/^int main(int argc, char *argv[])$/;"	f
+main	routing/routing_tester.c	/^int main(int argc, char *argv[])$/;"	f
+main	wireconf/do_wireconf.c	/^int main(int argc, char *argv[])$/;"	f
+major_version	chanel/io_chanel.h	/^  int major_version;$/;"	m	struct:__anon14
+major_version	deltaQ/io.h	/^  int major_version;$/;"	m	struct:__anon21
+make_polygon	deltaQ/object.h	/^  int make_polygon;$/;"	m	struct:object_class_s
+max_speed	deltaQ/motion.h	/^  double min_speed, max_speed;$/;"	m	struct:motion_class_s
+memory	chanel/pic16f648.h	/^	uint16_t memory[0x1000];$/;"	m	struct:__anon1
+merge_routing_tables_and_write	routing/do_routing.c	/^int merge_routing_tables_and_write(routing_table_class *routing_table, $/;"	f
+meridional_arc	deltaQ/deltaQ.c	/^double meridional_arc(double bF0, double n, double phi0_rad, double phi_rad)$/;"	f
+min_speed	deltaQ/motion.h	/^  double min_speed, max_speed;$/;"	m	struct:motion_class_s
+minor_version	chanel/io_chanel.h	/^  int minor_version;$/;"	m	struct:__anon14
+minor_version	deltaQ/io.h	/^  int minor_version;$/;"	m	struct:__anon21
+model1_alpha	deltaQ/active_tag.h	/^  float model1_alpha;     \/\/ constant of exponential dependency$/;"	m	struct:__anon25
+model1_alpha	deltaQ/wlan.h	/^  float model1_alpha;      \/\/ constant of exponential dependency$/;"	m	struct:__anon27
+model1_alpha	deltaQ/wlan.h	/^  float model1_alpha;     \/\/ constant of exponential dependency$/;"	m	struct:__anon26
+model1_alpha	deltaQ/wlan.h	/^  float model1_alpha;     \/\/ constant of exponential dependency$/;"	m	struct:__anon28
+model1_alpha	deltaQ/zigbee.h	/^  float model1_alpha;     \/\/ constant of exponential dependency$/;"	m	struct:__anon29
+model2_a	deltaQ/wlan.h	/^  float model2_a[B_RATES_NUMBER]; \/\/ parameter 'a' of the exponential fitting$/;"	m	struct:__anon26
+model2_b	deltaQ/wlan.h	/^  float model2_b[B_RATES_NUMBER]; \/\/ parameter 'b' of the exponential fitting$/;"	m	struct:__anon26
+modulo_difference	chanel/chanel_space.c	/^int modulo_difference(int n1, int n2, int modulo)$/;"	f
+modulo_difference	routing/create_tunnels.sh	/^modulo_difference()$/;"	f
+modulo_difference	routing/destroy_tunnels.sh	/^modulo_difference()$/;"	f
+modulo_difference	routing/qomet_routing.c	/^int modulo_difference(int n1, int n2, int modulo)$/;"	f
+motion_apply	deltaQ/motion.c	/^int motion_apply(motion_class *motion, scenario_class *scenario, $/;"	f
+motion_behavioral	deltaQ/motion.c	/^int motion_behavioral(motion_class *motion, scenario_class *scenario, $/;"	f
+motion_behavioral_object_avoidance	deltaQ/motion.c	/^int motion_behavioral_object_avoidance(motion_class *motion, $/;"	f
+motion_behavioral_path_following	deltaQ/motion.c	/^int motion_behavioral_path_following(motion_class *motion,$/;"	f
+motion_circular	deltaQ/motion.c	/^void motion_circular(motion_class *motion, node_class *node, double time_step)$/;"	f
+motion_class	deltaQ/global.h	/^typedef struct motion_class_s motion_class;$/;"	t	typeref:struct:motion_class_s
+motion_class_s	deltaQ/motion.h	/^struct motion_class_s$/;"	s
+motion_copy	deltaQ/motion.c	/^void motion_copy(motion_class *motion_dest, motion_class *motion_src)$/;"	f
+motion_init	deltaQ/motion.c	/^void motion_init(motion_class *motion, char *node_name, int type,$/;"	f
+motion_init_index	deltaQ/motion.c	/^int motion_init_index(motion_class *motion, scenario_class *scenario)$/;"	f
+motion_linear	deltaQ/motion.c	/^void motion_linear(motion_class *motion, node_class *node, double time_step)$/;"	f
+motion_linear_acc	deltaQ/motion.c	/^void motion_linear_acc(motion_class *motion, coordinate_class acceleration,$/;"	f
+motion_number	deltaQ/scenario.h	/^  int motion_number;$/;"	m	struct:scenario_class_s
+motion_print	deltaQ/motion.c	/^void motion_print(motion_class *motion)$/;"	f
+motion_random_walk	deltaQ/motion.c	/^void motion_random_walk(motion_class *motion, node_class *node, $/;"	f
+motion_rotation	deltaQ/motion.c	/^void motion_rotation(motion_class *motion, node_class *node, double time_step)$/;"	f
+motion_sense	deltaQ/motion.h	/^  int motion_sense;$/;"	m	struct:motion_class_s
+motion_step_divider	deltaQ/xml_scenario.h	/^  double motion_step_divider;$/;"	m	struct:xml_scenario_class_s
+motion_types	deltaQ/motion.c	/^char *motion_types[]={"linear", "circular", "rotation",$/;"	v
+motions	deltaQ/scenario.h	/^  motion_class motions[MAX_MOTIONS];$/;"	m	struct:scenario_class_s
+name	deltaQ/active_tag.h	/^  char name[MAX_STRING];$/;"	m	struct:__anon25
+name	deltaQ/coordinate.h	/^  char name[MAX_STRING];$/;"	m	struct:__anon18
+name	deltaQ/environment.h	/^  char name[MAX_STRING];$/;"	m	struct:environment_class_s
+name	deltaQ/node.h	/^  char name[MAX_STRING];$/;"	m	struct:node_class_s
+name	deltaQ/object.h	/^  char name[MAX_STRING];$/;"	m	struct:object_class_s
+name	deltaQ/wlan.h	/^  char name[MAX_STRING];$/;"	m	struct:__anon26
+name	deltaQ/wlan.h	/^  char name[MAX_STRING];$/;"	m	struct:__anon27
+name	deltaQ/wlan.h	/^  char name[MAX_STRING];$/;"	m	struct:__anon28
+name	deltaQ/zigbee.h	/^  char name[MAX_STRING];$/;"	m	struct:__anon29
+name_hash	deltaQ/environment.h	/^  uint32_t name_hash;$/;"	m	struct:environment_class_s
+name_provided	deltaQ/coordinate.h	/^  int name_provided;$/;"	m	struct:__anon18
+net_rt_iflist	routing/routing.c	/^char * net_rt_iflist(int family, int flags, size_t *lenp)$/;"	f
+new_operating_rate	deltaQ/connection.h	/^  int new_operating_rate;$/;"	m	struct:connection_class_s
+next	chanel/pic16f648.h	/^	uint64_t next;$/;"	m	struct:__anon1
+next_event	chanel/timer.h	/^  uint64_t next_event;$/;"	m	struct:__anon4
+next_event	wireconf/timer.h	/^  uint64_t next_event;$/;"	m	struct:__anon34
+next_hop	routing/qomet_routing.h	/^  int next_hop;$/;"	m	struct:__anon30
+next_hop_id	wireconf/do_wireconf.c	/^  int next_hop_id;$/;"	m	struct:__anon36	file:
+next_hops	routing/qomet_routing.h	/^  int next_hops[MAX_ROUTING_TABLE];$/;"	m	struct:__anon31
+nn2ni	chanel/tag.c	24;"	d	file:
+node_auto_connect	deltaQ/node.c	/^int node_auto_connect(node_class *from_node, scenario_class *scenario)$/;"	f
+node_auto_connect_at	deltaQ/node.c	/^int node_auto_connect_at(node_class *from_node, scenario_class *scenario)$/;"	f
+node_check_valid	deltaQ/node.c	/^int node_check_valid(node_class *nodes, int node_number, $/;"	f
+node_class	deltaQ/global.h	/^typedef struct node_class_s node_class;$/;"	t	typeref:struct:node_class_s
+node_class_s	deltaQ/node.h	/^struct node_class_s$/;"	s
+node_connections	deltaQ/node.c	/^char *node_connections[]={"ad_hoc", "infrastructure", "any"};$/;"	v
+node_copy	deltaQ/node.c	/^void node_copy(node_class *node_dest, node_class * node_src)$/;"	f
+node_index	deltaQ/motion.h	/^  int node_index;$/;"	m	struct:motion_class_s
+node_init	deltaQ/node.c	/^void node_init(node_class *node, char *name, int type, int id, char *ssid,$/;"	f
+node_is_active	routing/generate_aodv.c	/^  int node_is_active[MAX_NODES];$/;"	m	struct:__anon32	file:
+node_matrix	routing/generate_aodv.c	/^  int node_matrix[MAX_NODES][MAX_NODES];$/;"	m	struct:__anon32	file:
+node_name	deltaQ/motion.h	/^  char node_name[MAX_STRING];$/;"	m	struct:motion_class_s
+node_number	deltaQ/scenario.h	/^  int node_number;$/;"	m	struct:scenario_class_s
+node_print	deltaQ/node.c	/^void node_print(node_class *node)$/;"	f
+node_types	deltaQ/node.c	/^char *node_types[]={"regular", "access_point"};$/;"	v
+nodes	deltaQ/scenario.h	/^  node_class nodes[MAX_NODES];$/;"	m	struct:scenario_class_s
+noise_power	deltaQ/environment.h	/^  double noise_power[MAX_SEGMENTS];$/;"	m	struct:environment_class_s
+num_retransmissions	deltaQ/connection.h	/^  double num_retransmissions;$/;"	m	struct:connection_class_s
+num_segments	deltaQ/environment.h	/^  int num_segments;$/;"	m	struct:environment_class_s
+number_nodes	routing/qomet_routing.h	/^  int number_nodes;$/;"	m	struct:__anon31
+object_check_valid	deltaQ/object.c	/^int object_check_valid(object_class *objects, int object_number, $/;"	f
+object_class	deltaQ/global.h	/^typedef struct object_class_s object_class;$/;"	t	typeref:struct:object_class_s
+object_class_s	deltaQ/object.h	/^struct object_class_s$/;"	s
+object_copy	deltaQ/object.c	/^void object_copy(object_class *object_dest, object_class * object_src)$/;"	f
+object_found	deltaQ/xml_jpgis.h	/^  int object_found;$/;"	m	struct:xml_jpgis_class_s
+object_init	deltaQ/object.c	/^void object_init(object_class *object, char *name, char *environment)$/;"	f
+object_init_index	deltaQ/object.c	/^int object_init_index(object_class *object, scenario_class *scenario)$/;"	f
+object_init_rectangle	deltaQ/object.c	/^void object_init_rectangle(object_class *object, char *name, char *environment,$/;"	f
+object_intersect	deltaQ/object.c	/^int object_intersect(coordinate_class *start, coordinate_class *end, $/;"	f
+object_j	deltaQ/xml_jpgis.h	/^  int object_j;$/;"	m	struct:xml_jpgis_class_s
+object_number	deltaQ/scenario.h	/^  int object_number;$/;"	m	struct:scenario_class_s
+object_number	deltaQ/xml_jpgis.h	/^  int object_number;$/;"	m	struct:xml_jpgis_class_s
+object_print	deltaQ/object.c	/^void object_print(object_class *object)$/;"	f
+object_print_blh	deltaQ/object.c	/^void object_print_blh(object_class *object)$/;"	f
+object_types	deltaQ/object.c	/^char *object_types[]={"building", "road"};$/;"	v
+objects	deltaQ/scenario.h	/^  object_class objects[MAX_OBJECTS];$/;"	m	struct:scenario_class_s
+objects	deltaQ/xml_jpgis.h	/^  object_class *objects;$/;"	m	struct:xml_jpgis_class_s
+octet	wireconf/wireconf.c	/^  uint8_t octet[4];$/;"	m	union:__anon35	file:
+operating_rate	deltaQ/connection.h	/^  int operating_rate;$/;"	m	struct:connection_class_s
+operating_rates	deltaQ/active_tag.h	/^  double operating_rates[1];  \/\/ active tag operating data rate$/;"	m	struct:__anon25
+orinoco	deltaQ/wlan.c	/^parameters_802_11b orinoco =$/;"	v
+output_sleep_time	chanel/chanel.h	/^  float output_sleep_time;$/;"	m	struct:__anon10
+output_thread	chanel/chanel.h	/^  pthread_t output_thread;$/;"	m	struct:__anon10
+packet	chanel/tag_public.h	/^	condPacket packet;$/;"	m	struct:__anon12
+packet_size	deltaQ/connection.h	/^  int packet_size;$/;"	m	struct:connection_class_s
+parameters_802_11a	deltaQ/wlan.h	/^} parameters_802_11a;$/;"	t	typeref:struct:__anon28
+parameters_802_11b	deltaQ/wlan.h	/^} parameters_802_11b;$/;"	t	typeref:struct:__anon26
+parameters_802_11g	deltaQ/wlan.h	/^} parameters_802_11g;$/;"	t	typeref:struct:__anon27
+parameters_active_tag	deltaQ/active_tag.h	/^} parameters_active_tag;$/;"	t	typeref:struct:__anon25
+parameters_zigbee	deltaQ/zigbee.h	/^} parameters_zigbee;$/;"	t	typeref:struct:__anon29
+parent	chanel/tag_private.h	/^	localSpaceList *parent;$/;"	m	struct:__anon17
+parse_svn_revision	qomet.c	/^long int parse_svn_revision(char *svn_revision_str)$/;"	f
+payload	chanel/tag_public.h	/^	uint8_t payload[8];$/;"	m	struct:__anon11
+pc	chanel/pic16f648.h	/^	uint16_t pc;$/;"	m	struct:__anon1
+pic16f648Alloc	chanel/libpic16f648.c	/^pic16f648Alloc(uint32_t Hz)$/;"	f
+pic16f648Emul	chanel/libpic16f648.c	/^pic16f648Emul(void *arg)$/;"	f	file:
+pic16f648ExecOp	chanel/libpic16f648.c	/^pic16f648ExecOp(pic16f648_t *p)$/;"	f	file:
+pic16f648LoadHex	chanel/libpic16f648.c	/^pic16f648LoadHex(pic16f648_t *p, FILE *fd)$/;"	f
+pic16f648Lock	chanel/libpic16f648.c	/^pic16f648Lock(pic16f648_t *p)$/;"	f	file:
+pic16f648OpAddlw	chanel/libpic16f648.c	/^pic16f648OpAddlw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpAddwf	chanel/libpic16f648.c	/^pic16f648OpAddwf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpAndlw	chanel/libpic16f648.c	/^pic16f648OpAndlw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpAndwf	chanel/libpic16f648.c	/^pic16f648OpAndwf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpBcf	chanel/libpic16f648.c	/^pic16f648OpBcf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpBsf	chanel/libpic16f648.c	/^pic16f648OpBsf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpBtfsc	chanel/libpic16f648.c	/^pic16f648OpBtfsc(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpBtfss	chanel/libpic16f648.c	/^pic16f648OpBtfss(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpCall	chanel/libpic16f648.c	/^pic16f648OpCall(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpClrf	chanel/libpic16f648.c	/^pic16f648OpClrf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpClrw	chanel/libpic16f648.c	/^pic16f648OpClrw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpClrwdt	chanel/libpic16f648.c	/^pic16f648OpClrwdt(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpComf	chanel/libpic16f648.c	/^pic16f648OpComf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpDecf	chanel/libpic16f648.c	/^pic16f648OpDecf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpDecfsz	chanel/libpic16f648.c	/^pic16f648OpDecfsz(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpGoto	chanel/libpic16f648.c	/^pic16f648OpGoto(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpIncf	chanel/libpic16f648.c	/^pic16f648OpIncf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpIncfsz	chanel/libpic16f648.c	/^pic16f648OpIncfsz(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpIorlw	chanel/libpic16f648.c	/^pic16f648OpIorlw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpIorwf	chanel/libpic16f648.c	/^pic16f648OpIorwf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpMovf	chanel/libpic16f648.c	/^pic16f648OpMovf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpMovlw	chanel/libpic16f648.c	/^pic16f648OpMovlw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpMovwf	chanel/libpic16f648.c	/^pic16f648OpMovwf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpNop	chanel/libpic16f648.c	/^pic16f648OpNop(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpRetfie	chanel/libpic16f648.c	/^pic16f648OpRetfie(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpRetlw	chanel/libpic16f648.c	/^pic16f648OpRetlw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpReturn	chanel/libpic16f648.c	/^pic16f648OpReturn(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpRlf	chanel/libpic16f648.c	/^pic16f648OpRlf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpRrf	chanel/libpic16f648.c	/^pic16f648OpRrf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpSleep	chanel/libpic16f648.c	/^pic16f648OpSleep(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpSublw	chanel/libpic16f648.c	/^pic16f648OpSublw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpSubwf	chanel/libpic16f648.c	/^pic16f648OpSubwf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpSwapf	chanel/libpic16f648.c	/^pic16f648OpSwapf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpXorlw	chanel/libpic16f648.c	/^pic16f648OpXorlw(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648OpXorwf	chanel/libpic16f648.c	/^pic16f648OpXorwf(pic16f648_t *p, uint16_t op)$/;"	f	file:
+pic16f648ProcInt	chanel/libpic16f648.c	/^pic16f648ProcInt(pic16f648_t *p)$/;"	f	file:
+pic16f648Release	chanel/libpic16f648.c	/^pic16f648Release(pic16f648_t *p)$/;"	f
+pic16f648SetReg	chanel/libpic16f648.c	/^pic16f648SetReg(pic16f648_t *p, uint16_t a, uint8_t v)$/;"	f	file:
+pic16f648ShowInfo	chanel/libpic16f648.c	/^pic16f648ShowInfo(pic16f648_t *p)$/;"	f
+pic16f648Start	chanel/libpic16f648.c	/^pic16f648Start(pic16f648_t *p)$/;"	f
+pic16f648Unlock	chanel/libpic16f648.c	/^pic16f648Unlock(pic16f648_t *p)$/;"	f	file:
+pic16f648Wait	chanel/libpic16f648.c	/^pic16f648Wait(pic16f648_t *p)$/;"	f	file:
+pic16f648_t	chanel/pic16f648.h	/^} pic16f648_t;$/;"	t	typeref:struct:__anon1
+pic16f684ReadReg	chanel/libpic16f648.c	/^pic16f684ReadReg(pic16f648_t *p, uint16_t a)$/;"	f	file:
+pipe_data_class	chanel/chanel.h	/^} pipe_data_class;$/;"	t	typeref:struct:__anon9
+pipe_name	chanel/chanel.h	/^  char pipe_name[MAX_STRING];$/;"	m	struct:__anon10
+point_in_object	deltaQ/environment.c	/^int point_in_object(double xn, double yn, double xo1, double yo1, $/;"	f
+point_in_object3d	deltaQ/environment.c	/^int point_in_object3d(double xn, double yn, double zn, object_class *object)$/;"	f
+point_on_segment	deltaQ/environment.c	/^int point_on_segment(double x, double y, double sx1, double sy1, $/;"	f
+position	deltaQ/node.h	/^  coordinate_class position;$/;"	m	struct:node_class_s
+presc0	chanel/pic16f648.h	/^	uint8_t presc0;$/;"	m	struct:__anon1
+presc1	chanel/pic16f648.h	/^	uint8_t presc1;$/;"	m	struct:__anon1
+presc2	chanel/pic16f648.h	/^	uint8_t presc2;$/;"	m	struct:__anon1
+print_802_11a_parameters	deltaQ/wlan.c	/^void print_802_11a_parameters(parameters_802_11a *params)$/;"	f
+print_802_11b_parameters	deltaQ/wlan.c	/^void print_802_11b_parameters(parameters_802_11b *params)$/;"	f
+print_802_11g_parameters	deltaQ/wlan.c	/^void print_802_11g_parameters(parameters_802_11g *params)$/;"	f
+print_pipe	wireconf/wireconf.c	/^void print_pipe(struct dn_pipe *pipe)$/;"	f
+print_rule	wireconf/wireconf.c	/^void print_rule(struct ip_fw *rule)$/;"	f
+print_zigbee_parameters	deltaQ/zigbee.c	/^void print_zigbee_parameters(parameters_zigbee *params)$/;"	f
+pstsc2	chanel/pic16f648.h	/^	uint8_t pstsc2;$/;"	m	struct:__anon1
+qomet_param	wireconf/do_wireconf.c	/^} qomet_param;$/;"	t	typeref:struct:__anon36	file:
+rand_0_1	chanel/chanel.for-rune.c	/^double rand_0_1()$/;"	f
+rand_0_1	deltaQ/generic.c	/^double rand_0_1()$/;"	f
+rand_min_max	deltaQ/generic.c	/^double rand_min_max(double min, double max)$/;"	f
+randn	deltaQ/generic.c	/^double randn(double mean, double stdev)$/;"	f
+rcvbuf	chanel/pic16f648.h	/^	uint8_t rcvbuf[8];$/;"	m	struct:__anon1
+rcvscnt	chanel/pic16f648.h	/^	int32_t rcvscnt;$/;"	m	struct:__anon1
+rcvstat	chanel/pic16f648.h	/^	enum stat rcvstat;$/;"	m	struct:__anon1	typeref:enum:__anon1::stat
+rdtsc	chanel/pic16f648.h	18;"	d
+rdtsc	chanel/timer.h	73;"	d
+rdtsc	wireconf/timer.h	74;"	d
+rdtsc_HZ	chanel/chanel_space.c	/^  unsigned int rdtsc_HZ;$/;"	m	struct:__anon13	file:
+rdtsc_start_time	chanel/chanel_space.c	/^  uint64_t rdtsc_time1, rdtsc_time2, rdtsc_start_time;$/;"	m	struct:__anon13	file:
+rdtsc_time1	chanel/chanel_space.c	/^  uint64_t rdtsc_time1, rdtsc_time2, rdtsc_start_time;$/;"	m	struct:__anon13	file:
+rdtsc_time2	chanel/chanel_space.c	/^  uint64_t rdtsc_time1, rdtsc_time2, rdtsc_start_time;$/;"	m	struct:__anon13	file:
+read_finished	chanel/chanel_space.c	/^  int read_finished;$/;"	m	struct:__anon13	file:
+read_settings	wireconf/do_wireconf.c	/^int read_settings(char *path, in_addr_t *p, int p_size)$/;"	f
+received_data_count	chanel/do_chanel.c	/^int received_data_count=0;$/;"	v
+record_number	chanel/io_chanel.h	/^  int record_number;$/;"	m	struct:__anon15
+record_number	deltaQ/io.h	/^  int record_number;$/;"	m	struct:__anon22
+reg	chanel/pic16f648.h	/^	} reg;$/;"	m	struct:__anon1	typeref:union:__anon1::__anon2
+reserved	chanel/io_chanel.h	/^  char reserved[4];$/;"	m	struct:__anon14
+reserved	deltaQ/io.h	/^  char reserved[4];$/;"	m	struct:__anon21
+reset_time	chanel/chanel_space.c	/^  int reset_time;$/;"	m	struct:__anon13	file:
+resp	chanel/tag_private.h	/^	tagresp resp;$/;"	m	struct:__anon17
+rotation_angle_horizontal	deltaQ/motion.h	/^  double rotation_angle_horizontal;$/;"	m	struct:motion_class_s
+rotation_angle_vertical	deltaQ/motion.h	/^  double rotation_angle_vertical;$/;"	m	struct:motion_class_s
+routing_rule_check_valid	routing/route_xml.c	/^int routing_rule_check_valid(routing_rule_class *routing_rule)$/;"	f
+routing_rule_class	routing/qomet_routing.h	/^} routing_rule_class;$/;"	t	typeref:struct:__anon30
+routing_rule_print	routing/qomet_routing.c	/^void routing_rule_print(routing_rule_class *routing_rule)$/;"	f
+routing_table	routing/route_xml.h	/^  routing_table_class routing_table;$/;"	m	struct:__anon33
+routing_table_add_rule	routing/qomet_routing.c	/^int routing_table_add_rule(routing_table_class *routing_table, $/;"	f
+routing_table_add_rulec	routing/qomet_routing.c	/^int routing_table_add_rulec(routing_table_class *routing_table, $/;"	f
+routing_table_class	routing/qomet_routing.h	/^} routing_table_class;$/;"	t	typeref:struct:__anon31
+routing_table_clear	routing/qomet_routing.c	/^void routing_table_clear(routing_table_class *routing_table)$/;"	f
+routing_table_copy	routing/qomet_routing.c	/^void routing_table_copy(routing_table_class *routing_table_dst, $/;"	f
+routing_table_copy_configuration	routing/qomet_routing.c	/^void routing_table_copy_configuration(routing_table_class *routing_table_dst, $/;"	f
+routing_table_find_rule	routing/qomet_routing.c	/^int routing_table_find_rule(routing_table_class *routing_table, $/;"	f
+routing_table_init	routing/qomet_routing.c	/^int routing_table_init(routing_table_class *routing_table, int number_nodes,$/;"	f
+routing_table_print	routing/qomet_routing.c	/^void routing_table_print(routing_table_class *routing_table)$/;"	f
+routing_table_unwrite	routing/qomet_routing.c	/^int routing_table_unwrite(routing_table_class *routing_table)$/;"	f
+routing_table_unwrite_from_node	routing/qomet_routing.c	/^int routing_table_unwrite_from_node(routing_table_class *routing_table, $/;"	f
+routing_table_unwrite_rule	routing/qomet_routing.c	/^int routing_table_unwrite_rule(routing_table_class *routing_table, $/;"	f
+routing_table_write	routing/qomet_routing.c	/^int routing_table_write(routing_table_class *routing_table)$/;"	f
+routing_table_write2file	routing/generate_aodv.c	/^int routing_table_write2file(routing_table_class *routing_table, double time, char *base_name, char *routing_table_file_name)$/;"	f
+routing_table_write_from_node	routing/qomet_routing.c	/^int routing_table_write_from_node(routing_table_class *routing_table, $/;"	f
+routing_table_write_rule	routing/qomet_routing.c	/^int routing_table_write_rule(routing_table_class *routing_table, $/;"	f
+routing_tables_are_equal	routing/qomet_routing.c	/^int routing_tables_are_equal(routing_table_class *routing_table1, $/;"	f
+rtctl	routing/routing.c	/^int rtctl(char *daddr,	\/* destination IP address *\/$/;"	f
+rtctl2	routing/routing.c	/^int rtctl2(uint32_t *daddr,	\/* destination IP address *\/$/;"	f
+rtctl_add	routing/routing.c	/^int rtctl_add(char *daddr,	\/* destination IP address *\/$/;"	f
+rtctl_delete	routing/routing.c	/^int rtctl_delete(char *daddr,	\/* destination IP address *\/$/;"	f
+rtm_seq	routing/routing.c	/^static int rtm_seq = 0;$/;"	v	file:
+running	chanel/pic16f648.h	/^	int running;$/;"	m	struct:__anon1
+running	chanel/tag_private.h	/^	int running;$/;"	m	struct:__anon17
+s_node	deltaQ/active_tag.c	/^parameters_active_tag s_node =$/;"	v
+scenario	deltaQ/xml_scenario.h	/^  scenario_class scenario;$/;"	m	struct:xml_scenario_class_s
+scenario_add_connection	deltaQ/scenario.c	/^void *scenario_add_connection(scenario_class *scenario, $/;"	f
+scenario_add_environment	deltaQ/scenario.c	/^void *scenario_add_environment(scenario_class *scenario, $/;"	f
+scenario_add_motion	deltaQ/scenario.c	/^void *scenario_add_motion(scenario_class *scenario, motion_class *motion)$/;"	f
+scenario_add_node	deltaQ/scenario.c	/^void *scenario_add_node(scenario_class *scenario, node_class *node)$/;"	f
+scenario_add_object	deltaQ/scenario.c	/^void *scenario_add_object(scenario_class *scenario, object_class *object)$/;"	f
+scenario_auto_connect_nodes	deltaQ/scenario.c	/^int scenario_auto_connect_nodes(scenario_class *scenario)$/;"	f
+scenario_auto_connect_nodes_at	deltaQ/scenario.c	/^int scenario_auto_connect_nodes_at(scenario_class *scenario)$/;"	f
+scenario_class	deltaQ/global.h	/^typedef struct scenario_class_s scenario_class;$/;"	t	typeref:struct:scenario_class_s
+scenario_class_s	deltaQ/scenario.h	/^struct scenario_class_s$/;"	s
+scenario_deltaQ	deltaQ/scenario.c	/^int scenario_deltaQ(scenario_class *scenario)$/;"	f
+scenario_init	deltaQ/scenario.c	/^void scenario_init(scenario_class *scenario)$/;"	f
+scenario_init_state	deltaQ/scenario.c	/^int scenario_init_state(scenario_class *scenario, int jpgis_filename_provided,$/;"	f
+scenario_merge_objects	deltaQ/scenario.c	/^int scenario_merge_objects(scenario_class *scenario, int object_i1, $/;"	f
+scenario_print	deltaQ/scenario.c	/^void scenario_print(scenario_class *scenario)$/;"	f
+scenario_remove_object	deltaQ/scenario.c	/^int scenario_remove_object(scenario_class *scenario, int object_i)$/;"	f
+scenario_reset_node_interference_flag	deltaQ/scenario.c	/^void scenario_reset_node_interference_flag(scenario_class *scenario)$/;"	f
+scenario_try_merge_object	deltaQ/scenario.c	/^int scenario_try_merge_object(scenario_class *scenario, int merge_object_i)$/;"	f
+segment_in_object	deltaQ/environment.c	/^int segment_in_object(double xn1, double yn1, double xn2, double yn2,$/;"	f
+segment_in_object3d	deltaQ/environment.c	/^int segment_in_object3d(double xn1, double yn1, double zn1, $/;"	f
+segment_intersect	deltaQ/environment.c	/^int segment_intersect(double xn1, double yn1, double xn2, double yn2,$/;"	f
+sender	chanel/pic16f648.h	/^	pthread_t sender;$/;"	m	struct:__anon1
+sent_data_count	chanel/do_chanel.c	/^int sent_data_count=0;$/;"	v
+short_options	qomet.c	/^static char *short_options = "hvltbnmso:d";$/;"	v	file:
+sigma	deltaQ/environment.h	/^  double sigma[MAX_SEGMENTS];$/;"	m	struct:environment_class_s
+signature	chanel/io_chanel.h	/^  char signature[4];$/;"	m	struct:__anon14
+signature	deltaQ/io.h	/^  char signature[4];$/;"	m	struct:__anon21
+sndbuf	chanel/pic16f648.h	/^	uint8_t sndbuf[8];$/;"	m	struct:__anon1
+sndcnt	chanel/pic16f648.h	/^	int sndcnt;$/;"	m	struct:__anon1
+sndstat	chanel/pic16f648.h	/^	enum stat sndstat;$/;"	m	struct:__anon1	typeref:enum:__anon1::stat
+sock_masktop	routing/routing.c	/^char *sock_masktop(struct sockaddr *sa, socklen_t salen)$/;"	f
+sock_ntop_host	routing/routing.c	/^char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen)$/;"	f
+sock_ntop_host	wireconf/routing_info.c	/^char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen)$/;"	f
+source	chanel/chanel.h	/^  int source;$/;"	m	struct:__anon9
+sp	chanel/pic16f648.h	/^	uint32_t sp;$/;"	m	struct:__anon1
+speed	deltaQ/motion.h	/^  coordinate_class speed;$/;"	m	struct:motion_class_s
+speed_from_destination	deltaQ/motion.h	/^  int speed_from_destination;$/;"	m	struct:motion_class_s
+ssid	deltaQ/node.h	/^  char ssid[MAX_STRING];$/;"	m	struct:node_class_s
+stack	chanel/pic16f648.h	/^	uint16_t stack[8];$/;"	m	struct:__anon1
+stack	deltaQ/xml_scenario.h	/^  stack_class stack;$/;"	m	struct:xml_scenario_class_s
+stack_class	deltaQ/stack.h	/^} stack_class;$/;"	t	typeref:struct:__anon20
+stack_init	deltaQ/stack.c	/^void stack_init(stack_class *stack)$/;"	f
+stack_is_empty	deltaQ/stack.c	/^int stack_is_empty(stack_class *stack)$/;"	f
+stack_is_full	deltaQ/stack.c	/^int stack_is_full(stack_class *stack)$/;"	f
+stack_pop	deltaQ/stack.c	/^element_class *stack_pop(stack_class *stack)$/;"	f
+stack_push	deltaQ/stack.c	/^int stack_push(stack_class *stack, void *element, int element_type)$/;"	f
+stack_top	deltaQ/stack.c	/^element_class *stack_top(stack_class *stack)$/;"	f
+standard	deltaQ/connection.h	/^  int standard;$/;"	m	struct:connection_class_s
+start_element	deltaQ/xml_scenario.c	/^static void XMLCALL start_element(void *data, const char *element, $/;"	f	file:
+start_element	routing/route_xml.c	/^static void XMLCALL start_element(void *data, const char *element, $/;"	f	file:
+start_time	deltaQ/motion.h	/^  double start_time, stop_time;$/;"	m	struct:motion_class_s
+start_time	deltaQ/xml_scenario.h	/^  double start_time;$/;"	m	struct:xml_scenario_class_s
+stat	chanel/pic16f648.h	/^enum stat {NODATA, PENDING, CONFLICT, READY};$/;"	g
+state_changed	deltaQ/io.h	/^  int state_changed[MAX_CONNECTIONS];$/;"	m	struct:__anon24
+status	chanel/tag_public.h	/^	int status;$/;"	m	struct:__anon12
+step	deltaQ/xml_scenario.h	/^  double step;$/;"	m	struct:xml_scenario_class_s
+step_count	chanel/chanel_space.c	/^  long int step_count;$/;"	m	struct:__anon13	file:
+step_end_time	chanel/chanel_space.c	/^  double step_start_time, step_end_time;$/;"	m	struct:__anon13	file:
+step_start_time	chanel/chanel_space.c	/^  double step_start_time, step_end_time;$/;"	m	struct:__anon13	file:
+stop_time	deltaQ/motion.h	/^  double start_time, stop_time;$/;"	m	struct:motion_class_s
+string_hash	deltaQ/generic.c	/^uint32_t string_hash(char *key, size_t key_len)$/;"	f
+subminor_version	chanel/io_chanel.h	/^  int subminor_version;$/;"	m	struct:__anon14
+subminor_version	deltaQ/io.h	/^  int subminor_version;$/;"	m	struct:__anon21
+svn_revision	chanel/io_chanel.h	/^  int svn_revision;$/;"	m	struct:__anon14
+svn_revision	deltaQ/io.h	/^  int svn_revision;$/;"	m	struct:__anon21
+table_size	routing/qomet_routing.h	/^  int table_size;$/;"	m	struct:__anon31
+tag_fin	chanel/tag.c	/^tag_fin(void *p)$/;"	f
+tag_init	chanel/tag.c	/^tag_init(int gsid)$/;"	f
+tag_read	chanel/tag.c	/^tag_read(void *p, void *a)$/;"	f
+tag_sender	chanel/tag.c	/^tag_sender(void *p)$/;"	f
+tag_step	chanel/tag.c	/^tag_step(void *p)$/;"	f
+tag_write	chanel/tag.c	/^tag_write(void *p, void *a)$/;"	f
+tagframe	chanel/tag_public.h	/^} tagframe;$/;"	t	typeref:struct:__anon11
+tagresp	chanel/tag_public.h	/^} tagresp;$/;"	t	typeref:struct:__anon12
+tagstruct	chanel/tag_private.h	/^} tagstruct;$/;"	t	typeref:struct:__anon17
+thread	chanel/pic16f648.h	/^	pthread_t thread;$/;"	m	struct:__anon1
+through_environment	deltaQ/connection.h	/^  char through_environment[MAX_STRING];$/;"	m	struct:connection_class_s
+through_environment_index	deltaQ/connection.h	/^  int through_environment_index;$/;"	m	struct:connection_class_s
+tick	chanel/pic16f648.h	/^	uint32_t tick;$/;"	m	struct:__anon1
+tid	chanel/chanel_space.c	/^  int tid[NUMBER_NODES];$/;"	m	struct:__anon13	file:
+time	chanel/chanel.h	/^  double time;$/;"	m	struct:__anon6
+time	chanel/chanel_space.c	/^  float time, bandwidth[NUMBER_NODES], delay[NUMBER_NODES], $/;"	m	struct:__anon13	file:
+time	chanel/io_chanel.h	/^  float time;$/;"	m	struct:__anon15
+time	deltaQ/io.h	/^  float time;$/;"	m	struct:__anon22
+time	wireconf/do_wireconf.c	/^  float time;$/;"	m	struct:__anon36	file:
+time_record_number	chanel/io_chanel.h	/^  long int time_record_number;$/;"	m	struct:__anon14
+time_record_number	deltaQ/io.h	/^  long int time_record_number;$/;"	m	struct:__anon21
+time_records_read	chanel/chanel_space.c	/^  long int time_records_read;$/;"	m	struct:__anon13	file:
+time_since_destination_reached	deltaQ/motion.h	/^  double time_since_destination_reached;$/;"	m	struct:motion_class_s
+timer_free	chanel/timer.c	/^void timer_free(timer_handle *handle)$/;"	f
+timer_free	wireconf/timer.c	/^void timer_free(timer_handle *handle)$/;"	f
+timer_handle	chanel/timer.h	/^} timer_handle;$/;"	t	typeref:struct:__anon4
+timer_handle	wireconf/timer.h	/^} timer_handle;$/;"	t	typeref:struct:__anon34
+timer_init	chanel/timer.c	/^timer_handle *timer_init(void)$/;"	f
+timer_init	wireconf/timer.c	/^timer_handle *timer_init(void)$/;"	f
+timer_reset	chanel/timer.c	/^void timer_reset(timer_handle *handle)$/;"	f
+timer_reset	wireconf/timer.c	/^void timer_reset(timer_handle *handle)$/;"	f
+timer_wait	chanel/timer.c	/^int timer_wait(timer_handle *handle, uint64_t time_in_us)$/;"	f
+timer_wait	wireconf/timer.c	/^int timer_wait(timer_handle *handle, uint64_t time_in_us)$/;"	f
+timevalSub	chanel/tag.c	/^timevalSub(struct timeval *a, struct timeval *b)$/;"	f
+tmr2eq	chanel/pic16f648.h	/^	uint16_t tmr2eq;$/;"	m	struct:__anon1
+to	chanel/chanel_space.c	/^  int from, to;$/;"	m	struct:__anon13	file:
+to_node	chanel/chanel.h	/^  int to_node;$/;"	m	struct:__anon6
+to_node	chanel/io_chanel.h	/^  int to_node;$/;"	m	struct:__anon16
+to_node	deltaQ/connection.h	/^  char to_node[MAX_STRING];$/;"	m	struct:connection_class_s
+to_node	deltaQ/io.h	/^  int to_node;$/;"	m	struct:__anon23
+to_node	routing/qomet_routing.h	/^  int to_node;$/;"	m	struct:__anon30
+to_node_index	deltaQ/connection.h	/^  int to_node_index;$/;"	m	struct:connection_class_s
+to_nodes	routing/qomet_routing.h	/^  int to_nodes[MAX_ROUTING_TABLE];$/;"	m	struct:__anon31
+top	deltaQ/stack.h	/^  int top;$/;"	m	struct:__anon20
+tunnel_ip_head	routing/qomet_routing.h	/^  char tunnel_ip_head[MAX_IP_ADDRESS_LENGTH];$/;"	m	struct:__anon31
+type	deltaQ/environment.h	/^  char type[MAX_STRING];\/\/ indoor\/outdoor; not used yet$/;"	m	struct:environment_class_s
+type	deltaQ/motion.h	/^  int type;$/;"	m	struct:motion_class_s
+type	deltaQ/node.h	/^  int type;$/;"	m	struct:node_class_s
+type	deltaQ/object.h	/^  int type;$/;"	m	struct:object_class_s
+usage	qomet.c	/^static void usage(FILE *f)$/;"	f	file:
+usage	routing/routing_tester.c	/^void usage(char *argv0)$/;"	f
+usage	wireconf/do_wireconf.c	/^void usage(char *argv0)$/;"	f
+use_distance_model	deltaQ/active_tag.h	/^  int use_distance_model;     \/\/ set to TRUE if distance model is used, $/;"	m	struct:__anon25
+use_model1	deltaQ/wlan.h	/^  int use_model1;          \/\/ set to TRUE if model 1 is used, FALSE otherwise$/;"	m	struct:__anon27
+use_model1	deltaQ/wlan.h	/^  int use_model1;         \/\/ set to TRUE if model 1 is used, FALSE otherwise$/;"	m	struct:__anon26
+use_model1	deltaQ/wlan.h	/^  int use_model1;         \/\/ set to TRUE if model 1 is used, FALSE otherwise$/;"	m	struct:__anon28
+use_model1	deltaQ/zigbee.h	/^  int use_model1;         \/\/ set to TRUE if model 1 is used, FALSE otherwise$/;"	m	struct:__anon29
+use_model2	deltaQ/wlan.h	/^  int use_model2;         \/\/ set to TRUE if model 2 is used, FALSE otherwise$/;"	m	struct:__anon26
+variable_delay	deltaQ/connection.h	/^  double variable_delay;$/;"	m	struct:connection_class_s
+velocity	deltaQ/motion.h	/^  double velocity;$/;"	m	struct:motion_class_s
+vertex_number	deltaQ/object.h	/^  int vertex_number;$/;"	m	struct:object_class_s
+vertices	deltaQ/object.h	/^  coordinate_class vertices[MAX_VERTICES];$/;"	m	struct:object_class_s
+walk_time	deltaQ/motion.h	/^  double walk_time, current_walk_time;$/;"	m	struct:motion_class_s
+wlan_bandwidth	deltaQ/wlan.c	/^int wlan_bandwidth(connection_class *connection, $/;"	f
+wlan_connection_update	deltaQ/wlan.c	/^int wlan_connection_update(connection_class *connection, $/;"	f
+wlan_delay_jitter	deltaQ/wlan.c	/^int wlan_delay_jitter(connection_class *connection, $/;"	f
+wlan_fer	deltaQ/wlan.c	/^int wlan_fer(connection_class *connection, scenario_class *scenario, $/;"	f
+wlan_get_node_adapter	deltaQ/wlan.c	/^void *wlan_get_node_adapter(connection_class *connection, node_class *node)$/;"	f
+wlan_interference	deltaQ/wlan.c	/^int wlan_interference(connection_class *connection, $/;"	f
+wlan_loss_rate	deltaQ/wlan.c	/^int wlan_loss_rate(connection_class *connection, $/;"	f
+wlan_node_update_Pr0	deltaQ/wlan.c	/^void wlan_node_update_Pr0(node_class *node)$/;"	f
+wlan_operating_rate	deltaQ/wlan.c	/^int wlan_operating_rate(connection_class *connection, $/;"	f
+wlan_ppdu_duration	deltaQ/wlan.c	/^int wlan_ppdu_duration(connection_class *connection, double *ppdu_duration,$/;"	f
+wlan_retransmissions	deltaQ/wlan.c	/^int wlan_retransmissions(connection_class *connection, $/;"	f
+word	wireconf/wireconf.c	/^  uint32_t word;$/;"	m	union:__anon35	file:
+xml_buffer	deltaQ/xml_jpgis.h	/^char xml_buffer[BUFFER_SIZE];$/;"	v
+xml_buffer	deltaQ/xml_scenario.h	/^char xml_buffer[BUFFER_SIZE];$/;"	v
+xml_buffer	routing/route_xml.h	/^char xml_buffer[BUFFER_SIZE];$/;"	v
+xml_connection_init	deltaQ/xml_scenario.c	/^int xml_connection_init(connection_class *connection, const char **attributes)$/;"	f
+xml_depth	deltaQ/xml_jpgis.h	/^int xml_depth;$/;"	v
+xml_depth	deltaQ/xml_scenario.h	/^int xml_depth;$/;"	v
+xml_depth	routing/route_xml.h	/^int xml_depth;$/;"	v
+xml_environment_init	deltaQ/xml_scenario.c	/^int xml_environment_init(environment_class *environment, $/;"	f
+xml_jpgis_class	deltaQ/global.h	/^typedef struct xml_jpgis_class_s xml_jpgis_class;$/;"	t	typeref:struct:xml_jpgis_class_s
+xml_jpgis_class_s	deltaQ/xml_jpgis.h	/^struct xml_jpgis_class_s$/;"	s
+xml_jpgis_element_text	deltaQ/xml_jpgis.c	/^void XMLCALL xml_jpgis_element_text(void *user_data, $/;"	f
+xml_jpgis_end_element	deltaQ/xml_jpgis.c	/^static void XMLCALL xml_jpgis_end_element(void *user_data, const char *el)$/;"	f	file:
+xml_jpgis_init	deltaQ/xml_jpgis.c	/^void xml_jpgis_init(xml_jpgis_class *xml_jpgis, object_class *objects,$/;"	f
+xml_jpgis_load_objects	deltaQ/xml_jpgis.c	/^int xml_jpgis_load_objects(object_class *objects, int object_number,$/;"	f
+xml_jpgis_start_element	deltaQ/xml_jpgis.c	/^static void XMLCALL xml_jpgis_start_element(void *user_data, $/;"	f	file:
+xml_motion_init	deltaQ/xml_scenario.c	/^int xml_motion_init(motion_class *motion, const char **attributes, $/;"	f
+xml_node_init	deltaQ/xml_scenario.c	/^int xml_node_init(node_class *node, const char **attributes, $/;"	f
+xml_object_init	deltaQ/xml_scenario.c	/^int xml_object_init(object_class *object, const char **attributes,$/;"	f
+xml_parse_error	deltaQ/xml_scenario.h	/^  int xml_parse_error;$/;"	m	struct:xml_scenario_class_s
+xml_parse_error	routing/route_xml.h	/^  int xml_parse_error;$/;"	m	struct:__anon33
+xml_routing_rule_init	routing/route_xml.c	/^int xml_routing_rule_init(routing_rule_class *routing_rule, $/;"	f
+xml_routing_table_class	routing/route_xml.h	/^} xml_routing_table_class;$/;"	t	typeref:struct:__anon33
+xml_routing_table_init	routing/route_xml.c	/^int xml_routing_table_init(xml_routing_table_class *xml_routing_table, $/;"	f
+xml_routing_table_parse	routing/route_xml.c	/^int xml_routing_table_parse(FILE *scenario_file, $/;"	f
+xml_routing_table_print	routing/route_xml.c	/^void xml_routing_table_print(xml_routing_table_class *xml_routing_table)$/;"	f
+xml_scenario_class	deltaQ/global.h	/^typedef struct xml_scenario_class_s xml_scenario_class;$/;"	t	typeref:struct:xml_scenario_class_s
+xml_scenario_class_s	deltaQ/xml_scenario.h	/^struct xml_scenario_class_s$/;"	s
+xml_scenario_init	deltaQ/xml_scenario.c	/^int xml_scenario_init(xml_scenario_class *xml_scenario, $/;"	f
+xml_scenario_parse	deltaQ/xml_scenario.c	/^int xml_scenario_parse(FILE *scenario_file, xml_scenario_class *xml_scenario)$/;"	f
+xml_scenario_print	deltaQ/xml_scenario.c	/^void xml_scenario_print(xml_scenario_class *xml_scenario)$/;"	f
+xyz2blh	deltaQ/deltaQ.c	/^int xyz2blh(const coordinate_class *point_xyz, coordinate_class *point_blh)$/;"	f
+zero	chanel/timer.h	/^  uint64_t zero;$/;"	m	struct:__anon4
+zero	wireconf/timer.h	/^  uint64_t zero;$/;"	m	struct:__anon34
+zigbee_bandwidth	deltaQ/zigbee.c	/^int zigbee_bandwidth(connection_class *connection, $/;"	f
+zigbee_compute_channel_interference	deltaQ/zigbee.c	/^int zigbee_compute_channel_interference(connection_class *connection, $/;"	f
+zigbee_connection_update	deltaQ/zigbee.c	/^int zigbee_connection_update(connection_class *connection, $/;"	f
+zigbee_delay_jitter	deltaQ/zigbee.c	/^int zigbee_delay_jitter(connection_class *connection, $/;"	f
+zigbee_fer	deltaQ/zigbee.c	/^int zigbee_fer(connection_class *connection, scenario_class *scenario, $/;"	f
+zigbee_get_node_adapter	deltaQ/zigbee.c	/^void *zigbee_get_node_adapter(connection_class *connection, node_class *node)$/;"	f
+zigbee_interference	deltaQ/zigbee.c	/^int zigbee_interference(connection_class *connection, $/;"	f
+zigbee_loss_rate	deltaQ/zigbee.c	/^int zigbee_loss_rate(connection_class *connection, $/;"	f
+zigbee_node_update_Pr0	deltaQ/zigbee.c	/^void zigbee_node_update_Pr0(node_class *node)$/;"	f
+zigbee_operating_rates	deltaQ/zigbee.c	/^double zigbee_operating_rates[]={250e3};$/;"	v
+zigbee_ppdu_duration	deltaQ/zigbee.c	/^int zigbee_ppdu_duration(connection_class *connection, double *ppdu_duration)$/;"	f
+zigbee_retransmissions	deltaQ/zigbee.c	/^int zigbee_retransmissions(connection_class *connection, $/;"	f

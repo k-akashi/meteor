@@ -1,0 +1,265 @@
+
+		-------------------------------
+		      QOMET Usage Example 
+		-------------------------------
+
+			 Razvan Beuran
+	         (Last updated: 28 October 2008)
+
+
+TABLE OF CONTENTS
+-----------------
+1. Introduction
+2. Compiling QOMET
+3. Executing QOMET
+4. Running a QOMET emulation: Example 1
+5. Running a QOMET emulation: Example 2
+6. Final remarks
+7. Copyright notice
+
+
+1. Introduction
+---------------
+
+This file presents an example of how the QOMET wireless network
+emulator can be used in practice. It is assumed that the steps below
+are accomplished on a PC running FreeBSD with "dummynet" support
+(usually available by default).
+
+The following steps must be accomplished, as documented next:
+   * Compiling QOMET
+   * Executing QOMET
+   * Post-processing QOMET output
+   * Running the emulation
+ 
+  NOTES:
+  ------
+ 
+  1) Only the emulation itself needs to be run on FreeBSD; QOMET
+     can be compiled and executed on most OSes. So far we made tests
+     on Solaris, Linux, Windows (with cygwin or the Visual C compiler)
+     and FreeBSD.
+  2) Some numerical errors have been reported when usign FreeBSD 4,
+     therefore you should use FreeBSD 5.4 or higher, on which the
+     software was tested. The numerical errors in the computation of
+     the power of the received signal are being investigated.
+
+2. Compiling QOMET
+------------------
+
+On FreeBSD run the following command in the directory where the
+archive was unpacked:
+
+	gmake
+
+On systems such as Linux where GNU make is use by default, one can use
+the directly the 'make' command"
+
+	make
+
+  NOTES:
+  ------
+ 
+  1) The XML parser library expat-2.0.0 must be previously installed
+     on the computer on which QOMET is to be compiled and executed. 
+     One way to do this is to use the "ports" system, in which expat
+     is available at "/usr/ports/textproc/expat2"
+
+     The expat archive can also be obtained from the website
+     "http://expat.sourceforge.net". Please use "gmake" to compile
+     this archive on FreeBSD platforms, since the FreeBSD "make" has a
+     particular syntax concerning directives. Alternatively you should
+     modify the Makefile by changing "ifndef" to ".ifndef" (line 47)
+     and "endif" to ".endif" (line 49). If "gmake" is not installed on
+     your system, it can be easily installed from
+     "/usr/ports/devel/gmake/".
+
+  2) The current Makefile assumes the default installation of
+     expat-2.0.0 in "/usr/local/include" for header files, and
+     "/usr/local/lib" for the library itself. If you install
+     expat-2.0.0 in a different directory, then the Makefile needs to
+     be modified accordingly.
+
+  3) To compile the "deltaQ" library used by QOMET using Windows
+     Visual C, the following line must be uncommented in the Makefile
+     located in the deltaQ directory by removing the leading '#' sign:
+
+	#WIN_FLAGS = -D__WINDOWS__
+
+
+3. Executing QOMET
+------------------
+
+Run the following command in the directory where the archive was
+unpacked:
+
+	./qomet scenario_file.xml
+
+As a result the output file "scenario_file.xml.out" is produced. The
+screen output of QOMET is intended mainly for debugging purposes and
+can be safely ignored for the example file. Once you start writing
+your own scenario files, watch out for errors (which cause execution
+to be aborted) or warnings (the total number of which is reported at
+the end of execution, if any warnings occurred).
+
+
+4. Running a QOMET emulation: Example 1
+---------------------------------------
+
+The first example shows how one can use bash scripts to take QOMET
+output and configure dummynet, while running some test applications.
+
+
+4.1. Post-processing QOMET output
+
+In order to create the bandwidth, delay and loss files that will be
+used to configure in real time the "dummynet" emulator, run the
+following command in the directory where the archive was unpacked:
+
+	./post-processing.sh scenario_file.xml.out 1 2
+
+The last two numerical parameters are used to select the connection of
+interest (in this case from node with id '1' to node with id '2').
+
+As a result three files are created, scenario_file.xml.bandwidth,
+scenario_file.xml.loss and scenario_file.xml.delay, which contain only
+the values of bandwidth, loss and delay variation, respectively.
+Jitter is ignored since "dummynet" doesn't allow jitter specification.
+
+
+4.2. Running the emulation
+
+The emulation process can now be run. In the example included we used
+"netperf" as an example application. If "netperf" is not installed on
+your FreeBSD system, it can be easily installed from
+"/usr/ports/benchmarks/netperf".
+
+Another required utility is "sudo", which can be installed from
+"/usr/ports/security/sudo". Following this you need to configure
+"sudo" appropriately by using the file "/usr/local/etc/sudoers". 
+
+The program "sudo" is needed load, unload and configure dummynet. The
+scripts "dummynet_load.sh", and its counterpart, "dummynet_unload.sh",
+are provided for convenience. As it was reported that the "dummynet"
+module cannot be automatically located on some machines, in
+"dummynet_load.sh" the default path to the kernel module is given:
+"/boot/kernel/dummynet.ko". In case your installation uses a different
+path, please change this script accordingly.
+
+WARNING: dummynet is an option of the FreeBSD firewall, therefore it
+is prefered to use the above-mentioned scripts to start/stop
+dummynet. Otherwise you may found yourself "locked" outside the
+FreeBSD PC you are using, in the event you are configuring it
+remotely.
+
+The script that runs the emulation has been written using _bash_
+specific constructs, therefore it is not possible to run it using
+other shells. In order to start the emulation, run the following
+command:
+
+	bash run_experiment.sh scenario_file.xml.from_1.to_2
+
+As the emulation proceeds you will see a sequence of messages that
+indicate the parameters used to configure "dummynet". At the end the
+banner of "netperf" should appear, showing among other things the
+duration of the test (e.g., 60.00 seconds) and the achieved throughput
+in 10^6 bits/second (e.g., 4.35).
+
+  NOTES:
+  ------
+
+  1) The duration of the emulation is configured in the beginning of
+     "run_experiment.sh" by means of the variable "test_duration", and
+     is set to 60 seconds. Modifying the scenario duration implies
+     updating this variable.
+
+  2) The duration of each step is controlled through the variable
+     "nap_duration", which indicates the duration (in millliseconds)
+     of the wait between two successive "dummynet" configuration
+     commands. The default value "460" has been determined
+     experimentally so that each step (including command issuing)
+     takes approximately 500 ms. If the step size is changed in the
+     scenario representation file, this value should be modified
+     accordingly. A calibration of "nap_duration" may be required
+     anyway on your system. This can be done by noticing that before
+     and after the effective emulation the current time is displayed
+     in the form:
+	----------------------------
+	Mon Sep 25 14:53:41 JST 2006
+	----------------------------
+     By comparing these outputs one can do fine adjustments of the
+     value of "nap_duration".
+
+  3) If dummynet is compiled into the kernel loading it before the
+     experiment and unloading it after execution becomes
+     unnecessary. However the corresponding scripts are executed all
+     the time, and may cause harmless error messages to appear if
+     dummynet is compiled into the kernel.
+
+
+5. Running a QOMET emulation: Example 2
+---------------------------------------
+
+The second example shows a more advanced way of running a QOMET
+emulation. In this case we use a library that is distributed with
+QOMET, wireconf, in order to configure dummynet. This library also
+includes support for accurate calculation of execution time on
+FreeBSD.
+
+In the second example a program called "do_wireconf' effectively reads
+QOMET output, therefore it is no need to post-process the output
+anymore. The test applications in this case will be iperf and ping. In
+FreeBSD iperf can be installed for example from
+"/usr/ports/net/iperf". Another required program is "sudo", as
+mentioned in the previous section.
+
+In order to start the emulation, run the following command:
+
+	bash run_experiment.sh scenario_file.xml.out
+
+When the experiment is finished you can check the output of iperf and
+ping which was saved for convenience in the following files:
+	scenario_file.xml.out_ping.out
+	scenario_file.xml.out_iperf_c.out
+	scenario_file.xml.out_iperf_s.out
+
+
+6. Final remarks
+----------------
+
+This document presented step by step instructions on how to run an
+example of a wireless network emulation experiment by using our
+implementation, QOMET. We are very interested in getting feedback
+concerning QOMET. Please send your comments and bug reports to:
+info@starbed.org.
+
+
+7. Copyright notice
+-------------------
+
+Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the project nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
