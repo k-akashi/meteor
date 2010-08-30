@@ -1,0 +1,420 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.6	//
+AF_DECnet	utils.h	55;"	d
+ALLOBJ	Makefile	/^ALLOBJ=$(TOBJ) $(RTMONOBJ)$/;"	m
+ARRAY_SIZE	utils.h	132;"	d
+BANDWIDTH	do_wireconf.c	98;"	d	file:
+BODY	tc.c	/^static void *BODY = NULL;	\/* cached handle dlopen(NULL) *\/$/;"	v	file:
+CC	Makefile	/^CC      = gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
+CFLAGS	Makefile	/^CFLAGS  = -I. -g -Werror -Wall -D_GNU_SOURCE -O2 -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
+DEBUG	message.h	56;"	d
+DEBUG	message.h	61;"	d
+DEBUG	wireconf.c	94;"	d	file:
+DEBUG	wireconf.c	99;"	d	file:
+DEFINES	Makefile	/^DEFINES = -DRESOLVE_HOSTNAMES$/;"	m
+DELAY	do_wireconf.c	99;"	d	file:
+DIRECTION_BOTH	wireconf.h	64;"	d
+DIRECTION_IN	wireconf.h	65;"	d
+DIRECTION_OUT	wireconf.h	66;"	d
+DN_MAXADDL	utils.h	53;"	d
+ERROR	global.h	54;"	d
+FALSE	global.h	51;"	d
+FIRST_NODE_ID	global.h	60;"	d
+HOSTCC	Makefile	/^HOSTCC  = gcc$/;"	m
+INFO	message.h	65;"	d
+INFO	message.h	69;"	d
+INFO	wireconf.c	103;"	d	file:
+INFO	wireconf.c	108;"	d	file:
+IPPROTO_AH	utils.h	24;"	d
+IPPROTO_COMP	utils.h	27;"	d
+IPPROTO_ESP	utils.h	21;"	d
+IPSEC_PROTO_ANY	utils.h	30;"	d
+IPX_NODE_LEN	utils.h	64;"	d
+IP_ADDR_SIZE	global.h	58;"	d
+LDFLAGS	Makefile	/^LDFLAGS = -L.$/;"	m
+LDLIBS	Makefile	/^LDLIBS  = -ltc -lnetlink -lwireconf -ltimer -lm -ldl$/;"	m
+LDLIBS	Makefile	/^LDLIBS  = -lwireconf -ltimer -lm$/;"	m
+LOOP_COUNT	do_wireconf.c	101;"	d	file:
+MAXDIST	q_netem.c	53;"	d	file:
+MAX_MSG	tc_util.h	4;"	d
+MAX_NODES	global.h	62;"	d
+MAX_RULE_NUM	do_wireconf.c	77;"	d	file:
+MIN_PIPE_ID_IN	do_wireconf.c	73;"	d	file:
+MIN_PIPE_ID_IN_BCAST	do_wireconf.c	74;"	d	file:
+MIN_PIPE_ID_OUT	do_wireconf.c	75;"	d	file:
+NEXT_ARG	utils.h	38;"	d
+NEXT_ARG_OK	utils.h	39;"	d
+NEXT_IS_NUMBER	q_netem.c	105;"	d	file:
+NEXT_SA	routing_info.h	91;"	d
+NLMSG_TAIL	libnetlink.h	53;"	d
+NLOBJ	Makefile	/^NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o$/;"	m
+PACKET_LOSS_RATE	do_wireconf.c	100;"	d	file:
+PARAMETERS_TOTAL	do_wireconf.c	70;"	d	file:
+PARAMETERS_UNUSED	do_wireconf.c	71;"	d	file:
+PREFIXLEN_SPECIFIED	utils.h	51;"	d
+PREV_ARG	utils.h	40;"	d
+REQ	iproute.h	/^} REQ;$/;"	t	typeref:struct:__anon2
+ROUNDUP	routing_info.h	88;"	d
+ROUTE_BUFFER_SIZE	routing_info.h	74;"	d
+ROUTE_BUFFER_SIZE	routing_info.h	76;"	d
+RTAX_RTTVAR	iproute.c	39;"	d	file:
+RTM_SEQ_CT	routing_info.h	80;"	d
+RT_NAMES_H_	rt_names.h	2;"	d
+SPRINT_BSIZE	utils.h	33;"	d
+SPRINT_BUF	utils.h	34;"	d
+SUCCESS	global.h	53;"	d
+TARGETS	Makefile	/^TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so do_wireconf test$/;"	m
+TARGETS	Makefile	/^TARGETS = libtc.a libwireconf.a libtimer.a do_wireconf$/;"	m
+TCA_BUF_MAX	tc_common.h	2;"	d
+TCOBJ	Makefile	/^TCOBJ=test.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o #q_tbf.o$/;"	m
+TC_H_ROOT	libtc.c	20;"	d	file:
+TC_H_ROOT	test.c	20;"	d	file:
+TC_H_UNSPEC	libtc.c	19;"	d	file:
+TC_H_UNSPEC	test.c	19;"	d	file:
+TESTOBJ	Makefile	/^TESTOBJ=test.o$/;"	m
+TOBJ	Makefile	/^TOBJ=libnetlink.o #test.o iproute.o rtm_map.o$/;"	m
+TRUE	global.h	50;"	d
+UNAME	Makefile	/^UNAME = $(shell uname)$/;"	m
+WARNING	message.h	47;"	d
+WARNING	message.h	52;"	d
+WARNING	timer.c	64;"	d	file:
+WARNING	timer.c	69;"	d	file:
+WARNING	wireconf.c	85;"	d	file:
+WARNING	wireconf.c	90;"	d	file:
+_SL_	libtc.c	/^char * _SL_ = NULL;$/;"	v
+_SL_	test.c	/^char * _SL_ = NULL;$/;"	v
+_TC_CORE_H_	tc_core.h	2;"	d
+_TC_UTIL_H_	tc_util.h	2;"	d
+__LIBNETLINK_H__	libnetlink.h	2;"	d
+__LL_MAP_H__	ll_map.h	2;"	d
+__RTM_MAP_H__	rtm_map.h	2;"	d
+__TIMER_H	timer.h	42;"	d
+__UTILS_H__	utils.h	2;"	d
+__WIRECONF_H_	wireconf.h	47;"	d
+__get_hz	utils.c	/^int __get_hz(void)$/;"	f
+__get_user_hz	utils.c	/^int __get_user_hz(void)$/;"	f
+__iproute2_hz_internal	utils.c	/^int __iproute2_hz_internal;$/;"	v
+__iproute2_user_hz_internal	utils.c	/^int __iproute2_user_hz_internal;$/;"	v
+a_addr	utils.h	/^        unsigned char a_addr[DN_MAXADDL];$/;"	m	struct:dn_naddr
+a_len	utils.h	/^        unsigned short          a_len;$/;"	m	struct:dn_naddr
+action_a2n	tc_util.c	/^int action_a2n(char *arg, int *result)$/;"	f
+action_n2a	tc_util.c	/^char * action_n2a(int action, char *buf, int len)$/;"	f
+action_util	tc_util.h	/^struct action_util$/;"	s
+add_rule	wireconf.c	/^add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direction)$/;"	f
+add_rule	wireconf.c	/^int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, $/;"	f
+addattr32	libnetlink.c	/^int addattr32(struct nlmsghdr *n, int maxlen, int type, __u32 data)$/;"	f
+addattr_l	libnetlink.c	/^int addattr_l(struct nlmsghdr *n, int maxlen, int type, const void *data,$/;"	f
+addr	ll_map.c	/^	unsigned char	addr[8];$/;"	m	struct:idxmap	file:
+addr	utils.c	/^	inet_prefix addr;$/;"	m	struct:namerec	file:
+addraw_l	libnetlink.c	/^int addraw_l(struct nlmsghdr *n, int maxlen, const void *data, int len)$/;"	f
+alen	ll_map.c	/^	int		alen;$/;"	m	struct:idxmap	file:
+apply_socket_options	wireconf.c	/^static int apply_socket_options(int s, int option_id, void *option, $/;"	f	file:
+atoaddr	wireconf.c	/^static int atoaddr(char *array_address, in4_addr *ipv4_address, uint16_t *port)$/;"	f	file:
+bandwidth	do_wireconf.c	/^  float bandwidth;$/;"	m	struct:__anon1	file:
+bitlen	utils.h	/^	__s16 bitlen;$/;"	m	struct:__anon5
+buf	iproute.h	/^	char            buf[1024];$/;"	m	struct:__anon2
+bytelen	utils.h	/^	__u8 bytelen;$/;"	m	struct:__anon5
+close_socket	wireconf.c	/^void close_socket(int socket_id)$/;"	f
+cmdlineno	utils.c	/^int cmdlineno;$/;"	v
+configure_pipe	wireconf.c	/^int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)$/;"	f
+configure_qdisc	wireconf.c	/^int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate)$/;"	f
+cpu_frequency	timer.h	/^  uint32_t cpu_frequency;$/;"	m	struct:__anon4
+data	utils.h	/^	__u32 data[4];$/;"	m	struct:__anon5
+delay	do_wireconf.c	/^  float delay;$/;"	m	struct:__anon1	file:
+delay	tc_util.h	/^	char* delay;$/;"	m	struct:qdisc_parameter
+delay_corr	tc_util.h	/^	char* delay_corr;$/;"	m	struct:qdisc_parameter
+delete_rule	wireconf.c	/^int delete_rule(uint s, u_int32_t rule_number)$/;"	f
+dn_naddr	utils.h	/^struct dn_naddr $/;"	s
+do_filter	tc_filter.c	/^int do_filter(int argc, char **argv)$/;"	f
+dump	libnetlink.h	/^	__u32			dump;$/;"	m	struct:rtnl_handle
+dump_param_table	do_wireconf.c	/^void dump_param_table(qomet_param *p, int rule_count)$/;"	f
+duparg	utils.c	/^void duparg(const char* key, const char* arg)$/;"	f
+duparg2	utils.c	/^void duparg2(const char* key, const char* arg)$/;"	f
+explain	q_netem.c	/^static void explain(void)$/;"	f	file:
+explain	q_tbf.c	/^static void explain(void)$/;"	f	file:
+explain1	q_netem.c	/^static void explain1(const char *arg)$/;"	f	file:
+explain1	q_tbf.c	/^static void explain1(char *arg)$/;"	f	file:
+family	utils.h	/^	__u8 family;$/;"	m	struct:__anon5
+fd	libnetlink.h	/^	int			fd;$/;"	m	struct:rtnl_handle
+filter	iproute.h	/^} filter;$/;"	v	typeref:struct:__anon3
+filter_ifindex	tc_filter.c	/^static int filter_ifindex;$/;"	v	file:
+filter_ifindex	tc_qdisc.c	/^static int filter_ifindex;$/;"	v	file:
+filter_list	tc.c	/^static struct filter_util * filter_list;$/;"	v	typeref:struct:filter_util	file:
+filter_parent	tc_filter.c	/^static __u32 filter_parent;$/;"	v	file:
+filter_prio	tc_filter.c	/^static __u32 filter_prio;$/;"	v	file:
+filter_protocol	tc_filter.c	/^static __u32 filter_protocol;$/;"	v	file:
+filter_util	tc_util.h	/^struct filter_util$/;"	s
+flags	ll_map.c	/^	unsigned	flags;$/;"	m	struct:idxmap	file:
+flags	utils.h	/^	__u32 flags;$/;"	m	struct:__anon5
+flushb	iproute.h	/^	char *flushb;$/;"	m	struct:__anon3
+flushe	iproute.h	/^	int flushe;$/;"	m	struct:__anon3
+flushed	iproute.h	/^	int flushed;$/;"	m	struct:__anon3
+flushp	iproute.h	/^	int flushp;$/;"	m	struct:__anon3
+force	tc.c	/^int force = 0;$/;"	v
+format_host	utils.c	/^const char* format_host(int af, int len, const void *addr,$/;"	f
+get_addr	utils.c	/^int get_addr(inet_prefix* dst, const char* arg, int family)$/;"	f
+get_addr32	utils.c	/^__u32 get_addr32(const char* name)$/;"	f
+get_addr_1	utils.c	/^int get_addr_1(inet_prefix* addr, const char* name, int family)$/;"	f
+get_byte	utils.h	79;"	d
+get_cpu_frequency	timer.c	/^unsigned int get_cpu_frequency(void)$/;"	f
+get_filter_kind	tc.c	/^struct filter_util *get_filter_kind(const char *str)$/;"	f
+get_hz	utils.h	/^static __inline__ int get_hz(void)$/;"	f
+get_id_from_ip	routing_info.c	/^int get_id_from_ip(in_addr_t *IP_addresses, char *s)$/;"	f
+get_integer	utils.c	/^int get_integer(int* val, const char* arg, int base)$/;"	f
+get_ip_from_id	routing_info.c	/^int get_ip_from_id(char *IP_char_addresses, int id, char *ip)$/;"	f
+get_next_hop_id	routing_info.c	/^int get_next_hop_id(in_addr_t *IP_addresses, char *IP_char_addresses, $/;"	f
+get_next_hop_ip	routing_info.c	/^int get_next_hop_ip(char *dst, char *next_hop)$/;"	f
+get_percent	tc_util.c	/^int get_percent(__u32 *percent, const char *str)$/;"	f
+get_prefix	utils.c	/^int get_prefix(inet_prefix* dst, char* arg, int family)$/;"	f
+get_prefix_1	utils.c	/^int get_prefix_1(inet_prefix* dst, char* arg, int family)$/;"	f
+get_qdisc_handle	tc_util.c	/^int get_qdisc_handle(__u32 *h, const char *str)$/;"	f
+get_qdisc_kind	tc.c	/^struct qdisc_util* get_qdisc_kind(const char* str)$/;"	f
+get_rate	tc_util.c	/^int get_rate(unsigned *rate, const char *str)$/;"	f
+get_rate_and_cell	tc_util.c	/^int get_rate_and_cell(unsigned *rate, int *cell_log, char *str)$/;"	f
+get_route_info	libtc.c	/^char* get_route_info(char *info, char *addr)$/;"	f
+get_route_info	test.c	/^char* get_route_info(char *info, char *addr)$/;"	f
+get_routing_table_addr	routing_info.c	/^void get_routing_table_addr(int addrs, struct sockaddr *sa, $/;"	f
+get_rt_realms	rtm_map.c	/^int get_rt_realms(__u32 *realms, char *arg)$/;"	f
+get_rule	wireconf.c	/^get_rule(uint s, int16_t rulenum)$/;"	f
+get_s16	utils.c	/^int get_s16(__s16* val, const char* arg, int base)$/;"	f
+get_s8	utils.c	/^int get_s8(__s8* val, const char* arg, int base)$/;"	f
+get_short	utils.h	81;"	d
+get_size	tc_util.c	/^int get_size(unsigned* size, char* str)$/;"	f
+get_size_and_cell	tc_util.c	/^int get_size_and_cell(unsigned *size, int *cell_log, char *str)$/;"	f
+get_socket	wireconf.c	/^int get_socket(void)$/;"	f
+get_tc_classid	tc_util.c	/^int get_tc_classid(__u32 *h, const char *str)$/;"	f
+get_ticks	q_netem.c	/^static int get_ticks(__u32 *ticks, const char *str)$/;"	f	file:
+get_u16	utils.c	/^int get_u16(__u16* val, const char* arg, int base)$/;"	f
+get_u32	utils.c	/^int get_u32(__u32* val, const char* arg, int base)$/;"	f
+get_u64	utils.c	/^int get_u64(__u64* val, const char* arg, int base)$/;"	f
+get_u8	utils.c	/^int get_u8(__u8* val, const char* arg, int base)$/;"	f
+get_unsigned	utils.c	/^int get_unsigned(unsigned* val, const char* arg, int base)$/;"	f
+get_usecs	tc_util.c	/^int get_usecs(unsigned *usecs, const char *str)$/;"	f
+get_user_hz	utils.h	/^static __inline__ int get_user_hz(void)$/;"	f
+get_ushort	utils.h	80;"	d
+getcmdline	utils.c	/^size_t getcmdline(char* *linep, size_t *lenp, FILE *in)$/;"	f
+hexstring_a2n	utils.c	/^__u8* hexstring_a2n(const char* str, __u8* buf, int blen)$/;"	f
+hexstring_n2a	utils.c	/^char* hexstring_n2a(const __u8* str, int len, char* buf, int blen)$/;"	f
+id	tc_util.h	/^	char	id[16];$/;"	m	struct:filter_util
+id	tc_util.h	/^	char    id[16];$/;"	m	struct:action_util
+id	tc_util.h	/^	const char *id;$/;"	m	struct:qdisc_util
+idxmap	ll_map.c	/^static struct idxmap *idxmap[16];$/;"	v	typeref:struct:idxmap	file:
+idxmap	ll_map.c	/^struct idxmap$/;"	s	file:
+iif	iproute.h	/^	int iif, iifmask;$/;"	m	struct:__anon3
+iifmask	iproute.h	/^	int iif, iifmask;$/;"	m	struct:__anon3
+in4_addr	wireconf.c	/^} in4_addr;$/;"	t	typeref:union:__anon6	file:
+incomplete_command	utils.c	/^void incomplete_command(void)$/;"	f
+index	ll_map.c	/^	unsigned	index;$/;"	m	struct:idxmap	file:
+inet_addr_match	utils.c	/^int inet_addr_match(const inet_prefix* a, const inet_prefix* b, int bits)$/;"	f
+inet_prefix	utils.h	/^} inet_prefix;$/;"	t	typeref:struct:__anon5
+invarg	utils.c	/^void invarg(const char* msg, const char* arg)$/;"	f
+iproute_get	iproute.c	/^REQ iproute_get(int argc, char *argv)$/;"	f
+iproute_modify	iproute.c	/^int iproute_modify(int cmd, unsigned flags, int argc, char *argv)$/;"	f
+iproute_reset_filter	iproute.c	/^void iproute_reset_filter()$/;"	f
+ipx_addr	utils.h	/^struct ipx_addr {$/;"	s
+ipx_net	utils.h	/^	u_int32_t ipx_net;$/;"	m	struct:ipx_addr
+ipx_node	utils.h	/^	u_int8_t  ipx_node[IPX_NODE_LEN];$/;"	m	struct:ipx_addr
+jitter	tc_util.h	/^	char* jitter;$/;"	m	struct:qdisc_parameter
+limit	tc_util.h	/^	char* limit;$/;"	m	struct:qdisc_parameter
+ll_idx_n2a	ll_map.c	/^const char *ll_idx_n2a(unsigned idx, char *buf)$/;"	f
+ll_index_to_name	ll_map.c	/^const char *ll_index_to_name(unsigned idx)$/;"	f
+ll_init_map	ll_map.c	/^int ll_init_map(struct rtnl_handle *rth)$/;"	f
+ll_name_to_index	ll_map.c	/^unsigned ll_name_to_index(const char *name)$/;"	f
+ll_remember_index	ll_map.c	/^int ll_remember_index(const struct sockaddr_nl *who, $/;"	f
+local	libnetlink.h	/^	struct sockaddr_nl	local;$/;"	m	struct:rtnl_handle	typeref:struct:rtnl_handle::sockaddr_nl
+lookup_param	do_wireconf.c	/^int lookup_param(int next_hop_id, qomet_param *p, int rule_count)$/;"	f
+loss	tc_util.h	/^	char* loss;$/;"	m	struct:qdisc_parameter
+loss_corr	tc_util.h	/^	char* loss_corr;$/;"	m	struct:qdisc_parameter
+lossrate	do_wireconf.c	/^  float lossrate;$/;"	m	struct:__anon1	file:
+main	do_wireconf.c	/^int main(int argc, char *argv[])$/;"	f
+main	libtc.c	/^main(int argc, char **argv)$/;"	f
+main	test.c	/^main(int argc, char **argv)$/;"	f
+makeargs	utils.c	/^int makeargs(char* line, char* argv[], int maxargs)$/;"	f
+matches	utils.c	/^int matches(const char* cmd, const char* pattern)$/;"	f
+max_percent_value	tc_util.c	/^static const double max_percent_value = 0xffffffff;$/;"	v	file:
+mdst	iproute.h	/^	inet_prefix mdst;$/;"	m	struct:__anon3
+missarg	utils.c	/^void missarg(const char* key)$/;"	f
+mp_alg_names	iproute.c	/^static char *mp_alg_names[IP_MP_ALG_MAX+1] = {$/;"	v	file:
+msrc	iproute.h	/^	inet_prefix msrc;$/;"	m	struct:__anon3
+n	iproute.h	/^	struct nlmsghdr     n;$/;"	m	struct:__anon2	typeref:struct:__anon2::nlmsghdr
+name	ll_map.c	/^	char		name[16];$/;"	m	struct:idxmap	file:
+name	tc_util.c	/^	const char *name;$/;"	m	struct:rate_suffix	file:
+name	utils.c	/^	char	    *name;$/;"	m	struct:namerec	file:
+namerec	utils.c	/^struct namerec$/;"	s	file:
+netem_parse_opt	q_netem.c	/^static int netem_parse_opt(struct qdisc_util* qu, $/;"	f	file:
+netem_print_opt	q_netem.c	/^static int netem_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)$/;"	f	file:
+netem_qdisc_util	q_netem.c	/^struct qdisc_util netem_qdisc_util = {$/;"	v	typeref:struct:qdisc_util
+next	ll_map.c	/^	struct idxmap * next;$/;"	m	struct:idxmap	typeref:struct:idxmap::idxmap	file:
+next	tc_util.h	/^	struct  action_util *next;$/;"	m	struct:action_util	typeref:struct:action_util::action_util
+next	tc_util.h	/^	struct  qdisc_util *next;$/;"	m	struct:qdisc_util	typeref:struct:qdisc_util::qdisc_util
+next	tc_util.h	/^	struct filter_util *next;$/;"	m	struct:filter_util	typeref:struct:filter_util::filter_util
+next	utils.c	/^	struct namerec *next;$/;"	m	struct:namerec	typeref:struct:namerec::namerec	file:
+next_event	timer.h	/^  uint64_t next_event;$/;"	m	struct:__anon4
+next_hop_id	do_wireconf.c	/^  int next_hop_id;$/;"	m	struct:__anon1	file:
+nht	utils.c	/^static struct namerec *nht[256];$/;"	v	typeref:struct:namerec	file:
+octet	wireconf.c	/^  uint8_t octet[4];$/;"	m	union:__anon6	file:
+oif	iproute.h	/^	int oif, oifmask;$/;"	m	struct:__anon3
+oifmask	iproute.h	/^	int oif, oifmask;$/;"	m	struct:__anon3
+oneline	libtc.c	/^int oneline = 0;$/;"	v
+oneline	test.c	/^int oneline = 0;$/;"	v
+parse_aopt	tc_util.h	/^	int     (*parse_aopt)(struct action_util *a, int *argc, char ***argv, $/;"	m	struct:action_util
+parse_copt	tc_util.h	/^	int	(*parse_copt)(struct qdisc_util *qu, int argc, char **argv, struct nlmsghdr *n);$/;"	m	struct:qdisc_util
+parse_fopt	tc_util.h	/^	int	(*parse_fopt)(struct filter_util *qu, char *fhandle, int argc, $/;"	m	struct:filter_util
+parse_nexthops	iproute.c	/^int parse_nexthops(struct nlmsghdr *n, struct rtmsg *r, int argc, char *argv)$/;"	f
+parse_nofopt	tc.c	/^static int parse_nofopt(struct filter_util *qu, char *fhandle, int argc, char **argv, struct nlmsghdr *n)$/;"	f	file:
+parse_noqopt	tc.c	/^static int parse_noqopt(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr* n)$/;"	f	file:
+parse_one_nh	iproute.c	/^int parse_one_nh(struct rtattr *rta, struct rtnexthop *rtnh, int *argcp, char *argvp)$/;"	f
+parse_qopt	tc_util.h	/^	int	(*parse_qopt)(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr *n);$/;"	m	struct:qdisc_util
+parse_rtattr	libnetlink.c	/^int parse_rtattr(struct rtattr *tb[], int max, struct rtattr *rta, int len)$/;"	f
+parse_rtattr_byindex	libnetlink.c	/^int parse_rtattr_byindex(struct rtattr *tb[], int max, struct rtattr *rta, int len)$/;"	f
+parse_rtattr_nested	libnetlink.h	45;"	d
+peer	libnetlink.h	/^	struct sockaddr_nl	peer;$/;"	m	struct:rtnl_handle	typeref:struct:rtnl_handle::sockaddr_nl
+preferred_family	libtc.c	/^int preferred_family = AF_UNSPEC;$/;"	v
+preferred_family	test.c	/^int preferred_family = AF_UNSPEC;$/;"	v
+print_aopt	tc_util.h	/^	int     (*print_aopt)(struct action_util *au, FILE *f, struct rtattr *opt);$/;"	m	struct:action_util
+print_copt	tc_util.h	/^	int	(*print_copt)(struct qdisc_util *qu, FILE *f, struct rtattr *opt);$/;"	m	struct:qdisc_util
+print_filter	tc_filter.c	/^static int print_filter(const struct sockaddr_nl *who,$/;"	f	file:
+print_fopt	tc_util.h	/^	int	(*print_fopt)(struct filter_util *qu, FILE *f, struct rtattr *opt, __u32 fhandle);$/;"	m	struct:filter_util
+print_nofopt	tc.c	/^static int print_nofopt(struct filter_util *qu, FILE *f, struct rtattr *opt, __u32 fhandle)$/;"	f	file:
+print_noqopt	tc.c	/^static int print_noqopt(struct qdisc_util *qu, FILE *f, $/;"	f	file:
+print_percent	tc_util.c	/^void print_percent(char *buf, int len, __u32 per)$/;"	f
+print_pipe	wireconf.c	/^void print_pipe(struct dn_pipe *pipe)$/;"	f
+print_qdisc	tc_qdisc.c	/^static int print_qdisc(const struct sockaddr_nl *who, $/;"	f	file:
+print_qdisc_handle	tc_util.c	/^void print_qdisc_handle(char *buf, int len, __u32 h)$/;"	f
+print_qopt	tc_util.h	/^	int	(*print_qopt)(struct qdisc_util *qu, FILE *f, struct rtattr *opt);$/;"	m	struct:qdisc_util
+print_rate	tc_util.c	/^void print_rate(char *buf, int len, __u32 rate)$/;"	f
+print_rule	wireconf.c	/^void print_rule(struct ip_fw *rule)$/;"	f
+print_size	tc_util.c	/^void print_size(char *buf, int len, __u32 sz)$/;"	f
+print_tc_classid	tc_util.c	/^int print_tc_classid(char *buf, int len, __u32 h)$/;"	f
+print_tcstats2_attr	tc_util.c	/^void print_tcstats2_attr(FILE *fp, struct rtattr *rta, char *prefix, struct rtattr **xstats)$/;"	f
+print_tcstats_attr	tc_util.c	/^void print_tcstats_attr(FILE *fp, struct rtattr *tb[], char *prefix, struct rtattr **xstats)$/;"	f
+print_timestamp	utils.c	/^int print_timestamp(FILE *fp)$/;"	f
+print_tm	tc_util.c	/^void print_tm(FILE * f, const struct tcf_t *tm)$/;"	f
+print_usecs	tc_util.c	/^void print_usecs(char *buf, int len, __u32 usec)$/;"	f
+print_xstats	tc_util.h	/^	int 	(*print_xstats)(struct qdisc_util *qu, FILE *f, struct rtattr *xstats);$/;"	m	struct:qdisc_util
+print_xstats	tc_util.h	/^	int     (*print_xstats)(struct action_util *au, FILE *f, struct rtattr *xstats);$/;"	m	struct:action_util
+protocol	iproute.h	/^	int protocol, protocolmask;$/;"	m	struct:__anon3
+protocolmask	iproute.h	/^	int protocol, protocolmask;$/;"	m	struct:__anon3
+qdisc_list	tc.c	/^static struct qdisc_util * qdisc_list;$/;"	v	typeref:struct:qdisc_util	file:
+qdisc_parameter	tc_util.h	/^struct qdisc_parameter$/;"	s
+qdisc_util	tc_util.h	/^struct qdisc_util$/;"	s
+qomet_param	do_wireconf.c	/^} qomet_param;$/;"	t	typeref:struct:__anon1	file:
+r	iproute.h	/^	struct rtmsg        r;$/;"	m	struct:__anon2	typeref:struct:__anon2::rtmsg
+rate_suffix	tc_util.c	/^static const struct rate_suffix {$/;"	s	file:
+rdst	iproute.h	/^	inet_prefix rdst;$/;"	m	struct:__anon3
+rdtsc	timer.h	73;"	d
+read_settings	do_wireconf.c	/^int read_settings(char *path, in_addr_t *p, int p_size)$/;"	f
+realm	iproute.h	/^	int realm, realmmask;$/;"	m	struct:__anon3
+realmmask	iproute.h	/^	int realm, realmmask;$/;"	m	struct:__anon3
+reorder_corr	tc_util.h	/^	char* reorder_corr;$/;"	m	struct:qdisc_parameter
+reorder_prob	tc_util.h	/^	char* reorder_prob;$/;"	m	struct:qdisc_parameter
+resolve_address	utils.c	/^char* resolve_address(const char* addr, int len, int af)$/;"	f
+resolve_hosts	tc.c	/^int resolve_hosts = 0;$/;"	v
+rprefsrc	iproute.h	/^	inet_prefix rprefsrc;$/;"	m	struct:__anon3
+rsrc	iproute.h	/^	inet_prefix rsrc;$/;"	m	struct:__anon3
+rt_addr_n2a	utils.c	/^const char* rt_addr_n2a(int af, int len, const void *addr, char* buf, int buflen)$/;"	f
+rta_addattr32	libnetlink.c	/^int rta_addattr32(struct rtattr *rta, int maxlen, int type, __u32 data)$/;"	f
+rta_addattr_l	libnetlink.c	/^int rta_addattr_l(struct rtattr *rta, int maxlen, int type,$/;"	f
+rth	libtc.c	/^struct rtnl_handle rth;$/;"	v	typeref:struct:rtnl_handle
+rth	tc.c	/^struct rtnl_handle rth;$/;"	v	typeref:struct:rtnl_handle
+rth	test.c	/^struct rtnl_handle rth;$/;"	v	typeref:struct:rtnl_handle
+rtnl_close	libnetlink.c	/^void rtnl_close(struct rtnl_handle *rth)$/;"	f
+rtnl_dsfield_a2n	rt_names.c	/^int rtnl_dsfield_a2n(__u32 *id, char *arg)$/;"	f
+rtnl_dsfield_n2a	rt_names.c	/^char * rtnl_dsfield_n2a(int id, char *buf, int len)$/;"	f
+rtnl_dump_filter	libnetlink.c	/^int rtnl_dump_filter(struct rtnl_handle *rth,$/;"	f
+rtnl_dump_request	libnetlink.c	/^int rtnl_dump_request(struct rtnl_handle *rth, int type, void *req, int len)$/;"	f
+rtnl_filter_t	libnetlink.h	/^typedef int (*rtnl_filter_t)(const struct sockaddr_nl *, $/;"	t
+rtnl_from_file	libnetlink.c	/^int rtnl_from_file(FILE *rtnl, rtnl_filter_t handler,$/;"	f
+rtnl_handle	libnetlink.h	/^struct rtnl_handle$/;"	s
+rtnl_listen	libnetlink.c	/^int rtnl_listen(struct rtnl_handle *rtnl,$/;"	f
+rtnl_open	libnetlink.c	/^int rtnl_open(struct rtnl_handle *rth, unsigned subscriptions)$/;"	f
+rtnl_open_byproto	libnetlink.c	/^int rtnl_open_byproto(struct rtnl_handle *rth, unsigned subscriptions,$/;"	f
+rtnl_rtdsfield_init	rt_names.c	/^static int rtnl_rtdsfield_init;$/;"	v	file:
+rtnl_rtdsfield_initialize	rt_names.c	/^static void rtnl_rtdsfield_initialize(void)$/;"	f	file:
+rtnl_rtdsfield_tab	rt_names.c	/^static char * rtnl_rtdsfield_tab[256] = {$/;"	v	file:
+rtnl_rtntype_a2n	rtm_map.c	/^int rtnl_rtntype_a2n(int *id, char *arg)$/;"	f
+rtnl_rtntype_n2a	rtm_map.c	/^char *rtnl_rtntype_n2a(int id, char *buf, int len)$/;"	f
+rtnl_rtprot_a2n	rt_names.c	/^int rtnl_rtprot_a2n(__u32 *id, char *arg)$/;"	f
+rtnl_rtprot_init	rt_names.c	/^static int rtnl_rtprot_init;$/;"	v	file:
+rtnl_rtprot_initialize	rt_names.c	/^static void rtnl_rtprot_initialize(void)$/;"	f	file:
+rtnl_rtprot_n2a	rt_names.c	/^char * rtnl_rtprot_n2a(int id, char *buf, int len)$/;"	f
+rtnl_rtprot_tab	rt_names.c	/^static char * rtnl_rtprot_tab[256] = {$/;"	v	file:
+rtnl_rtrealm_a2n	rt_names.c	/^int rtnl_rtrealm_a2n(__u32 *id, char *arg)$/;"	f
+rtnl_rtrealm_init	rt_names.c	/^static int rtnl_rtrealm_init;$/;"	v	file:
+rtnl_rtrealm_initialize	rt_names.c	/^static void rtnl_rtrealm_initialize(void)$/;"	f	file:
+rtnl_rtrealm_n2a	rt_names.c	/^char * rtnl_rtrealm_n2a(int id, char *buf, int len)$/;"	f
+rtnl_rtrealm_tab	rt_names.c	/^static char * rtnl_rtrealm_tab[256] = {$/;"	v	file:
+rtnl_rtscope_a2n	rt_names.c	/^int rtnl_rtscope_a2n(__u32 *id, char *arg)$/;"	f
+rtnl_rtscope_init	rt_names.c	/^static int rtnl_rtscope_init;$/;"	v	file:
+rtnl_rtscope_initialize	rt_names.c	/^static void rtnl_rtscope_initialize(void)$/;"	f	file:
+rtnl_rtscope_n2a	rt_names.c	/^char * rtnl_rtscope_n2a(int id, char *buf, int len)$/;"	f
+rtnl_rtscope_tab	rt_names.c	/^static char * rtnl_rtscope_tab[256] = {$/;"	v	file:
+rtnl_rttable_a2n	rt_names.c	/^int rtnl_rttable_a2n(__u32 *id, char *arg)$/;"	f
+rtnl_rttable_init	rt_names.c	/^static int rtnl_rttable_init;$/;"	v	file:
+rtnl_rttable_initialize	rt_names.c	/^static void rtnl_rttable_initialize(void)$/;"	f	file:
+rtnl_rttable_n2a	rt_names.c	/^char * rtnl_rttable_n2a(int id, char *buf, int len)$/;"	f
+rtnl_rttable_tab	rt_names.c	/^static char * rtnl_rttable_tab[256] = {$/;"	v	file:
+rtnl_send	libnetlink.c	/^int rtnl_send(struct rtnl_handle *rth, const char *buf, int len)$/;"	f
+rtnl_tab_initialize	rt_names.c	/^static void rtnl_tab_initialize(char *file, char **tab, int size)$/;"	f	file:
+rtnl_talk	libnetlink.c	/^int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,$/;"	f
+rtnl_wilddump_request	libnetlink.c	/^int rtnl_wilddump_request(struct rtnl_handle *rth, int family, int type)$/;"	f
+rvia	iproute.h	/^	inet_prefix rvia;$/;"	m	struct:__anon3
+scale	tc_util.c	/^	double scale;$/;"	m	struct:rate_suffix	file:
+scope	iproute.h	/^	int scope, scopemask;$/;"	m	struct:__anon3
+scopemask	iproute.h	/^	int scope, scopemask;$/;"	m	struct:__anon3
+seq	libnetlink.h	/^	__u32			seq;$/;"	m	struct:rtnl_handle
+show_details	tc.c	/^int show_details = 0;$/;"	v
+show_raw	tc.c	/^int show_raw = 0;$/;"	v
+show_stats	tc.c	/^int show_stats = 0;$/;"	v
+sock_ntop_host	routing_info.c	/^char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen)$/;"	f
+sprint_percent	tc_util.c	/^char * sprint_percent(__u32 per, char *buf)$/;"	f
+sprint_qdisc_handle	tc_util.c	/^char * sprint_qdisc_handle(__u32 h, char *buf)$/;"	f
+sprint_rate	tc_util.c	/^char * sprint_rate(__u32 rate, char *buf)$/;"	f
+sprint_size	tc_util.c	/^char * sprint_size(__u32 size, char *buf)$/;"	f
+sprint_tc_classid	tc_util.c	/^char * sprint_tc_classid(__u32 h, char *buf)$/;"	f
+sprint_ticks	q_netem.c	/^static char *sprint_ticks(__u32 ticks, char *buf)$/;"	f	file:
+sprint_usecs	tc_util.c	/^char * sprint_usecs(__u32 usecs, char *buf)$/;"	f
+suffixes	tc_util.c	/^} suffixes[] = {$/;"	v	typeref:struct:rate_suffix	file:
+t2us	tc_core.c	/^static __u32 t2us = 1;$/;"	v	file:
+tb	iproute.h	/^	int tb;$/;"	m	struct:__anon3
+tbf_parse_opt	q_tbf.c	/^static int tbf_parse_opt(struct qdisc_util *qu, struct qdisc_data* qp,$/;"	f	file:
+tbf_print_opt	q_tbf.c	/^static int tbf_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)$/;"	f	file:
+tbf_qdisc_util	q_tbf.c	/^struct qdisc_util tbf_qdisc_util = {$/;"	v	typeref:struct:qdisc_util
+tc_calc_rtable	tc_core.c	/^int tc_calc_rtable(unsigned bps, __u32 *rtab, int cell_log, unsigned mtu,$/;"	f
+tc_calc_xmittime	tc_core.c	/^unsigned tc_calc_xmittime(unsigned rate, unsigned size)$/;"	f
+tc_cmd	libtc.c	/^tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type)$/;"	f
+tc_cmd	test.c	/^tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type)$/;"	f
+tc_core_init	tc_core.c	/^int tc_core_init()$/;"	f
+tc_core_tick2usec	tc_core.c	/^long tc_core_tick2usec(long tick)$/;"	f
+tc_core_usec2tick	tc_core.c	/^long tc_core_usec2tick(long usec)$/;"	f
+tc_filter_list	tc_filter.c	/^int tc_filter_list(int argc, char **argv)$/;"	f
+tc_filter_modify	tc_filter.c	/^int tc_filter_modify(int cmd, unsigned flags, int argc, char **argv)$/;"	f
+tc_qdisc_list	tc_qdisc.c	/^int tc_qdisc_list(int argc, char **argv)$/;"	f
+tc_qdisc_modify	tc_qdisc.c	/^int tc_qdisc_modify(int cmd, unsigned flags, char* dev, char* handle_id, char **argv)$/;"	f
+tc_ticks	q_netem.c	/^long tc_ticks(long usec)$/;"	f
+tick_in_usec	tc_core.c	/^static double tick_in_usec = 1;$/;"	v	file:
+time	do_wireconf.c	/^  float time;$/;"	m	struct:__anon1	file:
+timer_free	timer.c	/^void timer_free(timer_handle *handle)$/;"	f
+timer_handle	timer.h	/^} timer_handle;$/;"	t	typeref:struct:__anon4
+timer_init	timer.c	/^timer_handle *timer_init(void)$/;"	f
+timer_reset	timer.c	/^void timer_reset(timer_handle *handle)$/;"	f
+timer_wait	timer.c	/^int timer_wait(timer_handle *handle, uint64_t time_in_us)$/;"	f
+tos	iproute.h	/^	int tos, tosmask;$/;"	m	struct:__anon3
+tosmask	iproute.h	/^	int tos, tosmask;$/;"	m	struct:__anon3
+type	iproute.h	/^	int type, typemask;$/;"	m	struct:__anon3
+type	ll_map.c	/^	int		type;$/;"	m	struct:idxmap	file:
+typemask	iproute.h	/^	int type, typemask;$/;"	m	struct:__anon3
+us2t	tc_core.c	/^static __u32 us2t = 1;$/;"	v	file:
+usage	do_wireconf.c	/^void usage(char *argv0)$/;"	f
+usage	q_netem.c	45;"	d	file:
+usage	q_tbf.c	38;"	d	file:
+usage	tc_filter.c	/^static void usage(void)$/;"	f	file:
+usage	tc_qdisc.c	/^static int usage(void)$/;"	f	file:
+use_iec	tc.c	/^int use_iec = 0;$/;"	v
+word	wireconf.c	/^  uint32_t word;$/;"	m	union:__anon6	file:
+zero	timer.h	/^  uint64_t zero;$/;"	m	struct:__anon4

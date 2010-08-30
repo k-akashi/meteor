@@ -93,13 +93,15 @@ int get_next_hop_ip(char *dst, char *next_hop)
   char *buf;
   pid_t pid;
 
-  struct sockaddr *sa, *rti_info[RTAX_MAX];
+  struct sockaddr *sa; 
+  struct sockaddr *rti_info[RTAX_MAX];
   struct sockaddr_in *sin;
   char *gw;
 
 #ifdef __FreeBSD__
   struct rt_msghdr *rtm;
 #elif __linux
+  memset(rti_info[RTAX_MAX], 0, sizeof(rti_info));
   struct rtmsg *rtm;
 #endif
 

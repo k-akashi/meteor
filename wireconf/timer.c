@@ -77,7 +77,7 @@
 // get the frequency of the CPU
 unsigned int get_cpu_frequency(void)
 {
-  uint32_t hz;
+  uint32_t hz = 0;
 
   // use system call to get CPU frequency
 #ifdef __FreeBSD__
@@ -87,7 +87,7 @@ unsigned int get_cpu_frequency(void)
 //  hz = sysconf(_SC_CLK_TCK);
 	FILE *cpuinfo;
 	double tmp_hz;
-	char *str;
+	char *str = NULL;
 	char buff[10];
 
     cpuinfo = fopen("/proc/cpuinfo", "rb");

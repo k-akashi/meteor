@@ -1,0 +1,42 @@
+
+.SUFFIXES:  .c .o
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
+.o:
+	$(CC) -o $@ $< $(LDFLAGS) $(LDLIBS)
+
+CC = gcc
+HOSTCC = gcc
+CFLAGS = -I. -g -Werror -Wall -D_GNU_SOURCE -O2 -Wstrict-prototypes
+DEFINES = -DRESOLVE_HOSTNAMES
+LDFLAGS = -L.
+LDLIBS = -ltc -lnetlink -lm -ldl
+
+TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
+
+ALLOBJ=$(TOBJ) $(RTMONOBJ)
+NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
+TCOBJ=tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o #q_tbf.o
+TESTOBJ=test.o
+TARGETS=test
+
+all: libnetlink.a libtc.a q_netem.so test
+#$(TARGETS)
+
+q_netem.so: q_netem.c
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< -o $@ 
+
+libnetlink.a: $(NLOBJ)
+	$(AR) rcs $@ $(NLOBJ) && ranlib $@
+
+libtc.a: $(TCOBJ)
+	$(AR) rcs $@ $(TCOBJ) && ranlib $@
+
+ip: $(IPOBJ) $(LIBNETLINK) $(LIBUTIL)
+
+test: libnetlink.a libtc.a $(TOBJ) $(LIBNETLINK) $(TESTOBJ)
+	gcc -export-dynamic -o $@ test.o $(LDFLAGS) $(LDLIBS)
+
+clean:
+	rm -f $(ALLOBJ) $(TARGETS) $(NLOBJ) *.o *.so
+
