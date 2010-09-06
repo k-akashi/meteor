@@ -425,19 +425,27 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
 int
 add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direction)
 {
-	//system("tc qdisc add dev lo root handle 10: netem delay 0ms");
-	//struct qdisc_parameter qp;
-	//qp.limit = "1000";
-	//qp.delay = "0ms";
-	//qp.jitter = "0";
-    //qp.delay_corr = "0";
-    //qp.loss = "0";
-    //qp.loss_corr = "0";
-    //qp.reorder_prob = "0";
-    //qp.reorder_corr = "0";
-	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem");
-	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, "lo", "1", "1", qp, "netem");
+	//system("tc qdisc add dev lo root handle 10: netem delay 1us");
 	//system("tc qdisc add dev lo parent 10:1 handle 100: tbf rate 100mbit limit 10mb buffer 10kb/8");
+	struct qdisc_parameter qp;
+	char handleid[10];
+
+	// netem parameter set
+	memset(&qp, 0, sizeof(qp));
+
+	sprintf(handleid, "%d", handle_nr);
+	printf("rulenum = %s\n", handleid);
+
+	qp.limit = "1000";
+	qp.delay = "1us";
+	qp.jitter = "0";
+    qp.delay_corr = "0";
+    qp.loss = "0";
+    qp.loss_corr = "0";
+    qp.reorder_prob = "0";
+    qp.reorder_corr = "0";
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
+
 	return 0;
 }
 #endif
@@ -472,7 +480,12 @@ int delete_rule(uint s, u_int32_t rule_number)
       return ERROR;
     }
 #elif __linux
+	printf("delete qdisc\n");
+	struct qdisc_parameter qp;
+
+	memset(&qp, 0, sizeof(qp));
 	system("tc qdisc del dev lo root");
+	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
 #endif
 
   return SUCCESS;
@@ -539,34 +552,35 @@ int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)
 #elif __linux
 int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate)
 {
-	char delay_cmd[100];
-	char bw_cmd[100];
-	//char *delaystr = NULL;
-	//char *loss = NULL;
+	struct qdisc_parameter qp;
+	char delaystr[20];
+	char loss[20];
+	char handleid[10];
+	//char bw_cmd[100];
+	printf("rulenum = %d\n", handle);
+
+	memset(&qp, 0, sizeof(qp));
+
+	sprintf(handleid, "%d", handle);
+	sprintf(delaystr, "%dms", delay);
+	sprintf(loss, "%f", lossrate);
+	printf("configure qdisc\n");
+
+	qp.limit = "1000";
+	qp.delay = delaystr;
+	qp.jitter = "0";
+    qp.delay_corr = "0";
+	qp.loss = loss;
+    qp.loss_corr = "0";
+    qp.reorder_prob = "0";
+    qp.reorder_corr = "0";
 	
-	//sprintf(delaystr, "%d", delay);
-	//sprintf(loss, "%f", lossrate);
-	//struct qdisc_parameter qp =  {"1000", "0", "10", "0", "0", "0", "0", "0"};
-	//qp.delay = delaystr;
-	//qp.loss = loss;
-
-	if (delay && lossrate)
-	{
-		sprintf(delay_cmd, "tc qdisc change dev lo root handle 10: netem delay %dms loss %f", 
-			delay, lossrate);
-	}
-	else if (!lossrate)
-	{
-		sprintf(delay_cmd, "tc qdisc change dev lo root handle 10: netem delay %dms", 
-			delay);
-	}
+	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
 	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem");
-	//tc_cmd(RTM_NEWQDISC, 0, "lo", "1", "1", qp, "netem");
-	sprintf(bw_cmd, "tc qdisc change dev lo parent 1:1 handle 100: tbf rate %dbit limit 15kb buffer 10kb/8", 
-		bandwidth);
+	//sprintf(bw_cmd, "tc qdisc change dev lo parent 1:1 handle 100: tbf rate %dbit limit 15kb buffer 10kb/8", 
+	//	bandwidth);
 
-	system(delay_cmd);
-	system(bw_cmd);
+	//system(bw_cmd);
 
 	return SUCCESS;
 }

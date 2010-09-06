@@ -280,6 +280,7 @@ int main(int argc, char *argv[])
   time_period = -1;
   strncpy(broadcast_address, "255.255.255.255", IP_ADDR_SIZE);
 
+
   if(argc<2)
     {
       WARNING("No arguments provided");

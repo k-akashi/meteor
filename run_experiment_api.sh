@@ -65,7 +65,7 @@ echo "-- Running experiment..."
 # Start server application
 echo
 echo "* Starting server..."
-/usr/local/bin/iperf -s -u -i 0.5 -f k > ${output_name}_iperf_s.out -l $packet_size&
+#/usr/local/bin/iperf -s -u -i 0.5 -f k > ${output_name}_iperf_s.out -l $packet_size&
 
 # Wait for server to start
 sleep 1
@@ -73,7 +73,7 @@ sleep 1
 # Start client application
 echo "* Starting client..."
 #/usr/local/bin/iperf -c $server_address -B $client_address -u -i 0.5 -l $packet_size -b $offered_load -t $test_duration -f k > ${output_name}_iperf_c.out &
-/usr/local/bin/iperf -c $server_address -u -i 0.5 -l $packet_size -b $offered_load -t $test_duration -f k > ${output_name}_iperf_c.out &
+#/usr/local/bin/iperf -c $server_address -u -i 0.5 -l $packet_size -b $offered_load -t $test_duration -f k > ${output_name}_iperf_c.out &
 
 # Start ping
 echo "* Starting ping..."
@@ -86,8 +86,10 @@ echo ----------------------------
 
 # Start the QOMET emulation
 echo "* Starting QOMET emulation..." 
+echo "sudo time ./wireconf/do_wireconf -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out"
 sudo time ./wireconf/do_wireconf -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out
 
+echo "finish!!"
 echo ----------------------------
 date
 echo ----------------------------
@@ -105,7 +107,7 @@ sudo killall -INT ping
 
 sleep 2
 echo Killing iperf server...
-killall -INT iperf
+#killall -INT iperf
 
 #echo Killing tcpdump...
 #sudo killall tcpdump

@@ -563,7 +563,7 @@ size_t getcmdline(char* *linep, size_t *lenp, FILE *in)
 {
 	size_t cc;
 	char* cp;
-		
+
 	if ((cc = getline(linep, lenp, in)) < 0)
 		return cc;	/* eof or error */
 	++cmdlineno;

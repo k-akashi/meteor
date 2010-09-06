@@ -98,7 +98,8 @@ struct qdisc_util* get_qdisc_kind(const char* str)
 		if (strcmp(q->id, str) == 0)
 			return q;
 
-	snprintf(buf, sizeof(buf), "./q_%s.so", str);
+	snprintf(buf, sizeof(buf), "./wireconf/q_%s.so", str);
+	printf("buf = %s\n", buf);
 	dlh = dlopen(buf, RTLD_LAZY);
 	if (!dlh) {
 		/* look in current binary, only open once */

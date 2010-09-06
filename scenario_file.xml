@@ -1,7 +1,7 @@
 
 <!-- Example scenario file for QOMET v1.3-beta -->
 
-<qomet_scenario duration="60" step="0.5">
+<qomet_scenario duration="60" step="0.1">
         
   <node name="node_ap" type="access_point" id="1"
         x="0" y="0" z="0" Pt="20" internal_delay="1"/>

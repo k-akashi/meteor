@@ -87,10 +87,14 @@ unsigned int get_cpu_frequency(void)
 //  hz = sysconf(_SC_CLK_TCK);
 	FILE *cpuinfo;
 	double tmp_hz;
-	char *str = NULL;
+	char str[256];
 	char buff[10];
 
-    cpuinfo = fopen("/proc/cpuinfo", "rb");
+    if((cpuinfo = fopen("/proc/cpuinfo", "rb")) == NULL)
+	{
+		printf("file open error!!\n");
+		exit(EXIT_FAILURE);
+	}
 
 	while(fgets(str, 256, cpuinfo) != NULL)
 	{
