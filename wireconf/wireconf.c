@@ -444,7 +444,11 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     qp.loss_corr = "0";
     qp.reorder_prob = "0";
     qp.reorder_corr = "0";
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
+	qp.rate = "1Gbit";
+	qp.buffer = "1Mbit";
+
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "tbf");
 
 	return 0;
 }
@@ -550,21 +554,49 @@ int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)
   return SUCCESS;
 }
 #elif __linux
+int convert_netemid(int handle)
+{
+	int id;
+
+	id = handle;
+	id <<= 16;
+	id |= handle;
+
+	return id;
+}
 int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate)
 {
 	struct qdisc_parameter qp;
 	char delaystr[20];
 	char loss[20];
 	char handleid[10];
+	char rate[20];
+	char buffer[20];
 	//char bw_cmd[100];
-	printf("rulenum = %d\n", handle);
 
+	int netemid;
+	netemid = convert_netemid(handle);
+	printf("netem id = %d\n", netemid);
+	netemid |= handle;
+	int parent;
+	parent = netemid;
+	parent >>= 16;
+	int child;
+	child = netemid;
+	child <<= 16;
+	child >>= 16;
+	printf("parent id = %d\n", parent);
+	printf("child id = %d\n", child);
+	
+	
+	printf("rulenum = %d\n", handle);
 	memset(&qp, 0, sizeof(qp));
 
 	sprintf(handleid, "%d", handle);
 	sprintf(delaystr, "%dms", delay);
 	sprintf(loss, "%f", lossrate);
-	printf("configure qdisc\n");
+	sprintf(rate, "%d", bandwidth);
+	sprintf(buffer, "%d", bandwidth / 1024);
 
 	qp.limit = "1000";
 	qp.delay = delaystr;
@@ -574,8 +606,11 @@ int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate
     qp.loss_corr = "0";
     qp.reorder_prob = "0";
     qp.reorder_corr = "0";
+	qp.rate = rate;
+	qp.buffer = buffer;
 	
-	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
+	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
+	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "tbf");
 	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem");
 	//sprintf(bw_cmd, "tc qdisc change dev lo parent 1:1 handle 100: tbf rate %dbit limit 15kb buffer 10kb/8", 
 	//	bandwidth);

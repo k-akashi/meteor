@@ -17,6 +17,8 @@ struct qdisc_parameter
 	char* loss_corr;
 	char* reorder_prob;
 	char* reorder_corr;
+	char* rate;
+	char* buffer;
 };
 
 struct qdisc_util

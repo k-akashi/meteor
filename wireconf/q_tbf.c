@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "tc_util.h"
 
+/*
 static void explain(void)
 {
 	fprintf(stderr, "Usage: ... tbf limit BYTES burst BYTES[/BYTES] rate KBPS [ mtu BYTES[/BYTES] ]\n");
@@ -33,23 +34,33 @@ static void explain1(char *arg)
 {
 	fprintf(stderr, "Illegal \"%s\"\n", arg);
 }
-
+*/
 
 #define usage() return(-1)
 
-static int tbf_parse_opt(struct qdisc_util *qu, struct qdisc_data* qp,
+static int tbf_parse_opt(struct qdisc_util *qu, 
+	struct qdisc_parameter* qp,
 	struct nlmsghdr *n)
 {
-	int ok=0;
+//	int ok=0;
 	struct tc_tbf_qopt opt;
 	__u32 rtab[256];
-	__u32 ptab[256];
-	unsigned buffer=0, mtu=0, mpu=0, latency=0;
-	int Rcell_log=-1, Pcell_log = -1; 
+//	__u32 ptab[256];
+	unsigned buffer  = 0;
+	unsigned mtu     = 0; 
+	unsigned mpu     = 0;
+	unsigned latency = 0;
+	int Rcell_log    = -1;
+//	int Pcell_log    = -1; 
 	struct rtattr *tail;
 
 	memset(&opt, 0, sizeof(opt));
 
+	get_rate(&opt.rate.rate, qp->rate);
+	get_usecs(&latency, "1s");
+	get_size_and_cell(&buffer, &Rcell_log, qp->buffer);
+
+/*
 	while (argc > 0) {
 		if (matches(*argv, "limit") == 0) {
 			NEXT_ARG();
@@ -68,7 +79,7 @@ static int tbf_parse_opt(struct qdisc_util *qu, struct qdisc_data* qp,
 				fprintf(stderr, "Double \"limit/latency\" spec\n");
 				return -1;
 			}
-			if (get_usecs(&latency, *argv)) {
+			if (get_usecs(&latency, "1s")) {
 				explain1("latency");
 				return -1;
 			}
@@ -120,40 +131,17 @@ static int tbf_parse_opt(struct qdisc_util *qu, struct qdisc_data* qp,
 				return -1;
 			}
 			ok++;
-		} else if (matches(*argv, "peakrate") == 0) {
-			NEXT_ARG();
-			if (opt.peakrate.rate) {
-				fprintf(stderr, "Double \"peakrate\" spec\n");
-				return -1;
-			}
-			if (get_rate(&opt.peakrate.rate, *argv)) {
-				explain1("peakrate");
-				return -1;
-			}
-			ok++;
-		} else if (strcmp(*argv, "help") == 0) {
-			explain();
-			return -1;
-		} else {
-			fprintf(stderr, "What is \"%s\"?\n", *argv);
-			explain();
-			return -1;
 		}
 		argc--; argv++;
 	}
+*/
 
-	if (!ok)
-		return 0;
+//	if (!ok)
+//		return 0;
 
 	if (opt.rate.rate == 0 || !buffer) {
 		fprintf(stderr, "Both \"rate\" and \"burst\" are required.\n");
 		return -1;
-	}
-	if (opt.peakrate.rate) {
-		if (!mtu) {
-			fprintf(stderr, "\"mtu\" is required, if \"peakrate\" is requested.\n");
-			return -1;
-		}
 	}
 
 	if (opt.limit == 0 && latency == 0) {
@@ -178,23 +166,14 @@ static int tbf_parse_opt(struct qdisc_util *qu, struct qdisc_data* qp,
 	opt.buffer = tc_calc_xmittime(opt.rate.rate, buffer);
 	opt.rate.cell_log = Rcell_log;
 	opt.rate.mpu = mpu;
-	if (opt.peakrate.rate) {
-		if ((Pcell_log = tc_calc_rtable(opt.peakrate.rate, ptab, Pcell_log, mtu, mpu)) < 0) {
-			fprintf(stderr, "TBF: failed to calculate peak rate table.\n");
-			return -1;
-		}
-		opt.mtu = tc_calc_xmittime(opt.peakrate.rate, mtu);
-		opt.peakrate.cell_log = Pcell_log;
-		opt.peakrate.mpu = mpu;
-	}
 
 	tail = NLMSG_TAIL(n);
 	addattr_l(n, 1024, TCA_OPTIONS, NULL, 0);
 	addattr_l(n, 2024, TCA_TBF_PARMS, &opt, sizeof(opt));
 	addattr_l(n, 3024, TCA_TBF_RTAB, rtab, 1024);
-	if (opt.peakrate.rate)
-		addattr_l(n, 4096, TCA_TBF_PTAB, ptab, 1024);
+
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;
+	printf("debug!!\n");
 	return 0;
 }
 
