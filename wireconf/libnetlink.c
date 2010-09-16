@@ -293,7 +293,7 @@ int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,
 			int len = h->nlmsg_len;
 			int l = len - sizeof(*h);
 
-			printf("nlmsg       = %d\n", sizeof(*h));
+			printf("nlmsg       = %d\n", (int)sizeof(*h));
 			printf("nlmsg_len   = %d\n", h->nlmsg_len);
 			printf("nlmsg_type  = %d\n", h->nlmsg_type);
 			printf("nlmsg_flags = %d\n", h->nlmsg_flags);
