@@ -134,10 +134,10 @@ static int tbf_parse_opt(struct qdisc_util *qu,
 		}
 		argc--; argv++;
 	}
-*/
 
-//	if (!ok)
-//		return 0;
+	if (!ok)
+		return 0;
+*/
 
 	if (opt.rate.rate == 0 || !buffer) {
 		fprintf(stderr, "Both \"rate\" and \"burst\" are required.\n");
@@ -173,7 +173,7 @@ static int tbf_parse_opt(struct qdisc_util *qu,
 	addattr_l(n, 3024, TCA_TBF_RTAB, rtab, 1024);
 
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;
-	printf("debug!!\n");
+
 	return 0;
 }
 

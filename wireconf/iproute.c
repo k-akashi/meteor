@@ -39,13 +39,13 @@
 #define RTAX_RTTVAR RTAX_HOPS
 #endif
 
-static char *mp_alg_names[IP_MP_ALG_MAX+1] = {
-	[IP_MP_ALG_NONE] = "none",
-	[IP_MP_ALG_RR] = "rr",
-	[IP_MP_ALG_DRR] = "drr",
-	[IP_MP_ALG_RANDOM] = "random",
-	[IP_MP_ALG_WRANDOM] = "wrandom"
-};
+//static char *mp_alg_names[IP_MP_ALG_MAX+1] = {
+//	[IP_MP_ALG_NONE] = "none",
+//	[IP_MP_ALG_RR] = "rr",
+//	[IP_MP_ALG_DRR] = "drr",
+//	[IP_MP_ALG_RANDOM] = "random",
+//	[IP_MP_ALG_WRANDOM] = "wrandom"
+//};
 
 /*
 static int flush_update(void)
@@ -779,18 +779,18 @@ int iproute_modify(int cmd, unsigned flags, int argc, char *argv)
 			   strcmp(argv, "oif") == 0) {
 			NEXT_ARG();
 			d = argv;
-		} else if (strcmp(argv, "mpath") == 0 ||
-			   strcmp(argv, "mp") == 0) {
-			int i;
-			__u32 mp_alg = IP_MP_ALG_NONE;
-
-			NEXT_ARG();
-			for (i = 1; i < ARRAY_SIZE(mp_alg_names); i++)
-				if (strcmp(argv, mp_alg_names[i]) == 0)
-					mp_alg = i;
-			if (mp_alg == IP_MP_ALG_NONE)
-				invarg("\"mpath\" value is invalid\n", argv);
-			addattr_l(&req.n, sizeof(req), RTA_MP_ALGO, &mp_alg, sizeof(mp_alg));
+//		} else if (strcmp(argv, "mpath") == 0 ||
+//			   strcmp(argv, "mp") == 0) {
+//			int i;
+//			__u32 mp_alg = IP_MP_ALG_NONE;
+//
+//			NEXT_ARG();
+//			for (i = 1; i < ARRAY_SIZE(mp_alg_names); i++)
+//				if (strcmp(argv, mp_alg_names[i]) == 0)
+//					mp_alg = i;
+//			if (mp_alg == IP_MP_ALG_NONE)
+//				invarg("\"mpath\" value is invalid\n", argv);
+//			addattr_l(&req.n, sizeof(req), RTA_MP_ALGO, &mp_alg, sizeof(mp_alg));
 		} else {
 //			int type;
 			inet_prefix dst;

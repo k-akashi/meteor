@@ -96,6 +96,7 @@ extern int  tc_print_ipt(FILE *f, const struct rtattr *tb);
 extern int  parse_action(int *, char ***, int, struct nlmsghdr *);
 extern void print_tm(FILE *f, const struct tcf_t *tm);
 
+//extern int tc_cmd(int cmd, int flags, char* dev, char* parentid, char* handleid, int root, struct qdisc_parameter qp, char* type);
 extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
 extern char* get_route_info(char *info, char *addr);
 
