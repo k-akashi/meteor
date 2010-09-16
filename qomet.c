@@ -540,7 +540,7 @@ int main(int argc, char *argv[])
   if(xml_scenario==NULL)
     {
       WARNING("Cannot allocate memory (tried %d bytes)", 
-	      sizeof(xml_scenario_class));
+	      (int)sizeof(xml_scenario_class));
       goto ERROR_HANDLE;
     }
 
