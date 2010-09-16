@@ -28,7 +28,7 @@
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 #include <linux/in_route.h>
-#include <linux/ip_mp_alg.h>
+//#include <linux/ip_mp_alg.h>
 
 #include "rt_names.h"
 #include "utils.h"
