@@ -97,7 +97,11 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
 
 // delete an ipfw rule;
 // return SUCCESS on succes, ERROR on error
+#ifdef __FreeBSD__
 int delete_rule(uint s, u_int32_t rule_number);
+#elif __linux
+int delete_netem(uint s, char* dst, u_int32_t rule_number);
+#endif
 
 // print a rule structure
 #ifdef __FreeBSD__

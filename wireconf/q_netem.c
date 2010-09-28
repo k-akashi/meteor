@@ -148,37 +148,53 @@ static int netem_parse_opt(struct qdisc_util* qu,
 	memset(&corrupt, 0, sizeof(corrupt));
 
 	printf("debug message : netem_parse_opt\n");
-	if(get_size(&opt.limit, qp->limit)){
-		explain1("limit");
-		return -1;
+	if(qp->limit) {
+		if(get_size(&opt.limit, qp->limit)){
+			explain1("limit");
+			return -1;
+		}
 	}
-	if(get_ticks(&opt.latency, qp->delay)){
-		explain1("latency");
-		return -1;
+	if(qp->delay) {
+		if(get_ticks(&opt.latency, qp->delay)){
+			explain1("latency");
+			return -1;
+		}
 	}
-	if(get_ticks(&opt.jitter, qp->jitter)){
-		explain1("latency");
-		return -1;
+	if(qp->jitter) {
+		if(get_ticks(&opt.jitter, qp->jitter)){
+			explain1("latency");
+			return -1;
+		}
 	}
-	if(get_percent(&cor.delay_corr, qp->delay_corr)){
-		explain1("latency");
-		return -1;
+	if(qp->delay_corr) {
+		if(get_percent(&cor.delay_corr, qp->delay_corr)){
+			explain1("latency");
+			return -1;
+		}
 	}
-	if(get_percent(&opt.loss, qp->loss)){
-		explain1("loss");
-		return -1;
+	if(qp->loss) {
+		if(get_percent(&opt.loss, qp->loss)){
+			explain1("loss");
+			return -1;
+		}
 	}
-	if(get_percent(&cor.loss_corr, qp->loss_corr)){
-		explain1("loss");
-		return -1;
+	if(qp->loss_corr) {
+		if(get_percent(&cor.loss_corr, qp->loss_corr)){
+			explain1("loss");
+			return -1;
+		}
 	}
-	if(get_percent(&reorder.probability, qp->reorder_prob)){
-		explain1("reorder");
-		return -1;
+	if(qp->reorder_prob) {
+		if(get_percent(&reorder.probability, qp->reorder_prob)){
+			explain1("reorder");
+			return -1;
+		}
 	}
-	if(get_percent(&reorder.correlation, qp->reorder_corr)){
-		explain1("reorder");
-		return -1;
+	if(qp->reorder_corr) {
+		if(get_percent(&reorder.correlation, qp->reorder_corr)){
+			explain1("reorder");
+			return -1;
+		}
 	}
 
 	tail = NLMSG_TAIL(n);

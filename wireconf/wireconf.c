@@ -462,6 +462,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 
 // delete an ipfw rule;
 // return SUCCESS on succes, ERROR on error
+#ifdef __FreeBSD__
 int delete_rule(uint s, u_int32_t rule_number)
 {
   // Note: rule number is of type u_int16_t in ip_fw.h,
@@ -482,19 +483,39 @@ int delete_rule(uint s, u_int32_t rule_number)
    *	second u_int32_t contains sets to be enabled.
    */
 
-#ifdef __FreeBSD__
   // do delete rule
   if(apply_socket_options(s, IP_FW_DEL, &rule_number, sizeof(rule_number)) < 0)
     {
       WARNING("Delete rule operation failed");
       return ERROR;
     }
+
+  return SUCCESS;
+}
 #elif __linux
+int delete_netem(uint s, char* dst, u_int32_t rule_number)
+{
 	printf("delete qdisc\n");
 	struct qdisc_parameter qp;
 
 	memset(&qp, 0, sizeof(qp));
-	system("tc qdisc del dev lo root");
+
+/*
+	qp.limit = "1000";
+	qp.delay = "1us";
+	qp.jitter = "0";
+	qp.delay_corr = "0";
+	qp.loss = "0";
+	qp.loss_corr = "0";
+	qp.reorder_prob = "0";
+	qp.reorder_corr = "0";
+	qp.rate = "1Gbit";
+	qp.buffer = "1Mbit";
+*/
+
+	//system("tc qdisc del dev lo root");
+	tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
+	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
 #endif
 

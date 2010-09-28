@@ -906,11 +906,19 @@ loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_N
   // delete the dummynet rule
   if(usage_type==1)
     {
+#ifdef __FreeBSD__
       if(delete_rule(s, rulenum)==ERROR)
 	{
 	  WARNING("Could not delete rule #%d", rulenum);
 	  exit(1);
 	}
+#elif __linux
+      if(delete_netem(s, taddr, rulenum)==ERROR)
+	{
+	  WARNING("Could not delete rule #%d", rulenum);
+	  exit(1);
+	}
+#endif
     }
   else // usage (2) => delete multiple rules
     {
@@ -922,10 +930,17 @@ loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_N
 
 	  offset_num = j;
 	  INFO("Deleting rule %d...", MIN_PIPE_ID_OUT+offset_num);
+#ifdef __FreeBSD__
 	  if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num)==ERROR)
 	    {
 	      WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
 	    }
+#elif __linux
+	  if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num)==ERROR)
+	    {
+	      WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
+	    }
+#endif
 	}
 
       //delete broadcast dummynet rules
@@ -936,11 +951,19 @@ loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_N
         
 	  offset_num = j;
 	  INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST+offset_num);
+#ifdef __FreeBSD__
 	  if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR)
 	    {
 	      WARNING("Could not delete rule #%d", 
 		      MIN_PIPE_ID_IN_BCAST+offset_num);
 	    }
+#elif __linux
+	  if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR)
+		{
+	      WARNING("Could not delete rule #%d", 
+		      MIN_PIPE_ID_IN_BCAST+offset_num);
+		}
+#endif
 	}
     }
 

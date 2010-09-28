@@ -8,28 +8,7 @@ From 192.168.100.2 icmp_seq=24 Destination Host Unreachable
 From 192.168.100.2 icmp_seq=34 Destination Host Unreachable
 From 192.168.100.2 icmp_seq=35 Destination Host Unreachable
 From 192.168.100.2 icmp_seq=36 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=46 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=47 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=48 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=58 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=59 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=60 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=70 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=71 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=72 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=82 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=83 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=84 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=94 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=95 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=96 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=106 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=107 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=108 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=118 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=119 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=120 Destination Host Unreachable
 
 --- 192.168.100.100 ping statistics ---
-128 packets transmitted, 0 received, +30 errors, 100% packet loss, time 32023ms
+40 packets transmitted, 0 received, +9 errors, 100% packet loss, time 9827ms
 , pipe 3

@@ -88,6 +88,8 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	} req;
 
 	memset(&req, 0, sizeof(req));
+	memset(&d, 0, sizeof(d));
+	memset(&k, 0, sizeof(k));
 
 	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
@@ -95,8 +97,10 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	req.t.tcm_family = AF_UNSPEC;
 
 	strncpy(d, dev, sizeof(d) - 1);
-	get_qdisc_handle(&handle, handleid);
-	req.t.tcm_handle = handle;
+	if(cmd != RTM_DELQDISC) {
+		get_qdisc_handle(&handle, handleid);
+		req.t.tcm_handle = handle;
+	}
 	req.t.tcm_parent = TC_H_ROOT;
 	
 	int idx;
@@ -112,11 +116,16 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	strncpy(k, type, sizeof(k) - 1);
 	q = get_qdisc_kind(k);
 
-	if(k[0])
+	if(k[0]) {
 		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);
+	}
 
-	if(q->parse_qopt(q, &qp, &req.n))
-		return 1;
+	if(q) {
+		if(q->parse_qopt(q, &qp, &req.n)) {
+			return 1;
+		}
+	}
+	printf("debug message!!\n");
 
 	if(d[0]){
 		int idx;
@@ -129,6 +138,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 		}
 		req.t.tcm_ifindex = idx;
     }
+
 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
 		return -1;
 
