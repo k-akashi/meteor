@@ -453,8 +453,8 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	qp.rate = "1Gbit";
 	qp.buffer = "1Mbit";
 
-	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "tbf");
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "tbf");
 
 	return 0;
 }
