@@ -659,7 +659,7 @@ loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 		  //lossrate = (int)rint(lossrate * 0x7fffffff);
 
 		  // do configure Qdisc
-		  configure_qdisc(s, pipe_nr, bandwidth, delay, lossrate);
+		  configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
 #endif
 
 	      // increase loop counter

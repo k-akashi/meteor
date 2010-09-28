@@ -570,7 +570,7 @@ int convert_netemid(int handle)
 
 	return id;
 }
-int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate)
+int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate)
 {
 	struct qdisc_parameter qp;
 	char delaystr[20];
@@ -615,7 +615,8 @@ int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate
 	qp.rate = rate;
 	qp.buffer = buffer;
 	
-	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
+	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
+	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
 	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem");
 	//sprintf(bw_cmd, "tc qdisc change dev lo parent 1:1 handle 100: tbf rate %dbit limit 15kb buffer 10kb/8", 
 	//	bandwidth);
