@@ -110,6 +110,12 @@
 #endif
 
 
+//static struct 
+//{
+//	char netem_child[20];
+//	char tbf_child[20];
+//}rootid;
+
 ///////////////////////////////////////////////
 // IPv4 address data structure and manipulation
 ///////////////////////////////////////////////
@@ -574,6 +580,8 @@ int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate
 	char buffer[20];
 	//char bw_cmd[100];
 
+	memset(&qp, 0, sizeof(qp));
+
 	int netemid;
 	netemid = convert_netemid(handle);
 	printf("netem id = %d\n", netemid);
@@ -588,9 +596,7 @@ int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate
 	printf("parent id = %d\n", parent);
 	printf("child id = %d\n", child);
 	
-	
 	printf("rulenum = %d\n", handle);
-	memset(&qp, 0, sizeof(qp));
 
 	sprintf(handleid, "%d", handle);
 	sprintf(delaystr, "%dms", delay);
@@ -609,9 +615,7 @@ int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate
 	qp.rate = rate;
 	qp.buffer = buffer;
 	
-	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "tbf");
-	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "1", 1, qp, "netem");
-	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "1", 0, qp, "tbf");
+	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
 	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem");
 	//sprintf(bw_cmd, "tc qdisc change dev lo parent 1:1 handle 100: tbf rate %dbit limit 15kb buffer 10kb/8", 
 	//	bandwidth);

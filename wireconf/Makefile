@@ -24,7 +24,7 @@ CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
 LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl
-TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so do_wireconf test
+TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_prio.so do_wireconf test
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
@@ -48,6 +48,9 @@ q_netem.so: q_netem.c
 
 q_tbf.so: q_tbf.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 
+
+q_prio.so: q_prio.c
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< -o $@
 
 libnetlink.a: $(NLOBJ)
 	$(AR) rcs $@ $(NLOBJ) && ranlib $@

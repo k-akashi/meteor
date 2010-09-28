@@ -11,11 +11,11 @@ BANDWIDTH	do_wireconf.c	98;"	d	file:
 BODY	tc.c	/^static void *BODY = NULL;	\/* cached handle dlopen(NULL) *\/$/;"	v	file:
 CC	Makefile	/^CC      = gcc$/;"	m
 CFLAGS	Makefile	/^CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
-CFLAGS	Makefile	/^CFLAGS  = -I. -g -Werror -Wall -D_GNU_SOURCE -O2 -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
+CFLAGS	Makefile	/^CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
 DEBUG	message.h	56;"	d
 DEBUG	message.h	61;"	d
-DEBUG	wireconf.c	94;"	d	file:
-DEBUG	wireconf.c	99;"	d	file:
+DEBUG	wireconf.c	100;"	d	file:
+DEBUG	wireconf.c	95;"	d	file:
 DEFINES	Makefile	/^DEFINES = -DRESOLVE_HOSTNAMES$/;"	m
 DELAY	do_wireconf.c	99;"	d	file:
 DIRECTION_BOTH	wireconf.h	64;"	d
@@ -28,8 +28,8 @@ FIRST_NODE_ID	global.h	60;"	d
 HOSTCC	Makefile	/^HOSTCC  = gcc$/;"	m
 INFO	message.h	65;"	d
 INFO	message.h	69;"	d
-INFO	wireconf.c	103;"	d	file:
-INFO	wireconf.c	108;"	d	file:
+INFO	wireconf.c	104;"	d	file:
+INFO	wireconf.c	109;"	d	file:
 IPPROTO_AH	utils.h	24;"	d
 IPPROTO_COMP	utils.h	27;"	d
 IPPROTO_ESP	utils.h	21;"	d
@@ -37,7 +37,7 @@ IPSEC_PROTO_ANY	utils.h	30;"	d
 IPX_NODE_LEN	utils.h	64;"	d
 IP_ADDR_SIZE	global.h	58;"	d
 LDFLAGS	Makefile	/^LDFLAGS = -L.$/;"	m
-LDLIBS	Makefile	/^LDLIBS  = -ltc -lnetlink -lwireconf -ltimer -lm -ldl$/;"	m
+LDLIBS	Makefile	/^LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl$/;"	m
 LDLIBS	Makefile	/^LDLIBS  = -lwireconf -ltimer -lm$/;"	m
 LOOP_COUNT	do_wireconf.c	101;"	d	file:
 MAXDIST	q_netem.c	53;"	d	file:
@@ -68,10 +68,10 @@ RT_NAMES_H_	rt_names.h	2;"	d
 SPRINT_BSIZE	utils.h	33;"	d
 SPRINT_BUF	utils.h	34;"	d
 SUCCESS	global.h	53;"	d
-TARGETS	Makefile	/^TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so do_wireconf test$/;"	m
-TARGETS	Makefile	/^TARGETS = libtc.a libwireconf.a libtimer.a do_wireconf$/;"	m
+TARGETS	Makefile	/^TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so do_wireconf test$/;"	m
+TARGETS	Makefile	/^TARGETS = libwireconf.a libtimer.a do_wireconf$/;"	m
 TCA_BUF_MAX	tc_common.h	2;"	d
-TCOBJ	Makefile	/^TCOBJ=test.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o #q_tbf.o$/;"	m
+TCOBJ	Makefile	/^TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o #q_tbf.o$/;"	m
 TC_H_ROOT	libtc.c	20;"	d	file:
 TC_H_ROOT	test.c	20;"	d	file:
 TC_H_UNSPEC	libtc.c	19;"	d	file:
@@ -84,8 +84,8 @@ WARNING	message.h	47;"	d
 WARNING	message.h	52;"	d
 WARNING	timer.c	64;"	d	file:
 WARNING	timer.c	69;"	d	file:
-WARNING	wireconf.c	85;"	d	file:
-WARNING	wireconf.c	90;"	d	file:
+WARNING	wireconf.c	86;"	d	file:
+WARNING	wireconf.c	91;"	d	file:
 _SL_	libtc.c	/^char * _SL_ = NULL;$/;"	v
 _SL_	test.c	/^char * _SL_ = NULL;$/;"	v
 _TC_CORE_H_	tc_core.h	2;"	d
@@ -118,11 +118,13 @@ atoaddr	wireconf.c	/^static int atoaddr(char *array_address, in4_addr *ipv4_addr
 bandwidth	do_wireconf.c	/^  float bandwidth;$/;"	m	struct:__anon1	file:
 bitlen	utils.h	/^	__s16 bitlen;$/;"	m	struct:__anon5
 buf	iproute.h	/^	char            buf[1024];$/;"	m	struct:__anon2
+buffer	tc_util.h	/^	char* buffer;$/;"	m	struct:qdisc_parameter
 bytelen	utils.h	/^	__u8 bytelen;$/;"	m	struct:__anon5
 close_socket	wireconf.c	/^void close_socket(int socket_id)$/;"	f
 cmdlineno	utils.c	/^int cmdlineno;$/;"	v
 configure_pipe	wireconf.c	/^int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)$/;"	f
 configure_qdisc	wireconf.c	/^int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate)$/;"	f
+convert_netemid	wireconf.c	/^int convert_netemid(int handle)$/;"	f
 cpu_frequency	timer.h	/^  uint32_t cpu_frequency;$/;"	m	struct:__anon4
 data	utils.h	/^	__u32 data[4];$/;"	m	struct:__anon5
 delay	do_wireconf.c	/^  float delay;$/;"	m	struct:__anon1	file:
@@ -136,9 +138,8 @@ dump_param_table	do_wireconf.c	/^void dump_param_table(qomet_param *p, int rule_
 duparg	utils.c	/^void duparg(const char* key, const char* arg)$/;"	f
 duparg2	utils.c	/^void duparg2(const char* key, const char* arg)$/;"	f
 explain	q_netem.c	/^static void explain(void)$/;"	f	file:
-explain	q_tbf.c	/^static void explain(void)$/;"	f	file:
+explain	q_prio.c	/^static void explain(void)$/;"	f	file:
 explain1	q_netem.c	/^static void explain1(const char *arg)$/;"	f	file:
-explain1	q_tbf.c	/^static void explain1(char *arg)$/;"	f	file:
 family	utils.h	/^	__u8 family;$/;"	m	struct:__anon5
 fd	libnetlink.h	/^	int			fd;$/;"	m	struct:rtnl_handle
 filter	iproute.h	/^} filter;$/;"	v	typeref:struct:__anon3
@@ -232,14 +233,12 @@ loss	tc_util.h	/^	char* loss;$/;"	m	struct:qdisc_parameter
 loss_corr	tc_util.h	/^	char* loss_corr;$/;"	m	struct:qdisc_parameter
 lossrate	do_wireconf.c	/^  float lossrate;$/;"	m	struct:__anon1	file:
 main	do_wireconf.c	/^int main(int argc, char *argv[])$/;"	f
-main	libtc.c	/^main(int argc, char **argv)$/;"	f
 main	test.c	/^main(int argc, char **argv)$/;"	f
 makeargs	utils.c	/^int makeargs(char* line, char* argv[], int maxargs)$/;"	f
 matches	utils.c	/^int matches(const char* cmd, const char* pattern)$/;"	f
 max_percent_value	tc_util.c	/^static const double max_percent_value = 0xffffffff;$/;"	v	file:
 mdst	iproute.h	/^	inet_prefix mdst;$/;"	m	struct:__anon3
 missarg	utils.c	/^void missarg(const char* key)$/;"	f
-mp_alg_names	iproute.c	/^static char *mp_alg_names[IP_MP_ALG_MAX+1] = {$/;"	v	file:
 msrc	iproute.h	/^	inet_prefix msrc;$/;"	m	struct:__anon3
 n	iproute.h	/^	struct nlmsghdr     n;$/;"	m	struct:__anon2	typeref:struct:__anon2::nlmsghdr
 name	ll_map.c	/^	char		name[16];$/;"	m	struct:idxmap	file:
@@ -298,6 +297,9 @@ print_tm	tc_util.c	/^void print_tm(FILE * f, const struct tcf_t *tm)$/;"	f
 print_usecs	tc_util.c	/^void print_usecs(char *buf, int len, __u32 usec)$/;"	f
 print_xstats	tc_util.h	/^	int 	(*print_xstats)(struct qdisc_util *qu, FILE *f, struct rtattr *xstats);$/;"	m	struct:qdisc_util
 print_xstats	tc_util.h	/^	int     (*print_xstats)(struct action_util *au, FILE *f, struct rtattr *xstats);$/;"	m	struct:action_util
+prio_parse_opt	q_prio.c	/^static int prio_parse_opt(struct qdisc_util *qu, qdisc_parameter* qp, struct nlmsghdr *n)$/;"	f	file:
+prio_print_opt	q_prio.c	/^int prio_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)$/;"	f
+prio_qdisc_util	q_prio.c	/^struct qdisc_util prio_qdisc_util = {$/;"	v	typeref:struct:qdisc_util
 protocol	iproute.h	/^	int protocol, protocolmask;$/;"	m	struct:__anon3
 protocolmask	iproute.h	/^	int protocol, protocolmask;$/;"	m	struct:__anon3
 qdisc_list	tc.c	/^static struct qdisc_util * qdisc_list;$/;"	v	typeref:struct:qdisc_util	file:
@@ -305,6 +307,7 @@ qdisc_parameter	tc_util.h	/^struct qdisc_parameter$/;"	s
 qdisc_util	tc_util.h	/^struct qdisc_util$/;"	s
 qomet_param	do_wireconf.c	/^} qomet_param;$/;"	t	typeref:struct:__anon1	file:
 r	iproute.h	/^	struct rtmsg        r;$/;"	m	struct:__anon2	typeref:struct:__anon2::rtmsg
+rate	tc_util.h	/^	char* rate;$/;"	m	struct:qdisc_parameter
 rate_suffix	tc_util.c	/^static const struct rate_suffix {$/;"	s	file:
 rdst	iproute.h	/^	inet_prefix rdst;$/;"	m	struct:__anon3
 rdtsc	timer.h	73;"	d
@@ -382,7 +385,7 @@ sprint_usecs	tc_util.c	/^char * sprint_usecs(__u32 usecs, char *buf)$/;"	f
 suffixes	tc_util.c	/^} suffixes[] = {$/;"	v	typeref:struct:rate_suffix	file:
 t2us	tc_core.c	/^static __u32 t2us = 1;$/;"	v	file:
 tb	iproute.h	/^	int tb;$/;"	m	struct:__anon3
-tbf_parse_opt	q_tbf.c	/^static int tbf_parse_opt(struct qdisc_util *qu, struct qdisc_data* qp,$/;"	f	file:
+tbf_parse_opt	q_tbf.c	/^static int tbf_parse_opt(struct qdisc_util *qu, $/;"	f	file:
 tbf_print_opt	q_tbf.c	/^static int tbf_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)$/;"	f	file:
 tbf_qdisc_util	q_tbf.c	/^struct qdisc_util tbf_qdisc_util = {$/;"	v	typeref:struct:qdisc_util
 tc_calc_rtable	tc_core.c	/^int tc_calc_rtable(unsigned bps, __u32 *rtab, int cell_log, unsigned mtu,$/;"	f
@@ -412,7 +415,8 @@ typemask	iproute.h	/^	int type, typemask;$/;"	m	struct:__anon3
 us2t	tc_core.c	/^static __u32 us2t = 1;$/;"	v	file:
 usage	do_wireconf.c	/^void usage(char *argv0)$/;"	f
 usage	q_netem.c	45;"	d	file:
-usage	q_tbf.c	38;"	d	file:
+usage	q_prio.c	35;"	d	file:
+usage	q_tbf.c	39;"	d	file:
 usage	tc_filter.c	/^static void usage(void)$/;"	f	file:
 usage	tc_qdisc.c	/^static int usage(void)$/;"	f	file:
 use_iec	tc.c	/^int use_iec = 0;$/;"	v

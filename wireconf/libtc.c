@@ -54,12 +54,18 @@ char* get_route_info(char *info, char *addr)
 	if(strcmp(info, "dev") == 0){
 		return (char* )ll_index_to_name(*(int* )RTA_DATA(tb[RTA_OIF]));
 	} else if(strcmp(info, "next") == 0){
-		printf("%s\n",  (char* )inet_ntop(r->rtm_family,
+		if ((char* )inet_ntop(r->rtm_family,
 			RTA_DATA(tb[RTA_GATEWAY]),
-			abuf, sizeof(abuf)));
-		return  (char* )inet_ntop(r->rtm_family,
-			RTA_DATA(tb[RTA_GATEWAY]),
-			abuf, sizeof(abuf));
+			abuf, sizeof(abuf)) == NULL) {
+			return addr;
+		} else {
+			printf("%s\n",  (char* )inet_ntop(r->rtm_family,
+				RTA_DATA(tb[RTA_GATEWAY]),
+				abuf, sizeof(abuf)));
+			return  (char* )inet_ntop(r->rtm_family,
+				RTA_DATA(tb[RTA_GATEWAY]),
+				abuf, sizeof(abuf));
+		}
 	} else {
 		return "null";
 	}

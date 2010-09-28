@@ -155,27 +155,25 @@ Ignored negative value ('%s')", NODE_ID_STRING, attributes[i+1]);
 	    return ERROR;
 	  }
       }
-    else if(strcmp(attributes[i], NODE_ADAPTER_STRING)==0)
-      {
-	if(strcmp(attributes[i+1], NODE_ADAPTER_ORINOCO_STRING)==0)
-	  node->adapter_type = ORINOCO;
-	if(strcmp(attributes[i+1], NODE_ADAPTER_DEI80211MR_STRING)==0)
-	  node->adapter_type = DEI80211MR;
-	else if(strcmp(attributes[i+1], NODE_ADAPTER_CISCO_340_STRING)==0)
-	  node->adapter_type = CISCO_340;
-	else if(strcmp(attributes[i+1], NODE_ADAPTER_CISCO_ABG_STRING)==0)
-	  node->adapter_type = CISCO_ABG;
-	else if(strcmp(attributes[i+1], NODE_ADAPTER_JENNIC_STRING)==0)
-	  node->adapter_type = JENNIC;
-	else if(strcmp(attributes[i+1], NODE_ADAPTER_S_NODE_STRING)==0)
-	  node->adapter_type = S_NODE;
-	else
-	  {
-	    WARNING("Node attribute '%s' is assigned an invalid value ('%s')", 
-		    NODE_ADAPTER_STRING, attributes[i+1]);
-	    return ERROR;
-	  }
-      }
+	else if(strcmp(attributes[i], NODE_ADAPTER_STRING)==0) {
+		if(strcmp(attributes[i+1], NODE_ADAPTER_ORINOCO_STRING) == 0)
+			node->adapter_type = ORINOCO;
+		else if(strcmp(attributes[i+1], NODE_ADAPTER_DEI80211MR_STRING)==0)
+			node->adapter_type = DEI80211MR;
+		else if(strcmp(attributes[i+1], NODE_ADAPTER_CISCO_340_STRING)==0)
+			node->adapter_type = CISCO_340;
+		else if(strcmp(attributes[i+1], NODE_ADAPTER_CISCO_ABG_STRING)==0)
+			node->adapter_type = CISCO_ABG;
+		else if(strcmp(attributes[i+1], NODE_ADAPTER_JENNIC_STRING)==0)
+			node->adapter_type = JENNIC;
+		else if(strcmp(attributes[i+1], NODE_ADAPTER_S_NODE_STRING)==0)
+			node->adapter_type = S_NODE;
+		else {
+			WARNING("Node attribute '%s' is assigned an invalid value ('%s')", 
+				NODE_ADAPTER_STRING, attributes[i+1]);
+			return ERROR;
+		}
+	}
     else if(strcmp(attributes[i], NODE_ANTENNA_GAIN_STRING)==0)
       {
 	double_result = double_value(attributes[i+1]);
@@ -1489,9 +1487,10 @@ is not of 'QOMET definition' type!", XML_SCENARIO_STRING);
     {
       DEBUG("Node element found");
 
-      if(xml_node_init(&node, attributes,
-		       xml_scenario->cartesian_coord_syst)==ERROR)
+      if(xml_node_init(&node, attributes, xml_scenario->cartesian_coord_syst)==ERROR) {
+	  printf("\n\n\n\n\n\n\n\n\n\n\n xml_scenario->xml_parse_error = %d\n\n", xml_scenario->xml_parse_error);
 	xml_scenario->xml_parse_error = TRUE;
+	  }
       else 
 	if(node_check_valid(scenario->nodes, scenario->node_number,
 			    &node)==TRUE)
@@ -1857,6 +1856,7 @@ int xml_scenario_parse(FILE *scenario_file, xml_scenario_class *xml_scenario)
       // check for end of file
       parsing_done = feof(scenario_file);
 
+	  printf("\n\n1st xml_scenario->xml_parse_error = %d\n\n", xml_scenario->xml_parse_error);
       // check for parse error
       if(XML_Parse(xml_parser, xml_buffer, buffer_length, parsing_done) 
 	  == XML_STATUS_ERROR)
@@ -1869,6 +1869,7 @@ int xml_scenario_parse(FILE *scenario_file, xml_scenario_class *xml_scenario)
 	}
       else if(xml_scenario->xml_parse_error == TRUE)
 	{
+	  printf("\n\nxml_scenario->xml_parse_error = %d\n\n", xml_scenario->xml_parse_error);
 	  WARNING("User XML parse error in input file (see the WARNING \
 messages above)");
 	  return ERROR;
