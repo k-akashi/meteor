@@ -48,6 +48,7 @@ int get_tc_classid(__u32 *h, const char *str)
 	__u32 maj, min;
 	char *p;
 
+	printf("str = %s\n", str);
 	maj = TC_H_ROOT;
 	if (strcmp(str, "root") == 0)
 		goto ok;
@@ -55,22 +56,30 @@ int get_tc_classid(__u32 *h, const char *str)
 	if (strcmp(str, "none") == 0)
 		goto ok;
 	maj = strtoul(str, &p, 16);
+	printf("1st id = %u\n", maj);
 	if (p == str) {
+		printf("p == str\n");
 		maj = 0;
 		if (*p != ':')
 			return -1;
 	}
 	if (*p == ':') {
+		printf("id = %s\n", p);
 		if (maj >= (1<<16))
 			return -1;
-		maj <<= 16;
-		str = p+1;
-		min = strtoul(str, &p, 16);
+        printf("before id = %u\n", maj);
+        maj <<= 16;
+        printf("after id = %u\n", maj);
+        str = p+1;
+        printf("str id = %s\n", str);
+        min = strtoul(str, &p, 16);
+        printf("min id = %u\n", min);
 		if (*p != 0)
 			return -1;
 		if (min >= (1<<16))
 			return -1;
 		maj |= min;
+		printf("last id = %u\n", maj);
 	} else if (*p != 0)
 		return -1;
 

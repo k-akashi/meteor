@@ -431,9 +431,8 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
 int
 add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direction)
 {
-	//system("tc qdisc add dev lo root handle 10: netem delay 1us");
-	//system("tc qdisc add dev lo parent 10:1 handle 100: tbf rate 100mbit limit 10mb buffer 10kb/8");
 	struct qdisc_parameter qp;
+	char* device_name =  (char* )get_route_info("dev", dst);
 	char handleid[10];
 
 	// netem parameter set
@@ -453,8 +452,14 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	qp.rate = "1Gbit";
 	qp.buffer = "1Mbit";
 
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
-	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", dst), handleid, "1", qp, "tbf");
+//tmp
+	char parentid[10];
+	sprintf(parentid, "%d:1", handle_nr);
+	char bwid[10];
+	sprintf(bwid, "%d", handle_nr + 100);
+//
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentid, qp, "tbf");
 
 	return 0;
 }
@@ -514,7 +519,7 @@ int delete_netem(uint s, char* dst, u_int32_t rule_number)
 */
 
 	//system("tc qdisc del dev lo root");
-	tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
+	tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "root", qp, "netem");
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
 #endif
@@ -594,12 +599,12 @@ int convert_netemid(int handle)
 int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate)
 {
 	struct qdisc_parameter qp;
+	char* device_name =  (char* )get_route_info("dev", dst);
 	char delaystr[20];
 	char loss[20];
 	char handleid[10];
 	char rate[20];
 	char buffer[20];
-	//char bw_cmd[100];
 
 	memset(&qp, 0, sizeof(qp));
 
@@ -619,7 +624,14 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	
 	printf("rulenum = %d\n", handle);
 
+	
 	sprintf(handleid, "%d", handle);
+// tmp
+	char bwid[10];
+	char parentid[10];
+	sprintf(bwid, "%d", handle+100);
+	sprintf(parentid, "%d:1", handle);
+//
 	sprintf(delaystr, "%dms", delay);
 	sprintf(loss, "%f", lossrate);
 	sprintf(rate, "%d", bandwidth);
@@ -636,13 +648,8 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	qp.rate = rate;
 	qp.buffer = buffer;
 	
-	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), handleid, "1", qp, "netem");
-	tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", dst), handleid, "1", qp, "netem");
-	//tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem");
-	//sprintf(bw_cmd, "tc qdisc change dev lo parent 1:1 handle 100: tbf rate %dbit limit 15kb buffer 10kb/8", 
-	//	bandwidth);
-
-	//system(bw_cmd);
+	tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+	tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentid, qp, "tbf");
 
 	return SUCCESS;
 }
