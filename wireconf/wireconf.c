@@ -456,7 +456,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	char parentid[10];
 	sprintf(parentid, "%d:1", handle_nr);
 	char bwid[10];
-	sprintf(bwid, "%d", handle_nr + 100);
+	sprintf(bwid, "%d", handle_nr + 1000);
 //
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentid, qp, "tbf");
@@ -629,7 +629,7 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 // tmp
 	char bwid[10];
 	char parentid[10];
-	sprintf(bwid, "%d", handle+100);
+	sprintf(bwid, "%d", handle+1000);
 	sprintf(parentid, "%d:1", handle);
 //
 	sprintf(delaystr, "%dms", delay);

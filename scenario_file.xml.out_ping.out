@@ -1,14 +1,22 @@
-PING 192.168.100.100 (192.168.100.100) 1200(1228) bytes of data.
-From 192.168.100.2 icmp_seq=10 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=11 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=12 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=22 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=23 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=24 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=34 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=35 Destination Host Unreachable
-From 192.168.100.2 icmp_seq=36 Destination Host Unreachable
+PING 127.0.0.1 (127.0.0.1) 1200(1228) bytes of data.
+1208 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.040 ms
+1208 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=10.9 ms
+1208 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=7.96 ms
+1208 bytes from 127.0.0.1: icmp_seq=4 ttl=64 time=7.96 ms
+1208 bytes from 127.0.0.1: icmp_seq=5 ttl=64 time=7.98 ms
+1208 bytes from 127.0.0.1: icmp_seq=6 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=7 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=8 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=9 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=10 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=11 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=12 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=13 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=14 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=15 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=16 ttl=64 time=7.99 ms
+1208 bytes from 127.0.0.1: icmp_seq=18 ttl=64 time=7.98 ms
 
---- 192.168.100.100 ping statistics ---
-40 packets transmitted, 0 received, +9 errors, 100% packet loss, time 9827ms
-, pipe 3
+--- 127.0.0.1 ping statistics ---
+19 packets transmitted, 17 received, 10% packet loss, time 4532ms
+rtt min/avg/max/mdev = 0.040/7.693/10.939/2.037 ms
