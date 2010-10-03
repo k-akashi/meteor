@@ -59,9 +59,9 @@ char* get_route_info(char *info, char *addr)
 			abuf, sizeof(abuf)) == NULL) {
 			return addr;
 		} else {
-			printf("%s\n",  (char* )inet_ntop(r->rtm_family,
+			dprintf(("%s\n",  (char* )inet_ntop(r->rtm_family,
 				RTA_DATA(tb[RTA_GATEWAY]),
-				abuf, sizeof(abuf)));
+				abuf, sizeof(abuf))));
 			return  (char* )inet_ntop(r->rtm_family,
 				RTA_DATA(tb[RTA_GATEWAY]),
 				abuf, sizeof(abuf));
@@ -87,7 +87,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 		char buf[TCA_BUF_MAX];
 	} req;
 
-	printf("Start tc_cmd function!! type = %s\n", type);
+	dprintf(("Start tc_cmd function!! type = %s\n", type));
 
 	memset(&req, 0, sizeof(req));
 	memset(&d, 0, sizeof(d));
@@ -102,7 +102,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	if(cmd != RTM_DELQDISC) {
 		get_qdisc_handle(&handle, handleid);
 		req.t.tcm_handle = handle;
-		printf("req.t.tcm.handle = %d\n", req.t.tcm_handle);
+		dprintf(("req.t.tcm.handle = %d\n", req.t.tcm_handle));
 	}
 	if(strcmp(root, "root") == 0)
 		req.t.tcm_parent = TC_H_ROOT;
@@ -113,7 +113,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 			invarg(handleid, "invalid parent ID");
 		}
 		req.t.tcm_parent = handle;
-		printf("req.t.tcm.parent = %d\n", req.t.tcm_parent);
+		dprintf(("req.t.tcm.parent = %d\n", req.t.tcm_parent));
 	}
 
 	int idx;
@@ -138,7 +138,6 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 			return 1;
 		}
 	}
-	printf("debug message!!\n");
 
 	if(d[0]){
 		int idx;
@@ -150,7 +149,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 			return 1;
 		}
 		req.t.tcm_ifindex = idx;
-		printf("netem interface = %s\n", &d[0]);
+		dprintf(("netem interface = %s\n", &d[0]));
     }
 
 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)

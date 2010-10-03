@@ -66,8 +66,6 @@
 #include "tc_util.h"
 #endif
 
-
-
 /////////////////////////////////////////////
 // Special defines
 /////////////////////////////////////////////
@@ -439,7 +437,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	memset(&qp, 0, sizeof(qp));
 
 	sprintf(handleid, "%d", handle_nr);
-	printf("rulenum = %s\n", handleid);
+	dprintf(("rulenum = %s\n", handleid));
 
 	qp.limit = "1000";
 	qp.delay = "1us";
@@ -500,7 +498,7 @@ int delete_rule(uint s, u_int32_t rule_number)
 #elif __linux
 int delete_netem(uint s, char* dst, u_int32_t rule_number)
 {
-	printf("delete qdisc\n");
+	dprintf(("delete qdisc\n"));
 	struct qdisc_parameter qp;
 
 	memset(&qp, 0, sizeof(qp));
@@ -610,7 +608,6 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 
 	int netemid;
 	netemid = convert_netemid(handle);
-	printf("netem id = %d\n", netemid);
 	netemid |= handle;
 	int parent;
 	parent = netemid;
@@ -619,10 +616,10 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	child = netemid;
 	child <<= 16;
 	child >>= 16;
-	printf("parent id = %d\n", parent);
-	printf("child id = %d\n", child);
-	
-	printf("rulenum = %d\n", handle);
+	dprintf(("netem id = %d\n", netemid));
+	dprintf(("parent id = %d\n", parent));
+	dprintf(("child id = %d\n", child));
+	dprintf(("rulenum = %d\n", handle));
 
 	
 	sprintf(handleid, "%d", handle);

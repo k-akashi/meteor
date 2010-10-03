@@ -147,7 +147,7 @@ static int netem_parse_opt(struct qdisc_util* qu,
 	memset(&reorder, 0, sizeof(reorder));
 	memset(&corrupt, 0, sizeof(corrupt));
 
-	printf("debug message : netem_parse_opt\n");
+	dprintf(("debug message : netem_parse_opt\n"));
 	if(qp->limit) {
 		if(get_size(&opt.limit, qp->limit)){
 			explain1("limit");

@@ -11,11 +11,11 @@ BANDWIDTH	do_wireconf.c	98;"	d	file:
 BODY	tc.c	/^static void *BODY = NULL;	\/* cached handle dlopen(NULL) *\/$/;"	v	file:
 CC	Makefile	/^CC      = gcc$/;"	m
 CFLAGS	Makefile	/^CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
-CFLAGS	Makefile	/^CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO$/;"	m
+CFLAGS	Makefile	/^CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DDEBUG$/;"	m
 DEBUG	message.h	56;"	d
 DEBUG	message.h	61;"	d
-DEBUG	wireconf.c	100;"	d	file:
-DEBUG	wireconf.c	95;"	d	file:
+DEBUG	wireconf.c	93;"	d	file:
+DEBUG	wireconf.c	98;"	d	file:
 DEFINES	Makefile	/^DEFINES = -DRESOLVE_HOSTNAMES$/;"	m
 DELAY	do_wireconf.c	99;"	d	file:
 DIRECTION_BOTH	wireconf.h	64;"	d
@@ -28,8 +28,8 @@ FIRST_NODE_ID	global.h	60;"	d
 HOSTCC	Makefile	/^HOSTCC  = gcc$/;"	m
 INFO	message.h	65;"	d
 INFO	message.h	69;"	d
-INFO	wireconf.c	104;"	d	file:
-INFO	wireconf.c	109;"	d	file:
+INFO	wireconf.c	102;"	d	file:
+INFO	wireconf.c	107;"	d	file:
 IPPROTO_AH	utils.h	24;"	d
 IPPROTO_COMP	utils.h	27;"	d
 IPPROTO_ESP	utils.h	21;"	d
@@ -84,8 +84,8 @@ WARNING	message.h	47;"	d
 WARNING	message.h	52;"	d
 WARNING	timer.c	64;"	d	file:
 WARNING	timer.c	69;"	d	file:
-WARNING	wireconf.c	86;"	d	file:
-WARNING	wireconf.c	91;"	d	file:
+WARNING	wireconf.c	84;"	d	file:
+WARNING	wireconf.c	89;"	d	file:
 _SL_	libtc.c	/^char * _SL_ = NULL;$/;"	v
 _SL_	test.c	/^char * _SL_ = NULL;$/;"	v
 _TC_CORE_H_	tc_core.h	2;"	d
@@ -100,6 +100,8 @@ __get_hz	utils.c	/^int __get_hz(void)$/;"	f
 __get_user_hz	utils.c	/^int __get_user_hz(void)$/;"	f
 __iproute2_hz_internal	utils.c	/^int __iproute2_hz_internal;$/;"	v
 __iproute2_user_hz_internal	utils.c	/^int __iproute2_user_hz_internal;$/;"	v
+_dpeinrf	tc_util.h	11;"	d
+_dprintf	tc_util.h	13;"	d
 a_addr	utils.h	/^        unsigned char a_addr[DN_MAXADDL];$/;"	m	struct:dn_naddr
 a_len	utils.h	/^        unsigned short          a_len;$/;"	m	struct:dn_naddr
 action_a2n	tc_util.c	/^int action_a2n(char *arg, int *result)$/;"	f
@@ -123,13 +125,14 @@ bytelen	utils.h	/^	__u8 bytelen;$/;"	m	struct:__anon5
 close_socket	wireconf.c	/^void close_socket(int socket_id)$/;"	f
 cmdlineno	utils.c	/^int cmdlineno;$/;"	v
 configure_pipe	wireconf.c	/^int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)$/;"	f
-configure_qdisc	wireconf.c	/^int configure_qdisc(int s, int handle, int bandwidth, int delay, double lossrate)$/;"	f
+configure_qdisc	wireconf.c	/^int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate)$/;"	f
 convert_netemid	wireconf.c	/^int convert_netemid(int handle)$/;"	f
 cpu_frequency	timer.h	/^  uint32_t cpu_frequency;$/;"	m	struct:__anon4
 data	utils.h	/^	__u32 data[4];$/;"	m	struct:__anon5
 delay	do_wireconf.c	/^  float delay;$/;"	m	struct:__anon1	file:
 delay	tc_util.h	/^	char* delay;$/;"	m	struct:qdisc_parameter
 delay_corr	tc_util.h	/^	char* delay_corr;$/;"	m	struct:qdisc_parameter
+delete_netem	wireconf.c	/^int delete_netem(uint s, char* dst, u_int32_t rule_number)$/;"	f
 delete_rule	wireconf.c	/^int delete_rule(uint s, u_int32_t rule_number)$/;"	f
 dn_naddr	utils.h	/^struct dn_naddr $/;"	s
 do_filter	tc_filter.c	/^int do_filter(int argc, char **argv)$/;"	f
@@ -297,7 +300,7 @@ print_tm	tc_util.c	/^void print_tm(FILE * f, const struct tcf_t *tm)$/;"	f
 print_usecs	tc_util.c	/^void print_usecs(char *buf, int len, __u32 usec)$/;"	f
 print_xstats	tc_util.h	/^	int 	(*print_xstats)(struct qdisc_util *qu, FILE *f, struct rtattr *xstats);$/;"	m	struct:qdisc_util
 print_xstats	tc_util.h	/^	int     (*print_xstats)(struct action_util *au, FILE *f, struct rtattr *xstats);$/;"	m	struct:action_util
-prio_parse_opt	q_prio.c	/^static int prio_parse_opt(struct qdisc_util *qu, qdisc_parameter* qp, struct nlmsghdr *n)$/;"	f	file:
+prio_parse_opt	q_prio.c	/^static int prio_parse_opt(struct qdisc_util* qu, qdisc_parameter* qp, struct nlmsghdr* n)$/;"	f	file:
 prio_print_opt	q_prio.c	/^int prio_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)$/;"	f
 prio_qdisc_util	q_prio.c	/^struct qdisc_util prio_qdisc_util = {$/;"	v	typeref:struct:qdisc_util
 protocol	iproute.h	/^	int protocol, protocolmask;$/;"	m	struct:__anon3

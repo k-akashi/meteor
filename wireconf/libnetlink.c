@@ -25,6 +25,12 @@
 
 #include "libnetlink.h"
 
+#ifdef TCDEBUG
+#define dprintf(x)      printf x
+#else
+#define dprintf(x)
+#endif
+
 void rtnl_close(struct rtnl_handle *rth)
 {
 	close(rth->fd);
@@ -258,7 +264,7 @@ int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,
 		n->nlmsg_flags |= NLM_F_ACK;
 
 	status = sendmsg(rtnl->fd, &msg, 0);
-	printf("status sendmsg = %d\n", status);
+	dprintf(("status sendmsg = %d\n", status));
 
 	if (status < 0) {
 		perror("Cannot talk to rtnetlink");
@@ -272,7 +278,7 @@ int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,
 	while (1) {
 		iov.iov_len = sizeof(buf);
 		status = recvmsg(rtnl->fd, &msg, 0);
-		printf("status recvmsg = %d\n", status);
+		dprintf(("status recvmsg = %d\n", status));
 
 		if (status < 0) {
 			if (errno == EINTR)
@@ -293,13 +299,13 @@ int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,
 			int len = h->nlmsg_len;
 			int l = len - sizeof(*h);
 
-			printf("nlmsg       = %d\n", (int)sizeof(*h));
-			printf("nlmsg_len   = %d\n", h->nlmsg_len);
-			printf("nlmsg_type  = %d\n", h->nlmsg_type);
-			printf("nlmsg_flags = %d\n", h->nlmsg_flags);
-			printf("nlmsg_seq   = %d\n", h->nlmsg_seq);
-			printf("nlmsg_pid   = %d\n", h->nlmsg_pid);
-			printf("l = %d\n", l);
+			dprintf(("nlmsg       = %d\n", (int)sizeof(*h)));
+			dprintf(("nlmsg_len   = %d\n", h->nlmsg_len));
+			dprintf(("nlmsg_type  = %d\n", h->nlmsg_type));
+			dprintf(("nlmsg_flags = %d\n", h->nlmsg_flags));
+			dprintf(("nlmsg_seq   = %d\n", h->nlmsg_seq));
+			dprintf(("nlmsg_pid   = %d\n", h->nlmsg_pid));
+			dprintf(("l = %d\n", l));
 
 			if (l<0 || len>status) {
 				if (msg.msg_flags & MSG_TRUNC) {
@@ -326,17 +332,16 @@ int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,
 
 			if (h->nlmsg_type == NLMSG_ERROR) {
 				struct nlmsgerr *err = (struct nlmsgerr*)NLMSG_DATA(h);
-				printf("error no = %d\n", err->error);
+				dprintf(("error no = %d\n", err->error));
 				if (l < sizeof(struct nlmsgerr)) {
 					fprintf(stderr, "ERROR truncated\n");
 				} else {
 					errno = -err->error;
-					printf("errno = %d\n", -err->error);
+					dprintf(("errno = %d\n", -err->error));
 					if (errno == 0) {
-						printf("errno = 0\n");
+						dprintf(("errno = 0\n"));
 						if (answer)
 						{
-							printf("answer\n");
 							memcpy(answer, h, h->nlmsg_len);
 						}
 						return 0;

@@ -7,6 +7,12 @@
 #include <linux/gen_stats.h>
 #include "tc_core.h"
 
+#ifdef TCDEBUG
+#define dprintf(x) printf x
+#else
+#define dprintf(x)
+#endif
+
 struct qdisc_parameter
 {
 	char* limit;
