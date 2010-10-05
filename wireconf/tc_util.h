@@ -6,12 +6,15 @@
 #include <linux/pkt_cls.h>
 #include <linux/gen_stats.h>
 #include "tc_core.h"
+#include "libnetlink.h"
 
 #ifdef TCDEBUG
 #define dprintf(x) printf x
 #else
 #define dprintf(x)
 #endif
+
+struct rtnl_handle rth;
 
 struct qdisc_parameter
 {

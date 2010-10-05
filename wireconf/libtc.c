@@ -22,7 +22,8 @@
 int preferred_family = AF_UNSPEC;
 int oneline = 0;
 char * _SL_ = NULL;
-struct rtnl_handle rth;
+//struct rtnl_handle rth;
+int open_flag = 1;
 
 char* get_route_info(char *info, char *addr)
 {
@@ -32,8 +33,11 @@ char* get_route_info(char *info, char *addr)
 	char abuf[256];
 	_SL_ = oneline ? "\\" : "\n" ;
 
-	if(rtnl_open(&rth, 0) < 0)
-		exit(1);
+	if(open_flag) {
+		if(rtnl_open(&rth, 0) < 0)
+			exit(1);
+		open_flag = 0;
+	}
 
 	req = iproute_get(1, addr);
 	struct rtmsg *r = NLMSG_DATA(&req.n);
@@ -47,11 +51,12 @@ char* get_route_info(char *info, char *addr)
         int oif = 0;
         if (tb[RTA_OIF])
             oif = *(int*)RTA_DATA(tb[RTA_OIF]);
-        if ((oif^filter.oif)&filter.oifmask)
+        if ((oif^filter.oif)&filter.oifmask) {
             return 0;
+		}
     }
 
-	if(strcmp(info, "dev") == 0){
+	if(strcmp(info, "dev") == 0) {
 		return (char* )ll_index_to_name(*(int* )RTA_DATA(tb[RTA_OIF]));
 	} else if(strcmp(info, "next") == 0){
 		if ((char* )inet_ntop(r->rtm_family,
@@ -62,7 +67,7 @@ char* get_route_info(char *info, char *addr)
 			dprintf(("%s\n",  (char* )inet_ntop(r->rtm_family,
 				RTA_DATA(tb[RTA_GATEWAY]),
 				abuf, sizeof(abuf))));
-			return  (char* )inet_ntop(r->rtm_family,
+			return (char* )inet_ntop(r->rtm_family,
 				RTA_DATA(tb[RTA_GATEWAY]),
 				abuf, sizeof(abuf));
 		}

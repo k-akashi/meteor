@@ -57,6 +57,7 @@
 #include "message.h"
 #include "routing_info.h"
 
+#include "tc_util.h"
 
 // use this define to enable support for OLSR routing
 // in usage (1) type
@@ -977,6 +978,7 @@ loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_N
 
   // close socket
   DEBUG("Closing socket...");
+  rtnl_close(&rth);
   close_socket(s);
 
   fclose(fd);
