@@ -18,9 +18,9 @@ UNAME = $(shell uname)
 CC      = gcc
 HOSTCC  = gcc
 
-ifeq "$(UNAME)" "Linux"
-#CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
-CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
+ifeq ($(UNAME), Linux)
+CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
+#CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 #CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -O2 -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
@@ -33,7 +33,7 @@ TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o #q_tbf.o
 TESTOBJ=test.o
 endif
 
-ifeq "$(UNAME)" "FreeBSD"
+ifeq ($(UNAME), FreeBSD)
 CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO
 #CFLAGS = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_DEBUG -DMESSAGE_INFO
 LDFLAGS = -L.
@@ -43,7 +43,7 @@ endif
 
 all: $(TARGETS) 
 
-ifeq "$(UNAME)" "Linux"
+ifeq ($(UNAME), Linux)
 q_netem.so: q_netem.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< -o $@ 
 
@@ -68,11 +68,11 @@ libwireconf.a: wireconf.h wireconf.c wireconf.o global.h message.h
 libtimer.a: timer.h timer.c timer.o global.h message.h
 	ar rcs libtimer.a timer.o && ranlib libtimer.a   
 
-ifeq "$(UNAME)" "Linux"
+ifeq ($(UNAME), Linux)
 do_wireconf: do_wireconf.o routing_info.o libwireconf.a libtimer.a libtc.a libnetlink.a
 	$(CC) $(CFLAGS) -g -export-dynamic -o $@ do_wireconf.o routing_info.o $(LDFLAGS) $(LDLIBS)
 endif
-ifeq "$(UNAME)" "FreeBSD"
+ifeq ($(UNAME), FreeBSD)
 do_wireconf: do_wireconf.c routing_info.o libwireconf.a libtimer.a
 	$(CC) $(CFLAGS) -o $@ do_wireconf.c routing_info.o $(LDFLAGS) $(LDLIBS)
 endif
@@ -81,7 +81,7 @@ do_wireconf.o: do_wireconf.c
 
 routing_info.o: routing_info.c routing_info.h
 
-ifeq "$(UNAME)" "Linux"
+ifeq ($(UNAME), Linux)
 test: libnetlink.a libtc.a $(TOBJ) $(LIBNETLINK) $(TESTOBJ)
 	gcc -export-dynamic -o $@ test.o $(LDFLAGS) $(LDLIBS)
 endif
