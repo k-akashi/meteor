@@ -140,12 +140,14 @@ static int netem_parse_opt(struct qdisc_util* qu,
 	struct tc_netem_reorder reorder;
 	struct tc_netem_corrupt corrupt;
 	__s16* dist_data = NULL;
+	int present[__TCA_NETEM_MAX];
 
 	memset(&opt, 0, sizeof(opt));
 	opt.limit = 1000;
 	memset(&cor, 0, sizeof(cor));
 	memset(&reorder, 0, sizeof(reorder));
 	memset(&corrupt, 0, sizeof(corrupt));
+	memset(present, 0, sizeof(present));
 
 	dprintf(("debug message : netem_parse_opt\n"));
 	if(qp->limit) {
@@ -167,6 +169,7 @@ static int netem_parse_opt(struct qdisc_util* qu,
 		}
 	}
 	if(qp->delay_corr) {
+		++present[TCA_NETEM_CORR];
 		if(get_percent(&cor.delay_corr, qp->delay_corr)){
 			explain1("latency");
 			return -1;
@@ -179,18 +182,21 @@ static int netem_parse_opt(struct qdisc_util* qu,
 		}
 	}
 	if(qp->loss_corr) {
+		++present[TCA_NETEM_CORR];
 		if(get_percent(&cor.loss_corr, qp->loss_corr)){
 			explain1("loss");
 			return -1;
 		}
 	}
 	if(qp->reorder_prob) {
+		present[TCA_NETEM_REORDER] = 1;
 		if(get_percent(&reorder.probability, qp->reorder_prob)){
 			explain1("reorder");
 			return -1;
 		}
 	}
 	if(qp->reorder_corr) {
+		++present[TCA_NETEM_CORR];
 		if(get_percent(&reorder.correlation, qp->reorder_corr)){
 			explain1("reorder");
 			return -1;
@@ -221,19 +227,20 @@ static int netem_parse_opt(struct qdisc_util* qu,
 		return -1;
 
 	if (cor.delay_corr || cor.loss_corr || cor.dup_corr) {
-		if (addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof(cor)) < 0)
+		if (present[TCA_NETEM_CORR] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof(cor)) < 0)
 			return -1;
 	}
 
-	if (addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0)
+	if (present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0)
 		return -1;
 
 	if (corrupt.probability) {
-		if (addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0)
+		if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0)
 			return -1;
 	}
 
 	if (dist_data) {
+		dprintf(("dist_data\n\n"));
 		if (addattr_l(n, 32768, TCA_NETEM_DELAY_DIST,
 			      dist_data, dist_size*sizeof(dist_data[0])) < 0)
 			return -1;

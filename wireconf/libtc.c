@@ -121,6 +121,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 		dprintf(("req.t.tcm.parent = %d\n", req.t.tcm_parent));
 	}
 
+/*
 	int idx;
 
 	ll_init_map(&rth);
@@ -130,6 +131,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 		return 1;
 	}
 	req.t.tcm_ifindex = idx;
+*/
 
 	strncpy(k, type, sizeof(k) - 1);
 	q = get_qdisc_kind(k);
@@ -144,7 +146,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 		}
 	}
 
-	if(d[0]){
+	if(d[0]) {
 		int idx;
 
 		ll_init_map(&rth);

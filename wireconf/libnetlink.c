@@ -341,9 +341,7 @@ int rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n, pid_t peer,
 					if (errno == 0) {
 						dprintf(("errno = 0\n"));
 						if (answer)
-						{
 							memcpy(answer, h, h->nlmsg_len);
-						}
 						return 0;
 					}
 					perror("RTNETLINK answers");
