@@ -6,6 +6,7 @@
 
 long tc_core_usec2tick(long usec);
 long tc_core_tick2usec(long tick);
+int tc_core_time2big(unsigned time);
 unsigned tc_calc_xmittime(unsigned rate, unsigned size);
 int tc_calc_rtable(unsigned bps, __u32 *rtab, int cell_log, unsigned mtu, unsigned mpu);
 

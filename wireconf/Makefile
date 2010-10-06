@@ -45,7 +45,7 @@ all: $(TARGETS)
 
 ifeq ($(UNAME), Linux)
 q_netem.so: q_netem.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< -o $@ 
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 
 
 q_tbf.so: q_tbf.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 

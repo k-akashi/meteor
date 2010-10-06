@@ -32,6 +32,14 @@ long tc_core_usec2tick(long usec)
 	return usec*tick_in_usec;
 }
 
+int tc_core_time2big(unsigned time)
+{   
+	__u64 t = time;
+
+	t *= tick_in_usec;
+	return (t >> 32) != 0;
+}
+
 long tc_core_tick2usec(long tick)
 {
 	return tick/tick_in_usec;
