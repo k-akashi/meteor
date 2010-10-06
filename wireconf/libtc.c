@@ -92,6 +92,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 		char buf[TCA_BUF_MAX];
 	} req;
 
+	tc_core_init();
 	dprintf(("Start tc_cmd function!! type = %s\n", type));
 
 	memset(&req, 0, sizeof(req));

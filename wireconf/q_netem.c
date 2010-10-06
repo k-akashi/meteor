@@ -104,28 +104,26 @@ static int isnumber(const char *arg)
 */
 #define NEXT_IS_NUMBER() (NEXT_ARG_OK() && isnumber(argv[1]))
 
-long tc_ticks(long usec)
-{
-	double tick_in_usec = 1;
-	return usec*tick_in_usec;
-}
-
 /* Adjust for the fact that psched_ticks aren't always usecs 
    (based on kernel PSCHED_CLOCK configuration */
 static int get_ticks(__u32 *ticks, const char *str)
 {
 	unsigned t;
 
+	dprintf(("delay str = %s\n", str));
 	if(get_usecs(&t, str))
 		return -1;
+	dprintf(("delay pointer = %d\n", t));
 
 	if (tc_core_time2big(t)) {
 		fprintf(stderr, "Illegal %u time (too large)\n", t);
 		return -1;
 	} 
+	dprintf(("delay pointer time2big = %d\n", t));
 
-	*ticks = tc_core_usec2tick(t);
-	*ticks = tc_ticks(t);
+	dprintf(("ticks = %d\n", *ticks));
+	//*ticks = tc_core_usec2tick(t);
+	*ticks = tc_core_time2tick(t);
 	dprintf(("ticks = %d\n", *ticks));
 	return 0;
 }

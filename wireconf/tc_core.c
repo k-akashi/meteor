@@ -23,9 +23,20 @@
 
 #include "tc_core.h"
 
+/*
 static __u32 t2us = 1;
 static __u32 us2t = 1;
+*/
 static double tick_in_usec = 1;
+// for 2.6.34
+static double clock_factor = 1;
+//
+
+unsigned tc_core_time2tick(unsigned time)
+{   
+	printf("tc_core_time2tick = %f\n", time*tick_in_usec);
+    return time*tick_in_usec;
+}
 
 long tc_core_usec2tick(long usec)
 {
@@ -83,15 +94,28 @@ int tc_calc_rtable(unsigned bps, __u32 *rtab, int cell_log, unsigned mtu,
 int tc_core_init()
 {
 	FILE *fp = fopen("/proc/net/psched", "r");
+	__u32 clock_res;
+	__u32 t2us;
+	__u32 us2t;
 
 	if (fp == NULL)
 		return -1;
 
+/*
 	if (fscanf(fp, "%08x%08x", &t2us, &us2t) != 2) {
+		fclose(fp);
+		return -1;
+	}
+*/
+	if (fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
 		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
 	tick_in_usec = (double)t2us/us2t;
+	// for 2.6.34
+	tick_in_usec = (double)t2us / us2t * clock_factor;
+	//
+	printf("tick_in_usec = %f\n", tick_in_usec);
 	return 0;
 }

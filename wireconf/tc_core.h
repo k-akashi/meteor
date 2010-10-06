@@ -4,6 +4,7 @@
 #include <asm/types.h>
 #include <linux/pkt_sched.h>
 
+unsigned tc_core_time2tick(unsigned time);
 long tc_core_usec2tick(long usec);
 long tc_core_tick2usec(long tick);
 int tc_core_time2big(unsigned time);
