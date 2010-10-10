@@ -147,7 +147,7 @@ static int netem_parse_opt(struct qdisc_util* qu,
 	int present[__TCA_NETEM_MAX];
 
 	memset(&opt, 0, sizeof(opt));
-	opt.limit = 1000;
+	opt.limit = 100000;
 	memset(&cor, 0, sizeof(cor));
 	memset(&reorder, 0, sizeof(reorder));
 	memset(&corrupt, 0, sizeof(corrupt));

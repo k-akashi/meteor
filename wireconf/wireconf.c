@@ -125,6 +125,10 @@ typedef union
   uint32_t word;
 } in4_addr;
 
+#ifdef __linux
+int priv_delay = 0;
+double priv_loss = 0;
+#endif
 // convert a string containing an IPv4 address 
 // to an IPv4 data structure;
 // return SUCCESS on success, ERROR on error
@@ -439,7 +443,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	sprintf(handleid, "%d", handle_nr);
 	dprintf(("rulenum = %s\n", handleid));
 
-	qp.limit = "1000";
+	qp.limit = "1000000";
 	qp.delay = "1us";
 	qp.jitter = "0";
     qp.delay_corr = "0";
@@ -457,7 +461,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	sprintf(bwid, "%d", handle_nr + 1000);
 //
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentid, qp, "tbf");
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentid, qp, "tbf");
 
 	return 0;
 }
@@ -598,6 +602,7 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 {
 	struct qdisc_parameter qp;
 	char* device_name =  (char* )get_route_info("dev", dst);
+	int config_netem = 0;
 	char delaystr[20];
 	char loss[20];
 	char handleid[10];
@@ -629,24 +634,36 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	sprintf(bwid, "%d", handle+1000);
 	sprintf(parentid, "%d:1", handle);
 //
-	sprintf(delaystr, "%dms", delay);
-	sprintf(loss, "%f", lossrate);
+	if(priv_delay != delay) {
+		sprintf(delaystr, "%dms", delay);
+		qp.delay = delaystr;
+		priv_delay = delay;
+		config_netem = 1;
+	}
+	if(priv_loss != lossrate) {
+		sprintf(loss, "%f", lossrate);
+		qp.loss = loss;
+		priv_loss = lossrate;
+		config_netem = 1;
+	}
 	sprintf(rate, "%d", bandwidth);
 	sprintf(buffer, "%d", bandwidth / 1024);
 
-	qp.limit = "1000";
-	qp.delay = delaystr;
-	qp.jitter = "0";
-    qp.delay_corr = "0";
-	qp.loss = loss;
-    qp.loss_corr = "0";
-    qp.reorder_prob = "0";
-    qp.reorder_corr = "0";
+//	if(config_netem) {
+//		qp.jitter = "0";
+//    	qp.delay_corr = "0";
+//    	qp.loss_corr = "0";
+//    	qp.reorder_prob = "0";
+//    	qp.reorder_corr = "0";
+//	}
 	qp.rate = rate;
 	qp.buffer = buffer;
-	
-	tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
-	tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentid, qp, "tbf");
+
+	if(config_netem) {
+		qp.limit = "1000000";
+		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+	}
+	//tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentid, qp, "tbf");
 
 	return SUCCESS;
 }

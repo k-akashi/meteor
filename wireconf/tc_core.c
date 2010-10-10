@@ -34,7 +34,6 @@ static double clock_factor = 1;
 
 unsigned tc_core_time2tick(unsigned time)
 {   
-	printf("tc_core_time2tick = %f\n", time*tick_in_usec);
     return time*tick_in_usec;
 }
 
@@ -116,6 +115,5 @@ int tc_core_init()
 	// for 2.6.34
 	tick_in_usec = (double)t2us / us2t * clock_factor;
 	//
-	printf("tick_in_usec = %f\n", tick_in_usec);
 	return 0;
 }
