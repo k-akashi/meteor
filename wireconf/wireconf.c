@@ -128,6 +128,7 @@ typedef union
 #ifdef __linux
 int priv_delay = 0;
 double priv_loss = 0;
+int priv_rate = 0;
 #endif
 // convert a string containing an IPv4 address 
 // to an IPv4 data structure;
@@ -603,6 +604,7 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	struct qdisc_parameter qp;
 	char* device_name =  (char* )get_route_info("dev", dst);
 	int config_netem = 0;
+	int config_tbf = 0;
 	char delaystr[20];
 	char loss[20];
 	char handleid[10];
@@ -646,24 +648,27 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 		priv_loss = lossrate;
 		config_netem = 1;
 	}
-	sprintf(rate, "%d", bandwidth);
-	sprintf(buffer, "%d", bandwidth / 1024);
+	if(priv_rate != bandwidth) {
+		sprintf(rate, "%d", bandwidth);
+		sprintf(buffer, "%d", bandwidth / 1024);
+		priv_rate = bandwidth;
+		config_tbf = 1;
+	}
 
-//	if(config_netem) {
+	if(config_netem) {
+		qp.limit = "1000000";
 //		qp.jitter = "0";
 //    	qp.delay_corr = "0";
 //    	qp.loss_corr = "0";
 //    	qp.reorder_prob = "0";
 //    	qp.reorder_corr = "0";
-//	}
-	qp.rate = rate;
-	qp.buffer = buffer;
-
-	if(config_netem) {
-		qp.limit = "1000000";
 		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
 	}
-	//tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentid, qp, "tbf");
+	if(config_tbf) {
+		qp.rate = rate;
+		qp.buffer = buffer;
+		tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentid, qp, "tbf");
+	}
 
 	return SUCCESS;
 }
