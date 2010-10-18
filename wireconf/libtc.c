@@ -75,7 +75,6 @@ char* get_route_info(char *info, char *addr)
 		return "null";
 	}
 
-
 	return 0;
 }
 
@@ -134,8 +133,10 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	req.t.tcm_ifindex = idx;
 */
 
-	strncpy(k, type, sizeof(k) - 1);
-	q = get_qdisc_kind(k);
+	if(cmd != RTM_DELQDISC) {
+		strncpy(k, type, sizeof(k) - 1);
+		q = get_qdisc_kind(k);
+	}
 
 	if(k[0]) {
 		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);

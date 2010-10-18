@@ -444,7 +444,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	sprintf(handleid, "%d", handle_nr);
 	dprintf(("rulenum = %s\n", handleid));
 
-	qp.limit = "1000000";
+	qp.limit = "1000";
 	qp.delay = "1us";
 	qp.jitter = "0";
     qp.delay_corr = "0";
@@ -456,13 +456,19 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	qp.buffer = "1Mbit";
 
 //tmp
-	char parentid[10];
-	sprintf(parentid, "%d:1", handle_nr);
+	char netemid[10];
 	char bwid[10];
-	sprintf(bwid, "%d", handle_nr + 1000);
+	char parentprioid[10];
+	char parentnetemid[10];
+	sprintf(netemid, "%d", handle_nr + 1000);
+	sprintf(bwid, "%d", handle_nr + 2000);
+	sprintf(parentprioid, "%d:1", handle_nr);
+	sprintf(parentnetemid, "%s:1", netemid);
 //
+
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
-	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentid, qp, "tbf");
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parentprioid, qp, "pfifo");
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "tbf");
 
 	return 0;
 }
@@ -522,7 +528,7 @@ int delete_netem(uint s, char* dst, u_int32_t rule_number)
 */
 
 	//system("tc qdisc del dev lo root");
-	tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "root", qp, "netem");
+	tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "root", qp, "pfifo");
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
 #endif
@@ -613,6 +619,7 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 
 	memset(&qp, 0, sizeof(qp));
 
+/*
 	int netemid;
 	netemid = convert_netemid(handle);
 	netemid |= handle;
@@ -627,14 +634,18 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	dprintf(("parent id = %d\n", parent));
 	dprintf(("child id = %d\n", child));
 	dprintf(("rulenum = %d\n", handle));
-
+*/
 	
 	sprintf(handleid, "%d", handle);
 // tmp
+	char netemid[10];
 	char bwid[10];
-	char parentid[10];
-	sprintf(bwid, "%d", handle+1000);
-	sprintf(parentid, "%d:1", handle);
+	char parentprioid[10];
+	char parentnetemid[10];
+	sprintf(netemid, "%d", handle + 1000);
+	sprintf(bwid, "%d", handle + 2000);
+	sprintf(parentprioid, "%d:1", handle);
+	sprintf(parentnetemid, "%s:1", netemid);
 //
 	if(priv_delay != delay) {
 		sprintf(delaystr, "%dms", delay);
@@ -656,19 +667,19 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 	}
 
 	if(config_netem) {
-		qp.limit = "1000000";
+		qp.limit = "1000";
 //		qp.jitter = "0";
 //    	qp.delay_corr = "0";
 //    	qp.loss_corr = "0";
-//    	qp.reorder_prob = "0";
+    	qp.reorder_prob = "0";
 //    	qp.reorder_corr = "0";
 		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
 	}
-	if(config_tbf) {
-		qp.rate = rate;
-		qp.buffer = buffer;
-		tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentid, qp, "tbf");
-	}
+//	if(config_tbf) {
+//		qp.rate = rate;
+//		qp.buffer = buffer;
+//		tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentnetemid, qp, "tbf");
+//	}
 
 	return SUCCESS;
 }

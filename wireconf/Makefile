@@ -25,11 +25,12 @@ CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
 LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl
-TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so do_wireconf test
+TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_prio.so do_wireconf test
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o #q_tbf.o
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o 
+WCOBJ=q_tbf.o q_prio.o q_pfifo.o
 TESTOBJ=test.o
 endif
 
@@ -47,11 +48,23 @@ ifeq ($(UNAME), Linux)
 q_netem.so: q_netem.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 
 
+q_tbf.o: q_tbf.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 q_tbf.so: q_tbf.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 
 
+q_prio.o: q_prio.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 q_prio.so: q_prio.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< -o $@
+
+q_pfifo.o: q_pfifo.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+q_pfifo.so: q_pfifo.c
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
 
 libnetlink.a: $(NLOBJ)
 	$(AR) rcs $@ $(NLOBJ) && ranlib $@
@@ -69,11 +82,11 @@ libtimer.a: timer.h timer.c timer.o global.h message.h
 	ar rcs libtimer.a timer.o && ranlib libtimer.a   
 
 ifeq ($(UNAME), Linux)
-do_wireconf: do_wireconf.o routing_info.o libwireconf.a libtimer.a libtc.a libnetlink.a
-	$(CC) $(CFLAGS) -g -export-dynamic -o $@ do_wireconf.o routing_info.o $(LDFLAGS) $(LDLIBS)
+do_wireconf: do_wireconf.o routing_info.o libwireconf.a libtimer.a libtc.a libnetlink.a $(WCOBJ)
+	$(CC) $(CFLAGS) -g -export-dynamic -o $@ do_wireconf.o routing_info.o $(WCOBJ) $(LDFLAGS) $(LDLIBS)
 endif
 ifeq ($(UNAME), FreeBSD)
-do_wireconf: do_wireconf.c routing_info.o libwireconf.a libtimer.a
+do_wireconf: do_wireconf.c routing_info.o libwireconf.a libtimer.a 
 	$(CC) $(CFLAGS) -o $@ do_wireconf.c routing_info.o $(LDFLAGS) $(LDLIBS)
 endif
 

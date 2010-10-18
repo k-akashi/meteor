@@ -27,18 +27,13 @@
 #include "utils.h"
 #include "tc_util.h"
 
-static void explain(void)
-{
-	fprintf(stderr, "Usage: ... prio bands NUMBER priomap P1 P2...\n");
-}
-
 #define usage() return(-1)
 
-static int prio_parse_opt(struct qdisc_util* qu, qdisc_parameter* qp, struct nlmsghdr* n)
+static int prio_parse_opt(struct qdisc_util* qu, struct qdisc_parameter* qp, struct nlmsghdr* n)
 {
-	struct tc_prio_qopt opt={3,{ 1, 2, 2, 2, 1, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 }};
+	struct tc_prio_qopt opt={16,{ 1, 2, 2, 2, 1, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 }};
 
-	get_integer(&opt.bands, "16", 10);
+//	get_integer(&opt.bands, "16", 10);
 /*
 	if (pmap_mode) {
 		for (; idx < TC_PRIO_MAX; idx++)
