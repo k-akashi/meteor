@@ -22,7 +22,6 @@
 int preferred_family = AF_UNSPEC;
 int oneline = 0;
 char * _SL_ = NULL;
-//struct rtnl_handle rth;
 int open_flag = 1;
 
 char* get_route_info(char *info, char *addr)
@@ -47,11 +46,11 @@ char* get_route_info(char *info, char *addr)
     parse_rtattr(tb, RTA_MAX, RTM_RTA(r), len);
     memset(&dst, 0, sizeof(dst));
     dst.family = r->rtm_family;
-    if (filter.oifmask) {
+    if(filter.oifmask) {
         int oif = 0;
-        if (tb[RTA_OIF])
+        if(tb[RTA_OIF])
             oif = *(int*)RTA_DATA(tb[RTA_OIF]);
-        if ((oif^filter.oif)&filter.oifmask) {
+        if((oif^filter.oif)&filter.oifmask) {
             return 0;
 		}
     }
@@ -59,7 +58,7 @@ char* get_route_info(char *info, char *addr)
 	if(strcmp(info, "dev") == 0) {
 		return (char* )ll_index_to_name(*(int* )RTA_DATA(tb[RTA_OIF]));
 	} else if(strcmp(info, "next") == 0){
-		if ((char* )inet_ntop(r->rtm_family,
+		if((char* )inet_ntop(r->rtm_family,
 			RTA_DATA(tb[RTA_GATEWAY]),
 			abuf, sizeof(abuf)) == NULL) {
 			return addr;
@@ -111,8 +110,15 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	}
 	if(strcmp(root, "root") == 0)
 		req.t.tcm_parent = TC_H_ROOT;
-	else if(strcmp(root, "ingress") == 0)
+	else if(strcmp(root, "ingress") == 0) {
 		req.t.tcm_parent = TC_H_INGRESS;
+		memset(&qp, 0, sizeof(struct qdisc_parameter));
+		char* devname_in = "ifb1";
+		if(set_ifb(devname_in, "up") < 0) {
+			printf("cannot\n");
+			return 1;
+		}
+	}
 	else {
 		if(get_tc_classid(&handle, root)) {
 			invarg(handleid, "invalid parent ID");
@@ -126,7 +132,7 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 
 	ll_init_map(&rth);
 
-	if ((idx = ll_name_to_index(d)) == 0) {
+	if((idx = ll_name_to_index(d)) == 0) {
 		fprintf(stderr, "Cannot find device \"%s\"\n", d);
 		return 1;
 	}

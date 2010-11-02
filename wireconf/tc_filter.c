@@ -28,26 +28,13 @@
 #include "tc_util.h"
 #include "tc_common.h"
 
-static void usage(void);
 
-static void usage(void)
-{
-	fprintf(stderr, "Usage: tc filter [ add | del | change | get ] dev STRING\n");
-	fprintf(stderr, "       [ pref PRIO ] [ protocol PROTO ]\n");
-	fprintf(stderr, "       [ estimator INTERVAL TIME_CONSTANT ]\n");
-	fprintf(stderr, "       [ root | classid CLASSID ] [ handle FILTERID ]\n");
-	fprintf(stderr, "       [ [ FILTER_TYPE ] [ help | OPTIONS ] ]\n");
-	fprintf(stderr, "\n");
-	fprintf(stderr, "       tc filter show [ dev STRING ] [ root | parent CLASSID ]\n");
-	fprintf(stderr, "Where:\n");
-	fprintf(stderr, "FILTER_TYPE := { rsvp | u32 | fw | route | etc. }\n");
-	fprintf(stderr, "FILTERID := ... format depends on classifier, see there\n");
-	fprintf(stderr, "OPTIONS := ... try tc filter add <desired FILTER_KIND> help\n");
-	return;
-}
-
-
-int tc_filter_modify(int cmd, unsigned flags, int argc, char **argv)
+int 
+tc_filter_modify(cmd, flags, dev, argv)
+int cmd;
+unsigned int flags;
+char* dev;
+char** argv;
 {
 	struct {
 		struct nlmsghdr 	n;
@@ -73,39 +60,27 @@ int tc_filter_modify(int cmd, unsigned flags, int argc, char **argv)
 	req.n.nlmsg_type = cmd;
 	req.t.tcm_family = AF_UNSPEC;
 
-	while (argc > 0) {
-		if (strcmp(*argv, "dev") == 0) {
-			NEXT_ARG();
-			if (d[0])
-				duparg("dev", *argv);
-			strncpy(d, *argv, sizeof(d)-1);
-		} else if (strcmp(*argv, "root") == 0) {
-			if (req.t.tcm_parent) {
-				fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
-				return -1;
-			}
-			req.t.tcm_parent = TC_H_ROOT;
-		} else if (strcmp(*argv, "parent") == 0) {
-			__u32 handle;
-			NEXT_ARG();
-			if (req.t.tcm_parent)
-				duparg("parent", *argv);
-			if (get_tc_classid(&handle, *argv))
-				invarg(*argv, "Invalid parent ID");
-			req.t.tcm_parent = handle;
-		} else if (strcmp(*argv, "handle") == 0) {
+	strncpy(d, dev, sizeof(d)-1);
+
+	if(strcmp(*argv, "root") == 0) {
+		if(req.t.tcm_parent) {
+			fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
+			return -1;
+		}
+		req.t.tcm_parent = TC_H_ROOT;
+	} else {
+		__u32 handle;
+		if(req.t.tcm_parent)
+			duparg("parent", *argv);
+		if (get_tc_classid(&handle, *argv))
+			invarg(*argv, "Invalid parent ID");
+		req.t.tcm_parent = handle;
+	} else if (strcmp(*argv, "handle") == 0) {
 			NEXT_ARG();
 			if (fhandle)
 				duparg("handle", *argv);
 			fhandle = *argv;
-		} else if (matches(*argv, "preference") == 0 ||
-			   matches(*argv, "priority") == 0) {
-			NEXT_ARG();
-			if (prio)
-				duparg("priority", *argv);
-			if (get_u32(&prio, *argv, 0))
-				invarg(*argv, "invalid prpriority value");
-		} else if (matches(*argv, "protocol") == 0) {
+	} else if (matches(*argv, "protocol") == 0) {
 			__u16 id;
 			NEXT_ARG();
 			if (protocol)
@@ -113,11 +88,6 @@ int tc_filter_modify(int cmd, unsigned flags, int argc, char **argv)
 			if (ll_proto_a2n(&id, *argv))
 				invarg(*argv, "invalid protocol");
 			protocol = id;
-		} else if (matches(*argv, "estimator") == 0) {
-			if (parse_estimator(&argc, &argv, &est) < 0)
-				return -1;
-		} else if (matches(*argv, "help") == 0) {
-			usage();
 		} else {
 			strncpy(k, *argv, sizeof(k)-1);
 
@@ -125,36 +95,23 @@ int tc_filter_modify(int cmd, unsigned flags, int argc, char **argv)
 			argc--; argv++;
 			break;
 		}
-
-		argc--; argv++;
 	}
 
-	req.t.tcm_info = TC_H_MAKE(prio<<16, protocol);
+	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
-	if (k[0])
+	if(k[0])
 		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
 
-	if (q) {
-		if (q->parse_fopt(q, fhandle, argc, argv, &req.n))
+	if(q) {
+		if(q->parse_fopt(q, fhandle, argc, argv, &req.n))
 			return 1;
-	} else {
-		if (fhandle) {
-			fprintf(stderr, "Must specify filter type when using "
-				"\"handle\"\n");
-			return -1;
-		}
-		if (argc) {
-			if (matches(*argv, "help") == 0)
-				usage();
-			fprintf(stderr, "Garbage instead of arguments \"%s ...\". Try \"tc filter help\".\n", *argv);
-			return -1;
-		}
 	}
-	if (est.ewma_log)
+
+	if(est.ewma_log)
 		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
 
 
-	if (d[0])  {
+	if(d[0]) {
  		ll_init_map(&rth);
 
 		if ((req.t.tcm_ifindex = ll_name_to_index(d)) == 0) {
@@ -309,8 +266,6 @@ int tc_filter_list(int argc, char **argv)
 				invarg(*argv, "invalid protocol");
 			protocol = res;
 			filter_protocol = protocol;
-		} else if (matches(*argv, "help") == 0) {
-			usage();
 		} else {
 			fprintf(stderr, " What is \"%s\"? Try \"tc filter help\"\n", *argv);
 			return -1;
@@ -344,28 +299,14 @@ int tc_filter_list(int argc, char **argv)
 	return 0;
 }
 
-int do_filter(int argc, char **argv)
-{
-	if (argc < 1)
-		return tc_filter_list(0, NULL);
-	if (matches(*argv, "add") == 0)
-		return tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, argc-1, argv+1);
-	if (matches(*argv, "change") == 0)
-		return tc_filter_modify(RTM_NEWTFILTER, 0, argc-1, argv+1);
-	if (matches(*argv, "replace") == 0)
-		return tc_filter_modify(RTM_NEWTFILTER, NLM_F_CREATE, argc-1, argv+1);
-	if (matches(*argv, "delete") == 0)
-		return tc_filter_modify(RTM_DELTFILTER, 0,  argc-1, argv+1);
-#if 0
-	if (matches(*argv, "get") == 0)
-		return tc_filter_get(RTM_GETTFILTER, 0,  argc-1, argv+1);
-#endif
-	if (matches(*argv, "list") == 0 || matches(*argv, "show") == 0
-	    || matches(*argv, "lst") == 0)
-		return tc_filter_list(argc-1, argv+1);
-	if (matches(*argv, "help") == 0)
-		usage();
-	fprintf(stderr, "Command \"%s\" is unknown, try \"tc filter help\".\n", *argv);
-	return -1;
-}
 
+/*
+//	add filter rule
+		return tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, argc-1, argv+1);
+//	change filter rule
+		return tc_filter_modify(RTM_NEWTFILTER, 0, argc-1, argv+1);
+//	replace filter rule
+		return tc_filter_modify(RTM_NEWTFILTER, NLM_F_CREATE, argc-1, argv+1);
+//	delete filter rule
+		return tc_filter_modify(RTM_DELTFILTER, 0,  argc-1, argv+1);
+*/

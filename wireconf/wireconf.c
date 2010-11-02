@@ -466,6 +466,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	sprintf(parentnetemid, "%s:1", netemid);
 //
 
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "netem");
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parentprioid, qp, "pfifo");
 	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "tbf");
@@ -673,7 +674,9 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 //    	qp.loss_corr = "0";
     	qp.reorder_prob = "0";
 //    	qp.reorder_corr = "0";
+
 		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+		//tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "ingress", qp, "netem");
 	}
 //	if(config_tbf) {
 //		qp.rate = rate;

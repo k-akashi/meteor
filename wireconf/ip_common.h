@@ -20,13 +20,6 @@ extern int print_route(const struct sockaddr_nl *who,
 		       struct nlmsghdr *n, void *arg);
 extern int print_prefix(const struct sockaddr_nl *who,
 			struct nlmsghdr *n, void *arg);
-extern int do_ipaddr(int argc, char **argv);
-extern int do_iproute(int argc, char **argv);
-extern int do_iprule(int argc, char **argv);
-extern int do_ipneigh(int argc, char **argv);
-extern int do_ipntable(int argc, char **argv);
-extern int do_iptunnel(int argc, char **argv);
-extern int do_iplink(int argc, char **argv);
-extern int do_xfrm(int argc, char **argv);
+extern int set_ifb(char* devname, char* cmd);
 
 extern struct rtnl_handle rth;

@@ -29,7 +29,7 @@ TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_pr
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o 
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o
 WCOBJ=q_tbf.o q_prio.o q_pfifo.o
 TESTOBJ=test.o
 endif
@@ -72,7 +72,7 @@ libnetlink.a: $(NLOBJ)
 libtc.a: $(TCOBJ)
 	$(AR) rcs $@ $(TCOBJ) && ranlib $@
 
-ip: $(IPOBJ) $(LIBNETLINK) $(LIBUTIL)
+#ip: $(IPOBJ) $(LIBNETLINK) $(LIBUTIL)
 endif
 
 libwireconf.a: wireconf.h wireconf.c wireconf.o global.h message.h
