@@ -1,0 +1,14 @@
+PING 192.168.200.2 (192.168.200.2) 1200(1228) bytes of data.
+From 192.168.200.1 icmp_seq=10 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=11 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=12 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=22 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=23 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=24 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=34 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=35 Destination Host Unreachable
+From 192.168.200.1 icmp_seq=36 Destination Host Unreachable
+
+--- 192.168.200.2 ping statistics ---
+44 packets transmitted, 0 received, +9 errors, 100% packet loss, time 10836ms
+, pipe 3
