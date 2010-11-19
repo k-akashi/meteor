@@ -25,25 +25,6 @@
 #include "tc_util.h"
 #include "tc_common.h"
 
-static void explain(void)
-{
-	fprintf(stderr, 
-"Usage: ... netem [ limit PACKETS ] \n" \
-"                 [ delay TIME [ JITTER [CORRELATION]]]\n" \
-"                 [ distribution {uniform|normal|pareto|paretonormal} ]\n" \
-"                 [ drop PERCENT [CORRELATION]] \n" \
-"                 [ corrupt PERCENT [CORRELATION]] \n" \
-"                 [ duplicate PERCENT [CORRELATION]]\n" \
-"                 [ reorder PRECENT [CORRELATION] [ gap DISTANCE ]]\n");
-}
-
-static void explain1(const char *arg)
-{
-	fprintf(stderr, "Illegal \"%s\"\n", arg);
-}
-
-#define usage() return(-1)
-
 /*
  * Simplistic file parser for distrbution data.
  * Format is:
@@ -51,6 +32,18 @@ static void explain1(const char *arg)
  *	data0 data1
  */
 #define MAXDIST	65536
+
+static void
+explain(void)
+{
+	fprintf(stderr, "Unknown Error\n");
+}
+
+static void
+explain1(const char *arg)
+{
+	fprintf(stderr, arg);
+}
 /*
 static int get_distribution(const char *type, __s16 *data)
 {

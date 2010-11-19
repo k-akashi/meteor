@@ -438,12 +438,13 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	char* device_name =  (char* )get_route_info("dev", dst);
 	char handleid[10];
 
-	// netem parameter set
+	// Qdisc Parameter set
 	memset(&qp, 0, sizeof(qp));
 
 	sprintf(handleid, "%d", handle_nr);
 	dprintf(("rulenum = %s\n", handleid));
 
+	// initialize Qdisc Parameter
 	qp.limit = "1000";
 	qp.delay = "1us";
 	qp.jitter = "0";
@@ -466,10 +467,17 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	sprintf(parentnetemid, "%s:1", netemid);
 //
 
+	// configure netem
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
+	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parentprioid, qp, "pfifo");
 	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "netem");
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parentprioid, qp, "pfifo");
 	//tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "tbf");
+
+	// ingress filter
+	//device_name = "ifb0";
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "ingress");
+	system("tc filter add dev eth0 parent ffff: protocol ip u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev ifb0");
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, "ifb0", handleid, "root", qp, "netem");
 
 	return 0;
 }
@@ -675,8 +683,11 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
     	qp.reorder_prob = "0";
 //    	qp.reorder_corr = "0";
 
-		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+		//tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
 		//tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "ingress", qp, "netem");
+		// ingress
+		device_name = "ifb0";
+		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
 	}
 //	if(config_tbf) {
 //		qp.rate = rate;

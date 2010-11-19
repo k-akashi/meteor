@@ -30,11 +30,15 @@
 
 
 int 
-tc_filter_modify(cmd, flags, dev, argv)
+tc_filter_modify(cmd, flags, dev, parentid, handleid, protocolid, type, up)
 int cmd;
 unsigned int flags;
 char* dev;
-char** argv;
+char* parentid;
+char* handleid;
+char* protocolid;
+char* type;
+struct u32_parameter up;
 {
 	struct {
 		struct nlmsghdr 	n;
@@ -62,40 +66,36 @@ char** argv;
 
 	strncpy(d, dev, sizeof(d)-1);
 
-	if(strcmp(*argv, "root") == 0) {
+	if(*parentid == '0') {
 		if(req.t.tcm_parent) {
 			fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
 			return -1;
 		}
 		req.t.tcm_parent = TC_H_ROOT;
-	} else {
+	}
+	else {
 		__u32 handle;
 		if(req.t.tcm_parent)
-			duparg("parent", *argv);
-		if (get_tc_classid(&handle, *argv))
-			invarg(*argv, "Invalid parent ID");
+			duparg("parent", parentid);
+		if(get_tc_classid(&handle, parentid))
+			invarg(parentid, "Invalid parent ID");
 		req.t.tcm_parent = handle;
-	} else if (strcmp(*argv, "handle") == 0) {
-			NEXT_ARG();
-			if (fhandle)
-				duparg("handle", *argv);
-			fhandle = *argv;
-	} else if (matches(*argv, "protocol") == 0) {
-			__u16 id;
-			NEXT_ARG();
-			if (protocol)
-				duparg("protocol", *argv);
-			if (ll_proto_a2n(&id, *argv))
-				invarg(*argv, "invalid protocol");
-			protocol = id;
-		} else {
-			strncpy(k, *argv, sizeof(k)-1);
-
-			q = get_filter_kind(k);
-			argc--; argv++;
-			break;
-		}
 	}
+
+	if (fhandle)
+		duparg("handle", handleid);
+	fhandle = handleid;
+
+	// protocol set
+	__u16 id;
+	if(protocolid)
+		duparg("protocol", protocolid);
+	if (ll_proto_a2n(&id, protocolid))
+		invarg(protocolid, "invalid protocol");
+	protocol = id;
+
+	strncpy(k, type, sizeof(k)-1);
+	q = get_filter_kind(k);
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
@@ -103,7 +103,7 @@ char** argv;
 		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
 
 	if(q) {
-		if(q->parse_fopt(q, fhandle, argc, argv, &req.n))
+		if(q->parse_fopt(q, fhandle, up, &req.n, dev))
 			return 1;
 	}
 

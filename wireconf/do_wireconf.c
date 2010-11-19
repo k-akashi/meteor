@@ -57,7 +57,9 @@
 #include "message.h"
 #include "routing_info.h"
 
+#ifdef __linux
 #include "tc_util.h"
+#endif
 
 // use this define to enable support for OLSR routing
 // in usage (1) type

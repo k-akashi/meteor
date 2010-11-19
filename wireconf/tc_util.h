@@ -30,6 +30,21 @@ struct qdisc_parameter
 	char* buffer;
 };
 
+struct u32_parameter
+{
+	char* match;
+	char* offset;
+	char* hashkey;
+	char* classid;
+	char* divisor;
+	char* order;
+	char* link;
+	char* ht;
+	char* indev;
+	char* action;
+	char* police;
+};
+
 struct qdisc_util
 {
 	struct  qdisc_util *next;
@@ -37,7 +52,7 @@ struct qdisc_util
 //	int	(*parse_qopt)(struct qdisc_util *qu, int argc, char **argv, struct nlmsghdr *n);
 	int	(*parse_qopt)(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr *n);
 	int	(*print_qopt)(struct qdisc_util *qu, FILE *f, struct rtattr *opt);
-	int 	(*print_xstats)(struct qdisc_util *qu, FILE *f, struct rtattr *xstats);
+	int (*print_xstats)(struct qdisc_util *qu, FILE *f, struct rtattr *xstats);
 
 	int	(*parse_copt)(struct qdisc_util *qu, int argc, char **argv, struct nlmsghdr *n);
 	int	(*print_copt)(struct qdisc_util *qu, FILE *f, struct rtattr *opt);
@@ -47,8 +62,8 @@ struct filter_util
 {
 	struct filter_util *next;
 	char	id[16];
-	int	(*parse_fopt)(struct filter_util *qu, char *fhandle, int argc, 
-			      char **argv, struct nlmsghdr *n);
+	int	(*parse_fopt)(struct filter_util *qu, char *fhandle, struct u32_parameter, 
+			      struct nlmsghdr *n, char* dev);
 	int	(*print_fopt)(struct filter_util *qu, FILE *f, struct rtattr *opt, __u32 fhandle);
 };
 
@@ -108,5 +123,7 @@ extern void print_tm(FILE *f, const struct tcf_t *tm);
 //extern int tc_cmd(int cmd, int flags, char* dev, char* parentid, char* handleid, int root, struct qdisc_parameter qp, char* type);
 extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
 extern char* get_route_info(char *info, char *addr);
+
+extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, char* parentid, char* handleid, char* protocolid, char* type, struct u32_parameter up);
 
 #endif

@@ -19,8 +19,8 @@ CC      = gcc
 HOSTCC  = gcc
 
 ifeq ($(UNAME), Linux)
-#CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
-CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
+CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
+#CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 #CFLAGS  = -I. -g -Wall -Werror -D_GNU_SOURCE -O2 -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
@@ -30,7 +30,7 @@ TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
 TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o
-WCOBJ=q_tbf.o q_prio.o q_pfifo.o
+WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o
 TESTOBJ=test.o
 endif
 
@@ -64,6 +64,9 @@ q_pfifo.o: q_pfifo.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 q_pfifo.so: q_pfifo.c
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
+
+q_ingress.so: q_ingress.c
 	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
 
 libnetlink.a: $(NLOBJ)

@@ -144,7 +144,7 @@ struct filter_util *get_filter_kind(const char *str)
 		if (strcmp(q->id, str) == 0)
 			return q;
 
-	snprintf(buf, sizeof(buf), "./f_%s.so", str);
+	snprintf(buf, sizeof(buf), "./wireconf/f_%s.so", str);
 	dlh = dlopen(buf, RTLD_LAZY);
 	if (dlh == NULL) {
 		dlh = BODY;
