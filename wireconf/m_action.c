@@ -40,6 +40,7 @@ void act_usage(void)
 	fprintf (stderr, "action usage improper\n");
 }
 
+/*
 static int print_noaopt(struct action_util *au, FILE *f, struct rtattr *opt)
 {
 	if (opt && RTA_PAYLOAD(opt))
@@ -60,7 +61,7 @@ static int parse_noaopt(struct action_util *au, int *argc_p, char ***argv_p, int
 	}
 	return -1;
 }
-
+*/
 struct action_util *get_action_kind(char *str)
 {
 	static void *aBODY;
@@ -109,13 +110,13 @@ noexist:
 	if (a) {
 		memset(a, 0, sizeof(*a));
 		strncpy(a->id, "noact", 15);
-		a->parse_aopt = parse_noaopt;
-		a->print_aopt = print_noaopt;
+//		a->parse_aopt = parse_noaopt;
+//		a->print_aopt = print_noaopt;
 		goto reg;
 	}
 	return a;
 }
-
+/*
 int
 new_cmd(char **argv) 
 {
@@ -128,7 +129,7 @@ new_cmd(char **argv)
 	return 0;
 
 }
-
+*/
 int
 parse_action(action, tca_id, n)
 char* action;
@@ -147,7 +148,6 @@ struct nlmsghdr *n;
 	addattr_l(n, MAX_MSG, tca_id, NULL, 0);
 
 	memset(k, 0, sizeof (k));
-	eap = 1;
 	strncpy(k, action, sizeof (k) - 1);
 	a = get_action_kind(k);
 
@@ -155,7 +155,7 @@ struct nlmsghdr *n;
 	addattr_l(n, MAX_MSG, ++prio, NULL, 0);
 	addattr_l(n, MAX_MSG, TCA_ACT_KIND, k, strlen(k) + 1);
 
-	ret = a->parse_aopt(a, &argv, TCA_ACT_OPTIONS, n);
+	ret = a->parse_aopt(a, "redirect", TCA_ACT_OPTIONS, n);
 
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *)tail;
 
@@ -390,6 +390,7 @@ bad_val:
 	return ret;
 }
 
+/*
 int tc_action_modify(int cmd, unsigned flags, int *argc_p, char ***argv_p)
 {
 	int argc = *argc_p;
@@ -429,7 +430,7 @@ int tc_action_modify(int cmd, unsigned flags, int *argc_p, char ***argv_p)
 
 	return ret;
 }
-
+*/
 int tc_act_list_or_flush(int argc, char **argv, int event)
 {
 	int ret = 0, prio = 0, msg_size = 0;
@@ -501,6 +502,7 @@ bad_val:
 	return ret;
 }
 
+/*
 int do_action(int argc, char **argv)
 {
 
@@ -550,4 +552,4 @@ int do_action(int argc, char **argv)
 
 	return 0;
 }
-
+*/

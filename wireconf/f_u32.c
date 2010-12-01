@@ -890,7 +890,6 @@ char* dev;
 	htid = ((hash%divisor)<<12)|(htid&0xFFF00000);
 	sample_ok = 1;
 	continue;
-*/
 
 	// indev
 	char ind[IFNAMSIZ + 1];
@@ -903,6 +902,7 @@ char* dev;
 	}
 	strncpy(ind, up->indev, sizeof (ind) - 1);
 	addattr_l(n, MAX_MSG, TCA_U32_INDEV, ind, strlen(ind) + 1);
+*/
 
 	// action
 	if(parse_action(up->action, TCA_U32_ACT, n, dev)) {

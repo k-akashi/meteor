@@ -69,14 +69,10 @@ static int print_nofopt(struct filter_util *qu, FILE *f, struct rtattr *opt, __u
 	return 0;
 }
 
-static int parse_nofopt(struct filter_util *qu, char *fhandle, int argc, char **argv, struct nlmsghdr *n)
+static int parse_nofopt(struct filter_util *qu, char *fhandle, struct u32_parameter up, struct nlmsghdr *n, char* dev)
 {
 	__u32 handle;
 
-	if (argc) {
-		fprintf(stderr, "Unknown filter \"%s\", hence option \"%s\" is unparsable\n", qu->id, *argv);
-		return -1;
-	}
 	if (fhandle) {
 		struct tcmsg *t = NLMSG_DATA(n);
 		if (get_u32(&handle, fhandle, 16)) {

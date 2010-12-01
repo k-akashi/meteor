@@ -95,7 +95,7 @@ char* dev;
 
 	// device (redirect || mirror)
 	if(mirror || redir) {
-		strncpy(d, *dev, sizeof(d)-1);
+		strncpy(d, dev, sizeof(d)-1);
 	}
 
 	if (d[0])  {
@@ -111,6 +111,7 @@ char* dev;
 	}
 
 
+/*
 	if (argc && p.eaction == TCA_EGRESS_MIRROR) {
 
 		if (matches(*argv, "reclassify") == 0) {
@@ -132,7 +133,6 @@ char* dev;
 		}
 
 	}
-
 	if (argc) {
 		if (iok && matches(*argv, "index") == 0) {
 			fprintf(stderr, "mirred: Illegal double index\n");
@@ -149,6 +149,7 @@ char* dev;
 			}
 		}
 	}
+*/
 
 	if (mirred_d)
 		fprintf(stdout, "Action %d device %s ifindex %d\n",p.action, d,p.ifindex);
@@ -158,8 +159,6 @@ char* dev;
 	addattr_l(n, MAX_MSG, TCA_MIRRED_PARMS, &p, sizeof (p));
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;
 
-	*argc_p = argc;
-	*argv_p = argv;
 	return 0;
 }
 
