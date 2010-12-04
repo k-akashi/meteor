@@ -482,13 +482,14 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	up.offset = NULL;
 	up.hashkey = NULL;
 	up.classid = "1:1";
-	up.divisor = "1";
+	up.divisor = NULL;
 	up.order = NULL;
 	up.link = NULL;
 	up.ht = NULL;
 	up.indev = NULL;
 	up.action = "mirred";
 	up.police = NULL;
+	up.rdev = "ifb0";
 	tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, "ifb0", handleid, "root", qp, "netem");
 

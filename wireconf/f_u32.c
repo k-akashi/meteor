@@ -823,14 +823,16 @@ char* dev;
 	sel.sel.flags |= TC_U32_TERMINAL;
 
 	// divisor
-	unsigned divisor;
-	if(get_unsigned(&divisor, up.divisor, 0) || 
-	    divisor == 0 ||
-	    divisor > 0x100 || ((divisor - 1) & divisor)) {
-		fprintf(stderr, "Illegal \"divisor\"\n");
-		return -1;
+	if(up.divisor) {
+		unsigned divisor;
+		if(get_unsigned(&divisor, up.divisor, 0) || 
+		    divisor == 0 ||
+		    divisor > 0x100 || ((divisor - 1) & divisor)) {
+			fprintf(stderr, "Illegal \"divisor\"\n");
+			return -1;
+		}
+		addattr_l(n, MAX_MSG, TCA_U32_DIVISOR, &divisor, 4);
 	}
-	addattr_l(n, MAX_MSG, TCA_U32_DIVISOR, &divisor, 4);
 
 	// order
 	if(up.order) {

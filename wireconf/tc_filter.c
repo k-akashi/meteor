@@ -210,6 +210,9 @@ struct u32_parameter up;
 	if(k[0])
 		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
 
+	if(up.rdev) {
+		sprintf(dev, "%s", up.rdev);
+	}
 	if(q) {
 		if(q->parse_fopt(q, fhandle, up, &req.n, dev))
 			return 1;

@@ -43,6 +43,7 @@ struct u32_parameter
 	char* indev;
 	char* action;
 	char* police;
+	char* rdev; //redirect device
 };
 
 struct qdisc_util
