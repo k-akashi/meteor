@@ -72,7 +72,7 @@ struct action_util
 	struct  action_util *next;
 	char    id[16];
 	int     (*parse_aopt)(struct action_util *a, char* action, 
-			      int code, struct nlmsghdr *n);
+			      int code, struct nlmsghdr *n, char* dev);
 	int     (*print_aopt)(struct action_util *au, FILE *f, struct rtattr *opt);
 	int     (*print_xstats)(struct action_util *au, FILE *f, struct rtattr *xstats);
 };
@@ -117,7 +117,7 @@ extern int  police_print_xstats(struct action_util *a,FILE *f,
 				struct rtattr *tb);
 extern int  tc_print_action(FILE *f, const struct rtattr *tb);
 extern int  tc_print_ipt(FILE *f, const struct rtattr *tb);
-extern int  parse_action(char *, int, struct nlmsghdr *);
+extern int  parse_action(char *, int, struct nlmsghdr *, char* dev);
 extern void print_tm(FILE *f, const struct tcf_t *tm);
 
 //extern int tc_cmd(int cmd, int flags, char* dev, char* parentid, char* handleid, int root, struct qdisc_parameter qp, char* type);

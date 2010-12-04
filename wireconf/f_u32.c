@@ -29,36 +29,40 @@
 
 int get_u32_handle(__u32* handle, char* str)
 {
-	__u32 htid=0, hash=0, nodeid=0;
-	char *tmp = strchr(str, ':');
+	__u32 htid = 0;
+	__u32 hash = 0;
+	__u32 nodeid = 0;
+	dprintf(("get_u32_handle\n"));
 
-	if (tmp == NULL) {
-		if (memcmp("0x", str, 2) == 0)
+	char* tmp = strchr(str, ':');
+
+	if(tmp == NULL) {
+		if(memcmp("0x", str, 2) == 0)
 			return get_u32(handle, str, 16);
 		return -1;
 	}
 	htid = strtoul(str, &tmp, 16);
-	if (tmp == str && *str != ':' && *str != 0)
+	if(tmp == str && *str != ':' && *str != 0)
 		return -1;
-	if (htid>=0x1000)
+	if(htid >= 0x1000)
 		return -1;
-	if (*tmp) {
+	if(*tmp) {
 		str = tmp+1;
 		hash = strtoul(str, &tmp, 16);
-		if (tmp == str && *str != ':' && *str != 0)
+		if(tmp == str && *str != ':' && *str != 0)
 			return -1;
-		if (hash>=0x100)
+		if(hash >= 0x100)
 			return -1;
-		if (*tmp) {
+		if(*tmp) {
 			str = tmp+1;
 			nodeid = strtoul(str, &tmp, 16);
-			if (tmp == str && *str != 0)
+			if(tmp == str && *str != 0)
 				return -1;
-			if (nodeid>=0x1000)
+			if(nodeid >= 0x1000)
 				return -1;
 		}
 	}
-	*handle = (htid<<20)|(hash<<12)|nodeid;
+	*handle = (htid << 20) | (hash << 12) | nodeid;
 	return 0;
 }
 
@@ -133,7 +137,7 @@ static int pack_key32(struct tc_u32_sel *sel, __u32 key, __u32 mask, int off, in
 	mask = htonl(mask);
 	return pack_key(sel, key, mask, off, offmask);
 }
-
+/*
 static int pack_key16(struct tc_u32_sel *sel, __u32 key, __u32 mask, int off, int offmask)
 {
 	if (key > 0xFFFF || mask > 0xFFFF)
@@ -200,7 +204,7 @@ int parse_at(int *argc_p, char ***argv_p, int *off, int *offmask)
 	*argv_p = argv;
 	return 0;
 }
-
+*/
 
 static int parse_u32(sel, off, offmask)
 struct tc_u32_sel *sel;
@@ -219,7 +223,7 @@ int offmask;
 
 // at
 /*
-	if (parse_at(&argc, &argv, &off, &offmask))
+	if(parse_at(&argc, &argv, &off, &offmask))
 		return -1;
 	}
 */
@@ -229,6 +233,7 @@ int offmask;
 	return res;
 }
 
+/*
 static int parse_u16(int *argc_p, char ***argv_p, struct tc_u32_sel *sel, int off, int offmask)
 {
 	int res = -1;
@@ -608,6 +613,7 @@ static int parse_mark(int *argc_p, char ***argv_p, struct nlmsghdr *n)
 	*argv_p = argv;
 	return res;
 }
+*/
 
 static int parse_selector(match, sel, n)
 char* match;
@@ -669,6 +675,7 @@ done:
 	return res;
 }
 
+/*
 static int parse_offset(int *argc_p, char ***argv_p, struct tc_u32_sel *sel)
 {
 	int argc = *argc_p;
@@ -750,9 +757,10 @@ static int parse_hashkey(int *argc_p, char ***argv_p, struct tc_u32_sel *sel)
 	*argv_p = argv;
 	return 0;
 }
+*/
 
 static int 
-u32_parse_opt(qu, handle, u32_parameter, n, dev)
+u32_parse_opt(qu, handle, up, n, dev)
 struct filter_util *qu;
 char *handle;
 struct u32_parameter up;
@@ -770,21 +778,22 @@ char* dev;
 	__u32 htid = 0;
 	__u32 order = 0;
 
+	dprintf(("u32_parse_opt\n"));
 	memset(&sel, 0, sizeof(sel));
 
-	if(handle && get_u32_handle(&t->tcm_handle, handle)) {
-		fprintf(stderr, "Illegal filter ID\n");
-		return -1;
+	if(handle) {
+		dprintf(("handle : %s\n", handle));
+		if(get_u32_handle(&t->tcm_handle, handle)) {
+			fprintf(stderr, "Illegal filter ID\n");
+			return -1;
+		}
 	}
-
-	if(argc == 0)
-		return 0;
 
 	tail = NLMSG_TAIL(n);
 	addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
 	// match
-	if(parse_selector(&argc, up->match, &sel.sel, n)) {
+	if(parse_selector(up.match, &sel.sel, n)) {
 		fprintf(stderr, "Illegal \"match\"\n");
 		return -1;
 	}
@@ -792,30 +801,30 @@ char* dev;
 
 /*
 	// offset
-	if(parse_offset(&argc, up->offset, &sel.sel)) {
+	if(parse_offset(&argc, up.offset, &sel.sel)) {
 		fprintf(stderr, "Illegal \"offset\"\n");
 		return -1;
 	}
 
 	// hashkey
-	if(parse_hashkey(&argc, up->hashkey, &sel.sel)) {
+	if(parse_hashkey(&argc, up.hashkey, &sel.sel)) {
 		fprintf(stderr, "Illegal \"hashkey\"\n");
 		return -1;
 	}
 */
 
 	// classid and flowid
-	unsigned handle;
-	if(get_tc_classid(&handle, up->classid)) {
+	unsigned classid;
+	if(get_tc_classid(&classid, up.classid)) {
 		fprintf(stderr, "Illegal \"classid\"\n");
 		return -1;
 	}
-	addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &handle, 4);
+	addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &classid, 4);
 	sel.sel.flags |= TC_U32_TERMINAL;
 
 	// divisor
 	unsigned divisor;
-	if(get_unsigned(&divisor, up->divisor, 0) || 
+	if(get_unsigned(&divisor, up.divisor, 0) || 
 	    divisor == 0 ||
 	    divisor > 0x100 || ((divisor - 1) & divisor)) {
 		fprintf(stderr, "Illegal \"divisor\"\n");
@@ -824,37 +833,43 @@ char* dev;
 	addattr_l(n, MAX_MSG, TCA_U32_DIVISOR, &divisor, 4);
 
 	// order
-	if(get_u32(&order, up->order, 0)) {
-		fprintf(stderr, "Illegal \"order\"\n");
-		return -1;
+	if(up.order) {
+		if(get_u32(&order, up.order, 0)) {
+			fprintf(stderr, "Illegal \"order\"\n");
+			return -1;
+		}
 	}
 
 	// link
-	unsigned handle;
-	if(get_u32_handle(&handle, up->link)) {
-		fprintf(stderr, "Illegal \"link\"\n");
-		return -1;
+	if(up.link) {
+		unsigned link;
+		if(get_u32_handle(&link, up.link)) {
+			fprintf(stderr, "Illegal \"link\"\n");
+			return -1;
+		}
+		if(link && TC_U32_NODE(link)) {
+			fprintf(stderr, "\"link\" must be a hash table.\n");
+			return -1;
+		}
+		addattr_l(n, MAX_MSG, TCA_U32_LINK, &link, 4);
 	}
-	if (handle && TC_U32_NODE(handle)) {
-		fprintf(stderr, "\"link\" must be a hash table.\n");
-		return -1;
-	}
-	addattr_l(n, MAX_MSG, TCA_U32_LINK, &handle, 4);
 
 	// ht
-	unsigned handle;
-	if(get_u32_handle(&handle, up->ht)) {
-		fprintf(stderr, "Illegal \"ht\"\n");
-		return -1;
+	if(up.ht) {
+		unsigned ht;
+		if(get_u32_handle(&ht, up.ht)) {
+			fprintf(stderr, "Illegal \"ht\"\n");
+			return -1;
+		}
+		if (ht && TC_U32_NODE(ht)) {
+			fprintf(stderr, "\"ht\" must be a hash table.\n");
+			return -1;
+		}
+		if (sample_ok)
+			htid = (htid & 0xFF000) | (ht & 0xFFF00000);
+		else
+			htid = (ht & 0xFFFFF000);
 	}
-	if (handle && TC_U32_NODE(handle)) {
-		fprintf(stderr, "\"ht\" must be a hash table.\n");
-		return -1;
-	}
-	if (sample_ok)
-		htid = (htid&0xFF000)|(handle&0xFFF00000);
-	else
-		htid = (handle&0xFFFFF000);
 
 /*
 	// sample
@@ -900,21 +915,23 @@ char* dev;
 		fprintf(stderr, "Illegal indev\n");
 		return -1;
 	}
-	strncpy(ind, up->indev, sizeof (ind) - 1);
+	strncpy(ind, up.indev, sizeof (ind) - 1);
 	addattr_l(n, MAX_MSG, TCA_U32_INDEV, ind, strlen(ind) + 1);
 */
 
 	// action
-	if(parse_action(up->action, TCA_U32_ACT, n, dev)) {
+	if(parse_action(up.action, TCA_U32_ACT, n, dev)) {
 		fprintf(stderr, "Illegal \"action\"\n");
 		return -1;
 	}
 
+/*
 	// police
-	if(parse_police(&argc, up->police, TCA_U32_POLICE, n)) {
+	if(parse_police(&argc, up.police, TCA_U32_POLICE, n)) {
 		fprintf(stderr, "Illegal \"police\"\n");
 		return -1;
 	}
+*/
 
 	if(order) {
 		if(TC_U32_NODE(t->tcm_handle) && order != TC_U32_NODE(t->tcm_handle)) {

@@ -62,6 +62,7 @@ static int parse_noaopt(struct action_util *au, int *argc_p, char ***argv_p, int
 	return -1;
 }
 */
+
 struct action_util *get_action_kind(char *str)
 {
 	static void *aBODY;
@@ -72,7 +73,7 @@ struct action_util *get_action_kind(char *str)
 	int looked4gact = 0;
 restart_s:
 #endif
-	for (a = action_list; a; a = a->next) {
+	for(a = action_list; a; a = a->next) {
 		if (strcmp(a->id, str) == 0)
 			return a;
 	}
@@ -90,7 +91,7 @@ restart_s:
 
 	snprintf(buf, sizeof(buf), "%s_action_util", str);
 	a = dlsym(dlh, buf);
-	if (a == NULL)
+	if(a == NULL)
 		goto noexist;
 
 reg:
@@ -131,10 +132,11 @@ new_cmd(char **argv)
 }
 */
 int
-parse_action(action, tca_id, n)
+parse_action(action, tca_id, n, dev)
 char* action;
 int tca_id;
 struct nlmsghdr *n;
+char* dev;
 {
 	struct rtattr *tail, *tail2;
 	char k[16];
@@ -143,6 +145,7 @@ struct nlmsghdr *n;
 	int prio = 0;
 	struct action_util *a = NULL;
 
+	dprintf(("parse_action\n\n"));
 	tail = tail2 = NLMSG_TAIL(n);
 
 	addattr_l(n, MAX_MSG, tca_id, NULL, 0);
@@ -155,7 +158,7 @@ struct nlmsghdr *n;
 	addattr_l(n, MAX_MSG, ++prio, NULL, 0);
 	addattr_l(n, MAX_MSG, TCA_ACT_KIND, k, strlen(k) + 1);
 
-	ret = a->parse_aopt(a, "redirect", TCA_ACT_OPTIONS, n);
+	ret = a->parse_aopt(a, "redirect", TCA_ACT_OPTIONS, n, dev);
 
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *)tail;
 

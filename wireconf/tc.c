@@ -136,9 +136,11 @@ struct filter_util *get_filter_kind(const char *str)
 	char buf[256];
 	struct filter_util *q;
 
-	for (q = filter_list; q; q = q->next)
-		if (strcmp(q->id, str) == 0)
+	for(q = filter_list; q; q = q->next) {
+		if(strcmp(q->id, str) == 0) {
 			return q;
+		}
+	}
 
 	snprintf(buf, sizeof(buf), "./wireconf/f_%s.so", str);
 	dlh = dlopen(buf, RTLD_LAZY);
@@ -153,8 +155,9 @@ struct filter_util *get_filter_kind(const char *str)
 
 	snprintf(buf, sizeof(buf), "%s_filter_util", str);
 	q = dlsym(dlh, buf);
-	if (q == NULL)
+	if (q == NULL) {
 		goto noexist;
+	}
 
 reg:
 	q->next = filter_list;

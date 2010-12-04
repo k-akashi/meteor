@@ -52,8 +52,10 @@ int get_unsigned(unsigned* val, const char* arg, int base)
 	unsigned long res;
 	char* ptr;
 
-	if (!arg || !*arg)
+	if (!arg || !*arg) {
+		printf("divisor = %s\n\n", arg);
 		return -1;
+	}
 	res = strtoul(arg, &ptr, base);
 	if (!ptr || ptr == arg || *ptr || res > UINT_MAX)
 		return -1;
@@ -80,8 +82,10 @@ int get_u32(__u32* val, const char* arg, int base)
 	unsigned long res;
 	char* ptr;
 
-	if (!arg || !*arg)
+	if(!arg || !*arg) {
 		return -1;
+	}
+
 	res = strtoul(arg, &ptr, base);
 	if (!ptr || ptr == arg || *ptr || res > 0xFFFFFFFFUL)
 		return -1;
@@ -94,10 +98,13 @@ int get_u16(__u16* val, const char* arg, int base)
 	unsigned long res;
 	char* ptr;
 
-	if (!arg || !*arg)
+	if(!arg || !*arg)
 		return -1;
 	res = strtoul(arg, &ptr, base);
-	if (!ptr || ptr == arg || *ptr || res > 0xFFFF)
+	if(*ptr) {
+		printf("\n\n*ptr\n\n");
+	}
+	if(!ptr || ptr == arg || *ptr || res > 0xFFFF)
 		return -1;
 	*val = res;
 	return 0;

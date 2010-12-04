@@ -78,7 +78,14 @@ char* get_route_info(char *info, char *addr)
 }
 
 int
-tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type)
+tc_cmd(cmd, flags, dev, handleid, root, qp, type)
+int cmd;
+int flags;
+char* dev;
+char* handleid;
+char* root;
+struct qdisc_parameter qp;
+char* type;
 {
 	struct qdisc_util* q = NULL;
 	char d[16];
@@ -113,9 +120,10 @@ tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_p
 	else if(strcmp(root, "ingress") == 0) {
 		req.t.tcm_parent = TC_H_INGRESS;
 		memset(&qp, 0, sizeof(struct qdisc_parameter));
+		// lookup device table and set device 
 		char* devname_in = "ifb0";
 		if(set_ifb(devname_in, "up") < 0) {
-			printf("cannot\n");
+			printf("cannot create ifb device\n");
 			return 1;
 		}
 	}

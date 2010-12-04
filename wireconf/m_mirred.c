@@ -75,7 +75,7 @@ char* dev;
 	if(strcmp("mirror", egress) == 0) {
 		// mirror
 		mirror=1;
-		if (redir) {
+		if(redir) {
 			fprintf(stderr, "Cant have both mirror and redir\n");
 			return -1;
 		}
@@ -94,11 +94,13 @@ char* dev;
 	}
 
 	// device (redirect || mirror)
+	printf("dev = %s\n", dev);
 	if(mirror || redir) {
 		strncpy(d, dev, sizeof(d)-1);
 	}
+	dprintf(("parse_mirred\n\n"));
 
-	if (d[0])  {
+	if(d[0])  {
 		int idx;
 		ll_init_map(&rth);
 
@@ -151,7 +153,7 @@ char* dev;
 	}
 */
 
-	if (mirred_d)
+	if(mirred_d)
 		fprintf(stdout, "Action %d device %s ifindex %d\n",p.action, d,p.ifindex);
 
 	tail = NLMSG_TAIL(n);
