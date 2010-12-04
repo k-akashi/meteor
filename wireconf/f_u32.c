@@ -793,13 +793,15 @@ char* dev;
 	addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
 	// match
-	if(parse_selector(up.match, &sel.sel, n)) {
-		fprintf(stderr, "Illegal \"match\"\n");
-		return -1;
+	if(up.match) {
+		if(parse_selector(up.match, &sel.sel, n)) {
+			fprintf(stderr, "Illegal \"match\"\n");
+			return -1;
+		}
+		sel_ok++;
 	}
-	sel_ok++;
 
-/*
+/* not implemented
 	// offset
 	if(parse_offset(&argc, up.offset, &sel.sel)) {
 		fprintf(stderr, "Illegal \"offset\"\n");
@@ -814,13 +816,15 @@ char* dev;
 */
 
 	// classid and flowid
-	unsigned classid;
-	if(get_tc_classid(&classid, up.classid)) {
-		fprintf(stderr, "Illegal \"classid\"\n");
-		return -1;
+	if(up.classid) {
+		unsigned classid;
+		if(get_tc_classid(&classid, up.classid)) {
+			fprintf(stderr, "Illegal \"classid\"\n");
+			return -1;
+		}
+		addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &classid, 4);
+		sel.sel.flags |= TC_U32_TERMINAL;
 	}
-	addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &classid, 4);
-	sel.sel.flags |= TC_U32_TERMINAL;
 
 	// divisor
 	if(up.divisor) {
@@ -922,12 +926,14 @@ char* dev;
 */
 
 	// action
-	if(parse_action(up.action, TCA_U32_ACT, n, dev)) {
-		fprintf(stderr, "Illegal \"action\"\n");
-		return -1;
+	if(up.action) {
+		if(parse_action(up.action, TCA_U32_ACT, n, dev)) {
+			fprintf(stderr, "Illegal \"action\"\n");
+			return -1;
+		}
 	}
 
-/*
+/* not implemented
 	// police
 	if(parse_police(&argc, up.police, TCA_U32_POLICE, n)) {
 		fprintf(stderr, "Illegal \"police\"\n");
