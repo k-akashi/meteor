@@ -116,7 +116,6 @@ extern int  print_police(struct action_util *a, FILE *f,
 			 struct rtattr *tb);
 extern int  police_print_xstats(struct action_util *a,FILE *f, 
 				struct rtattr *tb);
-extern int  tc_print_action(FILE *f, const struct rtattr *tb);
 extern int  tc_print_ipt(FILE *f, const struct rtattr *tb);
 extern int  parse_action(char *, int, struct nlmsghdr *, char* dev);
 extern void print_tm(FILE *f, const struct tcf_t *tm);
