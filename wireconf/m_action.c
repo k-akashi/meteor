@@ -35,11 +35,6 @@ int gact_ld = 0 ; //fuckin backward compatibility
 int batch_c = 0;
 int tab_flush = 0;
 
-void act_usage(void)
-{
-	fprintf (stderr, "action usage improper\n");
-}
-
 /*
 static int print_noaopt(struct action_util *au, FILE *f, struct rtattr *opt)
 {
@@ -117,6 +112,7 @@ noexist:
 	}
 	return a;
 }
+
 /*
 int
 new_cmd(char **argv) 
@@ -131,6 +127,7 @@ new_cmd(char **argv)
 
 }
 */
+
 int
 parse_action(action, tca_id, n, dev)
 char* action;
@@ -281,159 +278,6 @@ static int do_print_action(const struct sockaddr_nl *who,
 	return 0;
 }
 
-int tc_action_gd(int cmd, unsigned flags, int *argc_p, char ***argv_p)
-{
-	char k[16];
-	struct action_util *a = NULL;
-	int argc = *argc_p;
-	char **argv = *argv_p;
-	int prio = 0;
-	int ret = 0;
-	__u32 i;
-	struct sockaddr_nl nladdr;
-	struct rtattr *tail;
-	struct rtattr *tail2;
-	struct nlmsghdr *ans = NULL;
-
-	struct {
-		struct nlmsghdr         n;
-		struct tcamsg           t;
-		char                    buf[MAX_MSG];
-	} req;
-
-	req.t.tca_family = AF_UNSPEC;
-
-	memset(&req, 0, sizeof(req));
-
-	memset(&nladdr, 0, sizeof(nladdr));
-	nladdr.nl_family = AF_NETLINK;
-
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcamsg));
-	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
-	req.n.nlmsg_type = cmd;
-	argc -=1;
-	argv +=1;
-
-
-	tail = NLMSG_TAIL(&req.n);
-	addattr_l(&req.n, MAX_MSG, TCA_ACT_TAB, NULL, 0);
-
-	while (argc > 0) {
-		if (strcmp(*argv, "action") == 0 ) {
-			argc--;
-			argv++;
-			continue;
-		} else if (strcmp(*argv, "help") == 0) {
-			return -1;
-		}
-
-		strncpy(k, *argv, sizeof (k) - 1);
-		a = get_action_kind(k);
-		if (NULL == a) { 
-			fprintf(stderr, "Error: non existent action: %s\n",k);
-			ret = -1;
-			goto bad_val;
-		}
-		if (strcmp(a->id, k) != 0) {
-			fprintf(stderr, "Error: non existent action: %s\n",k);
-			ret = -1;
-			goto bad_val;
-		}
-
-		argc -=1;
-		argv +=1;
-		if (argc <= 0) {
-			fprintf(stderr, "Error: no index specified action: %s\n",k);
-			ret = -1;
-			goto bad_val;
-		}
-
-		if (matches(*argv, "index") == 0) {
-			NEXT_ARG();
-			if (get_u32(&i, *argv, 10)) {
-				fprintf(stderr, "Illegal \"index\"\n");
-				ret = -1;
-				goto bad_val;
-			}
-			argc -=1;
-			argv +=1;
-		} else {
-			fprintf(stderr, "Error: no index specified action: %s\n",k);
-			ret = -1;
-			goto bad_val;
-		}
-
-		tail2 = NLMSG_TAIL(&req.n);
-		addattr_l(&req.n, MAX_MSG, ++prio, NULL, 0);
-		addattr_l(&req.n, MAX_MSG, TCA_ACT_KIND, k, strlen(k) + 1);
-		addattr32(&req.n, MAX_MSG, TCA_ACT_INDEX, i);
-		tail2->rta_len = (void *) NLMSG_TAIL(&req.n) - (void *) tail2;
-
-	}
-
-	tail->rta_len = (void *) NLMSG_TAIL(&req.n) - (void *) tail;
-
-	req.n.nlmsg_seq = rth.dump = ++rth.seq;
-	if (cmd == RTM_GETACTION)
-		ans = &req.n;
-
-	if (rtnl_talk(&rth, &req.n, 0, 0, ans, NULL, NULL) < 0) {
-		fprintf(stderr, "We have an error talking to the kernel\n");
-		return 1;
-	}
-
-	if (ans && do_print_action(NULL, &req.n, (void*)stdout) < 0) {
-		fprintf(stderr, "Dump terminated\n");
-		return 1;
-	}
-
-	*argc_p = argc;
-	*argv_p = argv;
-bad_val:
-	return ret;
-}
-
-/*
-int tc_action_modify(int cmd, unsigned flags, int *argc_p, char ***argv_p)
-{
-	int argc = *argc_p;
-	char **argv = *argv_p;
-	int ret = 0;
-
-	struct rtattr *tail;
-	struct {
-		struct nlmsghdr         n;
-		struct tcamsg           t;
-		char                    buf[MAX_MSG];
-	} req;
-
-	req.t.tca_family = AF_UNSPEC;
-
-	memset(&req, 0, sizeof(req));
-
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcamsg));
-	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
-	req.n.nlmsg_type = cmd;
-	tail = NLMSG_TAIL(&req.n);
-	argc -=1;
-	argv +=1;
-	if (parse_action(&argc, &argv, TCA_ACT_TAB, &req.n)) {
-		fprintf(stderr, "Illegal \"action\"\n");
-		return -1;
-	}
-	tail->rta_len = (void *) NLMSG_TAIL(&req.n) - (void *) tail;
-
-	if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
-		fprintf(stderr, "We have an error talking to the kernel\n");
-		ret = -1;
-	}
-
-	*argc_p = argc;
-	*argv_p = argv;
-
-	return ret;
-}
-*/
 int tc_act_list_or_flush(int argc, char **argv, int event)
 {
 	int ret = 0, prio = 0, msg_size = 0;
@@ -504,55 +348,3 @@ bad_val:
 
 	return ret;
 }
-
-/*
-int do_action(int argc, char **argv)
-{
-
-	int ret = 0;
-
-	while (argc > 0) {
-
-		if (matches(*argv, "add") == 0) {
-			ret =  tc_action_modify(RTM_NEWACTION, NLM_F_EXCL|NLM_F_CREATE, &argc, &argv);
-		} else if (matches(*argv, "change") == 0 ||
-			  matches(*argv, "replace") == 0) {
-			ret = tc_action_modify(RTM_NEWACTION, NLM_F_CREATE|NLM_F_REPLACE, &argc, &argv);
-		} else if (matches(*argv, "delete") == 0) {
-			argc -=1;
-			argv +=1;
-			ret = tc_action_gd(RTM_DELACTION, 0,  &argc, &argv);
-		} else if (matches(*argv, "get") == 0) {
-			argc -=1;
-			argv +=1;
-			ret = tc_action_gd(RTM_GETACTION, 0,  &argc, &argv);
-		} else if (matches(*argv, "list") == 0 || matches(*argv, "show") == 0
-						|| matches(*argv, "lst") == 0) {
-			if (argc <= 2) {
-				act_usage();
-				return -1;
-			}
-			return tc_act_list_or_flush(argc-2, argv+2, RTM_GETACTION);
-		} else if (matches(*argv, "flush") == 0) {
-			if (argc <= 2) {
-				act_usage();
-				return -1;
-			}
-			return tc_act_list_or_flush(argc-2, argv+2, RTM_DELACTION);
-		} else if (matches(*argv, "help") == 0) {
-			act_usage();
-			return -1;
-		} else {
-
-			ret = -1;
-		}
-
-		if (ret < 0) {
-			fprintf(stderr, "Command \"%s\" is unknown, try \"tc action help\".\n", *argv);
-			return -1;
-		}
-	}
-
-	return 0;
-}
-*/
