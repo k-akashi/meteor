@@ -66,7 +66,8 @@ int get_u32_handle(__u32* handle, char* str)
 	return 0;
 }
 
-char * sprint_u32_handle(__u32 handle, char *buf)
+char*
+sprint_u32_handle(__u32 handle, char *buf)
 {
 	int bsize = SPRINT_BSIZE-1;
 	__u32 htid = TC_U32_HTID(handle);
@@ -74,28 +75,28 @@ char * sprint_u32_handle(__u32 handle, char *buf)
 	__u32 nodeid = TC_U32_NODE(handle);
 	char *b = buf;
 
-	if (handle == 0) {
+	if(handle == 0) {
 		snprintf(b, bsize, "none");
 		return b;
 	}
-	if (htid) {
+	if(htid) {
 		int l = snprintf(b, bsize, "%x:", htid>>20);
 		bsize -= l;
 		b += l;
 	}
-	if (nodeid|hash) {
-		if (hash) {
+	if(nodeid|hash) {
+		if(hash) {
 			int l = snprintf(b, bsize, "%x", hash);
 			bsize -= l;
 			b += l;
 		}
-		if (nodeid) {
+		if(nodeid) {
 			int l = snprintf(b, bsize, ":%x", nodeid);
 			bsize -= l;
 			b += l;
 		}
 	}
-	if (show_raw)
+	if(show_raw)
 		snprintf(b, bsize, "[%08x] ", handle);
 	return buf;
 }
@@ -877,54 +878,6 @@ char* dev;
 			htid = (ht & 0xFFFFF000);
 	}
 
-/*
-	// sample
-	__u32 hash;
-	unsigned divisor = 0x100;
-
-	struct {
-		struct tc_u32_sel sel;
-		struct tc_u32_key keys[4];
-	} sel2;
-	memset(&sel2, 0, sizeof(sel2));
-	NEXT_ARG();
-	if (parse_selector(&argc, &argv, &sel2.sel, n)) {
-		fprintf(stderr, "Illegal \"sample\"\n");
-		return -1;
-	}
-	if (sel2.sel.nkeys != 1) {
-		fprintf(stderr, "\"sample\" must contain exactly ONE key.\n");
-		return -1;
-	}
-	if (*argv != 0 && strcmp(*argv, "divisor") == 0) {
-		NEXT_ARG();
-		if (get_unsigned(&divisor, *argv, 0) || divisor == 0 ||
-		    divisor > 0x100 || ((divisor - 1) & divisor)) {
-			fprintf(stderr, "Illegal sample \"divisor\"\n");
-			return -1;
-		}
-		NEXT_ARG();
-	}
-	hash = sel2.sel.keys[0].val&sel2.sel.keys[0].mask;
-	hash ^= hash>>16;
-	hash ^= hash>>8;
-	htid = ((hash%divisor)<<12)|(htid&0xFFF00000);
-	sample_ok = 1;
-	continue;
-
-	// indev
-	char ind[IFNAMSIZ + 1];
-	memset(ind, 0, sizeof (ind));
-	argc--;
-	argv++;
-	if(argc < 1) {
-		fprintf(stderr, "Illegal indev\n");
-		return -1;
-	}
-	strncpy(ind, up.indev, sizeof (ind) - 1);
-	addattr_l(n, MAX_MSG, TCA_U32_INDEV, ind, strlen(ind) + 1);
-*/
-
 	// action
 	if(up.action) {
 		if(parse_action(up.action, TCA_U32_ACT, n, dev)) {
@@ -959,125 +912,8 @@ char* dev;
 	return 0;
 }
 
-static int u32_print_opt(struct filter_util *qu, FILE *f, struct rtattr *opt, __u32 handle)
-{
-	struct rtattr *tb[TCA_U32_MAX+1];
-	struct tc_u32_sel *sel = NULL;
-	struct tc_u32_pcnt *pf = NULL;
-
-	if (opt == NULL)
-		return 0;
-
-	parse_rtattr_nested(tb, TCA_U32_MAX, opt);
-
-	if (handle) {
-		SPRINT_BUF(b1);
-		fprintf(f, "fh %s ", sprint_u32_handle(handle, b1));
-	}
-	if (TC_U32_NODE(handle)) {
-		fprintf(f, "order %d ", TC_U32_NODE(handle));
-	}
-
-	if (tb[TCA_U32_SEL]) {
-		if (RTA_PAYLOAD(tb[TCA_U32_SEL])  < sizeof(*sel))
-			return -1;
-
-		sel = RTA_DATA(tb[TCA_U32_SEL]);
-	}
-
-	if (tb[TCA_U32_DIVISOR]) {
-		fprintf(f, "ht divisor %d ", *(__u32*)RTA_DATA(tb[TCA_U32_DIVISOR]));
-	} else if (tb[TCA_U32_HASH]) {
-		__u32 htid = *(__u32*)RTA_DATA(tb[TCA_U32_HASH]);
-		fprintf(f, "key ht %x bkt %x ", TC_U32_USERHTID(htid), TC_U32_HASH(htid));
-	} else {
-		fprintf(f, "??? ");
-	}
-	if (tb[TCA_U32_CLASSID]) {
-		SPRINT_BUF(b1);
-		fprintf(f, "%sflowid %s ",
-			!sel || !(sel->flags&TC_U32_TERMINAL) ? "*" : "",
-			sprint_tc_classid(*(__u32*)RTA_DATA(tb[TCA_U32_CLASSID]), b1));
-	} else if (sel && sel->flags&TC_U32_TERMINAL) {
-		fprintf(f, "terminal flowid ??? ");
-	}
-	if (tb[TCA_U32_LINK]) {
-		SPRINT_BUF(b1);
-		fprintf(f, "link %s ", sprint_u32_handle(*(__u32*)RTA_DATA(tb[TCA_U32_LINK]), b1));
-	}
-
-	if (tb[TCA_U32_PCNT]) {
-		if (RTA_PAYLOAD(tb[TCA_U32_PCNT])  < sizeof(*pf)) {
-			fprintf(f, "Broken perf counters \n");
-			return -1;
-		}
-		pf = RTA_DATA(tb[TCA_U32_PCNT]);
-	}
-
-	if (sel && show_stats && NULL != pf)
-		fprintf(f, " (rule hit %llu success %llu)",
-			(unsigned long long) pf->rcnt,
-			(unsigned long long) pf->rhit);
-
-	if (tb[TCA_U32_MARK]) {
-		struct tc_u32_mark *mark = RTA_DATA(tb[TCA_U32_MARK]);
-		if (RTA_PAYLOAD(tb[TCA_U32_MARK]) < sizeof(*mark)) {
-			fprintf(f, "\n  Invalid mark (kernel&iproute2 mismatch)\n");
-		} else {
-			fprintf(f, "\n  mark 0x%04x 0x%04x (success %d)",
-				mark->val, mark->mask, mark->success);
-		}
-	}
-
-	if (sel) {
-		int i;
-		struct tc_u32_key *key = sel->keys;
-		if (sel->nkeys) {
-			for (i=0; i<sel->nkeys; i++, key++) {
-				fprintf(f, "\n  match %08x/%08x at %s%d",
-					(unsigned int)ntohl(key->val),
-					(unsigned int)ntohl(key->mask),
-					key->offmask ? "nexthdr+" : "",
-					key->off);
-				if (show_stats && NULL != pf)
-					fprintf(f, " (success %lld ) ",
-						(unsigned long long) pf->kcnts[i]);
-			}
-		}
-
-		if (sel->flags&(TC_U32_VAROFFSET|TC_U32_OFFSET)) {
-			fprintf(f, "\n    offset ");
-			if (sel->flags&TC_U32_VAROFFSET)
-				fprintf(f, "%04x>>%d at %d ", ntohs(sel->offmask), sel->offshift,  sel->offoff);
-			if (sel->off)
-				fprintf(f, "plus %d ", sel->off);
-		}
-		if (sel->flags&TC_U32_EAT)
-			fprintf(f, " eat ");
-
-		if (sel->hmask) {
-			fprintf(f, "\n    hash mask %08x at %d ",
-				(unsigned int)htonl(sel->hmask), sel->hoff);
-		}
-	}
-
-	if (tb[TCA_U32_POLICE]) {
-		fprintf(f, "\n");
-		tc_print_police(f, tb[TCA_U32_POLICE]);
-	}
-	if (tb[TCA_U32_INDEV]) {
-		struct rtattr *idev = tb[TCA_U32_INDEV];
-		fprintf(f, "\n  input dev %s\n", (char *) RTA_DATA(idev));
-	}
-	if (tb[TCA_U32_ACT]) {
-		tc_print_action(f, tb[TCA_U32_ACT]);
-	}
-
-	return 0;
-}
-
 struct filter_util u32_filter_util = {
 	.id = "u32",
 	.parse_fopt = u32_parse_opt,
-	.print_fopt = u32_print_opt,
+	//.print_fopt = u32_print_opt,
 };
