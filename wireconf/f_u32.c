@@ -101,18 +101,24 @@ sprint_u32_handle(__u32 handle, char *buf)
 	return buf;
 }
 
-static int pack_key(struct tc_u32_sel *sel, __u32 key, __u32 mask, int off, int offmask)
+static int
+pack_key(sel, key, mask, off, offmask)
+struct tc_u32_sel *sel;
+__u32 key;
+__u32 mask;
+int off;
+int offmask;
 {
 	int i;
 	int hwm = sel->nkeys;
 
 	key &= mask;
 
-	for (i=0; i<hwm; i++) {
-		if (sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
+	for(i = 0; i < hwm; i++) {
+		if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
 			__u32 intersect = mask&sel->keys[i].mask;
 
-			if ((key^sel->keys[i].val) & intersect)
+			if((key^sel->keys[i].val) & intersect)
 				return -1;
 			sel->keys[i].val |= key;
 			sel->keys[i].mask |= mask;
@@ -120,24 +126,33 @@ static int pack_key(struct tc_u32_sel *sel, __u32 key, __u32 mask, int off, int 
 		}
 	}
 
-	if (hwm >= 128)
+	if(hwm >= 128)
 		return -1;
-	if (off % 4)
+	if(off % 4)
 		return -1;
 	sel->keys[hwm].val = key;
 	sel->keys[hwm].mask = mask;
 	sel->keys[hwm].off = off;
 	sel->keys[hwm].offmask = offmask;
 	sel->nkeys++;
+
 	return 0;
 }
 
-static int pack_key32(struct tc_u32_sel *sel, __u32 key, __u32 mask, int off, int offmask)
+static int
+pack_key32(sel, key, mask, off, offmask)
+struct tc_u32_sel *sel;
+__u32 key;
+__u32 mask;
+int off;
+int offmask;
 {
 	key = htonl(key);
 	mask = htonl(mask);
+
 	return pack_key(sel, key, mask, off, offmask);
 }
+
 /*
 static int pack_key16(struct tc_u32_sel *sel, __u32 key, __u32 mask, int off, int offmask)
 {
@@ -298,41 +313,41 @@ static int parse_u8(int *argc_p, char ***argv_p, struct tc_u32_sel *sel, int off
 	*argv_p = argv;
 	return res;
 }
+*/
 
-static int parse_ip_addr(int *argc_p, char ***argv_p, struct tc_u32_sel *sel, int off)
+static int
+parse_ip_addr(match, sel, off)
+struct filter_match match;
+struct tc_u32_sel* sel;
+int off;
 {
 	int res = -1;
-	int argc = *argc_p;
-	char **argv = *argv_p;
 	inet_prefix addr;
 	__u32 mask;
 	int offmask = 0;
 
-	if (argc < 1)
+	if(get_prefix_1(&addr, match.arg, AF_INET))
 		return -1;
 
-	if (get_prefix_1(&addr, *argv, AF_INET))
-		return -1;
-	argc--; argv++;
-
-	if (argc > 0 && strcmp(argv[0], "at") == 0) {
+/*
+	if(argc > 0 && strcmp(argv[0], "at") == 0) {
 		NEXT_ARG();
 		if (parse_at(&argc, &argv, &off, &offmask))
 			return -1;
 	}
+*/
 
 	mask = 0;
-	if (addr.bitlen)
+	if(addr.bitlen)
 		mask = htonl(0xFFFFFFFF<<(32-addr.bitlen));
-	if (pack_key(sel, addr.data[0], mask, off, offmask) < 0)
+	if(pack_key(sel, addr.data[0], mask, off, offmask) < 0)
 		return -1;
 	res = 0;
 
-	*argc_p = argc;
-	*argv_p = argv;
 	return res;
 }
 
+/*
 static int parse_ip6_addr(int *argc_p, char ***argv_p, struct tc_u32_sel *sel, int off)
 {
 	int res = -1;
@@ -374,26 +389,24 @@ static int parse_ip6_addr(int *argc_p, char ***argv_p, struct tc_u32_sel *sel, i
 	*argv_p = argv;
 	return res;
 }
+*/
 
-static int parse_ip(int *argc_p, char ***argv_p, struct tc_u32_sel *sel)
+static int
+parse_ip(match, sel)
+struct filter_match match;
+struct tc_u32_sel *sel;
 {
 	int res = -1;
-	int argc = *argc_p;
-	char **argv = *argv_p;
 
-	if (argc < 2)
-		return -1;
-
-	if (strcmp(*argv, "src") == 0) {
-		NEXT_ARG();
-		res = parse_ip_addr(&argc, &argv, sel, 12);
+	if(strcmp(match.filter, "src") == 0) {
+		res = parse_ip_addr(match, sel, 12);
 		goto done;
 	}
-	if (strcmp(*argv, "dst") == 0) {
-		NEXT_ARG();
-		res = parse_ip_addr(&argc, &argv, sel, 16);
+	if(strcmp(match.filter, "dst") == 0) {
+		res = parse_ip_addr(match, sel, 16);
 		goto done;
 	}
+/*
 	if (strcmp(*argv, "tos") == 0 ||
 	    matches(*argv, "dsfield") == 0) {
 		NEXT_ARG();
@@ -455,14 +468,14 @@ static int parse_ip(int *argc_p, char ***argv_p, struct tc_u32_sel *sel)
 		res = parse_u8(&argc, &argv, sel, 20, 1);
 		goto done;
 	}
+*/
 	return -1;
 
 done:
-	*argc_p = argc;
-	*argv_p = argv;
 	return res;
 }
 
+/*
 static int parse_ip6(int *argc_p, char ***argv_p, struct tc_u32_sel *sel)
 {
 	int res = -1;
@@ -617,13 +630,13 @@ static int parse_mark(int *argc_p, char ***argv_p, struct nlmsghdr *n)
 */
 
 static int parse_selector(match, sel, n)
-char* match;
+struct filter_match match;
 struct tc_u32_sel *sel;
 struct nlmsghdr *n;
 {
 	int res = -1;
 
-	if (matches(match, "u32") == 0) {
+	if (matches(match.protocol, "u32") == 0) {
 		res = parse_u32(sel, 0, 0);
 		goto done;
 	}
@@ -638,11 +651,12 @@ struct nlmsghdr *n;
 		res = parse_u8(&argc, &argv, sel, 0, 0);
 		goto done;
 	}
-	if (matches(*argv, "ip") == 0) {
-		NEXT_ARG();
-		res = parse_ip(&argc, &argv, sel);
+*/
+	if(matches(match.protocol, "ip") == 0) {
+		res = parse_ip(match, sel);
 		goto done;
 	}
+/*
 	if (matches(*argv, "ip6") == 0) {
 		NEXT_ARG();
 		res = parse_ip6(&argc, &argv, sel);
@@ -794,7 +808,7 @@ char* dev;
 	addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
 	// match
-	if(up.match) {
+	if(up.match.type) {
 		if(parse_selector(up.match, &sel.sel, n)) {
 			fprintf(stderr, "Illegal \"match\"\n");
 			return -1;

@@ -39,10 +39,14 @@ struct nlmsghdr *n;
 	return 0;
 }
 
-static int ingress_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
+static int
+ingress_print_opt(qu, f, opt)
+struct qdisc_util* qu;
+FILE* f;
+struct rtattr* opt;
 {
+	fprintf(f, "---------------- ");
 
-		fprintf(f, "---------------- ");
 	return 0;
 }
 

@@ -38,9 +38,11 @@ static void explain1(char *arg)
 
 #define usage() return(-1)
 
-static int tbf_parse_opt(struct qdisc_util *qu, 
-	struct qdisc_parameter* qp,
-	struct nlmsghdr *n)
+static int
+tbf_parse_opt(qu, qp, n)
+struct qdisc_util *qu;
+struct qdisc_parameter* qp;
+struct nlmsghdr *n;
 {
 //	int ok=0;
 	struct tc_tbf_qopt opt;
@@ -139,27 +141,27 @@ static int tbf_parse_opt(struct qdisc_util *qu,
 		return 0;
 */
 
-	if (opt.rate.rate == 0 || !buffer) {
+	if(opt.rate.rate == 0 || !buffer) {
 		fprintf(stderr, "Both \"rate\" and \"burst\" are required.\n");
 		return -1;
 	}
 
-	if (opt.limit == 0 && latency == 0) {
+	if(opt.limit == 0 && latency == 0) {
 		fprintf(stderr, "Either \"limit\" or \"latency\" are required.\n");
 		return -1;
 	}
 
-	if (opt.limit == 0) {
-		double lim = opt.rate.rate*(double)latency/1000000 + buffer;
-		if (opt.peakrate.rate) {
-			double lim2 = opt.peakrate.rate*(double)latency/1000000 + mtu;
-			if (lim2 < lim)
+	if(opt.limit == 0) {
+		double lim = opt.rate.rate * (double)latency / 1000000 + buffer;
+		if(opt.peakrate.rate) {
+			double lim2 = opt.peakrate.rate * (double)latency / 1000000 + mtu;
+			if(lim2 < lim)
 				lim = lim2;
 		}
 		opt.limit = lim;
 	}
 
-	if ((Rcell_log = tc_calc_rtable(opt.rate.rate, rtab, Rcell_log, mtu, mpu)) < 0) {
+	if((Rcell_log = tc_calc_rtable(opt.rate.rate, rtab, Rcell_log, mtu, mpu)) < 0) {
 		fprintf(stderr, "TBF: failed to calculate rate table.\n");
 		return -1;
 	}
@@ -172,12 +174,16 @@ static int tbf_parse_opt(struct qdisc_util *qu,
 	addattr_l(n, 2024, TCA_TBF_PARMS, &opt, sizeof(opt));
 	addattr_l(n, 3024, TCA_TBF_RTAB, rtab, 1024);
 
-	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;
+	tail->rta_len = (void *)NLMSG_TAIL(n) - (void *)tail;
 
 	return 0;
 }
 
-static int tbf_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
+static int
+tbf_print_opt(qu, f, opt)
+struct qdisc_util *qu;
+FILE *f;
+struct rtattr *opt;
 {
 	struct rtattr *tb[TCA_TBF_PTAB+1];
 	struct tc_tbf_qopt *qopt;
@@ -186,49 +192,49 @@ static int tbf_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
 	SPRINT_BUF(b1);
 	SPRINT_BUF(b2);
 
-	if (opt == NULL)
+	if(opt == NULL)
 		return 0;
 
 	parse_rtattr_nested(tb, TCA_TBF_PTAB, opt);
 
-	if (tb[TCA_TBF_PARMS] == NULL)
+	if(tb[TCA_TBF_PARMS] == NULL)
 		return -1;
 
 	qopt = RTA_DATA(tb[TCA_TBF_PARMS]);
-	if (RTA_PAYLOAD(tb[TCA_TBF_PARMS])  < sizeof(*qopt))
+	if(RTA_PAYLOAD(tb[TCA_TBF_PARMS])  < sizeof(*qopt))
 		return -1;
 	fprintf(f, "rate %s ", sprint_rate(qopt->rate.rate, b1));
-	buffer = ((double)qopt->rate.rate*tc_core_tick2usec(qopt->buffer))/1000000;
-	if (show_details) {
+	buffer = ((double)qopt->rate.rate * tc_core_tick2usec(qopt->buffer)) / 1000000;
+	if(show_details) {
 		fprintf(f, "burst %s/%u mpu %s ", sprint_size(buffer, b1),
 			1<<qopt->rate.cell_log, sprint_size(qopt->rate.mpu, b2));
 	} else {
 		fprintf(f, "burst %s ", sprint_size(buffer, b1));
 	}
-	if (show_raw)
+	if(show_raw)
 		fprintf(f, "[%08x] ", qopt->buffer);
-	if (qopt->peakrate.rate) {
+	if(qopt->peakrate.rate) {
 		fprintf(f, "peakrate %s ", sprint_rate(qopt->peakrate.rate, b1));
-		if (qopt->mtu || qopt->peakrate.mpu) {
-			mtu = ((double)qopt->peakrate.rate*tc_core_tick2usec(qopt->mtu))/1000000;
-			if (show_details) {
+		if(qopt->mtu || qopt->peakrate.mpu) {
+			mtu = ((double)qopt->peakrate.rate * tc_core_tick2usec(qopt->mtu)) / 1000000;
+			if(show_details) {
 				fprintf(f, "mtu %s/%u mpu %s ", sprint_size(mtu, b1),
-					1<<qopt->peakrate.cell_log, sprint_size(qopt->peakrate.mpu, b2));
+					1 << qopt->peakrate.cell_log, sprint_size(qopt->peakrate.mpu, b2));
 			} else {
 				fprintf(f, "minburst %s ", sprint_size(mtu, b1));
 			}
-			if (show_raw)
+			if(show_raw)
 				fprintf(f, "[%08x] ", qopt->mtu);
 		}
 	}
 
-	if (show_raw)
+	if(show_raw)
 		fprintf(f, "limit %s ", sprint_size(qopt->limit, b1));
 
-	latency = 1000000*(qopt->limit/(double)qopt->rate.rate) - tc_core_tick2usec(qopt->buffer);
-	if (qopt->peakrate.rate) {
-		double lat2 = 1000000*(qopt->limit/(double)qopt->peakrate.rate) - tc_core_tick2usec(qopt->mtu);
-		if (lat2 > latency)
+	latency = 1000000 * (qopt->limit / (double)qopt->rate.rate) - tc_core_tick2usec(qopt->buffer);
+	if(qopt->peakrate.rate) {
+		double lat2 = 1000000 * (qopt->limit / (double)qopt->peakrate.rate) - tc_core_tick2usec(qopt->mtu);
+		if(lat2 > latency)
 			latency = lat2;
 	}
 	fprintf(f, "lat %s ", sprint_usecs(tc_core_tick2usec(latency), b1));

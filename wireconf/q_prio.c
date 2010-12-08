@@ -29,7 +29,11 @@
 
 #define usage() return(-1)
 
-static int prio_parse_opt(struct qdisc_util* qu, struct qdisc_parameter* qp, struct nlmsghdr* n)
+static int
+prio_parse_opt(qu, qp, n)
+struct qdisc_util* qu;
+struct qdisc_parameter* qp;
+struct nlmsghdr* n;
 {
 	struct tc_prio_qopt opt={16,{ 1, 2, 2, 2, 1, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 }};
 
@@ -44,20 +48,25 @@ static int prio_parse_opt(struct qdisc_util* qu, struct qdisc_parameter* qp, str
 	return 0;
 }
 
-int prio_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
+int
+prio_print_opt(qu, f, opt)
+struct qdisc_util* qu;
+FILE* f;
+struct rtattr* opt;
 {
 	int i;
-	struct tc_prio_qopt *qopt;
+	struct tc_prio_qopt* qopt;
 
-	if (opt == NULL)
+	if(opt == NULL)
 		return 0;
 
-	if (RTA_PAYLOAD(opt)  < sizeof(*qopt))
+	if(RTA_PAYLOAD(opt) < sizeof(*qopt))
 		return -1;
 	qopt = RTA_DATA(opt);
 	fprintf(f, "bands %u priomap ", qopt->bands);
-	for (i=0; i<=TC_PRIO_MAX; i++)
+	for(i = 0; i <= TC_PRIO_MAX; i++)
 		fprintf(f, " %d", qopt->priomap[i]);
+
 	return 0;
 }
 

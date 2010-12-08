@@ -30,9 +30,17 @@ struct qdisc_parameter
 	char* buffer;
 };
 
+struct filter_match {
+	char* type;
+	char* protocol;
+	char* filter;
+	char* arg;
+};
+
+
 struct u32_parameter
 {
-	char* match;
+	struct filter_match match;
 	char* offset;
 	char* hashkey;
 	char* classid;
@@ -124,6 +132,6 @@ extern void print_tm(FILE *f, const struct tcf_t *tm);
 extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
 extern char* get_route_info(char *info, char *addr);
 
-extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, char* parentid, char* handleid, char* protocolid, char* type, struct u32_parameter up);
+extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, char* parentid, char* handleid, char* protocolid, char* type, struct u32_parameter* up);
 
 #endif

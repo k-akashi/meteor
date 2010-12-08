@@ -145,17 +145,17 @@ char* parentid;
 char* handleid;
 char* protocolid;
 char* type;
-struct u32_parameter up;
+struct u32_parameter* up;
 {
 	struct {
 		struct nlmsghdr 	n;
 		struct tcmsg 		t;
 		char   			buf[MAX_MSG];
 	} req;
-	struct filter_util *q = NULL;
+	struct filter_util* q = NULL;
 	__u32 prio = 0;
 	__u32 protocol = 0;
-	char *fhandle = NULL;
+	char* fhandle = NULL;
 	char  d[16];
 	char  k[16];
 	struct tc_estimator est;
@@ -211,11 +211,11 @@ struct u32_parameter up;
 	if(k[0])
 		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
 
-	if(up.rdev) {
-		sprintf(dev, "%s", up.rdev);
+	if(up->rdev) {
+		sprintf(dev, "%s", up->rdev);
 	}
 	if(q) {
-		if(q->parse_fopt(q, fhandle, up, &req.n, dev))
+		if(q->parse_fopt(q, fhandle, *up, &req.n, dev))
 			return 1;
 	}
 

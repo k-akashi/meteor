@@ -182,6 +182,7 @@ char* type;
  }
 
 /*
+// test code
 int
 main(int argc, char **argv)
 {

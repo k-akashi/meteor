@@ -99,7 +99,10 @@ static int isnumber(const char *arg)
 
 /* Adjust for the fact that psched_ticks aren't always usecs 
    (based on kernel PSCHED_CLOCK configuration */
-static int get_ticks(__u32 *ticks, const char *str)
+static int
+get_ticks(ticks, str)
+__u32 *ticks;
+const char* str;
 {
 	unsigned t;
 
@@ -108,27 +111,34 @@ static int get_ticks(__u32 *ticks, const char *str)
 		return -1;
 	dprintf(("delay pointer = %d\n", t));
 
-	if (tc_core_time2big(t)) {
+	if(tc_core_time2big(t)) {
 		fprintf(stderr, "Illegal %u time (too large)\n", t);
 		return -1;
 	} 
 	dprintf(("delay pointer time2big = %d\n", t));
 
 	dprintf(("ticks = %d\n", *ticks));
+
 	//*ticks = tc_core_usec2tick(t);
 	*ticks = tc_core_time2tick(t);
 	dprintf(("ticks = %d\n", *ticks));
+
 	return 0;
 }
 
-static char *sprint_ticks(__u32 ticks, char *buf)
+static char*
+sprint_ticks(ticks, buf)
+__u32 ticks;
+char* buf;
 {
 	return sprint_usecs(tc_core_tick2usec(ticks), buf);
 }
 
-static int netem_parse_opt(struct qdisc_util* qu, 
-	struct qdisc_parameter* qp,
-	struct nlmsghdr *n)
+static int
+netem_parse_opt(qu, qp, n)
+struct qdisc_util* qu;
+struct qdisc_parameter* qp;
+struct nlmsghdr *n;
 {
 	size_t dist_size = 0;
 	struct rtattr* tail;
@@ -202,85 +212,88 @@ static int netem_parse_opt(struct qdisc_util* qu,
 
 	tail = NLMSG_TAIL(n);
 
-	if (reorder.probability) {
-		if (opt.latency == 0) {
+	if(reorder.probability) {
+		if(opt.latency == 0) {
 			fprintf(stderr, "reordering not possible without specifying some delay\n");
 		}
-		if (opt.gap == 0)
+		if(opt.gap == 0)
 			opt.gap = 1;
-	} else if (opt.gap > 0) {
+	} else if(opt.gap > 0) {
 		fprintf(stderr, "gap specified without reorder probability\n");
 		explain();
 		return -1;
 	}
 
-	if (dist_data && (opt.latency == 0 || opt.jitter == 0)) {
+	if(dist_data && (opt.latency == 0 || opt.jitter == 0)) {
 		fprintf(stderr, "distribution specified but no latency and jitter values\n");
 		explain();
 		return -1;
 	}
 
-	if (addattr_l(n, TCA_BUF_MAX, TCA_OPTIONS, &opt, sizeof(opt)) < 0)
+	if(addattr_l(n, TCA_BUF_MAX, TCA_OPTIONS, &opt, sizeof(opt)) < 0)
 		return -1;
 
-	if (cor.delay_corr || cor.loss_corr || cor.dup_corr) {
+	if(cor.delay_corr || cor.loss_corr || cor.dup_corr) {
 		if (present[TCA_NETEM_CORR] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof(cor)) < 0)
 			return -1;
 	}
 
-	if (present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0)
+	if(present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0)
 		return -1;
 
-	if (corrupt.probability) {
+	if(corrupt.probability) {
 		if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0)
 			return -1;
 	}
 
-	if (dist_data) {
+	if(dist_data) {
 		dprintf(("dist_data\n\n"));
-		if (addattr_l(n, 32768, TCA_NETEM_DELAY_DIST,
-			      dist_data, dist_size*sizeof(dist_data[0])) < 0)
+		if(addattr_l(n, 32768, TCA_NETEM_DELAY_DIST,
+			      dist_data, dist_size * sizeof(dist_data[0])) < 0)
 			return -1;
 	}
-	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;
+	tail->rta_len = (void*)NLMSG_TAIL(n) - (void*)tail;
 	return 0;
 }
 
-static int netem_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
+static int
+netem_print_opt(qu, f, opt)
+struct qdisc_util* qu;
+FILE* f;
+struct rtattr* opt;
 {
-	const struct tc_netem_corr *cor = NULL;
-	const struct tc_netem_reorder *reorder = NULL;
-	const struct tc_netem_corrupt *corrupt = NULL;
+	const struct tc_netem_corr* cor = NULL;
+	const struct tc_netem_reorder* reorder = NULL;
+	const struct tc_netem_corrupt* corrupt = NULL;
 	struct tc_netem_qopt qopt;
 	int len = RTA_PAYLOAD(opt) - sizeof(qopt);
 	SPRINT_BUF(b1);
 
-	if (opt == NULL)
+	if(opt == NULL)
 		return 0;
 
-	if (len < 0) {
+	if(len < 0) {
 		fprintf(stderr, "options size error\n");
 		return -1;
 	}
 	memcpy(&qopt, RTA_DATA(opt), sizeof(qopt));
 
-	if (len > 0) {
-		struct rtattr *tb[TCA_NETEM_MAX+1];
-		parse_rtattr(tb, TCA_NETEM_MAX, RTA_DATA(opt) + sizeof(qopt),
-			     len);
+	if(len > 0) {
+		struct rtattr* tb[TCA_NETEM_MAX + 1];
+		parse_rtattr(tb, TCA_NETEM_MAX, RTA_DATA(opt) + sizeof(qopt), len);
 		
-		if (tb[TCA_NETEM_CORR]) {
-			if (RTA_PAYLOAD(tb[TCA_NETEM_CORR]) < sizeof(*cor))
+		if(tb[TCA_NETEM_CORR]) {
+			if(RTA_PAYLOAD(tb[TCA_NETEM_CORR]) < sizeof(*cor))
 				return -1;
 			cor = RTA_DATA(tb[TCA_NETEM_CORR]);
 		}
-		if (tb[TCA_NETEM_REORDER]) {
-			if (RTA_PAYLOAD(tb[TCA_NETEM_REORDER]) < sizeof(*reorder))
+		if(tb[TCA_NETEM_REORDER]) {
+			if(RTA_PAYLOAD(tb[TCA_NETEM_REORDER]) < sizeof(*reorder))
 				return -1;
 			reorder = RTA_DATA(tb[TCA_NETEM_REORDER]);
 		}
-		if (tb[TCA_NETEM_CORRUPT]) {
-			if (RTA_PAYLOAD(tb[TCA_NETEM_CORRUPT]) < sizeof(*corrupt))
+		if(tb[TCA_NETEM_CORRUPT]) {
+			if(RTA_PAYLOAD(tb[TCA_NETEM_CORRUPT]) < sizeof(*corrupt))
 				return -1;
 			corrupt = RTA_DATA(tb[TCA_NETEM_CORRUPT]);
 		}
@@ -288,46 +301,46 @@ static int netem_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
 
 	fprintf(f, "limit %d", qopt.limit);
 
-	if (qopt.latency) {
+	if(qopt.latency) {
 		fprintf(f, " delay %s", sprint_ticks(qopt.latency, b1));
 
-		if (qopt.jitter) {
+		if(qopt.jitter) {
 			fprintf(f, "  %s", sprint_ticks(qopt.jitter, b1));
-			if (cor && cor->delay_corr)
+			if(cor && cor->delay_corr)
 				fprintf(f, " %s", sprint_percent(cor->delay_corr, b1));
 		}
 	}
 
-	if (qopt.loss) {
+	if(qopt.loss) {
 		fprintf(f, " loss %s", sprint_percent(qopt.loss, b1));
-		if (cor && cor->loss_corr)
+		if(cor && cor->loss_corr)
 			fprintf(f, " %s", sprint_percent(cor->loss_corr, b1));
 	}
 
-	if (qopt.duplicate) {
+	if(qopt.duplicate) {
 		fprintf(f, " duplicate %s",
 			sprint_percent(qopt.duplicate, b1));
-		if (cor && cor->dup_corr)
+		if(cor && cor->dup_corr)
 			fprintf(f, " %s", sprint_percent(cor->dup_corr, b1));
 	}
 			
-	if (reorder && reorder->probability) {
+	if(reorder && reorder->probability) {
 		fprintf(f, " reorder %s", 
 			sprint_percent(reorder->probability, b1));
-		if (reorder->correlation)
+		if(reorder->correlation)
 			fprintf(f, " %s", 
 				sprint_percent(reorder->correlation, b1));
 	}
 
-	if (corrupt && corrupt->probability) {
+	if(corrupt && corrupt->probability) {
 		fprintf(f, " corrupt %s", 
 			sprint_percent(corrupt->probability, b1));
-		if (corrupt->correlation)
+		if(corrupt->correlation)
 			fprintf(f, " %s", 
 				sprint_percent(corrupt->correlation, b1));
 	}
 
-	if (qopt.gap)
+	if(qopt.gap)
 		fprintf(f, " gap %lu", (unsigned long)qopt.gap);
 
 	return 0;

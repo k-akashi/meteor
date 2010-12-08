@@ -199,7 +199,8 @@ int get_addr_1(inet_prefix* addr, const char* name, int family)
 	return 0;
 }
 
-int get_prefix_1(inet_prefix* dst, char* arg, int family)
+int
+get_prefix_1(inet_prefix* dst, char* arg, int family)
 {
 	int err;
 	unsigned plen;
