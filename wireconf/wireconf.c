@@ -107,6 +107,10 @@
 #define INFO(message...) /* message */
 #endif
 
+#ifdef __linux
+#define MAX_IFB 1
+char *ifb_device[MAX_IFB];
+#endif
 
 //static struct 
 //{
@@ -434,6 +438,8 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
 int
 add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direction)
 {
+	int i;
+	int find_ifb_device = 0;
 	struct qdisc_parameter qp;
 	char* device_name =  (char* )get_route_info("dev", dst);
 	char handleid[10];
@@ -477,6 +483,21 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	//device_name = "ifb0";
 	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "ingress");
 	//system("tc filter add dev eth1 parent ffff: protocol ip u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev ifb0");
+	// filter-rule parameter
+	char ifb_device_name[5];
+	for(i = 0; i <= MAX_IFB; i++) {
+		if(!ifb_device[i]) {
+			ifb_device[i] = device_name;
+			find_ifb_device = 1;
+			sprintf(ifb_device_name, "ifb%d", i);
+			printf("\n\n\ndebug\n\n\n");
+			break;
+		}
+	}
+	if(!find_ifb_device) {
+		fprintf(stderr, "Cannot file ifb device\n");
+		exit(1);
+	}
 	struct u32_parameter* up;
 	up->match.type = "u32";
 	up->offset = NULL;
@@ -489,9 +510,9 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	up->indev = NULL;
 	up->action = "mirred";
 	up->police = NULL;
-	up->rdev = "ifb0";
+	up->rdev = ifb_device_name;
 	tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
-	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, "ifb0", handleid, "root", qp, "netem");
+	tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
 
 	return 0;
 }
@@ -700,8 +721,17 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 		//tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
 		//tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "ingress", qp, "netem");
 		// ingress
-		device_name = "ifb0";
-		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+		int ingress = 1;
+		int i;
+		if(ingress) {
+			for(i = 0; i <= MAX_IFB; i++) {
+				if(strcmp(ifb_device[i], device_name) == 0) {
+					sprintf(device_name, "ifb%d", i);
+					break;
+				}
+			}
+			tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+		}
 	}
 //	if(config_tbf) {
 //		qp.rate = rate;
