@@ -121,11 +121,15 @@ char* type;
 		req.t.tcm_parent = TC_H_INGRESS;
 		memset(&qp, 0, sizeof(struct qdisc_parameter));
 		// lookup device table and set device 
-		char* devname_in = "ifb0";
-		if(set_ifb(devname_in, "up") < 0) {
-			printf("cannot create ifb device\n");
-			return 1;
+		//if(set_ifb(ifb_device_name, "up") < 0) {
+		//	printf("cannot create ifb device\n");
+		//	return 1;
+		//}
+		if(cmd == RTM_DELQDISC) {
+	        strncpy(k, type, sizeof(k) - 1);
+	        q = get_qdisc_kind(k);
 		}
+		req.t.tcm_handle = 0xffff0000;
 	}
 	else {
 		if(get_tc_classid(&handle, root)) {
