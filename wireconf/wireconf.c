@@ -108,9 +108,24 @@
 #endif
 
 #ifdef __linux
-#define INGRESS 1 // 1 : ingress mode, 0 : egress mode
+#define TBF 0
+#define INGRESS 0 // 1 : ingress mode, 0 : egress mode
+#ifdef INGRESS
 #define MAX_IFB 1
-char *ifb_device[MAX_IFB];
+char* ifb_device[MAX_IFB];
+#endif
+#define MAX_DEV 16
+
+#define TEST 1
+#ifdef TEST
+char* device_list;
+#elif
+int dev_no = 0;
+struct DEVICE_LIST {
+	char dst_address[20];
+	char device[20];
+} device_list[MAX_DEV];
+#endif
 #endif
 
 //static struct 
@@ -445,6 +460,14 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	char* device_name =  (char* )get_route_info("dev", dst);
 	char handleid[10];
 
+#ifdef TEST
+	device_list = device_name;
+#elif
+	device_list[dev_no].dst_address = dst;
+	device_list[dev_no].device = device_name;
+	dev_no++;
+#endif
+
 	// Qdisc Parameter set
 	memset(&qp, 0, sizeof(qp));
 
@@ -452,7 +475,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	dprintf(("rulenum = %s\n", handleid));
 
 	// initialize Qdisc Parameter
-	qp.limit = "1000";
+	qp.limit = "100000";
 	qp.delay = "1us";
 	qp.jitter = "0";
     qp.delay_corr = "0";
@@ -477,8 +500,13 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 	// configure netem egress filter
 	if(!INGRESS) {
 		tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
-		tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "tbf");
-		tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, prioid, parentbwid, qp, "pfifo");
+		if(!TBF) {
+			tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "pfifo");
+		}
+		else {
+			tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "tbf");
+			tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, prioid, parentbwid, qp, "pfifo");
+		}
 	}
 	// ingress filter
 	if(INGRESS) {
@@ -675,7 +703,8 @@ int convert_netemid(int handle)
 int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate)
 {
 	struct qdisc_parameter qp;
-	char* device_name =  (char* )get_route_info("dev", dst);
+	//char* device_name =  (char* )get_route_info("dev", dst);
+	char* device_name;
 	int config_netem = 0;
 	int config_tbf = 0;
 	char delaystr[20];
@@ -686,6 +715,18 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 
 	memset(&qp, 0, sizeof(qp));
 
+#ifdef TEST
+	device_name = device_list;
+#elif
+	int i;
+	for(i = 0; i < dev_no; i++) {
+		if(strcmp(device_list[dev_no].dst_address, dst) == 0) {
+			device_name = device_list[dev_no].device;
+			break;
+		}
+	}
+#endif
+		
 /*
 	int netemid;
 	netemid = convert_netemid(handle);
@@ -715,8 +756,8 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 		qp.delay = delaystr;
 		priv_delay = delay;
 		config_netem = 1;
-	}
-	if(priv_loss != lossrate) {
+//	}
+//	if(priv_loss != lossrate) {
 		sprintf(loss, "%f", lossrate);
 		qp.loss = loss;
 		priv_loss = lossrate;
@@ -739,7 +780,7 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 		}
 	}
 	if(config_netem) {
-		qp.limit = "1000";
+		qp.limit = "100000";
 //		qp.jitter = "0";
 //    	qp.delay_corr = "0";
 //    	qp.loss_corr = "0";
@@ -749,19 +790,21 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 		tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
 	}
 
-	if(INGRESS) {
-		int i;
-		for(i = 0; i <= MAX_IFB; i++) {
-			if(strcmp(ifb_device[i], device_name) == 0) {
-				sprintf(device_name, "ifb%d", i);
-				break;
+	if(TBF) {
+		if(INGRESS) {
+			int i;
+			for(i = 0; i <= MAX_IFB; i++) {
+				if(strcmp(ifb_device[i], device_name) == 0) {
+					sprintf(device_name, "ifb%d", i);
+					break;
+				}
 			}
 		}
-	}
-	if(config_tbf) {
-		qp.rate = rate;
-		qp.buffer = buffer;
-		tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentnetemid, qp, "tbf");
+		if(config_tbf) {
+			qp.rate = rate;
+			qp.buffer = buffer;
+			tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentnetemid, qp, "tbf");
+		}
 	}
 
 	return SUCCESS;

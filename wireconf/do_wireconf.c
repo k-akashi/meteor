@@ -601,9 +601,14 @@ destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num,
 	      lossrate=PACKET_LOSS_RATE;
 #endif
 	      // print current configuration info
+#ifdef __FreeBSD__
 	      INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s \
 loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
-	      
+#elif __linux
+	      INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s \
+loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+#endif
+
 	      // if this is the first operation we reset the timer
 	      // Note: it is assumed time always equals 0.0 for the first line
 	      if(time == 0.0)
@@ -620,11 +625,15 @@ loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 			
 		  if(timer_wait(timer, time * 1000000) < 0)
 		    {
+#ifdef __FreeBSD__
 		      WARNING("Timer deadline missed at time=%.2f s", time);
+#elif __linux
+		      dprintf(("Timer deadline missed at time=%.2f s", time));
+#endif
 		      //exit(1); // NOT NEEDED ANYMORE!!!!
 		    }
 		}
-	      
+
 #ifdef OLSR_ROUTING
 	      // get the next hop ID to find correct configuration lines
 	      if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR)
@@ -657,8 +666,8 @@ loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 	      // do configure pipe
 	      configure_pipe(s, pipe_nr, bandwidth, delay, lossrate);
 #elif __linux
-		  bandwidth = (int)rint(bandwidth);// * 2.56);
-		  delay = (int)rint(delay);//(delay / 2);
+		  bandwidth = (int)round(bandwidth);// * 2.56);
+		  delay = (int)round(delay);//(delay / 2);
 		  //lossrate = (int)rint(lossrate * 0x7fffffff);
 
 		  // do configure Qdisc

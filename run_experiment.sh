@@ -56,8 +56,9 @@ delay=${delay_array[0]}
 echo
 echo "* Dummynet configuration #$index: bandwidth=${bandwidth}bit/s loss=$loss delay=${delay}ms"
 #sudo ipfw pipe 100 config bw ${bandwidth}bit/s delay ${delay}ms plr $loss
-sudo tc qdisc add dev eth0 root handle 10: netem delay ${delay}ms
-sudo tc qdisc add dev eth0 parent 10:1 handle 100: tbf rate ${bandwidth}bit limit 15Kb buffer 10Kb/8
+sudo tc qdisc add dev eth1 root handle 10: netem delay ${delay}ms limit 10000
+sudo tc qdisc add dev eth1 parent 10:1 handle 100: pfifo limit 100000 
+#sudo tc qdisc add dev eth1 parent 10:1 handle 100: tbf rate ${bandwidth}bit limit 15Kb buffer 10Kb/8
 
 # Start client application
 echo "* Starting client..."
@@ -77,8 +78,8 @@ for((index=1; index < $element_count; index++)); do
     delay=${delay_array[$index]}    
     echo "* Dummynet configuration #$index: bandwidth=${bandwidth}bit/s loss=$loss delay=${delay}ms"
     #sudo ipfw pipe 100 config bw ${bandwidth}bit/s delay ${delay}ms plr $loss
-	sudo tc qdisc change dev eth0 root handle 10: netem delay ${delay}ms
-	sudo tc qdisc change dev eth0 parent 10:1 handle 100: tbf rate ${bandwidth}bit limit 15Kb buffer 10Kb/8
+	sudo tc qdisc change dev eth1 root handle 10: netem delay ${delay}ms
+	#sudo tc qdisc change dev eth1 parent 10:1 handle 100: tbf rate ${bandwidth}bit limit 15Kb buffer 10Kb/8
 done
 
 # Do a last sleep for the last configuration
@@ -108,4 +109,4 @@ killall netserver
 echo Unloading dummynet...
 #sudo ipfw delete 100 
 #sudo ./dummynet_unload.sh
-sudo tc qdisc del dev eth0 root
+sudo tc qdisc del dev eth1 root
