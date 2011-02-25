@@ -52,7 +52,6 @@
 #include "global.h"
 #include "timer.h"
 
-
 ///////////////////////////////////
 // Message-handling macros
 ///////////////////////////////////
@@ -149,13 +148,15 @@ int timer_wait(timer_handle *handle, uint64_t time_in_us)
 
   // if current time exceeds next event time
   // the deadline was missed
-  if(handle->next_event < crt_time)
+  if(handle->next_event < crt_time) {
     return ERROR;
+  }
 
   // wait for the next event to occur
   do
     {
       // get current time
+      // gettimeofday
       rdtsc(crt_time);
     } 
   while(handle->next_event > crt_time);

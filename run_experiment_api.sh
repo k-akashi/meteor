@@ -69,7 +69,7 @@ echo "* Starting server..."
 #/usr/local/bin/iperf -s -u -i 0.5 -f k > ${output_name}_iperf_s.out -l $packet_size&
 
 # Wait for server to start
-sleep 1
+#sleep 1
 
 # Start client application
 echo "* Starting client..."
@@ -78,7 +78,7 @@ echo "* Starting client..."
 
 # Start ping
 echo "* Starting ping..."
-sudo ping -i 0.25 -s $packet_size $server_address > ${output_name}_ping.out &
+#sudo ping -i 0.25 -s $packet_size $server_address > ${output_name}_ping.out &
 
 echo
 echo ----------------------------
@@ -104,9 +104,9 @@ echo -- Ending experiment...
 # Kill processes
 
 echo Terminating ping...
-sudo killall -INT ping
+#sudo killall -INT ping
 
-sleep 2
+#sleep 2
 echo Killing iperf server...
 #killall -INT iperf
 

@@ -59,12 +59,12 @@
 
 #ifdef __linux
 #include "tc_util.h"
+#include <sched.h>
 #endif
 
 // use this define to enable support for OLSR routing
 // in usage (1) type
 //#define OLSR_ROUTING
-
 
 /////////////////////////////////////////////
 // Basic constants
@@ -78,6 +78,35 @@
 #define MIN_PIPE_ID_OUT         30000
 
 #define MAX_RULE_NUM            100
+
+// time measurement macro
+#define TCHK_START(name)           \
+    struct timeval name##_prev;    \
+    struct timeval name##_current; \
+    gettimeofday(&name##_prev, NULL)
+
+#define TCHK_END(name)                                                             \
+gettimeofday(&name##_current, NULL);                                               \
+time_t name##_sec;                                                                 \
+suseconds_t name##_usec;                                                           \
+if (name##_current.tv_sec == name##_prev.tv_sec) {                                 \
+    name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
+    name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                    \
+} else if (name ##_current.tv_sec != name##_prev.tv_sec) {                         \
+    int name##_carry = 1000000;                                                    \
+    name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
+    if (name##_prev.tv_usec > name##_current.tv_usec) {                            \
+        name##_usec = name##_carry - name##_prev.tv_usec + name##_current.tv_usec; \
+        name##_sec--;                                                              \
+        if (name##_usec > name##_carry) {                                          \
+            name##_usec = name##_usec - name##_carry;                              \
+            name##_sec++;                                                          \
+        }                                                                          \
+    } else {                                                                       \
+        name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                \
+    }                                                                              \
+}                                                                                  \
+printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
 
 /////////////////////////////////////////////
 // Structure to hold QOMET parameters
@@ -283,6 +312,18 @@ int main(int argc, char *argv[])
   time_period = -1;
   strncpy(broadcast_address, "255.255.255.255", IP_ADDR_SIZE);
 
+  // cpu affinity
+//#ifdef __linux__
+//  long int core_num;
+//  core_num = sysconf(_SC_NPROCESSORS_CONF);
+//
+//  if(core_num != 1) {
+//    cpu_set_t mask;
+//    CPU_ZERO(&mask);
+//    CPU_SET(1, &mask);
+//    sched_setaffinity(0, sizeof(mask), &mask);
+//  }
+//#endif
 
   if(argc<2)
     {
@@ -587,7 +628,6 @@ destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num,
 	  INFO("Skipped non-parametric line");
 	  continue;
 	}
-
       if(usage_type==1)
 	{
 	  // check whether the from_node and to_node from the file
@@ -612,27 +652,40 @@ loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 	      // if this is the first operation we reset the timer
 	      // Note: it is assumed time always equals 0.0 for the first line
 	      if(time == 0.0)
-		timer_reset(timer);
+        {
+		  timer_reset(timer);
+        }
 	      else 
 		{
 		  // wait for for the next timer event
 // debug messsage by k-akashi
-//			uint64_t t;
-//			rdtsc(t);
-//			printf("time_now  = %llu\n", t);
-//			printf("timer_now = %llu\n", timer->next_event);
-//			printf("CPU Frequency = %u\n", timer->cpu_frequency);
-			
+//            uint64_t t;
+//            uint64_t next_ev;
+//            rdtsc(t);
+//            next_ev = timer->zero + (timer->cpu_frequency * (time * 1000000) / 1000000);
+//            printf("rdtsc_time_before = %llu\n", t);
+//            printf("next_ev_time      = %llu\n", next_ev);
+//            printf("CPU Frequency = %u\n", timer->cpu_frequency);
+//            struct timeval gettime;
+//            gettimeofday(&gettime, NULL);
+//            printf("Before : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
+
 		  if(timer_wait(timer, time * 1000000) < 0)
 		    {
 #ifdef __FreeBSD__
 		      WARNING("Timer deadline missed at time=%.2f s", time);
 #elif __linux
+		      WARNING("Timer deadline missed at time=%.2f s", time);
 		      dprintf(("Timer deadline missed at time=%.2f s", time));
 #endif
 		      //exit(1); // NOT NEEDED ANYMORE!!!!
 		    }
+//            rdtsc(t);
+//            printf("rdtsc_time_after  = %llu\n", t);
+//            gettimeofday(&gettime, NULL);
+//            printf("After  : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
 		}
+
 
 #ifdef OLSR_ROUTING
 	      // get the next hop ID to find correct configuration lines

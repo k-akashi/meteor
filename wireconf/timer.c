@@ -43,6 +43,7 @@
  ***********************************************************************/
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/sysctl.h>
 
 #include <stdio.h>
@@ -68,7 +69,6 @@
 #else
 #define WARNING(message...) /* message */
 #endif
-
 
 /////////////////////////////////////////////
 // Functions implemented by the timer library
@@ -166,7 +166,7 @@ int timer_wait(timer_handle *handle, uint64_t time_in_us)
       rdtsc(crt_time);
 	  usleep(1);
     } 
-  while(handle->next_event > crt_time);
+  while(handle->next_event >= crt_time);
 
   return SUCCESS;
 }
