@@ -678,7 +678,7 @@ loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 		      WARNING("Timer deadline missed at time=%.2f s", time);
 		      dprintf(("Timer deadline missed at time=%.2f s", time));
 #endif
-		      //exit(1); // NOT NEEDED ANYMORE!!!!
+		      exit(1); // NOT NEEDED ANYMORE!!!!
 		    }
 //            rdtsc(t);
 //            printf("rdtsc_time_after  = %llu\n", t);

@@ -42,7 +42,7 @@ explain(void)
 static void
 explain1(const char *arg)
 {
-	fprintf(stderr, arg);
+	fprintf(stderr, "%s", arg);
 }
 /*
 static int get_distribution(const char *type, __s16 *data)

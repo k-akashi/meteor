@@ -119,7 +119,7 @@ char* ifb_device[MAX_IFB];
 #define TEST 1
 #ifdef TEST
 char* device_list;
-#elif
+#else
 int dev_no = 0;
 struct DEVICE_LIST {
 	char dst_address[20];
@@ -327,7 +327,8 @@ get_rule(uint s, int16_t rulenum)
     print_rule(&rules[i]);
 
 #elif __linux
-	system("tc qdisc show");
+	int ret;
+	ret = system("tc qdisc show");
 #endif
   return 0;
 }
@@ -462,7 +463,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 
 #ifdef TEST
 	device_list = device_name;
-#elif
+#else
 	device_list[dev_no].dst_address = dst;
 	device_list[dev_no].device = device_name;
 	dev_no++;
@@ -622,7 +623,8 @@ int delete_netem(uint s, char* dst, u_int32_t rule_number)
 		//sprintf(cmd, "tc qdisc del dev %s root", ifb_device_name);
 		//system(cmd);
 		sprintf(cmd, "tc qdisc del dev %s ingress", device_name);
-		system(cmd);
+		int ret;
+		ret = system(cmd);
 	}
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
 	//tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
@@ -717,7 +719,7 @@ int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, doub
 
 #ifdef TEST
 	device_name = device_list;
-#elif
+#else
 	int i;
 	for(i = 0; i < dev_no; i++) {
 		if(strcmp(device_list[dev_no].dst_address, dst) == 0) {

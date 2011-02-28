@@ -101,7 +101,7 @@ int get_next_hop_ip(char *dst, char *next_hop)
 #ifdef __FreeBSD__
   struct rt_msghdr *rtm;
 #elif __linux
-  memset(rti_info[RTAX_MAX], 0, sizeof(rti_info));
+  memset(rti_info, 0, sizeof(rti_info));
   struct rtmsg *rtm;
 #endif
 

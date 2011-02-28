@@ -92,14 +92,15 @@ unsigned int get_cpu_frequency(void)
 
     if((cpuinfo = fopen("/proc/cpuinfo", "rb")) == NULL)
 	{
-		printf("file open error!!\n");
+		printf("/proc/cpuinfo file cannot open\n");
 		exit(EXIT_FAILURE);
 	}
 
-	while(fgets(str, 256, cpuinfo) != NULL)
+	while(fgets(str, BUFSIZ, cpuinfo) != NULL)
 	{
 		if(strstr(str, "cpu MHz") != NULL){
-			strncpy(buff, str+11, 30);
+			//strncpy(buff, str + 11, (size_t)BUFSIZ);
+			strcpy(buff, str + 11);
 			tmp_hz = atof(buff);
 			hz = tmp_hz * 1000 * 1000;
 			break;
