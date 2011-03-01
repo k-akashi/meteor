@@ -59,13 +59,14 @@ OS_NAME=$(shell uname)
 
 ANY_OS_TARGETS = qomet generate_scenario ${DELTAQ_PATH}/libdeltaQ.a ${CHANEL_PATH}/do_chanel ${CHANEL_PATH}/chanel_config
 FREEBSD_TARGETS = ${WIRECONF_PATH}/wireconf ${ROUTING_PATH}/routing
-LINUX_TARGETS = ${WIRECONF_PATH}/wireconf ${ROUTING_PATH}/routing
+LINUX_TARGETS = ${WIRECONF_PATH}/wireconf
 
 # compile wireconf only of FreeBSD systems
 ifeq ($(OS_NAME),FreeBSD)
 all : ${ANY_OS_TARGETS} ${FREEBSD_TARGETS}
-else
-all : ${ANY_OS_TARGETS}
+endif
+ifeq ($(OS_NAME),Linux)
+all : ${ANY_OS_TARGETS} ${LINUX_TARGETS}
 endif
 
 # decide what make command will be used for submodules
