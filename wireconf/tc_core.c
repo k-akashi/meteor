@@ -32,88 +32,105 @@ static double tick_in_usec = 1;
 static double clock_factor = 1;
 //
 
-unsigned tc_core_time2tick(unsigned time)
+unsigned
+tc_core_time2tick(time)
+unsigned time;
 {   
-    return time*tick_in_usec;
+    return time * tick_in_usec;
 }
 
-long tc_core_usec2tick(long usec)
+long
+tc_core_usec2tick(usec)
+long usec;
 {
-	return usec*tick_in_usec;
+    return usec * tick_in_usec;
 }
 
-int tc_core_time2big(unsigned time)
+int
+tc_core_time2big(time)
+unsigned time;
 {   
-	__u64 t = time;
+    __u64 t = time;
 
-	t *= tick_in_usec;
-	return (t >> 32) != 0;
+    t *= tick_in_usec;
+    return (t >> 32) != 0;
 }
 
-long tc_core_tick2usec(long tick)
+long
+tc_core_tick2usec(tick)
+long tick;
 {
-	return tick/tick_in_usec;
+    return tick / tick_in_usec;
 }
 
-unsigned tc_calc_xmittime(unsigned rate, unsigned size)
+unsigned
+tc_calc_xmittime(rate, size)
+unsigned rate;
+unsigned size;
 {
-	return tc_core_usec2tick(1000000*((double)size/rate));
+    return tc_core_usec2tick(1000000 * ((double)size / rate));
 }
 
 /*
-   rtab[pkt_len>>cell_log] = pkt_xmit_time
- */
-
-int tc_calc_rtable(unsigned bps, __u32 *rtab, int cell_log, unsigned mtu,
-		   unsigned mpu)
-{
-	int i;
-	unsigned overhead = (mpu >> 8) & 0xFF;
-	mpu = mpu & 0xFF;
-
-	if (mtu == 0)
-		mtu = 2047;
-
-	if (cell_log < 0) {
-		cell_log = 0;
-		while ((mtu>>cell_log) > 255)
-			cell_log++;
-	}
-	for (i=0; i<256; i++) {
-		unsigned sz = (i<<cell_log);
-		if (overhead)
-			sz += overhead;
-		if (sz < mpu)
-			sz = mpu;
-		rtab[i] = tc_core_usec2tick(1000000*((double)sz/bps));
-	}
-	return cell_log;
-}
-
-int tc_core_init()
-{
-	FILE *fp = fopen("/proc/net/psched", "r");
-	__u32 clock_res;
-	__u32 t2us;
-	__u32 us2t;
-
-	if (fp == NULL)
-		return -1;
-
-/*
-	if (fscanf(fp, "%08x%08x", &t2us, &us2t) != 2) {
-		fclose(fp);
-		return -1;
-	}
+rtab[pkt_len>>cell_log] = pkt_xmit_time
 */
-	if (fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
-		fclose(fp);
-		return -1;
-	}
-	fclose(fp);
-	tick_in_usec = (double)t2us/us2t;
-	// for 2.6.34
-	tick_in_usec = (double)t2us / us2t * clock_factor;
-	//
-	return 0;
+
+int
+tc_calc_rtable(bps, rtab, cell_log, mtu, mpu)
+unsigned bps;
+__u32 *rtab;
+int cell_log;
+unsigned mtu;
+unsigned mpu;
+{
+    int i;
+    unsigned overhead = (mpu >> 8) & 0xFF;
+    mpu = mpu & 0xFF;
+
+    if(mtu == 0)
+        mtu = 2047;
+
+    if(cell_log < 0) {
+        cell_log = 0;
+        while((mtu>>cell_log) > 255)
+            cell_log++;
+    }
+    for(i = 0; i < 256; i++) {
+        unsigned sz = (i << cell_log);
+        if(overhead)
+            sz += overhead;
+        if(sz < mpu)
+            sz = mpu;
+        rtab[i] = tc_core_usec2tick( 1000000 * ((double)sz / bps));
+    }
+    return cell_log;
+}
+
+int
+tc_core_init()
+{
+    FILE *fp = fopen("/proc/net/psched", "r");
+    __u32 clock_res;
+    __u32 t2us;
+    __u32 us2t;
+
+    if (fp == NULL)
+        return -1;
+
+    /*
+    if (fscanf(fp, "%08x%08x", &t2us, &us2t) != 2) {
+    fclose(fp);
+    return -1;
+    }
+    */
+    if (fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
+        fclose(fp);
+        return -1;
+    }
+    fclose(fp);
+    //tick_in_usec = (double)t2us / us2t;
+    // for 2.6.34
+    tick_in_usec = (double)t2us / us2t * clock_factor;
+    //
+    return 0;
 }
