@@ -66,6 +66,11 @@
 #include "tc_util.h"
 #endif
 
+#define FRAME_LENGTH 1522
+// ether header 18 bytes
+// VLAN ID 4 bytes
+// payload 1500 bytes
+
 /////////////////////////////////////////////
 // Special defines
 /////////////////////////////////////////////
@@ -108,7 +113,7 @@
 #endif
 
 #ifdef __linux
-#define TBF 0
+#define TBF 1
 #define INGRESS 0 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
 #define MAX_IFB 1
@@ -752,30 +757,32 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
     */
 
     sprintf(handleid, "%d", handle);
+
     // tmp
     char bwid[10];
     char parentnetemid[10];
     sprintf(bwid, "%d", handle + 1000);
     sprintf(parentnetemid, "%d:1", handle);
     //
-    if(priv_delay != delay) {
-        sprintf(delaystr, "%dms", delay);
-        qp.delay = delaystr;
-        priv_delay = delay;
-        config_netem = 1;
-        if(priv_loss != lossrate) {
-            sprintf(loss, "%f", lossrate);
-            qp.loss = loss;
-            priv_loss = lossrate;
-        }
-        else {
-            qp.loss = priv_loss;
-        }
+
+    if(priv_delay != delay || priv_loss != lossrate) {
+         sprintf(delaystr, "%dms", delay);
+         qp.delay = delaystr;
+         priv_delay = delay;
+         config_netem = 1;
+         sprintf(loss, "%f", lossrate);
+         qp.loss = loss;
+         priv_loss = lossrate;
     }
 
     if(priv_rate != bandwidth) {
         sprintf(rate, "%d", bandwidth);
-        sprintf(buffer, "%d", bandwidth / 1024);
+        if((bandwidth / 1024) < FRAME_LENGTH) {
+            sprintf(buffer, "%d", FRAME_LENGTH);
+        }
+        else {
+            sprintf(buffer, "%d", bandwidth / 1024);
+        }
         priv_rate = bandwidth;
         config_tbf = 1;
     }
