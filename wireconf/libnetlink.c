@@ -31,7 +31,9 @@
 #define dprintf(x)
 #endif
 
-void rtnl_close(struct rtnl_handle *rth)
+void
+rtnl_close(rth)
+struct rtnl_handle* rth;
 {
 	close(rth->fd);
 }
