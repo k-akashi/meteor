@@ -31,15 +31,9 @@
 #define dprintf(x)
 #endif
 
-<<<<<<< HEAD
 void
 rtnl_close(rth)
 struct rtnl_handle* rth;
-=======
-void 
-rtnl_close(rth)
-rtnl_handle *rth;
->>>>>>> 45779e81f3d65220c2368051f20e8e0ff0fc99af
 {
     close(rth->fd);
 }
