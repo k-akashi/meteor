@@ -113,14 +113,18 @@
 #endif
 
 #ifdef __linux
-#define TBF 1
+
+#ifndef TBF
+#define TBF 0
+#endif // TBF
+
 #define INGRESS 0 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
 #define MAX_IFB 1
 char* ifb_device[MAX_IFB];
-#endif
-#define MAX_DEV 16
+#endif // INGRESS 
 
+#define MAX_DEV 16
 #define TEST 1
 #ifdef TEST
 char* device_list;
@@ -130,8 +134,8 @@ struct DEVICE_LIST {
     char dst_address[20];
     char device[20];
 } device_list[MAX_DEV];
-#endif
-#endif
+#endif // TEST
+#endif // __linux
 
 //static struct 
 //{
