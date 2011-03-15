@@ -32,7 +32,7 @@ int get_u32_handle(__u32* handle, char* str)
 	__u32 htid = 0;
 	__u32 hash = 0;
 	__u32 nodeid = 0;
-	dprintf(("get_u32_handle\n"));
+	dprintf(("get_u32_handle id = %s\n", str));
 
 	char* tmp = strchr(str, ':');
 
@@ -339,7 +339,7 @@ int off;
 
 	mask = 0;
 	if(addr.bitlen)
-		mask = htonl(0xFFFFFFFF<<(32-addr.bitlen));
+		mask = htonl(0xFFFFFFFF << (32 - addr.bitlen));
 	if(pack_key(sel, addr.data[0], mask, off, offmask) < 0)
 		return -1;
 	res = 0;
@@ -629,7 +629,8 @@ static int parse_mark(int *argc_p, char ***argv_p, struct nlmsghdr *n)
 }
 */
 
-static int parse_selector(match, sel, n)
+static int
+parse_selector(match, sel, n)
 struct filter_match match;
 struct tc_u32_sel *sel;
 struct nlmsghdr *n;

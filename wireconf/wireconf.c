@@ -139,8 +139,8 @@ struct DEVICE_LIST {
 
 //static struct 
 //{
-//	char netem_child[20];
-//	char tbf_child[20];
+//  char netem_child[20];
+//  char tbf_child[20];
 //}rootid;
 
 ///////////////////////////////////////////////
@@ -172,15 +172,15 @@ static int atoaddr(char *array_address, in4_addr *ipv4_address, uint16_t *port)
   for(;;)
     {
       if(array_address[c] == '.')
-	{
-	  c++, o++;
-	  continue;
-	} 
+    {
+      c++, o++;
+      continue;
+    } 
       else if(isdigit(array_address[c]) == 0)
-	break;
-		
+    break;
+        
       ipv4_address->octet[o] = ipv4_address->octet[o] * 10 + 
-	array_address[c] - '0';
+    array_address[c] - '0';
       c++;
     }
 
@@ -193,7 +193,7 @@ static int atoaddr(char *array_address, in4_addr *ipv4_address, uint16_t *port)
   for(;;)
     {
       if(isdigit(array_address[c]) == 0)
-	break;
+    break;
       *port = *port * 10 + array_address[c] - '0';
       c++;
     }
@@ -231,7 +231,7 @@ void close_socket(int socket_id)
 // apply socket options related to ipfw commands
 #ifdef __FreeBSD__
 static int apply_socket_options(int s, int option_id, void *option, 
-				socklen_t option_length)
+                socklen_t option_length)
 {
   // choose the action corresponding to the given command
   switch(option_id)
@@ -245,11 +245,11 @@ static int apply_socket_options(int s, int option_id, void *option,
 #endif
 
       if(getsockopt(s, IPPROTO_IP, option_id, option, &option_length) < 0) 
-	{
-	  WARNING("Error getting socket options");
-	  perror("getsockopt");
-	  return ERROR;
-	}
+    {
+      WARNING("Error getting socket options");
+      perror("getsockopt");
+      return ERROR;
+    }
       break;
 
       // delete a firewall rule (the rule contains dummynet pipes);
@@ -258,11 +258,11 @@ static int apply_socket_options(int s, int option_id, void *option,
       DEBUG("Delete ipfw rule #%d", (*(u_int32_t *)option));
 
       if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0)
-	{
-	  WARNING("Error setting socket options");
-	  perror("setsockopt");
-	  return ERROR;
-	}
+    {
+      WARNING("Error setting socket options");
+      perror("setsockopt");
+      return ERROR;
+    }
       break;
 
       // configure a dummynet pipe;
@@ -274,23 +274,23 @@ static int apply_socket_options(int s, int option_id, void *option,
 #endif
 
       if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0)
-	{
-	  WARNING("Error setting socket options");
-	  perror("setsockopt");
-	  return ERROR;
-	}
+    {
+      WARNING("Error setting socket options");
+      perror("setsockopt");
+      return ERROR;
+    }
       break;
 
       /* FUTURE PLAN: DELETE _PIPES_ INSTEAD OF RULES
     case IP_DUMMYNET_DEL:
       printf("delete pipe: option_id=%d option=%d option_length=%d\n",
-	     option_id, (*(int16_t*)(option)), option_length);
+         option_id, (*(int16_t*)(option)), option_length);
       if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0)
-	{
-	  WARNING("Error setting socket options");
-	  perror("setsockopt");
-	  return ERROR;
-	}
+    {
+      WARNING("Error setting socket options");
+      perror("setsockopt");
+      return ERROR;
+    }
       break;
       */
 
@@ -440,7 +440,7 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
     cmd[clen].len = 2;
     cmd[clen].arg1 = pipe_nr;
     ((uint32_t *)cmd)[clen + 1] = 0;
-    clen += 1;	/* trick! */
+    clen += 1;  /* trick! */
     if((p = (struct ip_fw *)malloc(sizeof(struct ip_fw) + clen * 4)) == NULL) 
     {
         WARNING("Could not allocate memory for a new rule");
@@ -497,26 +497,63 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     qp.buffer = "1Mbit";
 
     //tmp
+    char netemid[10];
     char bwid[10];
-    char prioid[10];
-    char parentnetemid[10];
-    char parentbwid[10];
-    sprintf(bwid, "%d", handle_nr + 1000);
-    sprintf(prioid, "%d", handle_nr + 2000);
-    sprintf(parentnetemid, "%d:1", handle_nr);
-    sprintf(parentbwid, "%s:1", bwid);
+    char pfifoid[10];
+    char parent_netemid[10];
+    char parent_bwid[10];
+    char parent_pfifoid[10];
+    char parent_filterid[10];
+    char dstaddr[20];
+    sprintf(netemid, "%d", handle_nr + 1000);
+    sprintf(parent_netemid, "%d:1", handle_nr);
+
+    if(!TBF) {
+        sprintf(pfifoid, "%d", handle_nr + 2000);
+        sprintf(parent_pfifoid, "%s:1", netemid);
+    }
+    else {
+        sprintf(bwid, "%d", handle_nr + 2000);
+        sprintf(parent_bwid, "%s:1", netemid);
+        sprintf(pfifoid, "%d", handle_nr + 3000);
+        sprintf(parent_pfifoid, "%s:1", bwid);
+    }
+
+    sprintf(dstaddr, "%s/32", dst);
+
+    dprintf(("filter dstination address : %s\n", dst));
+    sprintf(parent_filterid, "%d:0", handle_nr);
+    struct u32_parameter ufp;
+    memset(&ufp, 0, sizeof(struct u32_parameter));
+    ufp.match.type = "u32";
+    ufp.match.protocol = "ip";
+    ufp.match.filter = "dst";
+    ufp.match.arg = dstaddr;
+    ufp.offset = NULL;
+    ufp.hashkey = NULL;
+    ufp.classid = parent_netemid;
+    ufp.divisor = NULL;
+    ufp.order = NULL;
+    ufp.link = NULL;
+    ufp.ht = NULL;
+    ufp.indev = NULL;
+    ufp.action = NULL;
+    ufp.police = NULL;
+    ufp.rdev = NULL;
     //
 
     // configure netem egress filter
     if(!INGRESS) {
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "netem");
+        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "prio");
+        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parent_netemid, qp, "netem");
         if(!TBF) {
-            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "pfifo");
+            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, pfifoid, parent_pfifoid, qp, "pfifo");
         }
         else {
-            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parentnetemid, qp, "tbf");
-            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, prioid, parentbwid, qp, "pfifo");
+            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parent_bwid, qp, "tbf");
+            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, pfifoid, parent_pfifoid, qp, "pfifo");
         }
+        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, parent_netemid, "ip", "u32", &ufp);
     }
     // ingress filter
     if(INGRESS) {
@@ -550,8 +587,9 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
         up->rdev = ifb_device_name;
         tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parentnetemid, qp, "tbf");
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, prioid, parentbwid, qp, "pfifo");
+        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parent_netemid, qp, "tbf");
+        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, pfifoid, parent_bwid, qp, "pfifo");
+        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
     }
 
     return 0;
@@ -573,12 +611,12 @@ int delete_rule(uint s, u_int32_t rule_number)
      * and (ab)used to atomically manipulate sets. Argument size
      * is used to distinguish between the two:
      *    sizeof(u_int32_t)
-     *	delete single rule or set of rules,
-     *	or reassign rules (or sets) to a different set.
+     *  delete single rule or set of rules,
+     *  or reassign rules (or sets) to a different set.
      *    2*sizeof(u_int32_t)
-     *	atomic disable/enable sets.
-     *	first u_int32_t contains sets to be disabled,
-     *	second u_int32_t contains sets to be enabled.
+     *  atomic disable/enable sets.
+     *  first u_int32_t contains sets to be disabled,
+     *  second u_int32_t contains sets to be enabled.
      */
 
     // do delete rule
@@ -763,10 +801,14 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
     sprintf(handleid, "%d", handle);
 
     // tmp
+    char netemid[10];
+    char parent_netemid[10];
     char bwid[10];
-    char parentnetemid[10];
-    sprintf(bwid, "%d", handle + 1000);
-    sprintf(parentnetemid, "%d:1", handle);
+    char parent_bwid[10];
+    sprintf(netemid, "%d", handle + 1000);
+    sprintf(parent_netemid, "%d:1", handle);
+    sprintf(bwid, "%d", handle + 2000);
+    sprintf(parent_bwid, "%s:1", netemid);
     //
 
     if(priv_delay != delay || priv_loss != lossrate) {
@@ -809,7 +851,7 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
         qp.reorder_prob = "0";
 //        qp.reorder_corr = "0";
 
-        tc_cmd(RTM_NEWQDISC, 0, device_name, handleid, "root", qp, "netem");
+        tc_cmd(RTM_NEWQDISC, 0, device_name, netemid, parent_netemid, qp, "netem");
     }
 
     if(TBF) {
@@ -825,7 +867,7 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
         if(config_tbf) {
             qp.rate = rate;
             qp.buffer = buffer;
-            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parentnetemid, qp, "tbf");
+            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
         }
     }
 

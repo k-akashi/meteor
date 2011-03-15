@@ -171,7 +171,7 @@ struct u32_parameter* up;
 	req.n.nlmsg_type = cmd;
 	req.t.tcm_family = AF_UNSPEC;
 
-	dprintf(("filter set\n"));
+	dprintf(("\nfilter function\n"));
 
 	strncpy(d, dev, sizeof(d)-1);
 
@@ -191,9 +191,11 @@ struct u32_parameter* up;
 		req.t.tcm_parent = handle;
 	}
 
+/*
 	if(fhandle)
 		duparg("handle", handleid);
 	fhandle = handleid;
+*/
 
 	// protocol set
 	__u16 id;
@@ -203,7 +205,10 @@ struct u32_parameter* up;
 		invarg(protocolid, "invalid protocol");
 	protocol = id;
 
-	strncpy(k, type, sizeof(k)-1);
+    if (get_u32(&prio, "16", 0))
+        invarg("16", "invalid prpriority value");
+
+	strncpy(k, type, sizeof(k) - 1);
 	q = get_filter_kind(k);
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
@@ -221,7 +226,6 @@ struct u32_parameter* up;
 
 	if(est.ewma_log)
 		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
-
 
 	if(d[0]) {
  		ll_init_map(&rth);
