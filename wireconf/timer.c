@@ -164,8 +164,8 @@ int timer_wait(timer_handle *handle, uint64_t time_in_us)
   do
     {
       // get current time
-      rdtsc(crt_time);
 	  usleep(1);
+      rdtsc(crt_time);
     } 
   while(handle->next_event >= crt_time);
 

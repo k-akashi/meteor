@@ -22,11 +22,11 @@ ifeq ($(UNAME), Linux)
 # netem and tbf and debug message
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -DTCDEBUG
 # netem and debug message
-CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
+#CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
 # netem and tbf
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF 
 # netem only
-#CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
+CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
