@@ -98,7 +98,6 @@ char* dev;
 	if(mirror || redir) {
 		strncpy(d, dev, sizeof(d)-1);
 	}
-	dprintf(("parse_mirred\n\n"));
 
 	if(d[0])  {
 		int idx;

@@ -263,7 +263,7 @@ void *jarg;
     };
     char   buf[16384];
 
-    dprintf(("msghdr size = %d\n", sizeof(msg)));
+    dprintf(("[rtnl_talk] msghdr size = %d\n", sizeof(msg)));
     memset(&nladdr, 0, sizeof(nladdr));
     nladdr.nl_family = AF_NETLINK;
     nladdr.nl_pid = peer;
@@ -275,7 +275,7 @@ void *jarg;
         n->nlmsg_flags |= NLM_F_ACK;
 
     status = sendmsg(rtnl->fd, &msg, 0);
-    dprintf(("status sendmsg = %d\n", status));
+    dprintf(("[rtnl_talk] status sendmsg = %d\n", status));
 
     if(status < 0) {
         perror("Cannot talk to rtnetlink");
@@ -289,7 +289,7 @@ void *jarg;
     while(1){
         iov.iov_len = sizeof(buf);
         status = recvmsg(rtnl->fd, &msg, 0);
-        dprintf(("status recvmsg = %d\n", status));
+        dprintf(("[rtnl_talk] status recvmsg = %d\n", status));
 
         if(status < 0) {
             if(errno == EINTR)
@@ -310,13 +310,13 @@ void *jarg;
             int len = h->nlmsg_len;
             int l = len - sizeof(*h);
 
-            dprintf(("nlmsg       = %d\n", (int)sizeof(*h)));
-            dprintf(("nlmsg_len   = %d\n", h->nlmsg_len));
-            dprintf(("nlmsg_type  = %d\n", h->nlmsg_type));
-            dprintf(("nlmsg_flags = %d\n", h->nlmsg_flags));
-            dprintf(("nlmsg_seq   = %d\n", h->nlmsg_seq));
-            dprintf(("nlmsg_pid   = %d\n", h->nlmsg_pid));
-            dprintf(("l = %d\n", l));
+            dprintf(("[rtnl_talk] nlmsg       = %d\n", (int)sizeof(*h)));
+            dprintf(("[rtnl_talk] nlmsg_len   = %d\n", h->nlmsg_len));
+            dprintf(("[rtnl_talk] nlmsg_type  = %d\n", h->nlmsg_type));
+            dprintf(("[rtnl_talk] nlmsg_flags = %d\n", h->nlmsg_flags));
+            dprintf(("[rtnl_talk] nlmsg_seq   = %d\n", h->nlmsg_seq));
+            dprintf(("[rtnl_talk] nlmsg_pid   = %d\n", h->nlmsg_pid));
+            dprintf(("[rtnl_talk] Payload len = %d\n", l));
 
             if(l < 0 || len > status){
                 if(msg.msg_flags & MSG_TRUNC){
@@ -341,13 +341,13 @@ void *jarg;
 
             if(h->nlmsg_type == NLMSG_ERROR){
                 struct nlmsgerr* err = (struct nlmsgerr*)NLMSG_DATA(h);
-                dprintf(("error no = %d\n", err->error));
+                dprintf(("[rtnl_talk] error no = %d\n", err->error));
                 if(l < sizeof(struct nlmsgerr)){
                     fprintf(stderr, "ERROR truncated\n");
                 } 
                 else {
                     errno = -err->error;
-                    dprintf(("errno = %d\n", -err->error));
+                    dprintf(("[rtnl_talk] errno = %d\n", -err->error));
                     if(errno == 0) {
                         if(answer)
                             memcpy(answer, h, h->nlmsg_len);

@@ -55,7 +55,7 @@ const char* str;
 	uint32_t min;
 	char*    p;
 
-	dprintf(("Parent ID = %s\n", str));
+	dprintf(("[get_tc_classid] Parent ID = %s\n", str));
 	maj = TC_H_ROOT;
 	if(strcmp(str, "root") == 0)
 		goto ok;
@@ -69,7 +69,7 @@ const char* str;
 			return -1;
 	}
 	if(*p == ':') {
-		dprintf(("Leaf ID = %s\n", p));
+		dprintf(("[get_tc_classid] Leaf ID = %s\n", p));
 		if(maj >= (1<<16))
 			return -1;
         maj <<= 16;

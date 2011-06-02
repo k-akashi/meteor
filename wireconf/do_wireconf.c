@@ -642,11 +642,9 @@ int main(int argc, char *argv[])
 #endif
                 // print current configuration info
 #ifdef __FreeBSD__
-                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s \
-                        loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 #elif __linux
-                INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s \
-                        loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+                INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 #endif
 
                 // if this is the first operation we reset the timer

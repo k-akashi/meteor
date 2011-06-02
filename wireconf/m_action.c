@@ -142,7 +142,6 @@ char* dev;
 	int prio = 0;
 	struct action_util *a = NULL;
 
-	dprintf(("parse_action\n\n"));
 	tail = tail2 = NLMSG_TAIL(n);
 
 	addattr_l(n, MAX_MSG, tca_id, NULL, 0);

@@ -20,11 +20,11 @@ HOSTCC  = gcc
 
 ifeq ($(UNAME), Linux)
 # netem and tbf and debug message
-#CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -DTCDEBUG
+CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -DTCDEBUG
 # netem and debug message
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
 # netem and tbf
-CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF 
+#CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF 
 # netem only
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 
@@ -38,7 +38,7 @@ TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_prio.so m_action.so m_
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o tbf.o
 WCOBJ=q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 #WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 TESTOBJ=test.o

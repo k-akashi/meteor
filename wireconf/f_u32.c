@@ -32,7 +32,7 @@ int get_u32_handle(__u32* handle, char* str)
 	__u32 htid = 0;
 	__u32 hash = 0;
 	__u32 nodeid = 0;
-	dprintf(("get_u32_handle id = %s\n", str));
+	dprintf(("[get_u32_handle] handle id = %s\n", str));
 
 	char* tmp = strchr(str, ':');
 
@@ -794,11 +794,10 @@ char* dev;
 	__u32 htid = 0;
 	__u32 order = 0;
 
-	dprintf(("u32_parse_opt\n"));
 	memset(&sel, 0, sizeof(sel));
 
 	if(handle) {
-		dprintf(("handle : %s\n", handle));
+		dprintf(("[u32_parse_opt] handle : %s\n", handle));
 		if(get_u32_handle(&t->tcm_handle, handle)) {
 			fprintf(stderr, "Illegal filter ID\n");
 			return -1;

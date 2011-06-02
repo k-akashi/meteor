@@ -482,7 +482,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     memset(&qp, 0, sizeof(qp));
 
     sprintf(handleid, "%d", handle_nr);
-    dprintf(("rulenum = %s\n", handleid));
+    dprintf(("[add_rule] rulenum = %s\n", handleid));
 
     // initialize Qdisc Parameter
     qp.limit = "100000";
@@ -521,7 +521,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 
     sprintf(dstaddr, "%s/32", dst);
 
-    dprintf(("filter dstination address : %s\n", dst));
+    dprintf(("[add_rule] filter dstination address : %s\n", dst));
     sprintf(parent_filterid, "%d:0", handle_nr);
     struct u32_parameter ufp;
     memset(&ufp, 0, sizeof(struct u32_parameter));
@@ -544,13 +544,15 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 
     // configure netem egress filter
     if(!INGRESS) {
-		dprintf(("\n\nadd htb qdisc\n"));
+//		dprintf(("\n\n[add_rule] add tbf qdisc\n"));
+//		add_tbf_qdisc(device_name, "root", handleid, qp);
+		dprintf(("\n\n[add_rule] add htb qdisc\n"));
 		add_htb_qdisc(device_name, "root", handleid);
-		dprintf(("\n\nadd htb class\n"));
+		dprintf(("\n\n[add_rule] add htb class\n"));
 		add_htb_class(device_name, "200:", "200:1",   "10000000");
-		dprintf(("\n\nadd htb class\n"));
+		dprintf(("\n\n[add_rule] add htb class\n"));
 		add_htb_class(device_name, "200:1", "200:11", "10000000");
-		dprintf(("\n\nadd netem qdisc\n"));
+		dprintf(("\n\n[add_rule] add netem qdisc\n"));
 		add_netem_qdisc(device_name, "200:11", "1200:", qp);
         tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "200:", "200:11", "ip", "u32", &ufp);
 
@@ -645,7 +647,6 @@ int delete_rule(uint s, u_int32_t rule_number)
 int
 delete_netem(uint s, char* dst, u_int32_t rule_number)
 {
-    dprintf(("delete qdisc\n"));
     struct qdisc_parameter qp; // 1 : ingress mode, 0 : egress mode
     char* device_name;
 
@@ -806,10 +807,10 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
     child = netemid;
     child <<= 16;
     child >>= 16;
-    dprintf(("netem id = %d\n", netemid));
-    dprintf(("parent id = %d\n", parent));
-    dprintf(("child id = %d\n", child));
-    dprintf(("rulenum = %d\n", handle));
+    dprintf(("[configure_qdisc] netem id = %d\n", netemid));
+    dprintf(("[configure_qdisc] parent id = %d\n", parent));
+    dprintf(("[configure_qdisc] child id = %d\n", child));
+    dprintf(("[configure_qdisc] rulenum = %d\n", handle));
     */
 
     sprintf(handleid, "%d", handle);
@@ -885,6 +886,7 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
             qp.buffer = buffer;
 //            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
 			change_htb_class(device_name, "200:1", "200:11", rate);
+//			change_tbf_qdisc(device_name, "root", "200:", qp);
         }
     }
 
