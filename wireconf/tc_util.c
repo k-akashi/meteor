@@ -24,10 +24,13 @@
 #include "utils.h"
 #include "tc_util.h"
 
-int get_qdisc_handle(__u32 *h, const char *str)
+int
+get_qdisc_handle(h, str)
+uint32_t* h;
+const char* str;
 {
-	__u32 maj;
-	char *p;
+	uint32_t maj;
+	char*    p;
 
 	maj = TC_H_UNSPEC;
 	if(strcmp(str, "none") == 0)
@@ -43,10 +46,14 @@ ok:
 	return 0;
 }
 
-int get_tc_classid(__u32 *h, const char *str)
+int
+get_tc_classid(h, str)
+uint32_t* h;
+const char* str;
 {
-	__u32 maj, min;
-	char *p;
+	uint32_t maj;
+	uint32_t min;
+	char*    p;
 
 	dprintf(("str = %s\n", str));
 	maj = TC_H_ROOT;
@@ -76,7 +83,7 @@ int get_tc_classid(__u32 *h, const char *str)
         dprintf(("min id = %u\n", min));
 		if(*p != 0)
 			return -1;
-		if(min >= (1<<16))
+		if(min >= (1 << 16))
 			return -1;
 		maj |= min;
 		dprintf(("last id = %u\n", maj));
@@ -86,28 +93,6 @@ int get_tc_classid(__u32 *h, const char *str)
 ok:
 	*h = maj;
 	return 0;
-}
-
-int print_tc_classid(char *buf, int len, __u32 h)
-{
-	if(h == TC_H_ROOT)
-		sprintf(buf, "root");
-	else if(h == TC_H_UNSPEC)
-		snprintf(buf, len, "none");
-	else if(TC_H_MAJ(h) == 0)
-		snprintf(buf, len, ":%x", TC_H_MIN(h));
-	else if(TC_H_MIN(h) == 0)
-		snprintf(buf, len, "%x:", TC_H_MAJ(h)>>16);
-	else
-		snprintf(buf, len, "%x:%x", TC_H_MAJ(h)>>16, TC_H_MIN(h));
-	return 0;
-}
-
-char * sprint_tc_classid(__u32 h, char *buf)
-{
-	if(print_tc_classid(buf, SPRINT_BSIZE-1, h))
-		strcpy(buf, "???");
-	return buf;
 }
 
 /* See http://physics.nist.gov/cuu/Units/binary.html */
@@ -137,11 +122,14 @@ static const struct rate_suffix {
 };
 
 
-int get_rate(unsigned *rate, const char *str)
+int
+get_rate(rate, str)
+uint32_t* rate;
+const char* str;
 {
-	char *p;
+	char* p;
 	double bps = strtod(str, &p);
-	const struct rate_suffix *s;
+	const struct rate_suffix* s;
 
 	if(p == str)
 		return -1;
@@ -161,60 +149,38 @@ int get_rate(unsigned *rate, const char *str)
 	return -1;
 }
 
-int get_rate_and_cell(unsigned *rate, int *cell_log, char *str)
+void
+print_rate(buf, len, rate)
+char* buf;
+int len;
+uint32_t rate;
 {
-	char * slash = strchr(str, '/');
-
-	if(slash)
-		*slash = 0;
-
-	if(get_rate(rate, str))
-		return -1;
-
-	if(slash) {
-		int cell;
-		int i;
-
-		if(get_integer(&cell, slash+1, 0))
-			return -1;
-		*slash = '/';
-
-		for (i=0; i<32; i++) {
-			if((1<<i) == cell) {
-				*cell_log = i;
-				return 0;
-			}
-		}
-		return -1;
-	}
-	return 0;
-}
-
-void print_rate(char *buf, int len, __u32 rate)
-{
-	double tmp = (double)rate*8;
+	double tmp = (double)rate * 8;
 	extern int use_iec;
 
 	if(use_iec) {
-		if(tmp >= 1000.0*1024.0*1024.0)
-			snprintf(buf, len, "%.0fMibit", tmp/1024.0*1024.0);
-		else if(tmp >= 1000.0*1024)
-			snprintf(buf, len, "%.0fKibit", tmp/1024);
+		if(tmp >= 1000.0 * 1024.0 * 1024.0)
+			snprintf(buf, len, "%.0fMibit", tmp / 1024.0 * 1024.0);
+		else if(tmp >= 1000.0 * 1024)
+			snprintf(buf, len, "%.0fKibit", tmp / 1024);
 		else
 			snprintf(buf, len, "%.0fbit", tmp);
 	} else {
-		if(tmp >= 1000.0*1000000.0)
-			snprintf(buf, len, "%.0fMbit", tmp/1000000.0);
+		if(tmp >= 1000.0 * 1000000.0)
+			snprintf(buf, len, "%.0fMbit", tmp / 1000000.0);
 		else if(tmp >= 1000.0 * 1000.0)
-			snprintf(buf, len, "%.0fKbit", tmp/1000.0);
+			snprintf(buf, len, "%.0fKbit", tmp / 1000.0);
 		else
 			snprintf(buf, len, "%.0fbit",  tmp);
 	}
 }
 
-char * sprint_rate(__u32 rate, char *buf)
+char*
+sprint_rate(rate, buf)
+uint32_t rate;
+char* buf;
 {
-	print_rate(buf, SPRINT_BSIZE-1, rate);
+	print_rate(buf, SPRINT_BSIZE - 1, rate);
 	return buf;
 }
 

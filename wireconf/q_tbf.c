@@ -46,7 +46,7 @@ struct nlmsghdr *n;
 {
 //	int ok=0;
 	struct tc_tbf_qopt opt;
-	__u32 rtab[256];
+	uint32_t rtab[256];
 //	__u32 ptab[256];
 	unsigned buffer  = 0;
 	unsigned mtu     = 0; 

@@ -339,7 +339,7 @@ int off;
 
 	mask = 0;
 	if(addr.bitlen)
-		mask = htonl(0xFFFFFFFF << (32 - addr.bitlen));
+		mask = htonl(0xFFFFFFFF << (24 - addr.bitlen));
 	if(pack_key(sel, addr.data[0], mask, off, offmask) < 0)
 		return -1;
 	res = 0;

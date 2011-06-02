@@ -32,12 +32,14 @@ CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INF
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
 LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl
-TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf test
+TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf test
+#TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf test
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o
-WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o
+WCOBJ=q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
+#WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 TESTOBJ=test.o
 endif
 

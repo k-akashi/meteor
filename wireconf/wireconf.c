@@ -531,7 +531,8 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     ufp.match.arg = dstaddr;
     ufp.offset = NULL;
     ufp.hashkey = NULL;
-    ufp.classid = parent_netemid;
+    ufp.classid = "200:11";
+    //ufp.classid = parent_netemid;
     ufp.divisor = NULL;
     ufp.order = NULL;
     ufp.link = NULL;
@@ -540,10 +541,16 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     ufp.action = NULL;
     ufp.police = NULL;
     ufp.rdev = NULL;
-    //
 
     // configure netem egress filter
     if(!INGRESS) {
+		add_htb_qdisc(device_name, "root", handleid);
+		add_htb_class(device_name, "200:", "200:1",   "10000000");
+		add_htb_class(device_name, "200:1", "200:11", "10000000");
+        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, "1200:", "200:11", qp, "netem");
+        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "200:", "200:11", "ip", "u32", &ufp);
+
+/*
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "prio");
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parent_netemid, qp, "netem");
         if(!TBF) {
@@ -554,7 +561,9 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
             tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, pfifoid, parent_pfifoid, qp, "pfifo");
         }
         tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, parent_netemid, "ip", "u32", &ufp);
+*/
     }
+
     // ingress filter
     if(INGRESS) {
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "ingress");
@@ -851,7 +860,8 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
         qp.reorder_prob = "0";
 //        qp.reorder_corr = "0";
 
-        tc_cmd(RTM_NEWQDISC, 0, device_name, netemid, parent_netemid, qp, "netem");
+        //tc_cmd(RTM_NEWQDISC, 0, device_name, netemid, parent_netemid, qp, "netem");
+        tc_cmd(RTM_NEWQDISC, 0, device_name, "1200:", "200:11", qp, "netem");
     }
 
     if(TBF) {

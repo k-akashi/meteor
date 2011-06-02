@@ -130,6 +130,9 @@ extern void print_tm(FILE *f, const struct tcf_t *tm);
 
 //extern int tc_cmd(int cmd, int flags, char* dev, char* parentid, char* handleid, int root, struct qdisc_parameter qp, char* type);
 extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
+extern int add_htb_qdisc(char* device, char* parent_id, char* handle_id);
+extern int add_htb_class(char* device, char* parent_id, char* class_id, char* bnadwidth);
+
 extern char* get_route_info(char *info, char *addr);
 
 extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, char* parentid, char* handleid, char* protocolid, char* type, struct u32_parameter* up);
