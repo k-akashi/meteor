@@ -544,10 +544,14 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 
     // configure netem egress filter
     if(!INGRESS) {
+		dprintf(("\n\nadd htb qdisc\n"));
 		add_htb_qdisc(device_name, "root", handleid);
+		dprintf(("\n\nadd htb class\n"));
 		add_htb_class(device_name, "200:", "200:1",   "10000000");
+		dprintf(("\n\nadd htb class\n"));
 		add_htb_class(device_name, "200:1", "200:11", "10000000");
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, "1200:", "200:11", qp, "netem");
+		dprintf(("\n\nadd netem qdisc\n"));
+		add_netem_qdisc(device_name, "200:11", "1200:", qp);
         tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "200:", "200:11", "ip", "u32", &ufp);
 
 /*
@@ -663,7 +667,8 @@ delete_netem(uint s, char* dst, u_int32_t rule_number)
 
     //system("tc qdisc del dev lo root");
     if(!INGRESS) {
-        tc_cmd(RTM_DELQDISC, 0, device_name, "1", "root", qp, "pfifo");
+//        tc_cmd(RTM_DELQDISC, 0, device_name, "1", "root", qp, "pfifo");
+		delete_netem_qdisc(device_name);
     }
 
     if(INGRESS) {
@@ -861,7 +866,8 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
 //        qp.reorder_corr = "0";
 
         //tc_cmd(RTM_NEWQDISC, 0, device_name, netemid, parent_netemid, qp, "netem");
-        tc_cmd(RTM_NEWQDISC, 0, device_name, "1200:", "200:11", qp, "netem");
+        //tc_cmd(RTM_NEWQDISC, 0, device_name, "1200:", "200:11", qp, "netem");
+		change_netem_qdisc(device_name, "200:11", "1200:", qp);
     }
 
     if(TBF) {
@@ -877,7 +883,8 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
         if(config_tbf) {
             qp.rate = rate;
             qp.buffer = buffer;
-            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
+//            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
+			change_htb_class(device_name, "200:1", "200:11", rate);
         }
     }
 

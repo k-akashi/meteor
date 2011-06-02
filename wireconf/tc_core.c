@@ -131,20 +131,15 @@ tc_core_init()
     if (fp == NULL)
         return -1;
 
-    /*
-    if (fscanf(fp, "%08x%08x", &t2us, &us2t) != 2) {
-    fclose(fp);
-    return -1;
-    }
-    */
     if (fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
         fclose(fp);
         return -1;
     }
     fclose(fp);
+
+	// for 2.6.18
     //tick_in_usec = (double)t2us / us2t;
     // for 2.6.34
     tick_in_usec = (double)t2us / us2t * clock_factor;
-    //
     return 0;
 }

@@ -239,13 +239,13 @@ skip_it:
 
 int
 rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
-    struct rtnl_handle* rtnl;
-    struct nlmsghdr* n;
-    pid_t peer;
-    unsigned groups;
-    struct nlmsghdr* answer;
-    rtnl_filter_t junk;
-    void *jarg;
+struct rtnl_handle* rtnl;
+struct nlmsghdr* n;
+pid_t peer;
+unsigned groups;
+struct nlmsghdr* answer;
+rtnl_filter_t junk;
+void *jarg;
 {
     int status;
     unsigned seq;
@@ -286,7 +286,7 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
 
     iov.iov_base = buf;
 
-    while (1){
+    while(1){
         iov.iov_len = sizeof(buf);
         status = recvmsg(rtnl->fd, &msg, 0);
         dprintf(("status recvmsg = %d\n", status));
@@ -349,7 +349,6 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
                     errno = -err->error;
                     dprintf(("errno = %d\n", -err->error));
                     if(errno == 0) {
-                        dprintf(("errno = 0\n"));
                         if(answer)
                             memcpy(answer, h, h->nlmsg_len);
                         return 0;
@@ -533,7 +532,7 @@ int addattr_l(struct nlmsghdr *n, int maxlen, int type, const void *data,
     int len = RTA_LENGTH(alen);
     struct rtattr *rta;
 
-    if (NLMSG_ALIGN(n->nlmsg_len) + RTA_ALIGN(len) > maxlen) {
+    if(NLMSG_ALIGN(n->nlmsg_len) + RTA_ALIGN(len) > maxlen) {
         fprintf(stderr, "addattr_l ERROR: message exceeded bound of %d\n",maxlen);
         return -1;
     }

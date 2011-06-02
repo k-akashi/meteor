@@ -168,6 +168,7 @@ char* type;
             return 1;
         }
     }
+	printf("req.n.nlmsglen : %d\n", req.n.nlmsg_len);
 
     if(d[0]){
         int idx;

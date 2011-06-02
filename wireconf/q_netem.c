@@ -106,22 +106,16 @@ const char* str;
 {
 	unsigned t;
 
-	dprintf(("delay str = %s\n", str));
 	if(get_usecs(&t, str))
 		return -1;
-	dprintf(("delay pointer = %d\n", t));
 
 	if(tc_core_time2big(t)) {
 		fprintf(stderr, "Illegal %u time (too large)\n", t);
 		return -1;
 	} 
-	dprintf(("delay pointer time2big = %d\n", t));
-
-	dprintf(("ticks = %d\n", *ticks));
 
 	//*ticks = tc_core_usec2tick(t);
 	*ticks = tc_core_time2tick(t);
-	dprintf(("ticks = %d\n", *ticks));
 
 	return 0;
 }
@@ -253,6 +247,7 @@ struct nlmsghdr *n;
 			return -1;
 	}
 	tail->rta_len = (void*)NLMSG_TAIL(n) - (void*)tail;
+
 	return 0;
 }
 

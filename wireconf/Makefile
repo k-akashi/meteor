@@ -24,20 +24,21 @@ ifeq ($(UNAME), Linux)
 # netem and debug message
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
 # netem and tbf
-#CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF 
+CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF 
 # netem only
-CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
+#CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 
 #CFLAGS  = -O2 -I. -g -Wall -Werror -D_GNU_SOURCE -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
 LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl
-TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf test
+TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf 
+#TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf 
 #TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_prio.so m_action.so m_mirred.so q_pfifo.so f_u32.so do_wireconf test
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o
 WCOBJ=q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 #WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 TESTOBJ=test.o
@@ -51,7 +52,8 @@ LDLIBS  = -lwireconf -ltimer -lm
 TARGETS = libwireconf.a libtimer.a do_wireconf
 endif
 
-all: clean $(TARGETS) 
+#all: clean $(TARGETS) 
+all: clean $(TARGETS)
 
 ifeq ($(UNAME), Linux)
 q_netem.so: q_netem.c
