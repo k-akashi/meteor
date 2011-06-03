@@ -674,7 +674,7 @@ int main(int argc, char *argv[])
                         WARNING("Timer deadline missed at time=%.2f s", time);
 #elif __linux
                         WARNING("Timer deadline missed at time=%.2f s", time);
-                        dprintf(("Timer deadline missed at time=%.2f s", time));
+						exit(1);
 #endif
                         //exit(1); // NOT NEEDED ANYMORE!!!!
                     }
@@ -722,7 +722,9 @@ int main(int argc, char *argv[])
                 //lossrate = (int)rint(lossrate * 0x7fffffff);
 
                 // do configure Qdisc
+				//TCHK_START(time);
                 configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
+				//TCHK_END(time);
 #endif
 
                 // increase loop counter

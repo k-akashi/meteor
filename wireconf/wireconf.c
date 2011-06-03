@@ -61,7 +61,6 @@
 #ifdef __linux
 #include "utils.h"
 #include "ip_common.h"
-//#include "iproute.h"
 #include "tc_common.h"
 #include "tc_util.h"
 #endif
@@ -497,14 +496,43 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     qp.buffer = "1Mbit";
 
     //tmp
-    char netemid[10];
-    char bwid[10];
-    char pfifoid[10];
-    char parent_netemid[10];
-    char parent_bwid[10];
-    char parent_pfifoid[10];
-    char parent_filterid[10];
+    char netem_parent_id[10];
+    char netem_handle_id[10];
+
+    char htb_qdisc_parent_id[10];
+    char htb_qdisc_handle_id[10];
+
+    char htb_class_1_parent_id[10];
+    char htb_class_1_handle_id[10];
+
+    char htb_class_2_parent_id[10];
+    char htb_class_2_handle_id[10];
+
+#ifdef PFIFO
+    char pfifo_handle_id[10];
+    char pfifo_parent_id[10];
+#endif
+
+    char filter_parent_id[10];
+    char filter_handle_id[10];
     char dstaddr[20];
+
+    sprintf(htb_qdisc_parent_id, "root");
+    sprintf(htb_qdisc_handle_id, "%d:", handle_nr);
+
+    sprintf(htb_class_1_parent_id, "%d:",  handle_nr);
+    sprintf(htb_class_1_handle_id, "%d:1", handle_nr);
+
+    sprintf(htb_class_2_parent_id, "%d:",   handle_nr);
+    sprintf(htb_class_2_handle_id, "%d:11", handle_nr);
+
+    sprintf(netem_parent_id, "%d:11", handle_nr);
+    sprintf(netem_handle_id, "%d:", handle_nr + 1000);
+
+    sprintf(filter_parent_id, "%d:", handle_nr);
+    sprintf(filter_handle_id, "%d:11", handle_nr);
+
+/* master branch rule
     sprintf(netemid, "%d", handle_nr + 1000);
     sprintf(parent_netemid, "%d:1", handle_nr);
 
@@ -518,13 +546,16 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
         sprintf(pfifoid, "%d", handle_nr + 3000);
         sprintf(parent_pfifoid, "%s:1", bwid);
     }
+*/
 
     sprintf(dstaddr, "%s/32", dst);
 
-    dprintf(("[add_rule] filter dstination address : %s\n", dst));
-    sprintf(parent_filterid, "%d:0", handle_nr);
+    dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
+
     struct u32_parameter ufp;
+
     memset(&ufp, 0, sizeof(struct u32_parameter));
+
     ufp.match.type = "u32";
     ufp.match.protocol = "ip";
     ufp.match.filter = "dst";
@@ -544,18 +575,18 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 
     // configure netem egress filter
     if(!INGRESS) {
-//		dprintf(("\n\n[add_rule] add tbf qdisc\n"));
-//		add_tbf_qdisc(device_name, "root", handleid, qp);
-		dprintf(("\n\n[add_rule] add htb qdisc\n"));
-		add_htb_qdisc(device_name, "root", handleid);
-		dprintf(("\n\n[add_rule] add htb class\n"));
-		add_htb_class(device_name, "200:", "200:1",   "10000000");
-		dprintf(("\n\n[add_rule] add htb class\n"));
-		add_htb_class(device_name, "200:1", "200:11", "10000000");
-		dprintf(("\n\n[add_rule] add netem qdisc\n"));
-		add_netem_qdisc(device_name, "200:11", "1200:", qp);
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "200:", "200:11", "ip", "u32", &ufp);
+//      dprintf(("\n\n[add_rule] add tbf qdisc\n"));
+//      add_tbf_qdisc(device_name, "root", handleid, qp);
 
+        dprintf(("\n\n[add_rule] add htb qdisc\n"));
+        add_htb_qdisc(device_name, htb_qdisc_parent_id, htb_qdisc_handle_id);
+        dprintf(("\n\n[add_rule] add htb class\n"));
+        add_htb_class(device_name, htb_class_1_parent_id, htb_class_1_handle_id, "10000000");
+        dprintf(("\n\n[add_rule] add htb class\n"));
+        add_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, "10000000");
+        dprintf(("\n\n[add_rule] add netem qdisc\n"));
+        add_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
+        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_parent_id, filter_handle_id, "ip", "u32", &ufp);
 /*
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "prio");
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parent_netemid, qp, "netem");
@@ -600,11 +631,11 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
         up->action = "mirred";
         up->police = NULL;
         up->rdev = ifb_device_name;
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parent_netemid, qp, "tbf");
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, pfifoid, parent_bwid, qp, "pfifo");
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
+//        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
+//        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
+//        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parent_netemid, qp, "tbf");
+//        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, pfifoid, parent_bwid, qp, "pfifo");
+//        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
     }
 
     return 0;
@@ -669,7 +700,7 @@ delete_netem(uint s, char* dst, u_int32_t rule_number)
     //system("tc qdisc del dev lo root");
     if(!INGRESS) {
 //        tc_cmd(RTM_DELQDISC, 0, device_name, "1", "root", qp, "pfifo");
-		delete_netem_qdisc(device_name);
+        delete_netem_qdisc(device_name);
     }
 
     if(INGRESS) {
@@ -769,7 +800,13 @@ convert_netemid(int handle)
 }
 
 int
-configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate)
+configure_qdisc(s, dst, handle, bandwidth, delay, lossrate)
+int s;
+char* dst;
+int handle;
+int bandwidth;
+int delay;
+double lossrate;
 {
     struct qdisc_parameter qp;
     //char* device_name =  (char* )get_route_info("dev", dst);
@@ -814,6 +851,16 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
     */
 
     sprintf(handleid, "%d", handle);
+
+    char htb_class_2_parent_id[10];
+    char htb_class_2_handle_id[10];
+    char netem_parent_id[10];
+    char netem_handle_id[10];
+
+    sprintf(htb_class_2_parent_id, "%d:",   handle);
+    sprintf(htb_class_2_handle_id, "%d:11", handle);
+    sprintf(netem_parent_id, "%d:11", handle);
+    sprintf(netem_handle_id, "%d:", handle + 1000);
 
     // tmp
     char netemid[10];
@@ -860,15 +907,15 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
 
     if(config_netem) {
         qp.limit = "100000";
-//        qp.jitter = "0";
-//        qp.delay_corr = "0";
-//        qp.loss_corr = "0";
+        qp.jitter = "0";
+        qp.delay_corr = "0";
+        qp.loss_corr = "0";
         qp.reorder_prob = "0";
-//        qp.reorder_corr = "0";
+        qp.reorder_corr = "0";
 
+        //tc_cmd(RTM_NEWQDISC, 0, device_name, "1200:", "200:1", qp, "netem");
         //tc_cmd(RTM_NEWQDISC, 0, device_name, netemid, parent_netemid, qp, "netem");
-        //tc_cmd(RTM_NEWQDISC, 0, device_name, "1200:", "200:11", qp, "netem");
-		change_netem_qdisc(device_name, "200:11", "1200:", qp);
+        change_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
     }
 
     if(TBF) {
@@ -884,9 +931,10 @@ configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double l
         if(config_tbf) {
             qp.rate = rate;
             qp.buffer = buffer;
+//            tc_cmd(RTM_NEWQDISC, 0, device_name, "200:", "root", qp, "tbf");
 //            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
-			change_htb_class(device_name, "200:1", "200:11", rate);
-//			change_tbf_qdisc(device_name, "root", "200:", qp);
+            change_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, rate);
+//          change_tbf_qdisc(device_name, "root", "200:", qp);
         }
     }
 
