@@ -674,7 +674,6 @@ int main(int argc, char *argv[])
                         WARNING("Timer deadline missed at time=%.2f s", time);
 #elif __linux
                         WARNING("Timer deadline missed at time=%.2f s", time);
-						exit(1);
 #endif
                         //exit(1); // NOT NEEDED ANYMORE!!!!
                     }

@@ -163,7 +163,7 @@ int timer_wait(timer_handle *handle, uint64_t time_in_us)
   // wait for the next event to occur
   do
     {
-	  //usleep(1);
+	  usleep(1);
       // get current time
       rdtsc(crt_time);
     } 
