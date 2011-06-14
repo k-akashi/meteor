@@ -24,7 +24,7 @@ ifeq ($(UNAME), Linux)
 # netem and debug message
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG
 # netem and tbf or htb
-CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF 
+CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
 # netem only
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO
 
@@ -57,37 +57,37 @@ all: clean $(TARGETS)
 
 ifeq ($(UNAME), Linux)
 q_netem.so: q_netem.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@ 
 
 q_tbf.o: q_tbf.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 q_tbf.so: q_tbf.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@ 
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@ 
 
 q_prio.o: q_prio.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 q_prio.so: q_prio.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< -o $@
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< -o $@
 
 q_pfifo.o: q_pfifo.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 q_pfifo.so: q_pfifo.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
 
 q_ingress.so: q_ingress.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
 
 f_u32.so: f_u32.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
 
 m_action.so: m_action.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
 
 m_mirred.so: m_mirred.c
-	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared -fpic $< tc_core.o -o $@
+	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
 
 libnetlink.a: $(NLOBJ)
 	$(AR) rcs $@ $(NLOBJ) && ranlib $@
