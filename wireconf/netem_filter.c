@@ -1,15 +1,3 @@
-/*
- * tc_filter.c		"tc filter".
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- *
- * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -136,6 +124,233 @@ char* buf;
 	return 0;
 }
 
+static int
+pack_key(sel, key, mask, off, offmask)
+struct tc_u32_sel* sel;
+uint32_t key;
+uint32_t mask;
+int off;
+int offmask;
+{
+	int i;
+	int hwm = sel->nkeys;
+
+	key &= mask;
+
+	for(i = 0; i < hwm; i++) {
+		if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
+			uint32_t intersect = mask&sel->keys[i].mask;
+
+			if((key ^ sel->keys[i].val) & intersect)
+				return -1;
+			sel->keys[i].val |= key;
+			sel->keys[i].mask |= mask;
+			return 0;
+		}
+	}
+
+	if(hwm >= 128)
+		return -1;
+	if(off % 4)
+		return -1;
+	sel->keys[hwm].val = key;
+	sel->keys[hwm].mask = mask;
+	sel->keys[hwm].off = off;
+	sel->keys[hwm].offmask = offmask;
+	sel->nkeys++;
+
+	return 0;
+}
+
+static int
+parse_ipv4_dstaddr(match, sel)
+struct filter_match match;
+struct tc_u32_sel* sel;
+{
+    inet_prefix addr;
+    uint32_t mask;
+
+    if(get_prefix_1(&addr, match.org, AF_INET))
+        return -1;
+
+    mask = 0;
+    if(addr.bitlen)
+        mask = hton(0xFFFFFFFF << (24 - addr.bitlen));
+    if(pack_key(sel, addr.data[0], mask, 12, 0))
+        return -1;
+
+    return 0;
+    
+}
+
+static int
+parse_u32(sel)
+struct tc_u32_sel* sel;
+{
+    int res = -1;
+    uint32_t key;
+    uint32_t mask;
+
+    get_u32(&key, '0', 0)
+    get_u32(&mask, '0', 0)
+
+    res = pack_key32(sel, key, mask, off, offmask);
+
+    return res;
+}
+
+static int
+u32_opt(dev, handle)
+char* dev;
+char* handle;
+{
+    struct {
+        struct tc_u32_sel sel;
+        struct tc_u32_key key[128];
+    } sel;
+    struct tcmsg* t = NLMSG_DATA(n);
+    struct rtattr* tail;
+    int protocol;
+
+    if(handle) {
+        dprintf(("[u32_opt] handle : %s\n", handle));
+        if(get_u32_handle(&t->tcm_handle, handle)) {
+            fprintf(stderr, "Illegal Filter ID\n");
+            return -1;
+        }
+    }
+
+    tail = NLMSG_TAIL(n);
+    addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
+
+    parse_u32(sel, );
+    
+//    if(ipv4) {
+    parse_ipv4_dstaddr(match, sel);
+//    }
+
+    // flow id
+    uint32_t class_id;
+    get_tc_classid(&class_id, up.classid);
+    addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &class_id, 4);
+    sel.sel.flags |= TC_U32_TERMINAL;
+
+    // order
+    get_u32(&order, up.order, 0);
+
+    // link
+    get_u32_handle(&link, up.link);
+    addattr_l(n, MAX_MSG, TCA_U32_LINK, &link, 4);
+
+    // ht
+    uint32_t ht;
+    get_u32_handle(&ht, up.ht);
+    htid = (ht & 0xFFFFF000);
+
+    tail->rta_len = (void*)NLMSG_TAIL(n) - (void*)tail;
+
+    return 0;
+}
+
+int 
+add_netem_filter(dev, parentid, handleid, protocolid, up)
+char* dev;
+char* parentid;
+char* handleid;
+char* protocolid;
+struct u32_parameter* up;
+{
+    int flags = NLM_F_EXCL|NLM_F_CREATE;
+	struct {
+		struct nlmsghdr 	n;
+		struct tcmsg 		t;
+		char                buf[MAX_MSG];
+	} req;
+	struct filter_util* q = NULL;
+	__u32 prio = 0;
+	__u32 protocol = 0;
+	char* fhandle = NULL;
+	char  device[16];
+	char  filter_kind[16];
+	struct tc_estimator est;
+
+	memset(&req, 0, sizeof(req));
+	memset(&est, 0, sizeof(est));
+	memset(d, 0, sizeof(d));
+	memset(k, 0, sizeof(k));
+	memset(&req, 0, sizeof(req));
+
+
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
+	req.n.nlmsg_type = RTM_NEWTFILTER;
+	req.t.tcm_family = AF_UNSPEC;
+
+	dprintf(("\n[add_netem_filter] filter function\n"));
+
+	strncpy(device, dev, sizeof(device)-1);
+
+	if(*parentid == '0') {
+		if(req.t.tcm_parent) {
+			fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
+			return -1;
+		}
+		req.t.tcm_parent = TC_H_ROOT;
+	}
+	else {
+		__u32 handle;
+		if(req.t.tcm_parent)
+			duparg("parent", parentid);
+		if(get_tc_classid(&handle, parentid))
+			invarg(parentid, "Invalid parent ID");
+		req.t.tcm_parent = handle;
+	}
+
+	// protocol set
+	__u16 id;
+	if(protocol)
+		duparg("protocol", protocolid);
+	if(ll_proto_a2n(&id, protocolid))
+		invarg(protocolid, "invalid protocol");
+	protocol = id;
+
+    if (get_u32(&prio, "16", 0))
+        invarg("16", "invalid prpriority value");
+
+	strncpy(filter_kind, "u32", sizeof(filter_kind) - 1);
+	q = get_filter_kind(k);
+
+	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
+
+	if(filter_kind[0])
+		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);
+
+	if(up->rdev) {
+		sprintf(dev, "%s", up->rdev);
+	}
+
+    u32_opt();
+
+	if(est.ewma_log)
+		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
+
+	if(d[0]) {
+ 		ll_init_map(&rth);
+
+		if ((req.t.tcm_ifindex = ll_name_to_index(d)) == 0) {
+			fprintf(stderr, "Cannot find device \"%s\"\n", d);
+			return 1;
+		}
+	}
+
+ 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+		fprintf(stderr, "We have an error talking to the kernel\n");
+		return 2;
+	}
+
+	return 0;
+}
+
 int 
 tc_filter_modify(cmd, flags, dev, parentid, handleid, protocolid, type, up)
 int cmd;
@@ -244,40 +459,6 @@ struct u32_parameter* up;
 	return 0;
 }
 
-int
-add_netem_filter()
-{
-	struct {
-		struct nlmsghdr 	n;
-		struct tcmsg 		t;
-		char   			buf[MAX_MSG];
-	} req;
-	struct filter_util* q = NULL;
-	__u32 prio = 0;
-	__u32 protocol = 0;
-	char* fhandle = NULL;
-	char  d[16];
-	char  k[16];
-	struct tc_estimator est;
-
-	memset(&req, 0, sizeof(req));
-	memset(&est, 0, sizeof(est));
-	memset(d, 0, sizeof(d));
-	memset(k, 0, sizeof(k));
-	memset(&req, 0, sizeof(req));
-
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
-	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
-	req.n.nlmsg_type = cmd;
-	req.t.tcm_family = AF_UNSPEC;
-
-	dprintf(("\nfilter function\n"));
-
-	strncpy(d, dev, sizeof(d)-1);
-
-
-	return 0;
-}
 
 /*
 // filter_modify function uasage
