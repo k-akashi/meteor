@@ -87,7 +87,7 @@ int data_init(data_class *data_object, int from_node, int to_node,
   // check that the data doesn't exceed the maximum size
   if(data_length > MAX_DATA_SIZE)
     {
-      WARNING_("Data length (%d) exceeds maximum data size (%d)",
+      WARNING_("Data length (%ld) exceeds maximum data size (%d)",
 	      data_length, MAX_DATA_SIZE);
       return ERROR;
     }
@@ -112,7 +112,7 @@ int data_copy(data_class *data_dst, data_class *data_src)
   // check that the data doesn't exceed the maximum size
   if(data_src->data_length > MAX_DATA_SIZE)
     {
-      WARNING_("Source object data length (%d) exceeds maximum data size (%d)",
+      WARNING_("Source object data length (%ld) exceeds maximum data size (%d)",
 	      data_src->data_length, MAX_DATA_SIZE);
       return ERROR;
     }
@@ -137,7 +137,7 @@ int data_print(data_class *data_object)
   int i;
 
   printf("Data contents: from_node=%d to_node=%d time=%2f data_type=%d \
-data_length=%d\n", data_object->from_node, data_object->to_node, 
+data_length=%ld\n", data_object->from_node, data_object->to_node, 
 	 data_object->time, data_object->data_type, data_object->data_length);
 
   // specific printing of bit-type data sequence
@@ -475,13 +475,13 @@ int chanel_configuration_pipe_write(int chanel_pipe_id,
 
   // write to pipe
   wrote_count = write(chanel_pipe_id, pipe_data, intended_count);
-  INFO_("Wrote %d bytes to pipe", wrote_count);
+  INFO_("Wrote %ld bytes to pipe", wrote_count);
 
   // check that intended and wrote data sizes are the same
   if(wrote_count != intended_count)
     {
       WARNING_("Error writing to deltaQ configuration pipe \
-(intended=%d bytes, wrote=%d bytes", intended_count, wrote_count); 
+(intended=%ld bytes, wrote=%ld bytes", intended_count, wrote_count); 
       return ERROR;
     }
 
