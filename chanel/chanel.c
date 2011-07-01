@@ -87,8 +87,11 @@ int data_init(data_class *data_object, int from_node, int to_node,
   // check that the data doesn't exceed the maximum size
   if(data_length > MAX_DATA_SIZE)
     {
-      WARNING_("Data length (%ld) exceeds maximum data size (%d)",
-	      data_length, MAX_DATA_SIZE);
+#ifdef __i686__
+      WARNING_("Data length (%d) exceeds maximum data size (%d)", data_length, MAX_DATA_SIZE);
+#elif __amd64__
+      WARNING_("Data length (%ld) exceeds maximum data size (%d)", data_length, MAX_DATA_SIZE);
+#endif
       return ERROR;
     }
   
@@ -112,8 +115,11 @@ int data_copy(data_class *data_dst, data_class *data_src)
   // check that the data doesn't exceed the maximum size
   if(data_src->data_length > MAX_DATA_SIZE)
     {
-      WARNING_("Source object data length (%ld) exceeds maximum data size (%d)",
-	      data_src->data_length, MAX_DATA_SIZE);
+#ifdef __i686__
+      WARNING_("Source object data length (%d) exceeds maximum data size (%d)", data_src->data_length, MAX_DATA_SIZE);
+#elif __amd4__
+      WARNING_("Source object data length (%ld) exceeds maximum data size (%d)", data_src->data_length, MAX_DATA_SIZE);
+#endif
       return ERROR;
     }
 
@@ -136,9 +142,15 @@ int data_print(data_class *data_object)
 {
   int i;
 
+#ifdef __i686__
   printf("Data contents: from_node=%d to_node=%d time=%2f data_type=%d \
 data_length=%ld\n", data_object->from_node, data_object->to_node, 
 	 data_object->time, data_object->data_type, data_object->data_length);
+#elif __amd64__
+  printf("Data contents: from_node=%d to_node=%d time=%2f data_type=%d \
+data_length=%ld\n", data_object->from_node, data_object->to_node, 
+	 data_object->time, data_object->data_type, data_object->data_length);
+#endif
 
   // specific printing of bit-type data sequence
   if(data_object->data_type == DATA_TYPE_BIT)
@@ -475,13 +487,22 @@ int chanel_configuration_pipe_write(int chanel_pipe_id,
 
   // write to pipe
   wrote_count = write(chanel_pipe_id, pipe_data, intended_count);
+#ifdef __i686__
   INFO_("Wrote %ld bytes to pipe", wrote_count);
+#elif __amd64__
+  INFO_("Wrote %ld bytes to pipe", wrote_count);
+#endif
 
   // check that intended and wrote data sizes are the same
   if(wrote_count != intended_count)
     {
+#ifdef __i686__
       WARNING_("Error writing to deltaQ configuration pipe \
 (intended=%ld bytes, wrote=%ld bytes", intended_count, wrote_count); 
+#elif __amd64__
+      WARNING_("Error writing to deltaQ configuration pipe \
+(intended=%ld bytes, wrote=%ld bytes", intended_count, wrote_count); 
+#endif
       return ERROR;
     }
 
