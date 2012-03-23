@@ -268,6 +268,7 @@ int main(int argc, char *argv[])
     int usage_type;
 
     float time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
+    uint16_t opt;
     FILE *fd;
     timer_handle *timer;
     int loop_count=0;
@@ -619,11 +620,11 @@ int main(int argc, char *argv[])
     while(fgets(buf, BUFSIZ, fd) != NULL)
     {
         if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f "
-                    "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
+                    "%f %f %f %f %f %f %f %hu", &time, &from, &dummy[0],
                     &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
                     &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
                     &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
-                    &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL)
+                    &lossrate, &delay, &dummy[12], &opt) != PARAMETERS_TOTAL)
         {
             INFO("Skipped non-parametric line");
             continue;
@@ -722,7 +723,7 @@ int main(int argc, char *argv[])
 
                 // do configure Qdisc
 				//TCHK_START(time);
-                configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
+                configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate, opt);
 				//TCHK_END(time);
 #endif
 

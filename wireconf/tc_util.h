@@ -110,7 +110,7 @@ extern int add_tbf_qdisc(char* device, char* parent_id, char* handle_id, struct 
 extern int change_tbf_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
 extern int add_lte_qdisc(char* device, char* parent_id, char* handle_id);
 extern int add_lte_class(char* device, char* parent_id, char* class_id, char* bnadwidth);
-extern int change_lte_class(char* device, char* parent_id, char* class_id, char* bnadwidth)
+extern int change_lte_class(char* device, char* parent_id, char* class_id, char* bnadwidth, uint16_t opt);
 
 extern char* get_route_info(char *info, char *addr);
 

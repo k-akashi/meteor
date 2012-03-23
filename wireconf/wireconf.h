@@ -118,7 +118,7 @@ void print_pipe(struct dn_pipe *pipe);
 #ifdef __FreeBSD__
 int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate);
 #elif __linux
-int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate);
+int configure_qdisc(int s, char* dst, int handle, int bandwidth, int delay, double lossrate, uint16_t opt);
 #endif
 
 #endif /* !__WIRECONF_H */

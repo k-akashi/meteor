@@ -263,7 +263,7 @@ void *jarg;
     };
     char   buf[16384];
 
-    dprintf(("[rtnl_talk] msghdr size = %d\n", sizeof(msg)));
+    dprintf(("[rtnl_talk] msghdr size = %lu\n", sizeof(msg)));
     memset(&nladdr, 0, sizeof(nladdr));
     nladdr.nl_family = AF_NETLINK;
     nladdr.nl_pid = peer;
