@@ -499,14 +499,14 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     char netem_parent_id[10];
     char netem_handle_id[10];
 
-    char htb_qdisc_parent_id[10];
-    char htb_qdisc_handle_id[10];
+    char lte_qdisc_parent_id[10];
+    char lte_qdisc_handle_id[10];
 
-    char htb_class_1_parent_id[10];
-    char htb_class_1_handle_id[10];
+    char lte_class_1_parent_id[10];
+    char lte_class_1_handle_id[10];
 
-    char htb_class_2_parent_id[10];
-    char htb_class_2_handle_id[10];
+    char lte_class_2_parent_id[10];
+    char lte_class_2_handle_id[10];
 
 #ifdef PFIFO
     char pfifo_handle_id[10];
@@ -517,14 +517,14 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     char filter_handle_id[10];
     char dstaddr[20];
 
-    sprintf(htb_qdisc_parent_id, "root");
-    sprintf(htb_qdisc_handle_id, "%d:", handle_nr);
+    sprintf(lte_qdisc_parent_id, "root");
+    sprintf(lte_qdisc_handle_id, "%d:", handle_nr);
 
-    sprintf(htb_class_1_parent_id, "%d:",  handle_nr);
-    sprintf(htb_class_1_handle_id, "%d:1", handle_nr);
+    sprintf(lte_class_1_parent_id, "%d:",  handle_nr);
+    sprintf(lte_class_1_handle_id, "%d:1", handle_nr);
 
-    sprintf(htb_class_2_parent_id, "%d:",   handle_nr);
-    sprintf(htb_class_2_handle_id, "%d:11", handle_nr);
+    sprintf(lte_class_2_parent_id, "%d:",   handle_nr);
+    sprintf(lte_class_2_handle_id, "%d:11", handle_nr);
 
     sprintf(netem_parent_id, "%d:11", handle_nr);
     sprintf(netem_handle_id, "%d:", handle_nr + 1000);
@@ -578,12 +578,12 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 //      dprintf(("\n\n[add_rule] add tbf qdisc\n"));
 //      add_tbf_qdisc(device_name, "root", handleid, qp);
 
-        dprintf(("\n\n[add_rule] add htb qdisc\n"));
-        add_htb_qdisc(device_name, htb_qdisc_parent_id, htb_qdisc_handle_id);
-        dprintf(("\n\n[add_rule] add htb class\n"));
-        add_htb_class(device_name, htb_class_1_parent_id, htb_class_1_handle_id, "10000000");
-        dprintf(("\n\n[add_rule] add htb class\n"));
-        add_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, "10000000");
+        dprintf(("\n\n[add_rule] add lte qdisc\n"));
+        add_lte_qdisc(device_name, lte_qdisc_parent_id, lte_qdisc_handle_id);
+        dprintf(("\n\n[add_rule] add lte class\n"));
+        add_lte_class(device_name, lte_class_1_parent_id, lte_class_1_handle_id, "10000000");
+        dprintf(("\n\n[add_rule] add lte class\n"));
+        add_lte_class(device_name, lte_class_2_parent_id, lte_class_2_handle_id, "10000000");
         dprintf(("\n\n[add_rule] add netem qdisc\n"));
         add_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
         tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_parent_id, filter_handle_id, "ip", "u32", &ufp);
@@ -852,13 +852,13 @@ double lossrate;
 
     sprintf(handleid, "%d", handle);
 
-    char htb_class_2_parent_id[10];
-    char htb_class_2_handle_id[10];
+    char lte_class_2_parent_id[10];
+    char lte_class_2_handle_id[10];
     char netem_parent_id[10];
     char netem_handle_id[10];
 
-    sprintf(htb_class_2_parent_id, "%d:",   handle);
-    sprintf(htb_class_2_handle_id, "%d:11", handle);
+    sprintf(lte_class_2_parent_id, "%d:",   handle);
+    sprintf(lte_class_2_handle_id, "%d:11", handle);
     sprintf(netem_parent_id, "%d:11", handle);
     sprintf(netem_handle_id, "%d:", handle + 1000);
 
@@ -933,7 +933,7 @@ double lossrate;
             qp.buffer = buffer;
 //            tc_cmd(RTM_NEWQDISC, 0, device_name, "200:", "root", qp, "tbf");
 //            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
-            change_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, rate);
+            change_lte_class(device_name, lte_class_2_parent_id, lte_class_2_handle_id, rate);
 //          change_tbf_qdisc(device_name, "root", "200:", qp);
         }
     }
