@@ -70,7 +70,7 @@
 // Basic constants
 /////////////////////////////////////////////
 
-#define PARAMETERS_TOTAL        19
+#define PARAMETERS_TOTAL        20
 #define PARAMETERS_UNUSED       13
 
 #define MIN_PIPE_ID_IN          10000

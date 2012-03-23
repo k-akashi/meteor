@@ -585,6 +585,7 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
         dprintf(("\n\n[add_rule] add lte class\n"));
         add_lte_class(device_name, lte_class_2_parent_id, lte_class_2_handle_id, "10000000");
         dprintf(("\n\n[add_rule] add netem qdisc\n"));
+        dprintf(("\n\n[add_rule] add netem device : %s\n", device_name));
         add_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
         tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_parent_id, filter_handle_id, "ip", "u32", &ufp);
 /*
