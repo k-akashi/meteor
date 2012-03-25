@@ -157,6 +157,7 @@ typedef union
 int priv_delay = 0;
 double priv_loss = 0;
 int priv_rate = 0;
+int priv_opt = 0;
 #endif
 // convert a string containing an IPv4 address 
 // to an IPv4 data structure;
@@ -885,7 +886,7 @@ uint16_t opt;
          priv_loss = lossrate;
     }
 
-    if(priv_rate != bandwidth) {
+    if(priv_rate != bandwidth || priv_opt != opt) {
         sprintf(rate, "%d", bandwidth);
         if((bandwidth / 1024) < FRAME_LENGTH) {
             sprintf(buffer, "%d", FRAME_LENGTH);
@@ -894,6 +895,7 @@ uint16_t opt;
             sprintf(buffer, "%d", bandwidth / 1024);
         }
         priv_rate = bandwidth;
+        priv_opt = opt;
         config_tbf = 1;
     }
 

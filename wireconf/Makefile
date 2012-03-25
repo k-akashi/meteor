@@ -20,11 +20,11 @@ HOSTCC  = gcc
 
 ifeq ($(UNAME), Linux)
 # netem and tbf and debug message
-#CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -DTCDEBUG -fPIC
+CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -DTCDEBUG -fPIC
 # netem and debug message
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG -fPIC
 # netem and tbf or htb
-CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
+#CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
 # netem only
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -fPIC
 
