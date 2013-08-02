@@ -70,7 +70,13 @@ typedef struct
 } timer_handle;
 
 // macro to read time stamp counter from CPU
+#ifdef __amd64__
+#define rdtsc(t)                                                              \
+    __asm__ __volatile__ ("rdtsc; movq %%rdx, %0; salq $32, %0;orq %%rax, %0" \
+    : "=r"(t) : : "%rax", "%rdx"); 
+#else
 #define rdtsc(t) asm volatile("rdtsc" : "=A" (t))
+#endif
 
 
 /////////////////////////////////////////////

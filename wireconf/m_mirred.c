@@ -98,7 +98,6 @@ char* dev;
 	if(mirror || redir) {
 		strncpy(d, dev, sizeof(d)-1);
 	}
-	dprintf(("parse_mirred\n\n"));
 
 	if(d[0])  {
 		int idx;
@@ -183,52 +182,8 @@ char* dev;
 	return -1;
 }
 
-int
-print_mirred(struct action_util *au,FILE * f, struct rtattr *arg)
-{
-	struct tc_mirred *p;
-	struct rtattr *tb[TCA_MIRRED_MAX + 1];
-	const char *dev;
-	SPRINT_BUF(b1);
-
-	if (arg == NULL)
-		return -1;
-
-	parse_rtattr_nested(tb, TCA_MIRRED_MAX, arg);
-
-	if (tb[TCA_MIRRED_PARMS] == NULL) {
-		fprintf(f, "[NULL mirred parameters]");
-		return -1;
-	}
-	p = RTA_DATA(tb[TCA_MIRRED_PARMS]);
-
-	/*
-	ll_init_map(&rth);
-	*/
-
-
-	if ((dev = ll_index_to_name(p->ifindex)) == 0) {
-		fprintf(stderr, "Cannot find device %d\n", p->ifindex);
-		return -1;
-	}
-
-	fprintf(f, "mirred (%s to device %s) %s", mirred_n2a(p->eaction), dev,action_n2a(p->action, b1, sizeof (b1)));
-
-	fprintf(f, "\n ");
-	fprintf(f, "\tindex %d ref %d bind %d",p->index,p->refcnt,p->bindcnt);
-
-	if (show_stats) {
-		if (tb[TCA_MIRRED_TM]) {
-			struct tcf_t *tm = RTA_DATA(tb[TCA_MIRRED_TM]);
-			print_tm(f,tm);
-		}
-	}
-	fprintf(f, "\n ");
-	return 0;
-}
-
 struct action_util mirred_action_util = {
 	.id = "mirred",
 	.parse_aopt = parse_mirred,
-	.print_aopt = print_mirred,
+	.print_aopt = NULL,
 };

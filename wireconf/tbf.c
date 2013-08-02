@@ -1,15 +1,3 @@
-/*
- * q_tbf.c		TBF.
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- *
- * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,29 +10,13 @@
 
 #include "utils.h"
 #include "tc_util.h"
-
-/*
-static void explain(void)
-{
-	fprintf(stderr, "Usage: ... tbf limit BYTES burst BYTES[/BYTES] rate KBPS [ mtu BYTES[/BYTES] ]\n");
-	fprintf(stderr, "               [ peakrate KBPS ] [ latency TIME ]\n");
-}
-
-static void explain1(char *arg)
-{
-	fprintf(stderr, "Illegal \"%s\"\n", arg);
-}
-*/
-
-#define usage() return(-1)
+#include "tc_common.h"
 
 static int
-tbf_parse_opt(qu, qp, n)
-struct qdisc_util *qu;
+tbf_opt(qp, n)
 struct qdisc_parameter* qp;
 struct nlmsghdr *n;
 {
-//	int ok=0;
 	struct tc_tbf_qopt opt;
 	uint32_t rtab[256];
 //	__u32 ptab[256];
@@ -179,9 +151,144 @@ struct nlmsghdr *n;
 	return 0;
 }
 
-struct qdisc_util tbf_qdisc_util = {
-	.id		= "tbf",
-	.parse_qopt	= tbf_parse_opt,
-	.print_qopt	= NULL,
-};
+int
+add_tbf_qdisc(dev, parent_id, handle_id, qp)
+char* dev;
+char* parent_id;
+char* handle_id;
+struct qdisc_parameter qp;
+{
+	uint32_t handle;
+	struct {
+		struct nlmsghdr n;
+		struct tcmsg t;
+		char buf[TCA_BUF_MAX];
+	} req;
 
+	uint32_t flags;
+	flags = NLM_F_EXCL|NLM_F_CREATE;
+
+	memset(&req, 0, sizeof(req));
+
+	tc_core_init();
+
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
+	req.n.nlmsg_type = RTM_NEWQDISC;
+	req.t.tcm_family = AF_UNSPEC;
+
+	// Qdisc kind
+	char qdisc_kind[16] = "tbf";
+
+	// device name
+	char device[16];
+	strncpy(device, dev, sizeof(device) - 1);
+
+	// set root or parent-id
+	if(strcmp(parent_id, "root") == 0) {
+		req.t.tcm_parent = TC_H_ROOT;
+	}
+	else {
+		if(get_tc_classid(&handle, parent_id))
+			dprintf(("[add_tbf_qdisc] Invalid parent id : %s\n", parent_id));
+		req.t.tcm_parent = handle;
+	}
+
+	// set handle-id
+	if(get_qdisc_handle(&handle, handle_id))
+		dprintf(("[add_tbf_qdisc] Invalid handle id : %s\n", handle_id));
+	req.t.tcm_handle = handle;
+
+	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+
+	tbf_opt(&qp, &req.n);
+
+	if(device[0]) {
+		int idx;
+
+		ll_init_map(&rth);
+
+		if((idx = ll_name_to_index(device)) == 0) {
+			fprintf(stderr, "Cannot find device \"%s\"\n", device);
+			return 1;
+		}
+		req.t.tcm_ifindex = idx;
+		dprintf(("[add_tbf_qdisc] TBF ifindex = %d\n", idx));
+	}
+
+	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+		return -1;
+
+	return 0;
+}
+
+int
+change_tbf_qdisc(dev, parent_id, handle_id, qp)
+char* dev;
+char* parent_id;
+char* handle_id;
+struct qdisc_parameter qp;
+{
+	uint32_t handle;
+	struct {
+		struct nlmsghdr n;
+		struct tcmsg t;
+		char buf[TCA_BUF_MAX];
+	} req;
+
+	memset(&req, 0, sizeof(req));
+
+	tc_core_init();
+
+	uint32_t flags;
+	flags = 0;
+
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
+	req.n.nlmsg_type = RTM_NEWQDISC;
+	req.t.tcm_family = AF_UNSPEC;
+
+	// Qdisc kind
+	char qdisc_kind[16] = "tbf";
+
+	// device name
+	char device[16];
+	strncpy(device, dev, sizeof(device) - 1);
+
+	// set root or parent-id
+	if(strcmp(parent_id, "root") == 0) {
+		req.t.tcm_parent = TC_H_ROOT;
+	}
+	else {
+		if(get_tc_classid(&handle, parent_id))
+			dprintf(("[change_tbf_qdisc] Invalid parent id : %s\n", parent_id));
+		req.t.tcm_parent = handle;
+	}
+
+	// set handle-id
+	if(get_qdisc_handle(&handle, handle_id))
+		dprintf(("[change_tbf_qdisc] Invalid handle id : %s\n", handle_id));
+	req.t.tcm_handle = handle;
+
+	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+
+	tbf_opt(&qp, &req.n);
+
+	if(device[0]) {
+		int idx;
+
+		ll_init_map(&rth);
+
+		if((idx = ll_name_to_index(device)) == 0) {
+			fprintf(stderr, "Cannot find device \"%s\"\n", device);
+			return 1;
+		}
+		req.t.tcm_ifindex = idx;
+		dprintf(("[change_tbf_qdisc] TBF ifindex = %d\n", idx));
+	}
+
+	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+		return -1;
+
+	return 0;
+}

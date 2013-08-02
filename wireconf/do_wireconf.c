@@ -642,11 +642,9 @@ int main(int argc, char *argv[])
 #endif
                 // print current configuration info
 #ifdef __FreeBSD__
-                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s \
-                        loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 #elif __linux
-                INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s \
-                        loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+                INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 #endif
 
                 // if this is the first operation we reset the timer
@@ -676,7 +674,6 @@ int main(int argc, char *argv[])
                         WARNING("Timer deadline missed at time=%.2f s", time);
 #elif __linux
                         WARNING("Timer deadline missed at time=%.2f s", time);
-                        dprintf(("Timer deadline missed at time=%.2f s", time));
 #endif
                         //exit(1); // NOT NEEDED ANYMORE!!!!
                     }
@@ -724,7 +721,9 @@ int main(int argc, char *argv[])
                 //lossrate = (int)rint(lossrate * 0x7fffffff);
 
                 // do configure Qdisc
+				//TCHK_START(time);
                 configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
+				//TCHK_END(time);
 #endif
 
                 // increase loop counter

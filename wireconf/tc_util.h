@@ -56,29 +56,27 @@ struct u32_parameter
 
 struct qdisc_util
 {
-	struct  qdisc_util *next;
-	const char *id;
-//	int	(*parse_qopt)(struct qdisc_util *qu, int argc, char **argv, struct nlmsghdr *n);
-	int	(*parse_qopt)(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr *n);
-	int	(*print_qopt)(struct qdisc_util *qu, FILE *f, struct rtattr *opt);
-	int (*print_xstats)(struct qdisc_util *qu, FILE *f, struct rtattr *xstats);
+	struct  qdisc_util* next;
+	const char* id;
+	int	(*parse_qopt)(struct qdisc_util* qu, struct qdisc_parameter* qp, struct nlmsghdr* n);
+	int	(*print_qopt)(struct qdisc_util* qu, FILE* f, struct rtattr* opt);
+	int (*print_xstats)(struct qdisc_util* qu, FILE* f, struct rtattr* xstats);
 
-	int	(*parse_copt)(struct qdisc_util *qu, int argc, char **argv, struct nlmsghdr *n);
-	int	(*print_copt)(struct qdisc_util *qu, FILE *f, struct rtattr *opt);
+	int	(*parse_copt)(struct qdisc_util* qu, int argc, char** argv, struct nlmsghdr* n);
+	int	(*print_copt)(struct qdisc_util* qu, FILE* f, struct rtattr* opt);
 };
 
 struct filter_util
 {
 	struct filter_util *next;
 	char	id[16];
-	int	(*parse_fopt)(struct filter_util *qu, char *fhandle, struct u32_parameter, 
-			      struct nlmsghdr *n, char* dev);
-	int	(*print_fopt)(struct filter_util *qu, FILE *f, struct rtattr *opt, __u32 fhandle);
+	int	(*parse_fopt)(struct filter_util* qu, char* fhandle, struct u32_parameter, struct nlmsghdr* n, char* dev);
+	int	(*print_fopt)(struct filter_util* qu, FILE* f, struct rtattr* opt, __u32 fhandle);
 };
 
 struct action_util
 {
-	struct  action_util *next;
+	struct  action_util* next;
 	char    id[16];
 	int     (*parse_aopt)(struct action_util *a, char* action, 
 			      int code, struct nlmsghdr *n, char* dev);
@@ -86,50 +84,31 @@ struct action_util
 	int     (*print_xstats)(struct action_util *au, FILE *f, struct rtattr *xstats);
 };
 
-extern struct qdisc_util *get_qdisc_kind(const char *str);
-extern struct filter_util *get_filter_kind(const char *str);
+extern struct qdisc_util* get_qdisc_kind(const char *str);
+extern struct filter_util* get_filter_kind(const char *str);
 
 extern int get_qdisc_handle(__u32 *h, const char *str);
 extern int get_rate(unsigned *rate, const char *str);
 extern int get_percent(unsigned *percent, const char *str);
 extern int get_size(unsigned *size, char *str);
-extern int get_size_and_cell(unsigned *size, int *cell_log, char *str);
+extern int get_size_and_cell(unsigned* size, int* cell_log, char* str);
 extern int get_usecs(unsigned *usecs, const char *str);
-extern void print_rate(char *buf, int len, __u32 rate);
-extern void print_size(char *buf, int len, __u32 size);
-extern void print_percent(char *buf, int len, __u32 percent);
-extern void print_qdisc_handle(char *buf, int len, __u32 h);
-extern void print_usecs(char *buf, int len, __u32 usecs);
-extern char * sprint_rate(__u32 rate, char *buf);
-extern char * sprint_size(__u32 size, char *buf);
-extern char * sprint_qdisc_handle(__u32 h, char *buf);
-extern char * sprint_tc_classid(__u32 h, char *buf);
-extern char * sprint_usecs(__u32 usecs, char *buf);
-extern char * sprint_percent(__u32 percent, char *buf);
-
-extern void print_tcstats_attr(FILE *fp, struct rtattr *tb[], char *prefix, struct rtattr **xstats);
-extern void print_tcstats2_attr(FILE *fp, struct rtattr *rta, char *prefix, struct rtattr **xstats);
 
 extern int get_tc_classid(__u32 *h, const char *str);
-extern int print_tc_classid(char *buf, int len, __u32 h);
-extern char * sprint_tc_classid(__u32 h, char *buf);
 
-extern int tc_print_police(FILE *f, struct rtattr *tb);
-extern int parse_police(int *, char ***, int, struct nlmsghdr *);
+extern int parse_action(char *, int, struct nlmsghdr *, char* dev);
 
-extern char *action_n2a(int action, char *buf, int len);
-extern int  action_a2n(char *arg, int *result);
-extern int  act_parse_police(struct action_util *a,int *, char ***, int, struct nlmsghdr *);
-extern int  print_police(struct action_util *a, FILE *f, 
-			 struct rtattr *tb);
-extern int  police_print_xstats(struct action_util *a,FILE *f, 
-				struct rtattr *tb);
-extern int  tc_print_ipt(FILE *f, const struct rtattr *tb);
-extern int  parse_action(char *, int, struct nlmsghdr *, char* dev);
-extern void print_tm(FILE *f, const struct tcf_t *tm);
-
-//extern int tc_cmd(int cmd, int flags, char* dev, char* parentid, char* handleid, int root, struct qdisc_parameter qp, char* type);
 extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
+
+extern int add_netem_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
+extern int change_netem_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
+extern int delete_netem_qdisc(char* device);
+extern int add_htb_qdisc(char* device, char* parent_id, char* handle_id);
+extern int add_htb_class(char* device, char* parent_id, char* class_id, char* bnadwidth);
+extern int change_htb_class(char* device, char* parent_id, char* class_id, char* bnadwidth);
+extern int add_tbf_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
+extern int change_tbf_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
+
 extern char* get_route_info(char *info, char *addr);
 
 extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, char* parentid, char* handleid, char* protocolid, char* type, struct u32_parameter* up);

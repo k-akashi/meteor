@@ -25,7 +25,11 @@
 
 #define usage() return(-1)
 
-static int fifo_parse_opt(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr *n)
+static int
+fifo_parse_opt(qu, qp, n)
+struct qdisc_util* qu;
+struct qdisc_parameter* qp;
+struct nlmsghdr* n;
 {
 //	int ok=0;
 	struct tc_fifo_qopt opt;
@@ -58,39 +62,19 @@ static int fifo_parse_opt(struct qdisc_util *qu, struct qdisc_parameter* qp, str
 	return 0;
 }
 
-static int fifo_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
-{
-	struct tc_fifo_qopt *qopt;
-
-	if (opt == NULL)
-		return 0;
-
-	if (RTA_PAYLOAD(opt)  < sizeof(*qopt))
-		return -1;
-	qopt = RTA_DATA(opt);
-	if (strcmp(qu->id, "bfifo") == 0) {
-		SPRINT_BUF(b1);
-		fprintf(f, "limit %s", sprint_size(qopt->limit, b1));
-	} else
-		fprintf(f, "limit %up", qopt->limit);
-	return 0;
-}
-
-
 struct qdisc_util bfifo_qdisc_util = {
 	.id = "bfifo",
 	.parse_qopt = fifo_parse_opt,
-	.print_qopt = fifo_print_opt,
+	.print_qopt = NULL,
 };
 
 struct qdisc_util pfifo_qdisc_util = {
 	.id = "pfifo",
 	.parse_qopt = fifo_parse_opt,
-	.print_qopt = fifo_print_opt,
+	.print_qopt = NULL,
 };
 
-extern int prio_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt);
 struct qdisc_util pfifo_fast_qdisc_util = {
 	.id = "pfifo_fast",
-	.print_qopt = prio_print_opt,
+	.print_qopt = NULL,
 };

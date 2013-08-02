@@ -75,34 +75,48 @@ unsigned size;
 rtab[pkt_len>>cell_log] = pkt_xmit_time
 */
 
+unsigned 
+tc_adjust_size(sz, mpu, linklayer)
+unsigned sz;
+unsigned mpu;
+enum link_layer linklayer;
+{
+    if (sz < mpu)
+        sz = mpu;
+
+	return sz;
+} 
+
 int
-tc_calc_rtable(bps, rtab, cell_log, mtu, mpu)
-unsigned bps;
-__u32 *rtab;
+tc_calc_rtable(r, rtab, cell_log, mtu, linklayer)
+struct tc_ratespec* r;
+uint32_t* rtab;
 int cell_log;
 unsigned mtu;
-unsigned mpu;
+enum link_layer linklayer;
 {
     int i;
-    unsigned overhead = (mpu >> 8) & 0xFF;
-    mpu = mpu & 0xFF;
+    unsigned sz;
+    unsigned bps = r->rate; 
+    unsigned mpu = r->mpu;
 
-    if(mtu == 0)
+    if (mtu == 0)
         mtu = 2047;
 
-    if(cell_log < 0) {
+    if (cell_log < 0) {
         cell_log = 0;
-        while((mtu>>cell_log) > 255)
-            cell_log++;
+        while ((mtu >> cell_log) > 255)
+            cell_log++; 
+    } 
+
+    for (i = 0; i < 256; i++) {
+        sz = tc_adjust_size((i + 1) << cell_log, mpu, linklayer);
+        rtab[i] = tc_calc_xmittime(bps, sz);
     }
-    for(i = 0; i < 256; i++) {
-        unsigned sz = (i << cell_log);
-        if(overhead)
-            sz += overhead;
-        if(sz < mpu)
-            sz = mpu;
-        rtab[i] = tc_core_usec2tick( 1000000 * ((double)sz / bps));
-    }
+
+    r->cell_align = -1;
+    r->cell_log=cell_log;
+
     return cell_log;
 }
 
@@ -117,20 +131,15 @@ tc_core_init()
     if (fp == NULL)
         return -1;
 
-    /*
-    if (fscanf(fp, "%08x%08x", &t2us, &us2t) != 2) {
-    fclose(fp);
-    return -1;
-    }
-    */
     if (fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
         fclose(fp);
         return -1;
     }
     fclose(fp);
+
+	// for 2.6.18
     //tick_in_usec = (double)t2us / us2t;
     // for 2.6.34
     tick_in_usec = (double)t2us / us2t * clock_factor;
-    //
     return 0;
 }

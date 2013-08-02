@@ -66,7 +66,7 @@ char *addr;
                     abuf, sizeof(abuf)) == NULL) {
             return addr;
         } else {
-            dprintf(("%s\n",  (char* )inet_ntop(r->rtm_family,
+            dprintf(("[get_route_info] %s\n",  (char* )inet_ntop(r->rtm_family,
                             RTA_DATA(tb[RTA_GATEWAY]),
                             abuf, sizeof(abuf))));
             return (char* )inet_ntop(r->rtm_family,
@@ -101,7 +101,7 @@ char* type;
     } req;
 
     tc_core_init();
-    dprintf(("Start tc_cmd function!! type = %s\n", type));
+    dprintf(("[tc_cmd] Start tc_cmd function type = %s\n", type));
 
     memset(&req, 0, sizeof(req));
     memset(&d, 0, sizeof(d));
@@ -116,7 +116,7 @@ char* type;
     if(cmd != RTM_DELQDISC) {
         get_qdisc_handle(&handle, handleid);
         req.t.tcm_handle = handle;
-        dprintf(("req.t.tcm.handle = %d\n", req.t.tcm_handle));
+        dprintf(("[tc_cmd] req.t.tcm.handle = %d\n", req.t.tcm_handle));
     }
     if(strcmp(root, "root") == 0)
         req.t.tcm_parent = TC_H_ROOT;
@@ -139,7 +139,7 @@ char* type;
             invarg(handleid, "invalid parent ID");
         }
         req.t.tcm_parent = handle;
-        dprintf(("req.t.tcm.parent = %d\n", req.t.tcm_parent));
+        dprintf(("[tc_cmd] req.t.tcm.parent = %d\n", req.t.tcm_parent));
     }
 
     /*
@@ -168,7 +168,6 @@ char* type;
             return 1;
         }
     }
-
     if(d[0]){
         int idx;
 
@@ -179,7 +178,7 @@ char* type;
             return 1;
         }
         req.t.tcm_ifindex = idx;
-        dprintf(("netem interface = %s\n", &d[0]));
+        dprintf(("[tc_cmd] tc ifindex = %d\n", idx));
     }
 
     if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
