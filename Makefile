@@ -39,7 +39,7 @@ WIRECONF_PATH=./wireconf
 INCS=${EXPAT_INC} ${DELTAQ_INC}
 LIBS=-lm ${EXPAT_LIB} ${DELTAQ_LIB}
 
-GENERAL_FLAGS=$(SVN_DEFINE) -Wall -Werror
+GENERAL_FLAGS=$(SVN_DEFINE) -Wall -Wall
 
 # compiler flags
 ifeq ($(COMPILE_TYPE), debug)
