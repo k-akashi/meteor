@@ -24,7 +24,7 @@ ifeq ($(UNAME), Linux)
 # netem and debug message
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG -fPIC
 # netem and tbf or htb
-CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
+CFLAGS  = -O3 -I. -g -Wall -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
 # netem only
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -fPIC
 
@@ -38,7 +38,7 @@ TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a q_netem.so q_tbf.so q_pr
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o tbf.o  lte.o
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o tbf.o
 WCOBJ=q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 #WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 TESTOBJ=test.o

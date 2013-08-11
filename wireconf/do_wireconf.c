@@ -37,6 +37,7 @@
  *           drive the netwrok emulator dummynet on FreeBSD 
  *
  * Authors: Junya Nakata, Lan Nguyen Tien, Razvan Beuran
+ * Changes : Kunio AKASHI
  *
  *   $Revision: 128 $
  *   $LastChangedDate: 2009-02-06 10:21:50 +0900 (Fri, 06 Feb 2009) $
@@ -112,10 +113,9 @@ printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
 // Structure to hold QOMET parameters
 /////////////////////////////////////////////
 
-typedef struct
-{
+typedef struct {
     float time;
-    int next_hop_id;
+    int32_t next_hop_id;
     float bandwidth;
     float delay;
     float lossrate;
@@ -138,36 +138,25 @@ typedef struct
 ///////////////////////////////////
 
 // print a brief usage of this program
-void usage(char *argv0)
-{
-    fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET \
-            data.\n\n");
-    fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> \
-            in two different ways:\n");
-    fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address \
-        <from_node_addr>)\n");
-    fprintf(stderr, "    <to_node_id> (IP address <to_node_addr>) using the \
-            dummynet rule\n");
-    fprintf(stderr, "    <rule_number> and pipe <pipe_number>, optionally in \
-            direction 'in' or 'out'.\n");
+void usage(char *argv0) {
+    fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET  data.\n\n");
+    fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> in two different ways:\n");
+    fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address <from_node_addr>)\n");
+    fprintf(stderr, "    <to_node_id> (IP address <to_node_addr>) using the dummynet rule\n");
+    fprintf(stderr, "    <rule_number> and pipe <pipe_number>, optionally in direction 'in' or 'out'.\n");
     fprintf(stderr, "    Usage: %s -q <qomet_output_file>\n"
             "\t\t\t-f <from_node_id> \t-F <from_node_addr>\n"
             "\t\t\t-t <to_node_id> \t-T <to_node_addr>\n"
             "\t\t\t-r <rule_number> \t-p <pipe_number>\n"
             "\t\t\t[-d {in|out}]\n", argv0);
-    fprintf(stderr, "(2) Configure all connections from the current node \
-            <current_id> given the\n");
-    fprintf(stderr, "    IP settings in <settings_file> and the OPTIONAL \
-            broadcast address\n");
-    fprintf(stderr, "    <broadcast_address>; Interval between configurations \
-            is <time_period>.\n");
-    fprintf(stderr, "    The settings file contains on each line pairs of ids \
-            and IP addresses.\n");
+    fprintf(stderr, "(2) Configure all connections from the current node <current_id> given the\n");
+    fprintf(stderr, "    IP settings in <settings_file> and the OPTIONAL broadcast address\n");
+    fprintf(stderr, "    <broadcast_address>; Interval between configurations is <time_period>.\n");
+    fprintf(stderr, "    The settings file contains on each line pairs of ids and IP addresses.\n");
     fprintf(stderr, "    Usage: %s -q <qomet_output_file>\n"
             "\t\t\t-i <current_id> \t-s <settings_file>\n"
             "\t\t\t-m <time_period> \t[-b <broadcast_address>]\n", argv0);
-    fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, \
-            otherwise usage (1) is assumed.\n");
+    fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, otherwise usage (1) is assumed.\n");
 }
 
 // read settings (node ids and corresponding IP adresses)
@@ -175,52 +164,46 @@ void usage(char *argv0)
 // the corresponding index;
 // return the number of addresses successfully read, 
 // or -1 on ERROR
-int read_settings(char *path, in_addr_t *p, int p_size)
-{
+int read_settings(char *path, in_addr_t *p, int p_size) {
     static char buf[BUFSIZ];
-    int i=0;
-    int line_nr=0;
+    int i = 0;
+    int line_nr = 0;
     FILE *fd;
 
     int node_id;
     char node_ip[IP_ADDR_SIZE];
 
-    if((fd = fopen(path, "r")) == NULL)
-    {
+    if((fd = fopen(path, "r")) == NULL) {
         WARNING("Cannot open settings file '%s'", path);
         return -1;
     }
 
-    while(fgets(buf, BUFSIZ, fd) != NULL)
-    {
+    while(fgets(buf, BUFSIZ, fd) != NULL) {
         line_nr++;
 
-        if(i>=p_size)
-        {
+        if(i>=p_size) {
             WARNING("Maximum number of IP addresses (%d) exceeded",
                     p_size);
             fclose(fd);
             return -1;
         }
-        else
-        {
+        else {
             int scaned_items;
             scaned_items=sscanf(buf, "%d %16s", &node_id, node_ip);
-            if(scaned_items<2)
-            {
+            if(scaned_items < 2) {
                 WARNING("Skipped invalid line #%d in settings file '%s'", 
                         line_nr, path);
                 continue;
             }
-            if(node_id<0 || node_id<FIRST_NODE_ID || node_id >= MAX_NODES)
-            {
+            if(node_id < 0 || node_id<FIRST_NODE_ID || node_id >= MAX_NODES) {
                 WARNING("Node id %d is not within the permitted range [%d, %d]",
                         node_id, FIRST_NODE_ID, MAX_NODES);
                 fclose(fd);
                 return -1;
             }
-            if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE)
+            if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE) {
                 i++;
+            }
         }
     }
 
@@ -234,11 +217,9 @@ int read_settings(char *path, in_addr_t *p, int p_size)
  *        the number of rules in param table (rule_count)
  * Output: the id of rule in param_table or -1 if fail
  *********************************************************/
-int lookup_param(int next_hop_id, qomet_param *p, int rule_count)
-{
+int lookup_param(int next_hop_id, qomet_param *p, int rule_count) {
     int i;
-    for (i = 0; i < rule_count; i++)
-    {
+    for (i = 0; i < rule_count; i++) {
         if (p[i].next_hop_id == next_hop_id)
             return i;
     }
@@ -247,45 +228,42 @@ int lookup_param(int next_hop_id, qomet_param *p, int rule_count)
 }
 
 // dump QOMET parameter table
-void dump_param_table(qomet_param *p, int rule_count)
-{
+void dump_param_table(qomet_param *p, int rule_count) {
     int i;
     INFO("Dumping the param_table (rule count=%d)...", rule_count);
-    for (i = 0; i < rule_count; i++)
-    {
+    for (i = 0; i < rule_count; i++) {
         INFO("%f \t %d \t %f \t %f \t %f", p[i].time, p[i].next_hop_id, 
                 p[i].bandwidth, p[i].delay, p[i].lossrate);
     }
 }
 
 // main function
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char ch, *p, *argv0, *faddr, *taddr, buf[BUFSIZ];
-    int s, fid, tid, from, to, pipe_nr;
+    uint32_t s, fid, tid, from, to, pipe_nr;
     uint16_t rulenum;
 
-    int usage_type;
+    uint32_t usage_type;
 
     float time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
     FILE *fd;
     timer_handle *timer;
-    int loop_count=0;
+    int32_t loop_count = 0;
 
-    int direction=DIRECTION_BOTH;
+    int32_t direction=DIRECTION_BOTH;
 
     struct timeval tp_begin, tp_end;
 
-    int i, my_id;
+    int32_t i, my_id;
     in_addr_t IP_addresses[MAX_NODES];
     char IP_char_addresses[MAX_NODES*IP_ADDR_SIZE];
-    int node_number;
+    int32_t node_number;
 
-    int j, offset_num, rule_count, next_hop_id, rule_num;
+    int32_t j, offset_num, rule_count, next_hop_id, rule_num;
     float time_period, next_time;
     qomet_param param_table[MAX_RULE_NUM];
     qomet_param param_over_read;
-    unsigned int over_read;
+    uint32_t over_read;
     char broadcast_address[IP_ADDR_SIZE];
 
     usage_type = 1;
@@ -325,22 +303,18 @@ int main(int argc, char *argv[])
 //    }
 //#endif
 
-    if(argc<2)
-    {
+    if(argc < 2) {
         WARNING("No arguments provided");
         usage(argv0);
         exit(1);
     }
 
     // parse command-line options
-    while((ch = getopt(argc, argv, "q:f:F:t:T:r:p:d:i:s:m:b:")) != -1)
-    {
-        switch(ch)
-        {
+    while((ch = getopt(argc, argv, "q:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
+        switch(ch) {
             //QOMET output file
             case 'q':
-                if((fd = fopen(optarg, "r")) == NULL) 
-                {
+                if((fd = fopen(optarg, "r")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
                 }
@@ -352,8 +326,7 @@ int main(int argc, char *argv[])
                 // from_node_id
             case 'f':
                 fid = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid from_node_id '%s'", optarg);
                     exit(1);
                 }
@@ -371,8 +344,7 @@ int main(int argc, char *argv[])
                 // to_node_id
             case 't':
                 tid = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid to_node_id '%s'", optarg);
                     exit(1);
                 }
@@ -386,8 +358,7 @@ int main(int argc, char *argv[])
                 // rule number for dummynet configuration
             case 'r':
                 rulenum = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid rule_number '%s'", optarg);
                     exit(1);
                 }
@@ -396,8 +367,7 @@ int main(int argc, char *argv[])
                 // pipe number for dummynet configuration
             case 'p':
                 pipe_nr = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid pipe_number '%s'", optarg);
                     exit(1);
                 }
@@ -405,16 +375,13 @@ int main(int argc, char *argv[])
 
                 // direction option for dummynet configuration
             case 'd':
-                if(strcmp(optarg, "in")==0)
-                {
+                if(strcmp(optarg, "in") == 0) {
                     direction = DIRECTION_IN;
                 }
-                else if(strcmp(optarg, "out")==0)
-                {
+                else if(strcmp(optarg, "out") == 0) {
                     direction = DIRECTION_OUT;
                 }
-                else
-                {
+                else {
                     WARNING("Invalid direction '%s'", optarg);
                     exit(1);
                 }
@@ -431,18 +398,18 @@ int main(int argc, char *argv[])
                 // settings file
             case 's':
                 usage_type = 2;
-                if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1)
-                {
+                if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
                     exit(1);
                 }
-                for(i = 0; i < node_number; i++)
+                for(i = 0; i < node_number; i++) {
                     snprintf(IP_char_addresses + i * IP_ADDR_SIZE, IP_ADDR_SIZE, 
                             "%hu.%hu.%hu.%hu",
                             *(((uint8_t *)&IP_addresses[i]) + 0),
                             *(((uint8_t *)&IP_addresses[i]) + 1),
                             *(((uint8_t *)&IP_addresses[i]) + 2),
                             *(((uint8_t *)&IP_addresses[i]) + 3));
+                }
                 break;
 
                 // time interval between settings
@@ -468,8 +435,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if((my_id<FIRST_NODE_ID) || (my_id>=node_number+FIRST_NODE_ID))
-    {
+    if((my_id<FIRST_NODE_ID) || (my_id>=node_number+FIRST_NODE_ID)) {
         WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id,
                 FIRST_NODE_ID, node_number+FIRST_NODE_ID-1);
         exit(1);
@@ -480,17 +446,13 @@ int main(int argc, char *argv[])
     argv += optind;
 
     // check that all the required arguments were provided
-    if(fd == NULL)
-    {
+    if(fd == NULL) {
         WARNING("No QOMET data file was provided");
         usage(argv0);
         exit(1);
     }
 
-    if((usage_type == 1) &&
-            ((fid == -1) || (faddr == NULL) ||
-             (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535)))
-    {
+    if((usage_type == 1) && ((fid == -1) || (faddr == NULL) || (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535))) {
         WARNING("Insufficient arguments were provided for usage (1)");
         usage(argv0);
         fclose(fd);
@@ -507,30 +469,25 @@ int main(int argc, char *argv[])
 
     // initialize timer
     DEBUG("Initialize timer...");
-    if((timer = timer_init()) == NULL)
-    {
+    if((timer = timer_init()) == NULL) {
         WARNING("Could not initialize timer");
         exit(1);
     }
 
     // open control socket
     DEBUG("Open control socket...");
-    if((s = get_socket()) < 0)
-    {
+    if((s = get_socket()) < 0) {
         WARNING("Could not open control socket (requires root priviledges)\n");
         exit(1);
     }
 
     // add pipe to dummynet in normal manner
-    if(usage_type==1)
-    {
+    if(usage_type == 1) {
         // get rule
         //get_rule(s, 123);
 
-        INFO("Add rule #%d with pipe #%d from %s to %s", 
-                rulenum, pipe_nr, faddr, taddr);
-        if(add_rule(s, rulenum, pipe_nr, faddr, taddr, direction) < 0)
-        {
+        INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, faddr, taddr);
+        if(add_rule(s, rulenum, pipe_nr, faddr, taddr, direction) < 0) {
             WARNING("Could not add rule #%d with pipe #%d from %s to %s", 
                     rulenum, pipe_nr, faddr, taddr);
             exit(1);
@@ -541,11 +498,10 @@ int main(int argc, char *argv[])
 
         //exit(2);
     }
-    else // usage (2) => sets of rules must be added
-    {
+    else {
+        // usage (2) => sets of rules must be added
         // add rule & pipe for unicast traffic _to_ j
-        for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
-        {
+        for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
             if(j == my_id)
                 continue;
 
@@ -616,24 +572,20 @@ int main(int argc, char *argv[])
     // read input data from QOMET output file
     INFO("Reading QOMET data from file...");
     next_time = 0;
-    while(fgets(buf, BUFSIZ, fd) != NULL)
-    {
+    while(fgets(buf, BUFSIZ, fd) != NULL) {
         if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f "
-                    "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
-                    &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
-                    &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
-                    &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
-                    &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL)
-        {
+            "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
+            &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
+            &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
+            &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
+            &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL) {
             INFO("Skipped non-parametric line");
             continue;
         }
-        if(usage_type==1)
-        {
+        if(usage_type==1) {
             // check whether the from_node and to_node from the file
             // match the user selected ones
-            if((from == fid) && (to == next_hop_id))
-            {
+            if((from == fid) && (to == next_hop_id)) {
 
 #ifdef PREDEFINED_EXPERIMENT
                 bandwidth=BANDWIDTH;
@@ -649,12 +601,10 @@ int main(int argc, char *argv[])
 
                 // if this is the first operation we reset the timer
                 // Note: it is assumed time always equals 0.0 for the first line
-                if(time == 0.0)
-                {
+                if(time == 0.0) {
                     timer_reset(timer);
                 }
-                else 
-                {
+                else {
                     // wait for for the next timer event
                     // debug messsage by k-akashi
                     //            uint64_t t;
@@ -668,8 +618,7 @@ int main(int argc, char *argv[])
                     //            gettimeofday(&gettime, NULL);
                     //            printf("Before : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
 
-                    if(timer_wait(timer, time * 1000000) < 0)
-                    {
+                    if(timer_wait(timer, time * 1000000) < 0) {
 #ifdef __FreeBSD__
                         WARNING("Timer deadline missed at time=%.2f s", time);
 #elif __linux
@@ -686,13 +635,13 @@ int main(int argc, char *argv[])
 
 #ifdef OLSR_ROUTING
                 // get the next hop ID to find correct configuration lines
-                if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR)
-                {
+                if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR) {
                     WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i,direction=%i", time, tid, direction);
                     exit(1);
                 }
-                else
+                else {
                     INFO("Time=%.2f: Next_hop=%i for destination=%i", time, next_hop_id, tid);
+                }
 #endif
 
                 // prepare adjusted values:
@@ -730,18 +679,16 @@ int main(int argc, char *argv[])
                 loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                if(loop_count>LOOP_COUNT)
+                if(loop_count>LOOP_COUNT) {
                     break;
+                }
 #endif
             }
         }
-        else // usage (2) => manage multiple rules
-        {
+        else { // usage (2) => manage multiple rules
             // add rules regarding next deadline to parameter table
-            if(time == next_time)
-            {
-                if(from == my_id)
-                {
+            if(time == next_time) {
+                if(from == my_id) {
                     param_table[rule_count].time = time;
                     param_table[rule_count].next_hop_id = to;
                     param_table[rule_count].bandwidth = bandwidth;
@@ -751,12 +698,10 @@ int main(int argc, char *argv[])
                 }
                 continue;
             }
-            else 
-            {
+            else {
                 // check the reading link, if it is involved, 
                 // store on the param_over_read
-                if(from == my_id)
-                {
+                if(from == my_id) {
                     over_read = 1;
                     param_over_read.time = time;
                     param_over_read.next_hop_id = to;
@@ -764,36 +709,34 @@ int main(int argc, char *argv[])
                     param_over_read.delay = delay;
                     param_over_read.lossrate = lossrate;
                 }
-                else
+                else {
                     over_read = 0;
+                }
 
                 // waiting for the next timer deadline event;
                 // if this is the first operation we reset the timer
                 // Note: it is assumed time always equals 0.0 for the first line
-                if(time == 0.0)
+                if(time == 0.0) {
                     timer_reset(timer);
-                else
-                {
+                }
+                else {
                     // wait for for the next timer event
-                    if(timer_wait(timer, time * 1000000) < 0)
-                    {
+                    if(timer_wait(timer, time * 1000000) < 0) {
                         WARNING("Timer deadline missed at time=%.2f s", time);
                     }
                 }
 
                 // when timer event comes, apply configuration for all 
                 // the unicast links with destination 'i'
-                for(i=FIRST_NODE_ID; i<(node_number+FIRST_NODE_ID); i++)
-                {
-                    if(i == my_id)
+                for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
+                    if(i == my_id) {
                         //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
                         continue;
+                    }
 
                     // get the next hop ID for destination i 
                     // to find correct configuration lines
-                    if((next_hop_id = get_next_hop_id(IP_addresses, IP_char_addresses, 
-                                    i, DIRECTION_OUT)) == ERROR)
-                    {
+                    if((next_hop_id = get_next_hop_id(IP_addresses, IP_char_addresses, i, DIRECTION_OUT)) == ERROR) {
                         WARNING("Could not locate the next hop for destination node %i", i);
                         exit(1);
                     }
@@ -801,9 +744,7 @@ int main(int argc, char *argv[])
                     //INFO("Next_hop=%i for destination=%i", next_hop_id, i);
 
                     offset_num = i;
-                    if((rule_num = lookup_param(next_hop_id, param_table, 
-                                    rule_count)) == -1) 
-                    {
+                    if((rule_num = lookup_param(next_hop_id, param_table, rule_count)) == -1) {
                         WARNING("Could not locate the rule number for next hop = %i", 
                                 next_hop_id);
                         dump_param_table(param_table, rule_count);
@@ -856,21 +797,20 @@ int main(int argc, char *argv[])
                     loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count>LOOP_COUNT)
+                    if(loop_count>LOOP_COUNT) {
                         break;
+                    }
 #endif
                 }// end for loop
 
                 // config the broadcast links have source node id = i
-                for(i=FIRST_NODE_ID; i<(node_number+FIRST_NODE_ID); i++)
-                {
+                for(i=FIRST_NODE_ID; i<(node_number+FIRST_NODE_ID); i++) {
                     if(i == my_id)
                         //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
                         continue;
 
                     offset_num = i;
-                    if((rule_num = lookup_param(i, param_table, rule_count)) == -1)
-                    {
+                    if((rule_num = lookup_param(i, param_table, rule_count)) == -1) {
                         WARNING("Could not locate the rule number for next hop = %d with rule count = %d", 
                                 i, rule_count);
                         dump_param_table(param_table, rule_count);
@@ -922,8 +862,9 @@ int main(int argc, char *argv[])
                     loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count>LOOP_COUNT)
+                    if(loop_count>LOOP_COUNT) {
                         break;
+                    }
 #endif
                 }// end for loop for broadcast
                 // End config for broadcast traffic
@@ -934,8 +875,7 @@ int main(int argc, char *argv[])
                 next_time += time_period;
                 INFO("New timer deadline=%f", next_time);
                 // if there is over read then assign to param_table
-                if(over_read == 1)
-                {
+                if(over_read == 1) {
                     param_table[0].time = param_over_read.time;
                     param_table[0].next_hop_id = param_over_read.next_hop_id;
                     param_table[0].bandwidth = param_over_read.bandwidth;
@@ -955,75 +895,69 @@ int main(int argc, char *argv[])
 
     // if the loop was not entered not even once
     // there is an error
-    if(loop_count == 0)
-    {
-        if(usage_type==1)
+    if(loop_count == 0) {
+        if(usage_type==1) {
             WARNING("The specified pair from_node_id=%d & to_node_id=%d "
                     "could not be found", fid, tid);
-        else
+        }
+        else {
             WARNING("No valid line was found for the node %d", my_id); 
+        }
     }
 
     // release the timer
     timer_free(timer);
 
     // delete the dummynet rule
-    if(usage_type==1)
-    {
+    if(usage_type==1) {
 #ifdef __FreeBSD__
-        if(delete_rule(s, rulenum)==ERROR)
-        {
+        if(delete_rule(s, rulenum) == ERROR) {
             WARNING("Could not delete rule #%d", rulenum);
             exit(1);
         }
 #elif __linux
-        if(delete_netem(s, taddr, rulenum)==ERROR)
-        {
+        if(delete_netem(s, taddr, rulenum) == ERROR) {
             WARNING("Could not delete rule #%d", rulenum);
             exit(1);
         }
 #endif
     }
-    else // usage (2) => delete multiple rules
-    {
+    else {
+        // usage (2) => delete multiple rules
         // delete the unicast dummynet rules
-        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
-        {
-            if(j == my_id)
+        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+            if(j == my_id) {
                 continue;
+            }
 
             offset_num = j;
             INFO("Deleting rule %d...", MIN_PIPE_ID_OUT+offset_num);
 #ifdef __FreeBSD__
-            if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num)==ERROR)
-            {
+            if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num)==ERROR) {
                 WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
             }
 #elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num)==ERROR)
-            {
+            if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num)==ERROR) {
                 WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
             }
 #endif
         }
 
         //delete broadcast dummynet rules
-        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
-        {
-            if(j == my_id)
+        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+            if(j == my_id) {
                 continue;
+            }
 
             offset_num = j;
             INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST+offset_num);
 #ifdef __FreeBSD__
-            if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR)
-            {
+            if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR) {
                 WARNING("Could not delete rule #%d", 
                         MIN_PIPE_ID_IN_BCAST+offset_num);
             }
 #elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR)
-            {
+            if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR) {
                 WARNING("Could not delete rule #%d", 
                         MIN_PIPE_ID_IN_BCAST+offset_num);
             }
