@@ -147,8 +147,7 @@ struct DEVICE_LIST {
 ///////////////////////////////////////////////
 
 // IPv4 address structure
-typedef union
-{
+typedef union {
     uint8_t octet[4];
     uint32_t word;
 } in4_addr;
@@ -162,41 +161,49 @@ int priv_rate = 0;
 // to an IPv4 data structure;
 // return SUCCESS on success, ERROR on error
 #ifdef __FreeBSD__
-static int atoaddr(char *array_address, in4_addr *ipv4_address, uint16_t *port)
+static int 
+atoaddr(array_address, ipv4_address, port)
+char *array_address;
+in4_addr *ipv4_address;
+uint16_t *port;
 {
-  int c, o;
+    uint32_t c, o;
   
-  c = 0, o = 0, ipv4_address->word = 0, *port = 0;
+    c = 0;
+    o = 0;
+    ipv4_address->word = 0;
+    *port = 0;
 
-  for(;;)
-    {
-      if(array_address[c] == '.')
-    {
-      c++, o++;
-      continue;
-    } 
-      else if(isdigit(array_address[c]) == 0)
-    break;
+    for(;;) {
+        if(array_address[c] == '.') {
+            c++;
+            o++;
+            continue;
+        } 
+        else if(isdigit(array_address[c]) == 0) {
+            break;
+        }
         
-      ipv4_address->octet[o] = ipv4_address->octet[o] * 10 + 
-    array_address[c] - '0';
-      c++;
+        ipv4_address->octet[o] = ipv4_address->octet[o] * 10 + array_address[c] - '0';
+        c++;
     }
 
-  if(array_address[c] == '\0')
+    if(array_address[c] == '\0') {
+        return SUCCESS;
+    }
+    else if((o != 3) || (array_address[c] != ':')) {
+        return ERROR;
+    }
+    c++;
+    
+    for(;;) {
+        if(isdigit(array_address[c]) == 0) {
+            break;
+        }
+        *port = *port * 10 + array_address[c] - '0';
+        c++;
+    }
     return SUCCESS;
-  else if((o != 3) || (array_address[c] != ':'))
-    return ERROR;
-  c++;
-
-  for(;;)
-    {
-      if(isdigit(array_address[c]) == 0)
-    break;
-      *port = *port * 10 + array_address[c] - '0';
-      c++;
-    }
-  return SUCCESS;
 }
 #endif
 
@@ -207,95 +214,100 @@ static int atoaddr(char *array_address, in4_addr *ipv4_address, uint16_t *port)
 
 // get a socket identifier;
 // return socket identifier on succes, ERROR on error
-int get_socket(void)
+int
+get_socket(void)
 {
-  int socket_id;
+    uint32_t socket_id;
   
-  if((socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
-    {
-      WARNING("Error creating socket");
-      perror("socket");
-      return ERROR;
+    if((socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
+        WARNING("Error creating socket");
+        perror("socket");
+
+        return ERROR;
     }
 
-  return socket_id;
+    return socket_id;
 }
 
 // close socket specified by socket_id
-void close_socket(int socket_id)
+void
+close_socket(socket_id)
+int socket_id;
 {
   close(socket_id);
 }
 
 // apply socket options related to ipfw commands
 #ifdef __FreeBSD__
-static int apply_socket_options(int s, int option_id, void *option, 
-                socklen_t option_length)
+static int
+apply_socket_options(s, option_id, option, socklen_t, option_length)
+int s;
+int option_id;
+void *option;
+socklen_t option_length;
 {
-  // choose the action corresponding to the given command
-  switch(option_id)
-    {
-      // add a rule to the firewall (the rule contains dummynet pipes);
-      // option should be of type "struct ip_fw*"
-    case IP_FW_ADD:
+    // choose the action corresponding to the given command
+    switch(option_id) {
+        // add a rule to the firewall (the rule contains dummynet pipes);
+        // option should be of type "struct ip_fw*"
+        case IP_FW_ADD:
 #ifdef MESSAGE_DEBUG
-      DEBUG("Add ipfw rule: "); 
-      print_rule((struct ip_fw*)option);
+            DEBUG("Add ipfw rule: "); 
+            print_rule((struct ip_fw*)option);
 #endif
 
-      if(getsockopt(s, IPPROTO_IP, option_id, option, &option_length) < 0) 
-    {
-      WARNING("Error getting socket options");
-      perror("getsockopt");
-      return ERROR;
-    }
-      break;
+            if(getsockopt(s, IPPROTO_IP, option_id, option, &option_length) < 0) {
+                WARNING("Error getting socket options");
+                perror("getsockopt");
+    
+                return ERROR;
+            }
+            break;
 
-      // delete a firewall rule (the rule contains dummynet pipes);
-      // option should be of type "u_int32_t *"
-    case IP_FW_DEL:
-      DEBUG("Delete ipfw rule #%d", (*(u_int32_t *)option));
+        // delete a firewall rule (the rule contains dummynet pipes);
+        // option should be of type "u_int32_t *"
+        case IP_FW_DEL:
+            DEBUG("Delete ipfw rule #%d", (*(u_int32_t *)option));
 
-      if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0)
-    {
-      WARNING("Error setting socket options");
-      perror("setsockopt");
-      return ERROR;
-    }
-      break;
+            if(setsockopt(s, IPPROTO_IP, option_id, option, option_length) < 0) {
+                WARNING("Error setting socket options");
+                perror("setsockopt");
 
-      // configure a dummynet pipe;
-      // option should be of type "dn_pipe *"
-    case IP_DUMMYNET_CONFIGURE:
+                return ERROR;
+            }
+            break;
+
+        // configure a dummynet pipe;
+        // option should be of type "dn_pipe *"
+        case IP_DUMMYNET_CONFIGURE:
 #ifdef MESSAGE_DEBUG
-      DEBUG("Configure ipfw dummynet pipe: "); 
-      print_pipe((struct dn_pipe*)option);
+            DEBUG("Configure ipfw dummynet pipe: "); 
+            print_pipe((struct dn_pipe*)option);
 #endif
 
-      if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0)
-    {
-      WARNING("Error setting socket options");
-      perror("setsockopt");
-      return ERROR;
-    }
-      break;
+            if(setsockopt(s, IPPROTO_IP, option_id, option, option_length) < 0) {
+                WARNING("Error setting socket options");
+                perror("setsockopt");
+                return ERROR;
+            }
+            break;
 
-      /* FUTURE PLAN: DELETE _PIPES_ INSTEAD OF RULES
-    case IP_DUMMYNET_DEL:
-      printf("delete pipe: option_id=%d option=%d option_length=%d\n",
-         option_id, (*(int16_t*)(option)), option_length);
-      if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0)
-    {
-      WARNING("Error setting socket options");
-      perror("setsockopt");
-      return ERROR;
-    }
-      break;
-      */
+        /* FUTURE PLAN: DELETE _PIPES_ INSTEAD OF RULES
+        case IP_DUMMYNET_DEL:
+            printf("delete pipe: option_id=%d option=%d option_length=%d\n", option_id, (*(int16_t*)(option)), option_length);
+            if(setsockopt(s, IPPROTO_IP, option_id, option, option_length)<0) {
+                WARNING("Error setting socket options");
+                perror("setsockopt");
 
-    default:
-      WARNING("Unrecognized ipfw socket option: %d", option_id);
-      return -1;
+                return ERROR;
+            }
+            break;
+        */
+
+        default:
+            WARNING("Unrecognized ipfw socket option: %d", option_id);
+
+            return -1;
     }
  
    return 0;
@@ -310,11 +322,13 @@ static int apply_socket_options(int s, int option_id, void *option,
 // get a rule
 // NOT WORKING PROPERLY YET!!!!!!!!!!!!!
 int
-get_rule(uint s, int16_t rulenum)
+get_rule(s, rulenum)
+uint s;
+int16_t rulenum;
 {
 #ifdef __FreeBSD__
     //int RULES=100;
-    int i=0;
+    int i = 0;
     struct ip_fw rules[10];
 
     socklen_t rules_size;
@@ -324,19 +338,22 @@ get_rule(uint s, int16_t rulenum)
     //rule.rulenum = rulenum;
 
     //  printf("Get rule: "); print_rule(&rule);
-    if(getsockopt(s, IPPROTO_IP, IP_FW_GET, &rules, &rules_size) < 0) 
-    {
+    if(getsockopt(s, IPPROTO_IP, IP_FW_GET, &rules, &rules_size) < 0) {
         WARNING("Error getting socket options");
         perror("getsockopt");
         return -1;
     }
     printf("Got rules:\n");
-    for(i=0; i<10; i++)
+    for(i = 0; i < 10; i++) {
         print_rule(&rules[i]);
+    }
 
 #elif __linux
-    int ret;
+    uint32_t ret;
     ret = system("tc qdisc show");
+    if(ret != 0) {
+        dprintf(("Cannot print qdisc setting\n"));
+    }
 #endif
     return 0;
 }
@@ -344,8 +361,14 @@ get_rule(uint s, int16_t rulenum)
 // add an ipfw rule containing a dummynet pipe to the firewall
 // return SUCCESS on succes, ERROR on error
 #ifdef __FreeBSD__
-int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, 
-        int direction)
+int
+add_rule(s, rulenum, pipe_nr, src, dst, direction)
+int s;
+uint16_t rulenum;
+int pipe_nr;
+char *src;
+char *dst;
+int direction;
 {
     int clen;
     in4_addr addr;
@@ -358,17 +381,14 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
 
     // process source address
 
-    if(strncmp(src, "any", strlen(src))==0)
-    {
+    if(strncmp(src, "any", strlen(src))==0) {
         // source address was "any"
         cmd[clen].opcode = O_IP_SRC;
         cmd[clen].len = 0;
         cmd[clen].arg1 = 0;
     }
-    else
-    {
-        if(atoaddr(src, &addr, &port) < 0)
-        {
+    else {
+        if(atoaddr(src, &addr, &port) < 0) {
             WARNING("Invalid argument to add_rule: %s\n", src);
             return ERROR;
         }
@@ -377,8 +397,7 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
         cmd[clen].arg1 = 0;
         ((uint32_t *)cmd)[clen + 1] = addr.word;
         clen += 2;
-        if(port > 0)
-        {
+        if(port > 0) {
             cmd[clen].opcode = O_IP_SRCPORT;
             cmd[clen].len = 2;
             cmd[clen].arg1 = 0;
@@ -389,17 +408,14 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
     }
 
     // process destination address
-    if(strncmp(dst, "any", strlen(dst))==0)
-    {
+    if(strncmp(dst, "any", strlen(dst)) == 0) {
         // destination address was "any"
         cmd[clen].opcode = O_IP_DST;
         cmd[clen].len = 0;
         cmd[clen].arg1 = 0;
     }
-    else
-    {
-        if(atoaddr(dst, &addr, &port) < 0)
-        {
+    else {
+        if(atoaddr(dst, &addr, &port) < 0) {
             WARNING("Invalid argument to add_rule: %s", dst);
             return ERROR;
         }
@@ -409,8 +425,7 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
         cmd[clen].arg1 = 0;
         ((uint32_t *)cmd)[clen + 1] = addr.word;
         clen += 2;
-        if(port > 0)
-        {
+        if(port > 0) {
             cmd[clen].opcode = O_IP_DSTPORT;
             cmd[clen].len = 2;
             cmd[clen].arg1 = 0;
@@ -421,15 +436,15 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
     }
 
     // use in/out direction indicators
-    if(direction != DIRECTION_BOTH)
-    {
+    if(direction != DIRECTION_BOTH) {
         // basic command code for in/out operation
         cmd[clen].opcode = O_IN; 
         cmd[clen].len = 1;
 
         // a negation mask is used for meaning "out"
-        if(direction == DIRECTION_OUT)
+        if(direction == DIRECTION_OUT) {
             cmd[clen].len |= F_NOT;
+        }
         //printf("len=0x%x len&F_NOT=0x%x flen=%d\n", cmd[clen].len, cmd[clen].len & F_NOT, F_LEN(cmd+clen));
         clen += 1;
     }
@@ -440,8 +455,7 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
     cmd[clen].arg1 = pipe_nr;
     ((uint32_t *)cmd)[clen + 1] = 0;
     clen += 1;  /* trick! */
-    if((p = (struct ip_fw *)malloc(sizeof(struct ip_fw) + clen * 4)) == NULL) 
-    {
+    if((p = (struct ip_fw *)malloc(sizeof(struct ip_fw) + clen * 4)) == NULL) {
         WARNING("Could not allocate memory for a new rule");
         return ERROR;
     }
@@ -452,8 +466,7 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
     bcopy(cmd, &p->cmd, clen * 4);
 
     // apply appropriate socket options
-    if(apply_socket_options(s, IP_FW_ADD, p, sizeof(struct ip_fw) + clen*4) < 0)
-    {
+    if(apply_socket_options(s, IP_FW_ADD, p, sizeof(struct ip_fw) + clen * 4) < 0) {
         WARNING("Adding rule operation failed");
         return ERROR;
     }
@@ -461,10 +474,16 @@ int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst,
 }
 #elif __linux
 int
-add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direction)
+add_rule(s, rulenum, handle_nr, src, dst, direction)
+int s;
+uint16_t rulenum;
+int handle_nr;
+char *src;
+char *dst;
+int direction;
 {
     int i;
-    int find_ifb_device = 0;
+    int32_t find_ifb_device = 0;
     struct qdisc_parameter qp;
     char* device_name =  (char* )get_route_info("dev", dst);
     char handleid[10];
@@ -495,7 +514,6 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
     qp.rate = "1Gbit";
     qp.buffer = "1Mbit";
 
-    //tmp
     char netem_parent_id[10];
     char netem_handle_id[10];
 
@@ -645,7 +663,10 @@ add_rule(int s, uint16_t rulenum, int handle_nr, char *src, char *dst, int direc
 // delete an ipfw rule;
 // return SUCCESS on succes, ERROR on error
 #ifdef __FreeBSD__
-int delete_rule(uint s, u_int32_t rule_number)
+int
+delete_rule(s, rule_number)
+uint32_t s;
+uint32_t rule_number;
 {
     // Note: rule number is of type u_int16_t in ip_fw.h,
     // but a comment in ip_fw2.c shows that the expected size
@@ -666,8 +687,7 @@ int delete_rule(uint s, u_int32_t rule_number)
      */
 
     // do delete rule
-    if(apply_socket_options(s, IP_FW_DEL, &rule_number, sizeof(rule_number)) < 0)
-    {
+    if(apply_socket_options(s, IP_FW_DEL, &rule_number, sizeof(rule_number)) < 0) {
         WARNING("Delete rule operation failed");
         return ERROR;
     }
@@ -676,7 +696,10 @@ int delete_rule(uint s, u_int32_t rule_number)
 }
 #elif __linux
 int
-delete_netem(uint s, char* dst, u_int32_t rule_number)
+delete_netem(s, dst, rule_number)
+uint32_t s;
+char* dst;
+uint32_t rule_number;
 {
     struct qdisc_parameter qp; // 1 : ingress mode, 0 : egress mode
     char* device_name;
@@ -705,6 +728,8 @@ delete_netem(uint s, char* dst, u_int32_t rule_number)
 
     if(INGRESS) {
         int i;
+        int ret;
+        char *cmd;
         char ifb_device_name[5];
         for(i = 0; i <= MAX_IFB; i++) {
             if(strcmp(ifb_device[i], device_name) == 0) {
@@ -714,11 +739,9 @@ delete_netem(uint s, char* dst, u_int32_t rule_number)
         }
         tc_cmd(RTM_DELQDISC, 0, ifb_device_name, "1", "root", qp, "pfifo");
         //tc_cmd(RTM_DELQDISC, 0, device_name, "1", "root", qp, "ingress");
-        char *cmd;
         //sprintf(cmd, "tc qdisc del dev %s root", ifb_device_name);
         //system(cmd);
         sprintf(cmd, "tc qdisc del dev %s ingress", device_name);
-        int ret;
         ret = system(cmd);
     }
     //tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
@@ -730,7 +753,9 @@ delete_netem(uint s, char* dst, u_int32_t rule_number)
 
 // print a rule structure
 #ifdef __FreeBSD__
-void print_rule(struct ip_fw *rule)
+void
+print_rule(rule)
+struct ip_fw *rule;
 {
     printf("Rule #%d (size=%d):\n", rule->rulenum, sizeof(*rule));
     printf("\tnext=%p next_rule=%p\n", rule->next, rule->next_rule);
@@ -743,7 +768,9 @@ void print_rule(struct ip_fw *rule)
 
 // print a pipe structure
 #ifdef __FreeBSD__
-void print_pipe(struct dn_pipe *pipe)
+void
+print_pipe(pipe)
+struct dn_pipe *pipe;
 {
     printf("Pipe #%d (size=%d):\n", pipe->pipe_nr, sizeof(*pipe));
     //printf("\tnext=%p pipe_nr=%u\n", pipe->next.sle_next, pipe->pipe_nr);
@@ -762,7 +789,13 @@ void print_pipe(struct dn_pipe *pipe)
 // configure a dummynet pipe;
 // return SUCCESS on succes, ERROR on error
 #ifdef __FreeBSD__
-int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)
+int
+configure_pipe(s, pipe_nr, bandwidth, delay, lossrate)
+int s;
+int pipe_nr;
+int bandwidth;
+int delay;
+int lossrate;
 {
     struct dn_pipe p;
 
@@ -779,8 +812,7 @@ int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)
     // in case bandwidth limitation is enforced
     p.fs.qsize = 2;
 
-    if(apply_socket_options(s, IP_DUMMYNET_CONFIGURE, &p, sizeof(p)) < 0)
-    {
+    if(apply_socket_options(s, IP_DUMMYNET_CONFIGURE, &p, sizeof(p)) < 0) {
         WARNING("Pipe configuration could not be applied");
         return ERROR;
     }
@@ -788,7 +820,8 @@ int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate)
 }
 #elif __linux
 int
-convert_netemid(int handle)
+convert_netemid(handle)
+int handle;
 {
     int id;
 

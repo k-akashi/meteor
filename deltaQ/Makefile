@@ -27,13 +27,13 @@ INCS=${EXPAT_INC}
 # on Solaris 'log2' is not defined, so we defined it ourselves
 
 ifeq ($(COMPILE_TYPE), debug)
-GCC_FLAGS = -g -Wall ${WIN_FLAGS} -Werror     # generate debugging info
+GCC_FLAGS = -g -Wall ${WIN_FLAGS}      # generate debugging info
 endif
 ifeq ($(COMPILE_TYPE), profile)
-GCC_FLAGS = -pg -Wall ${WIN_FLAGS} -Werror    # generate profiling info
+GCC_FLAGS = -pg -Wall ${WIN_FLAGS}     # generate profiling info
 endif
 ifeq ($(COMPILE_TYPE), release)
-GCC_FLAGS = -Wall ${WIN_FLAGS} -Werror   # no additional info
+GCC_FLAGS = -Wall ${WIN_FLAGS}    # no additional info
 endif
 
 DELTA_Q_OBJECTS = node.o object.o coordinate.o environment.o motion.o connection.o scenario.o xml_scenario.o wlan.o ethernet.o active_tag.o zigbee.o generic.o stack.o io.o xml_jpgis.o

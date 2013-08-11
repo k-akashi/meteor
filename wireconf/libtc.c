@@ -65,7 +65,8 @@ char *addr;
                     RTA_DATA(tb[RTA_GATEWAY]),
                     abuf, sizeof(abuf)) == NULL) {
             return addr;
-        } else {
+        }
+        else {
             dprintf(("[get_route_info] %s\n",  (char* )inet_ntop(r->rtm_family,
                             RTA_DATA(tb[RTA_GATEWAY]),
                             abuf, sizeof(abuf))));
@@ -73,7 +74,8 @@ char *addr;
                     RTA_DATA(tb[RTA_GATEWAY]),
                     abuf, sizeof(abuf));
         }
-    } else {
+    }
+    else {
         return "null";
     }
 
@@ -154,21 +156,21 @@ char* type;
        req.t.tcm_ifindex = idx;
        */
 
-    if(cmd != RTM_DELQDISC){
+    if(cmd != RTM_DELQDISC) {
         strncpy(k, type, sizeof(k) - 1);
         q = get_qdisc_kind(k);
     }
 
-    if(k[0]){
+    if(k[0]) {
         addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);
     }
 
-    if(q){
+    if(q) {
         if(q->parse_qopt(q, &qp, &req.n)) {
             return 1;
         }
     }
-    if(d[0]){
+    if(d[0]) {
         int idx;
 
         ll_init_map(&rth);
@@ -181,8 +183,9 @@ char* type;
         dprintf(("[tc_cmd] tc ifindex = %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
+    }
 
     return 0;
 }
@@ -190,7 +193,9 @@ char* type;
 /*
 // test code
 int
-main(int argc, char **argv)
+main(argc, argv)
+int argc;
+char **argv;
 {
 char* ret;
 struct qdisc_parameter qp =  {"1000", "10ms", "10", "0", "0.01", "0", "0", "0"};

@@ -29,7 +29,7 @@ CHANEL_PATH=./chanel
 
 DELTAQ_PATH=./deltaQ
 DELTAQ_INC=-I${DELTAQ_PATH}
-DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ
+DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ -lm
 
 ROUTING_PATH=./routing
 
@@ -39,7 +39,7 @@ WIRECONF_PATH=./wireconf
 INCS=${EXPAT_INC} ${DELTAQ_INC}
 LIBS=-lm ${EXPAT_LIB} ${DELTAQ_LIB}
 
-GENERAL_FLAGS=$(SVN_DEFINE) -Wall -Werror
+GENERAL_FLAGS=$(SVN_DEFINE) -Wall
 
 # compiler flags
 ifeq ($(COMPILE_TYPE), debug)

@@ -36,15 +36,25 @@ int batch_c = 0;
 int tab_flush = 0;
 
 /*
-static int print_noaopt(struct action_util *au, FILE *f, struct rtattr *opt)
+static int
+print_noaopt(au, f, opt)
+struct action_util *au;
+FILE *f;
+struct rtattr *opt;
 {
-	if (opt && RTA_PAYLOAD(opt))
-		fprintf(f, "[Unknown action, optlen=%u] ", 
-			(unsigned) RTA_PAYLOAD(opt));
+	if (opt && RTA_PAYLOAD(opt)) {
+		fprintf(f, "[Unknown action, optlen=%u] ", (unsigned) RTA_PAYLOAD(opt));
+    }
 	return 0;
 }
 
-static int parse_noaopt(struct action_util *au, int *argc_p, char ***argv_p, int code, struct nlmsghdr *n)
+static int
+parse_noaopt(au, argc_p, argv_p, code, n)
+struct action_util *au;
+int *argc_p;
+char ***argv_p;
+int code;
+struct nlmsghdr *n;
 {
 	int argc = *argc_p;
 	char **argv = *argv_p;
@@ -58,7 +68,8 @@ static int parse_noaopt(struct action_util *au, int *argc_p, char ***argv_p, int
 }
 */
 
-struct action_util *get_action_kind(char *str)
+struct action_util *get_action_kind(str)
+char *str;
 {
 	static void *aBODY;
 	void *dlh;
@@ -75,19 +86,21 @@ restart_s:
 
 	snprintf(buf, sizeof(buf), "m_%s.so", str);
 	dlh = dlopen(buf, RTLD_LAZY);
-	if (dlh == NULL) {
+	if(dlh == NULL) {
 		dlh = aBODY;
-		if (dlh == NULL) {
+		if(dlh == NULL) {
 			dlh = aBODY = dlopen(NULL, RTLD_LAZY);
-			if (dlh == NULL)
+			if(dlh == NULL) {
 				goto noexist;
+            }
 		}
 	}
 
 	snprintf(buf, sizeof(buf), "%s_action_util", str);
 	a = dlsym(dlh, buf);
-	if(a == NULL)
+	if(a == NULL) {
 		goto noexist;
+    }
 
 reg:
 	a->next = action_list;
@@ -96,14 +109,14 @@ reg:
 
 noexist:
 #ifdef CONFIG_GACT
-	if (!looked4gact) {
+	if(!looked4gact) {
 		looked4gact = 1;
 		strcpy(str,"gact");
 		goto restart_s;
 	}
 #endif
 	a = malloc(sizeof(*a));
-	if (a) {
+	if(a) {
 		memset(a, 0, sizeof(*a));
 		strncpy(a->id, "noact", 15);
 //		a->parse_aopt = parse_noaopt;
@@ -115,13 +128,15 @@ noexist:
 
 /*
 int
-new_cmd(char **argv) 
+new_cmd(argv) 
+char **argv
 {
 	if ((matches(*argv, "change") == 0) ||
 		(matches(*argv, "replace") == 0)||
 		(matches(*argv, "delete") == 0)||
-		(matches(*argv, "add") == 0))
+		(matches(*argv, "add") == 0)) {
 			return 1;
+    }
 
 	return 0;
 

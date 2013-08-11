@@ -82,28 +82,30 @@
 
 // time measurement macro
 #define TCHK_START(name)           \
-    struct timeval name##_prev;    \
-struct timeval name##_current; \
+struct timeval name##_prev;        \
+struct timeval name##_current;     \
 gettimeofday(&name##_prev, NULL)
 
 #define TCHK_END(name)                                                             \
     gettimeofday(&name##_current, NULL);                                           \
 time_t name##_sec;                                                                 \
 suseconds_t name##_usec;                                                           \
-if (name##_current.tv_sec == name##_prev.tv_sec) {                                 \
+if(name##_current.tv_sec == name##_prev.tv_sec) {                                  \
     name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
     name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                    \
-} else if (name ##_current.tv_sec != name##_prev.tv_sec) {                         \
+}                                                                                  \
+else if(name ##_current.tv_sec != name##_prev.tv_sec) {                            \
     int name##_carry = 1000000;                                                    \
     name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
-    if (name##_prev.tv_usec > name##_current.tv_usec) {                            \
+    if(name##_prev.tv_usec > name##_current.tv_usec) {                             \
         name##_usec = name##_carry - name##_prev.tv_usec + name##_current.tv_usec; \
         name##_sec--;                                                              \
-        if (name##_usec > name##_carry) {                                          \
+        if(name##_usec > name##_carry) {                                           \
             name##_usec = name##_usec - name##_carry;                              \
             name##_sec++;                                                          \
         }                                                                          \
-    } else {                                                                       \
+    }                                                                              \
+    else {                                                                         \
         name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                \
     }                                                                              \
 }                                                                                  \
@@ -127,10 +129,10 @@ typedef struct {
 ////////////////////////////////////////////////
 
 //#define PREDEFINED_EXPERIMENT          // enable predefined experiment
-#define BANDWIDTH               10e6   // bandwidth in bps
-#define DELAY                   5      // delay in ms 
-#define PACKET_LOSS_RATE        0      // loss rate in range [0,1]
-#define LOOP_COUNT              4      // number of iterations
+#define BANDWIDTH               10e6     // bandwidth in bps
+#define DELAY                   5        // delay in ms 
+#define PACKET_LOSS_RATE        0        // loss rate in range [0,1]
+#define LOOP_COUNT              4        // number of iterations
 
 
 ///////////////////////////////////
@@ -138,7 +140,10 @@ typedef struct {
 ///////////////////////////////////
 
 // print a brief usage of this program
-void usage(char *argv0) {
+void
+usage(argv0)
+char *argv0;
+{
     fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET  data.\n\n");
     fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> in two different ways:\n");
     fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address <from_node_addr>)\n");
@@ -164,7 +169,12 @@ void usage(char *argv0) {
 // the corresponding index;
 // return the number of addresses successfully read, 
 // or -1 on ERROR
-int read_settings(char *path, in_addr_t *p, int p_size) {
+int
+read_settings(path, p, p_size)
+char *path;
+in_addr_t *p;
+int p_size;
+{
     static char buf[BUFSIZ];
     int i = 0;
     int line_nr = 0;
@@ -217,7 +227,12 @@ int read_settings(char *path, in_addr_t *p, int p_size) {
  *        the number of rules in param table (rule_count)
  * Output: the id of rule in param_table or -1 if fail
  *********************************************************/
-int lookup_param(int next_hop_id, qomet_param *p, int rule_count) {
+int
+lookup_param(next_hop_id, p, rule_count)
+int next_hop_id;
+qomet_param *p;
+int rule_count;
+{
     int i;
     for (i = 0; i < rule_count; i++) {
         if (p[i].next_hop_id == next_hop_id)
@@ -228,17 +243,24 @@ int lookup_param(int next_hop_id, qomet_param *p, int rule_count) {
 }
 
 // dump QOMET parameter table
-void dump_param_table(qomet_param *p, int rule_count) {
+void
+dump_param_table(p, rule_count)
+qomet_param *p;
+int rule_count;
+{
     int i;
     INFO("Dumping the param_table (rule count=%d)...", rule_count);
     for (i = 0; i < rule_count; i++) {
-        INFO("%f \t %d \t %f \t %f \t %f", p[i].time, p[i].next_hop_id, 
-                p[i].bandwidth, p[i].delay, p[i].lossrate);
+        INFO("%f \t %d \t %f \t %f \t %f", p[i].time, p[i].next_hop_id, p[i].bandwidth, p[i].delay, p[i].lossrate);
     }
 }
 
 // main function
-int main(int argc, char *argv[]) {
+int
+main(argc, argv)
+int argc;
+char **argv;
+{
     char ch, *p, *argv0, *faddr, *taddr, buf[BUFSIZ];
     uint32_t s, fid, tid, from, to, pipe_nr;
     uint16_t rulenum;
@@ -436,8 +458,7 @@ int main(int argc, char *argv[]) {
     }
 
     if((my_id<FIRST_NODE_ID) || (my_id>=node_number+FIRST_NODE_ID)) {
-        WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id,
-                FIRST_NODE_ID, node_number+FIRST_NODE_ID-1);
+        WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id, FIRST_NODE_ID, node_number+FIRST_NODE_ID - 1);
         exit(1);
     }
 
@@ -508,12 +529,11 @@ int main(int argc, char *argv[]) {
             offset_num = j; 
 
             INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
-                    my_id, MIN_PIPE_ID_OUT+offset_num, MIN_PIPE_ID_OUT+offset_num, 
-                    IP_char_addresses+(j-FIRST_NODE_ID)*IP_ADDR_SIZE);
-            if(add_rule(s, MIN_PIPE_ID_OUT+offset_num, MIN_PIPE_ID_OUT+offset_num,
-                        "any", IP_char_addresses+(j-FIRST_NODE_ID)*IP_ADDR_SIZE, 
-                        DIRECTION_OUT) < 0)
-            {
+                    my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, 
+                    IP_char_addresses + (j - FIRST_NODE_ID) * IP_ADDR_SIZE);
+            if(add_rule(s, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num,
+                        "any", IP_char_addresses + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                        DIRECTION_OUT) < 0) {
                 WARNING("Node %d: Could not add rule #%d with pipe #%d to \
                         destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
                         MIN_PIPE_ID_OUT + offset_num, 
@@ -552,7 +572,7 @@ int main(int argc, char *argv[]) {
     gettimeofday(&tp_begin, NULL);
 
     // do this only for usage (1)
-    if(usage_type==1)
+    if(usage_type == 1)
     {
 #ifdef OLSR_ROUTING
         // get the next hop ID to find correct configuration lines
@@ -854,7 +874,7 @@ int main(int argc, char *argv[]) {
                     configure_pipe(s, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
 #elif __linux
                     bandwidth = (int)rint(bandwidth);// * 2.56);
-                    delay = (int) rint(delay);//(delay / 2);
+                    delay = (int)rint(delay);//(delay / 2);
                     lossrate = (int)rint(lossrate * 0x7fffffff);
 #endif
 
@@ -862,7 +882,7 @@ int main(int argc, char *argv[]) {
                     loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count>LOOP_COUNT) {
+                    if(loop_count > LOOP_COUNT) {
                         break;
                     }
 #endif
@@ -870,7 +890,7 @@ int main(int argc, char *argv[]) {
                 // End config for broadcast traffic
 
                 // Reset the parameter and param_table for the next time
-                memset(param_table, 0, sizeof(qomet_param)*MAX_RULE_NUM);
+                memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
                 rule_count = 0;
                 next_time += time_period;
                 INFO("New timer deadline=%f", next_time);
@@ -896,9 +916,8 @@ int main(int argc, char *argv[]) {
     // if the loop was not entered not even once
     // there is an error
     if(loop_count == 0) {
-        if(usage_type==1) {
-            WARNING("The specified pair from_node_id=%d & to_node_id=%d "
-                    "could not be found", fid, tid);
+        if(usage_type == 1) {
+            WARNING("The specified pair from_node_id=%d & to_node_id=%d could not be found", fid, tid);
         }
         else {
             WARNING("No valid line was found for the node %d", my_id); 
@@ -931,14 +950,14 @@ int main(int argc, char *argv[]) {
             }
 
             offset_num = j;
-            INFO("Deleting rule %d...", MIN_PIPE_ID_OUT+offset_num);
+            INFO("Deleting rule %d...", MIN_PIPE_ID_OUT + offset_num);
 #ifdef __FreeBSD__
-            if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num)==ERROR) {
-                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
+            if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num) == ERROR) {
+                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT + offset_num);
             }
 #elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num)==ERROR) {
-                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
+            if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num) == ERROR) {
+                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT + offset_num);
             }
 #endif
         }
@@ -950,16 +969,14 @@ int main(int argc, char *argv[]) {
             }
 
             offset_num = j;
-            INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST+offset_num);
+            INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST + offset_num);
 #ifdef __FreeBSD__
-            if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR) {
-                WARNING("Could not delete rule #%d", 
-                        MIN_PIPE_ID_IN_BCAST+offset_num);
+            if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num) == ERROR) {
+                WARNING("Could not delete rule #%d", MIN_PIPE_ID_IN_BCAST+offset_num);
             }
 #elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR) {
-                WARNING("Could not delete rule #%d", 
-                        MIN_PIPE_ID_IN_BCAST+offset_num);
+            if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST + offset_num) == ERROR) {
+                WARNING("Could not delete rule #%d", MIN_PIPE_ID_IN_BCAST + offset_num);
             }
 #endif
         }
@@ -969,9 +986,7 @@ int main(int argc, char *argv[]) {
     gettimeofday(&tp_end, NULL);
 
     // print execution time
-    INFO("Experiment execution time=%.4f s", 
-            (tp_end.tv_sec+tp_end.tv_usec/1.0e6) - 
-            (tp_begin.tv_sec+tp_begin.tv_usec/1.0e6));
+    INFO("Experiment execution time=%.4f s", (tp_end.tv_sec+tp_end.tv_usec / 1.0e6) - (tp_begin.tv_sec+tp_begin.tv_usec / 1.0e6));
 
     // close socket
     DEBUG("Closing socket...");
