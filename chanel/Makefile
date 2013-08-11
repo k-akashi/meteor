@@ -47,10 +47,10 @@ LDLIBS=-lpthread ${RT_LIB} -lm ${EXPAT_LIB} ${DELTAQ_LIB}
 all:	  $(TARGETS)
 
 do_chanel : do_chanel.c chanel.o
-	gcc ${GCC_FLAGS} -o do_chanel do_chanel.c chanel.o ${LDFLAGS} ${LDLIBS}
+	gcc ${GCC_FLAGS} -o do_chanel do_chanel.c chanel.o ../deltaQ/libdeltaQ.a ${LDFLAGS} ${LDLIBS}
 
 chanel_config : chanel_config.c chanel.o ../deltaQ/
-	gcc ${GCC_FLAGS} -o chanel_config chanel_config.c chanel.o ${INCS} ${LDFLAGS} ${LDLIBS}
+	gcc ${GCC_FLAGS} -o chanel_config chanel_config.c ../deltaQ/libdeltaQ.a chanel.o ${INCS} ${LDFLAGS} ${LDLIBS}
 
 chanel.o : chanel.c chanel.h
 	gcc ${GCC_FLAGS} -c chanel.c
