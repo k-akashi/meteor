@@ -191,7 +191,7 @@ int p_size;
     while(fgets(buf, BUFSIZ, fd) != NULL) {
         line_nr++;
 
-        if(i>=p_size) {
+        if(i >= p_size) {
             WARNING("Maximum number of IP addresses (%d) exceeded",
                     p_size);
             fclose(fd);
@@ -332,8 +332,11 @@ char **argv;
     }
 
     // parse command-line options
-    while((ch = getopt(argc, argv, "q:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
+    while((ch = getopt(argc, argv, "hq:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
         switch(ch) {
+            case 'h':
+                usage();
+                exit(0);
             //QOMET output file
             case 'q':
                 if((fd = fopen(optarg, "r")) == NULL) {
@@ -457,7 +460,7 @@ char **argv;
         }
     }
 
-    if((my_id<FIRST_NODE_ID) || (my_id>=node_number+FIRST_NODE_ID)) {
+    if((my_id < FIRST_NODE_ID) || (my_id >= node_number + FIRST_NODE_ID)) {
         WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id, FIRST_NODE_ID, node_number+FIRST_NODE_ID - 1);
         exit(1);
     }
@@ -685,8 +688,8 @@ char **argv;
                 // do configure pipe
                 configure_pipe(s, pipe_nr, bandwidth, delay, lossrate);
 #elif __linux
-                bandwidth = (int)round(bandwidth);// * 2.56);
-                delay = (int)round(delay);//(delay / 2);
+                bandwidth = (int)round(bandwidth);     // * 2.56);
+                delay = (int)round(delay);             //(delay / 2);
                 //lossrate = (int)rint(lossrate * 0x7fffffff);
 
                 // do configure Qdisc
@@ -824,7 +827,7 @@ char **argv;
                 }// end for loop
 
                 // config the broadcast links have source node id = i
-                for(i=FIRST_NODE_ID; i<(node_number+FIRST_NODE_ID); i++) {
+                for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
                     if(i == my_id)
                         //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
                         continue;

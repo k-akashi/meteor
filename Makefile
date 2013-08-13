@@ -83,17 +83,17 @@ MAKE_CMD = make
 endif
 
 # defining revision info
-SVN_REVISION := "$(shell svnversion -n .)"
+#SVN_REVISION := "$(shell svnversion -n .)"
 
 # if revision info cannot be obtained from SVN, try to get it from a file
 ifeq ($(SVN_REVISION), "")
 #$(warning No SVN revision info, trying to get it from 'svn_revision.txt')
-SVN_REVISION := "$(shell cat svn_revision.txt)"
+#SVN_REVISION := "$(shell cat svn_revision.txt)"
 else
 #$(warning Writing revision info to file 'svn_revision.txt')
-$(shell echo "$(SVN_REVISION)" | cat > svn_revision.txt)
+#$(shell echo "$(SVN_REVISION)" | cat > svn_revision.txt)
 endif
-SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
+#SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
 
 
 # created object qomet.o so that module dependencies
