@@ -312,18 +312,20 @@ char **argv;
     time_period = -1;
     strncpy(broadcast_address, "255.255.255.255", IP_ADDR_SIZE);
 
+/*
 // cpu affinity
-//#ifdef __linux__
-//    long int core_num;
-//    core_num = sysconf(_SC_NPROCESSORS_CONF);
-//    
-//    if(core_num != 1) {
-//        cpu_set_t mask;
-//        CPU_ZERO(&mask);
-//        CPU_SET(1, &mask);
-//        sched_setaffinity(0, sizeof(mask), &mask);
-//    }
-//#endif
+#ifdef __linux
+    uint32_t core_num;
+    core_num = sysconf(_SC_NPROCESSORS_CONF);
+    
+    if(core_num != 1) {
+        cpu_set_t mask;
+        CPU_ZERO(&mask);
+        CPU_SET(1, &mask);
+        sched_setaffinity(0, sizeof(mask), &mask);
+    }
+#endif
+*/
 
     if(argc < 2) {
         WARNING("No arguments provided");
@@ -482,13 +484,14 @@ char **argv;
         fclose(fd);
         exit(1);
     }
-    //  else if ((my_id == -1) || (node_number == -1) || (time_period == -1))
-    //    {
-    //      WARNING("Insufficient arguments were provided for usage (2)");
-    //      usage(argv0);
-    //      fclose(fd);
-    //      exit(1);
-    //    }
+/*
+    else if ((my_id == -1) || (node_number == -1) || (time_period == -1)) {
+        WARNING("Insufficient arguments were provided for usage (2)");
+        usage(argv0);
+        fclose(fd);
+        exit(1);
+    }
+*/
 
 
     // initialize timer
@@ -507,7 +510,6 @@ char **argv;
 
     // add pipe to dummynet in normal manner
     if(usage_type == 1) {
-        // get rule
         //get_rule(s, 123);
 
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, faddr, taddr);
@@ -516,8 +518,6 @@ char **argv;
                     rulenum, pipe_nr, faddr, taddr);
             exit(1);
         }
-
-        // get rule
         //get_rule(s, 123);
 
         //exit(2);
@@ -628,18 +628,20 @@ char **argv;
                     timer_reset(timer);
                 }
                 else {
+                    /*
                     // wait for for the next timer event
                     // debug messsage by k-akashi
-                    //            uint64_t t;
-                    //            uint64_t next_ev;
-                    //            rdtsc(t);
-                    //            next_ev = timer->zero + (timer->cpu_frequency * (time * 1000000) / 1000000);
-                    //            printf("rdtsc_time_before = %llu\n", t);
-                    //            printf("next_ev_time      = %llu\n", next_ev);
-                    //            printf("CPU Frequency = %u\n", timer->cpu_frequency);
-                    //            struct timeval gettime;
-                    //            gettimeofday(&gettime, NULL);
-                    //            printf("Before : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
+                                uint64_t t;
+                                uint64_t next_ev;
+                                rdtsc(t);
+                                next_ev = timer->zero + (timer->cpu_frequency * (time * 1000000) / 1000000);
+                                printf("rdtsc_time_before = %llu\n", t);
+                                printf("next_ev_time      = %llu\n", next_ev);
+                                printf("CPU Frequency = %u\n", timer->cpu_frequency);
+                                struct timeval gettime;
+                                gettimeofday(&gettime, NULL);
+                                printf("Before : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
+                    */
 
                     if(timer_wait(timer, time * 1000000) < 0) {
 #ifdef __FreeBSD__
@@ -667,14 +669,17 @@ char **argv;
                 }
 #endif
 
-                // prepare adjusted values:
-                // 1. if packet size is known bandwidth could be adjusted:
-                //   multiplication factor 1.0778 was computed for 400 byte datagrams
-                //   because of 28 bytes header (428/400=1.07)
-                //   however we consider bandwidth at Ethernet level, therefore we
-                //   don't multiply here but when plotting results
-                //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
-                //         but we seem to obtain correct values using bits/second
+                /*
+                 prepare adjusted values:
+                 1. if packet size is known bandwidth could be adjusted:
+                   multiplication factor 1.0778 was computed for 400 byte datagrams
+                   because of 28 bytes header (428/400=1.07)
+                   however we consider bandwidth at Ethernet level, therefore we
+                   don't multiply here but when plotting results
+                   Note: ip_dummynet.h says that bandwidth is in bytes/tick
+                         but we seem to obtain correct values using bits/second
+                */
+
 #ifdef __FreeBSD__
                 bandwidth = (int)round(bandwidth);// * 2.56);
 
@@ -790,6 +795,7 @@ char **argv;
                             loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
                             time, bandwidth, lossrate, delay, offset_num);
 
+                    /*
                     // prepare adjusted values:
                     // 1. if packet size is known bandwidth could be adjusted:
                     //   multiplication factor 1.0778 was computed for 400 byte datagrams
@@ -798,6 +804,7 @@ char **argv;
                     //   don't multiply here but when plotting results
                     //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
                     //   but we seem to obtain correct values using bits/second
+                    */
 #ifdef __FreeBSD__
                     bandwidth = (int)round(bandwidth);// * 2.56);
                     // 2. no adjustment necessary for delay expressed in ms
@@ -857,6 +864,7 @@ char **argv;
                             loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
                             time, bandwidth, lossrate, delay, offset_num);
 
+                    /*
                     // prepare adjusted values:
                     // 1. if packet size is known bandwidth could be adjusted:
                     //   multiplication factor 1.0778 was computed for 400 byte datagrams
@@ -865,6 +873,7 @@ char **argv;
                     //   don't multiply here but when plotting results
                     //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
                     //   but we seem to obtain correct values using bits/second
+                    */
 #ifdef __FreeBSD__
                     bandwidth = (int)round(bandwidth);// * 2.56);
                     // 2. no adjustment necessary for delay expressed in ms

@@ -45,7 +45,7 @@ int rtnl_open_byproto(struct rtnl_handle *rth, unsigned subscriptions,
     int sndbuf = 32768;
     int rcvbuf = 32768;
 
-    memset(rth, 0, sizeof(rth));
+    memset(rth, 0, sizeof(struct rtnl_handle));
 
     rth->fd = socket(AF_NETLINK, SOCK_RAW, protocol);
     if (rth->fd < 0) {
@@ -263,7 +263,7 @@ void *jarg;
     };
     char   buf[16384];
 
-    dprintf(("[rtnl_talk] msghdr size = %d\n", sizeof(msg)));
+    dprintf(("[rtnl_talk] msghdr size = %ld\n", sizeof(msg)));
     memset(&nladdr, 0, sizeof(nladdr));
     nladdr.nl_family = AF_NETLINK;
     nladdr.nl_pid = peer;
@@ -469,7 +469,9 @@ void *jarg;
     nladdr.nl_groups = 0;
 
     while(1) {
-        int err, len, type;
+        int err;
+        int len;
+        int type;
         int l;
 
         status = fread(&buf, 1, sizeof(*h), rtnl);
@@ -488,8 +490,7 @@ void *jarg;
         l = len - sizeof(*h);
 
         if(l < 0 || len > sizeof(buf)) {
-            fprintf(stderr, "!!!malformed message: len=%d @%lu\n",
-                    len, ftell(rtnl));
+            fprintf(stderr, "!!!malformed message: len=%d type=%d @%lu\n", len, type, ftell(rtnl));
             return -1;
         }
 

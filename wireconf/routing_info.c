@@ -181,6 +181,9 @@ char *next_hop;
 	rtm = (struct rtmsg *)buf;
 	rtm->rtm_type = RTM_GETROUTE;
 	pid = getpid();
+    if(pid != 0) {
+        fprintf(stderr, "Operation not permitted\n");
+    }
 #endif
     // if rt_dst != NULL and rt_dst equals dst then gw is considered
 

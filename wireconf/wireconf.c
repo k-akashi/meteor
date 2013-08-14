@@ -36,6 +36,7 @@
  *           configurator library
  *
  * Authors: Junya Nakata, Razvan Beuran
+ * Changes: Kunio AKASHI
  *
  ***********************************************************************/
 
@@ -70,6 +71,9 @@
 // VLAN ID 4 bytes
 // payload 1500 bytes
 
+#ifdef __linux
+#define DEV_NAME 256
+#endif
 /////////////////////////////////////////////
 // Special defines
 /////////////////////////////////////////////
@@ -167,7 +171,8 @@ char *array_address;
 in4_addr *ipv4_address;
 uint16_t *port;
 {
-    uint32_t c, o;
+    uint32_t c;
+    uint32_t o;
   
     c = 0;
     o = 0;
@@ -485,8 +490,11 @@ int direction;
     int i;
     int32_t find_ifb_device = 0;
     struct qdisc_parameter qp;
-    char* device_name =  (char* )get_route_info("dev", dst);
+    char* device_name;
     char handleid[10];
+
+    device_name = malloc(DEV_NAME);
+    device_name =  (char* )get_route_info("dev", dst);
 
 #ifdef TEST
     device_list = device_name;
@@ -591,36 +599,22 @@ int direction;
     ufp.police = NULL;
     ufp.rdev = NULL;
 
-    // configure netem egress filter
     if(!INGRESS) {
-//      dprintf(("\n\n[add_rule] add tbf qdisc\n"));
-//      add_tbf_qdisc(device_name, "root", handleid, qp);
-
         dprintf(("\n\n[add_rule] add htb qdisc\n"));
         add_htb_qdisc(device_name, htb_qdisc_parent_id, htb_qdisc_handle_id);
+
         dprintf(("\n\n[add_rule] add htb class\n"));
         add_htb_class(device_name, htb_class_1_parent_id, htb_class_1_handle_id, "10000000");
+
         dprintf(("\n\n[add_rule] add htb class\n"));
         add_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, "10000000");
+
         dprintf(("\n\n[add_rule] add netem qdisc\n"));
         add_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_parent_id, filter_handle_id, "ip", "u32", &ufp);
-/*
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "root", qp, "prio");
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, netemid, parent_netemid, qp, "netem");
-        if(!TBF) {
-            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, pfifoid, parent_pfifoid, qp, "pfifo");
-        }
-        else {
-            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, bwid, parent_bwid, qp, "tbf");
-            tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, pfifoid, parent_pfifoid, qp, "pfifo");
-        }
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, parent_netemid, "ip", "u32", &ufp);
-*/
-    }
 
-    // ingress filter
-    if(INGRESS) {
+        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_parent_id, filter_handle_id, "ip", "u32", &ufp);
+    }
+    else if(INGRESS) {
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "ingress");
         char ifb_device_name[5];
         for(i = 0; i <= MAX_IFB; i++) {
@@ -705,8 +699,9 @@ uint32_t rule_number;
     char* device_name;
 
     memset(&qp, 0, sizeof(qp));
+    device_name = malloc(DEV_NAME);
 
-    device_name = (char* )get_route_info("dev", dst);
+    device_name = (char*)get_route_info("dev", dst);
     /*
     qp.limit = "1000";
     qp.delay = "1us";
@@ -729,8 +724,11 @@ uint32_t rule_number;
     if(INGRESS) {
         int i;
         int ret;
+        int cmd_len = 1024;
         char *cmd;
         char ifb_device_name[5];
+
+        cmd = malloc(cmd_len);
         for(i = 0; i <= MAX_IFB; i++) {
             if(strcmp(ifb_device[i], device_name) == 0) {
                 sprintf(ifb_device_name, "ifb%d", i);
@@ -743,6 +741,9 @@ uint32_t rule_number;
         //system(cmd);
         sprintf(cmd, "tc qdisc del dev %s ingress", device_name);
         ret = system(cmd);
+        if(ret != 0) {
+            exit(1);
+        }
     }
     //tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
     //tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
@@ -842,8 +843,7 @@ int delay;
 double lossrate;
 {
     struct qdisc_parameter qp;
-    //char* device_name =  (char* )get_route_info("dev", dst);
-    char* device_name;
+    char *device_name;
     int config_netem = 0;
     int config_tbf = 0;
     char delaystr[20];
@@ -853,6 +853,7 @@ double lossrate;
     char buffer[20];
 
     memset(&qp, 0, sizeof(qp));
+    device_name = malloc(DEV_NAME);
 
 #ifdef TEST
     device_name = device_list;
@@ -946,8 +947,6 @@ double lossrate;
         qp.reorder_prob = "0";
         qp.reorder_corr = "0";
 
-        //tc_cmd(RTM_NEWQDISC, 0, device_name, "1200:", "200:1", qp, "netem");
-        //tc_cmd(RTM_NEWQDISC, 0, device_name, netemid, parent_netemid, qp, "netem");
         change_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
     }
 
@@ -964,10 +963,7 @@ double lossrate;
         if(config_tbf) {
             qp.rate = rate;
             qp.buffer = buffer;
-//            tc_cmd(RTM_NEWQDISC, 0, device_name, "200:", "root", qp, "tbf");
-//            tc_cmd(RTM_NEWQDISC, 0, device_name, bwid, parent_bwid, qp, "tbf");
             change_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, rate);
-//          change_tbf_qdisc(device_name, "root", "200:", qp);
         }
     }
 

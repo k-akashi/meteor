@@ -153,7 +153,6 @@ char* dev;
 	struct rtattr *tail, *tail2;
 	char k[16];
 
-	int ret = 0;
 	int prio = 0;
 	struct action_util *a = NULL;
 
@@ -169,7 +168,7 @@ char* dev;
 	addattr_l(n, MAX_MSG, ++prio, NULL, 0);
 	addattr_l(n, MAX_MSG, TCA_ACT_KIND, k, strlen(k) + 1);
 
-	ret = a->parse_aopt(a, "redirect", TCA_ACT_OPTIONS, n, dev);
+	a->parse_aopt(a, "redirect", TCA_ACT_OPTIONS, n, dev);
 
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *)tail;
 

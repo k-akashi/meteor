@@ -44,14 +44,12 @@ endif
 
 ifeq ($(UNAME), FreeBSD)
 CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO
-#CFLAGS = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_DEBUG -DMESSAGE_INFO
 LDFLAGS = -L.
 LDLIBS  = -lwireconf -ltimer -lm
 TARGETS = libwireconf.a libtimer.a do_wireconf
 endif
 
-#all: clean $(TARGETS) 
-all: clean $(TARGETS)
+all: $(TARGETS)
 
 ifeq ($(UNAME), Linux)
 libnetlink.a: $(NLOBJ)
@@ -88,4 +86,4 @@ test: libnetlink.a libtc.a $(TOBJ) $(LIBNETLINK) $(TESTOBJ)
 endif
 
 clean:
-	rm -f $(ALLOBJ) $(TARGETS) $(NLOBJ) *.o *.so
+	rm -f $(ALLOBJ) $(TARGETS) $(NLOBJ) *.o
