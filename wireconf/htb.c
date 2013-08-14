@@ -28,10 +28,8 @@ char* bandwidth;
 	uint32_t mtu;
 	uint32_t mpu = 0;
 	uint16_t overhead = 0;
-//	uint16_t linklayer = LINKLAYER_ETHERNET;
 
 	memset(&opt, 0, sizeof(opt));
-	// MTU size is eth packet length
 	mtu = 1600;
 
 	get_rate(&opt.rate.rate, bandwidth);
@@ -100,14 +98,11 @@ char* bandwidth;
     req.n.nlmsg_type = RTM_NEWTCLASS;
     req.t.tcm_family = AF_UNSPEC;
 
-    // Class kind
     char class_kind[16] = "htb";
 
-	// device name
 	char device[16];
 	strncpy(device, dev, sizeof(device) - 1);
 
-    // set root or parent-id
     if(strcmp(parent_id, "root")) {
         req.t.tcm_parent = TC_H_ROOT;
     }
@@ -117,7 +112,6 @@ char* bandwidth;
         req.t.tcm_parent = handle;
     }
 
-    // set handle-id
     if(get_tc_classid(&handle, class_id))
         dprintf(("[add_htb_class] Invalid handle id : %s\n", class_id));
     req.t.tcm_handle = handle;
@@ -171,14 +165,11 @@ char* bandwidth;
     req.n.nlmsg_type = RTM_NEWTCLASS;
     req.t.tcm_family = AF_UNSPEC;
 
-    // Class kind
     char class_kind[16] = "htb";
 
-	// device name
 	char device[16];
 	strncpy(device, dev, sizeof(device) - 1);
 
-    // set root or parent-id
     if(strcmp(parent_id, "root")) {
         req.t.tcm_parent = TC_H_ROOT;
     }
@@ -188,7 +179,6 @@ char* bandwidth;
         req.t.tcm_parent = handle;
     }
 
-    // set handle-id
     if(get_tc_classid(&handle, class_id))
         dprintf(("[change_htb_class] Invalid handle id : %s\n", class_id));
     req.t.tcm_handle = handle;
@@ -265,14 +255,11 @@ char* handle_id;
 	req.n.nlmsg_type  = RTM_NEWQDISC;
 	req.t.tcm_family  = AF_UNSPEC;
 
-	// Qdisc kind
 	char qdisc_kind[16] = "htb";
 
-	// device name
 	char device[16];
 	strncpy(device, dev, sizeof(device) - 1);
 
-	// set root or parent-id
 	if(strcmp(parent_id, "root") == 0) {
 		req.t.tcm_parent = TC_H_ROOT;
 	}
@@ -282,7 +269,6 @@ char* handle_id;
 		req.t.tcm_parent = handle;
 	}
 
-	// set handle-id
 	if(get_qdisc_handle(&handle, handle_id))
 		dprintf(("[add_htb_qdisc] Invalid handle id : %s\n", handle_id));
 	req.t.tcm_handle = handle;

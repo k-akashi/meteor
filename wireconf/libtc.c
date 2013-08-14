@@ -197,32 +197,28 @@ main(argc, argv)
 int argc;
 char **argv;
 {
-char* ret;
-struct qdisc_parameter qp =  {"1000", "10ms", "10", "0", "0.01", "0", "0", "0"};
-
-ret = (char*)get_route_info(argv[1], argv[2]);
-printf("result = %s\n", ret);
-
-if(strcmp("add", argv[3]) == 0)
-{
-if(tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
-printf("missing tc\n");
-}
-else if(strcmp("change", argv[3]) == 0)
-{
-if(tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
-printf("missing tc\n");
-}
-else if(strcmp("del", argv[3]) == 0)
-{
-if(tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
-printf("missing tc\n");
-}
-else
-{
-printf("implememtation only add, del\n");
-}
-
-return 0;
+    char* ret;
+    struct qdisc_parameter qp =  {"1000", "10ms", "10", "0", "0.01", "0", "0", "0"};
+    
+    ret = (char*)get_route_info(argv[1], argv[2]);
+    printf("result = %s\n", ret);
+    
+    if(strcmp("add", argv[3]) == 0) {
+        if(tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+        printf("missing tc\n");
+    }
+    else if(strcmp("change", argv[3]) == 0) {
+        if(tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+        printf("missing tc\n");
+    }
+    else if(strcmp("del", argv[3]) == 0) {
+        if(tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+        printf("missing tc\n");
+    }
+    else {
+        printf("implememtation only add, del\n");
+    }
+    
+    return 0;
 }
 */
