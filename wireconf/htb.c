@@ -14,8 +14,8 @@
 
 static int
 htb_class_opt(n, bandwidth)
-struct nlmsghdr* n;
-char* bandwidth;
+struct nlmsghdr *n;
+char *bandwidth;
 {
 	struct tc_htb_opt opt;
 	struct rtattr* tail;

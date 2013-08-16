@@ -38,9 +38,9 @@ static struct idxmap *idxmap[16];
 
 int
 ll_remember_index(who, n, arg)
-const struct sockaddr_nl* who;
-struct nlmsghdr* n;
-void* arg;
+const struct sockaddr_nl *who;
+struct nlmsghdr *n;
+void *arg;
 {
 	int h;
 	struct ifinfomsg *ifi = NLMSG_DATA(n);
@@ -91,26 +91,29 @@ void* arg;
 	return 0;
 }
 
-const char*
-ll_idx_n2a(idx, buf)
+const char
+*ll_idx_n2a(idx, buf)
 unsigned idx;
-char* buf;
+char *buf;
 {
 	struct idxmap* im;
 
-	if(idx == 0)
+	if(idx == 0) {
 		return "*";
+    }
 
-	for(im = idxmap[idx&0xF]; im; im = im->next)
-		if(im->index == idx)
+	for(im = idxmap[idx&0xF]; im; im = im->next) {
+		if(im->index == idx) {
 			return im->name;
+        }
+    }
 	snprintf(buf, 16, "if%d", idx);
 
 	return buf;
 }
 
-const char*
-ll_index_to_name(idx)
+const char
+*ll_index_to_name(idx)
 unsigned idx;
 {
 	static char nbuf[16];
@@ -120,7 +123,7 @@ unsigned idx;
 
 unsigned int
 ll_name_to_index(name)
-const char* name;
+const char *name;
 {
 	static char ncache[16];
 	static int icache;
@@ -149,7 +152,7 @@ const char* name;
 
 int
 ll_init_map(rth)
-struct rtnl_handle* rth;
+struct rtnl_handle *rth;
 {
 	if(rtnl_wilddump_request(rth, AF_UNSPEC, RTM_GETLINK) < 0) {
 		perror("Cannot send dump request");

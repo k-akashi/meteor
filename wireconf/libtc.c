@@ -86,13 +86,13 @@ int
 tc_cmd(cmd, flags, dev, handleid, root, qp, type)
 int cmd;
 int flags;
-char* dev;
-char* handleid;
-char* root;
+char *dev;
+char *handleid;
+char *root;
 struct qdisc_parameter qp;
-char* type;
+char *type;
 {
-    struct qdisc_util* q = NULL;
+    struct qdisc_util *q = NULL;
     char d[16];
     char k[16];
     __u32 handle;
@@ -154,7 +154,7 @@ char* type;
        return 1;
        }
        req.t.tcm_ifindex = idx;
-       */
+    */
 
     if(cmd != RTM_DELQDISC) {
         strncpy(k, type, sizeof(k) - 1);
@@ -190,8 +190,7 @@ char* type;
     return 0;
 }
 
-/*
-// test code
+/* test code
 int
 main(argc, argv)
 int argc;

@@ -164,11 +164,13 @@ char *argv0;
     fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, otherwise usage (1) is assumed.\n");
 }
 
+/*
 // read settings (node ids and corresponding IP adresses)
 // from a file, and store the adresses in the array p at
 // the corresponding index;
 // return the number of addresses successfully read, 
 // or -1 on ERROR
+*/
 int
 read_settings(path, p, p_size)
 char *path;
@@ -205,7 +207,7 @@ int p_size;
                         line_nr, path);
                 continue;
             }
-            if(node_id < 0 || node_id<FIRST_NODE_ID || node_id >= MAX_NODES) {
+            if(node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
                 WARNING("Node id %d is not within the permitted range [%d, %d]",
                         node_id, FIRST_NODE_ID, MAX_NODES);
                 fclose(fd);
@@ -234,8 +236,9 @@ qomet_param *p;
 int rule_count;
 {
     int i;
-    for (i = 0; i < rule_count; i++) {
-        if (p[i].next_hop_id == next_hop_id)
+
+    for(i = 0; i < rule_count; i++) {
+        if(p[i].next_hop_id == next_hop_id)
             return i;
     }
 
@@ -249,8 +252,9 @@ qomet_param *p;
 int rule_count;
 {
     int i;
+
     INFO("Dumping the param_table (rule count=%d)...", rule_count);
-    for (i = 0; i < rule_count; i++) {
+    for(i = 0; i < rule_count; i++) {
         INFO("%f \t %d \t %f \t %f \t %f", p[i].time, p[i].next_hop_id, p[i].bandwidth, p[i].delay, p[i].lossrate);
     }
 }
@@ -261,7 +265,11 @@ main(argc, argv)
 int argc;
 char **argv;
 {
-    char ch, *p, *argv0, *faddr, *taddr, buf[BUFSIZ];
+    char ch;
+    char *p;
+    char *argv0;
+    char *faddr;
+    char *taddr, buf[BUFSIZ];
     uint32_t s, fid, tid, from, to, pipe_nr;
     uint16_t rulenum;
 
@@ -276,7 +284,8 @@ char **argv;
 
     struct timeval tp_begin, tp_end;
 
-    int32_t i, my_id;
+    int32_t i;
+    int32_t my_id;
     in_addr_t IP_addresses[MAX_NODES];
     char IP_char_addresses[MAX_NODES*IP_ADDR_SIZE];
     int32_t node_number;
@@ -312,8 +321,7 @@ char **argv;
     time_period = -1;
     strncpy(broadcast_address, "255.255.255.255", IP_ADDR_SIZE);
 
-/*
-// cpu affinity
+/* cpu affinity
 #ifdef __linux
     uint32_t core_num;
     core_num = sysconf(_SC_NPROCESSORS_CONF);
@@ -333,25 +341,19 @@ char **argv;
         exit(1);
     }
 
-    // parse command-line options
     while((ch = getopt(argc, argv, "hq:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
         switch(ch) {
             case 'h':
                 usage();
                 exit(0);
-            //QOMET output file
             case 'q':
                 if((fd = fopen(optarg, "r")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
                 }
                 break;
-
-                /////////////////////////////////////////////
-                // Usage (1) parameters
-                /////////////////////////////////////////////
-                // from_node_id
             case 'f':
+                // from_node_id
                 fid = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid from_node_id '%s'", optarg);
@@ -368,8 +370,8 @@ char **argv;
                 faddr = optarg;
                 break;
 
-                // to_node_id
             case 't':
+                // to_node_id
                 tid = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid to_node_id '%s'", optarg);
@@ -377,13 +379,13 @@ char **argv;
                 }
                 break;
 
-                // IP address of to_node
             case 'T':
+                // IP address of to_node
                 taddr = optarg;
                 break;
 
-                // rule number for dummynet configuration
             case 'r':
+                // rule number for dummynet configuration
                 rulenum = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid rule_number '%s'", optarg);
@@ -391,8 +393,8 @@ char **argv;
                 }
                 break;
 
-                // pipe number for dummynet configuration
             case 'p':
+                // pipe number for dummynet configuration
                 pipe_nr = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid pipe_number '%s'", optarg);
@@ -400,8 +402,8 @@ char **argv;
                 }
                 break;
 
-                // direction option for dummynet configuration
             case 'd':
+                // direction option for dummynet configuration
                 if(strcmp(optarg, "in") == 0) {
                     direction = DIRECTION_IN;
                 }
@@ -414,16 +416,13 @@ char **argv;
                 }
                 break;
 
-                /////////////////////////////////////////////
-                // Usage (2) parameters
-                /////////////////////////////////////////////
-                // current node ID
             case 'i':
+                // current node ID
                 my_id = strtol(optarg, NULL, 10);
                 break;
 
-                // settings file
             case 's':
+                // settings file
                 usage_type = 2;
                 if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
@@ -439,8 +438,8 @@ char **argv;
                 }
                 break;
 
-                // time interval between settings
             case 'm':
+                // time interval between settings
                 // check if conversion was performed (we assume a time
                 // period of 0 is also invalid)
                 if ((time_period = strtod(optarg,NULL)) == 0)
@@ -454,8 +453,8 @@ char **argv;
                 strncpy(broadcast_address, optarg, IP_ADDR_SIZE);
                 break;
 
-                // help output
             case '?':
+                // help output
             default:
                 usage(argv0);
                 exit(1);
@@ -467,11 +466,9 @@ char **argv;
         exit(1);
     }
 
-    // update argument-related counter and pointer
     argc -= optind;
     argv += optind;
 
-    // check that all the required arguments were provided
     if(fd == NULL) {
         WARNING("No QOMET data file was provided");
         usage(argv0);
@@ -494,14 +491,11 @@ char **argv;
 */
 
 
-    // initialize timer
     DEBUG("Initialize timer...");
     if((timer = timer_init()) == NULL) {
         WARNING("Could not initialize timer");
         exit(1);
     }
-
-    // open control socket
     DEBUG("Open control socket...");
     if((s = get_socket()) < 0) {
         WARNING("Could not open control socket (requires root priviledges)\n");
@@ -565,7 +559,7 @@ char **argv;
                 WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
                         destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
                         MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        IP_char_addresses+(j-FIRST_NODE_ID)*IP_ADDR_SIZE, broadcast_address);
+                        IP_char_addresses+(j - FIRST_NODE_ID) * IP_ADDR_SIZE, broadcast_address);
                 exit(1);
             }
         }
@@ -579,7 +573,7 @@ char **argv;
     {
 #ifdef OLSR_ROUTING
         // get the next hop ID to find correct configuration lines
-        if( (next_hop_id = get_next_hop_id(tid, direction)) == ERROR )
+        if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR)
         {
             WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i, direction=%i", time, tid, direction);
             exit(1);
@@ -616,11 +610,7 @@ char **argv;
                 lossrate=PACKET_LOSS_RATE;
 #endif
                 // print current configuration info
-#ifdef __FreeBSD__
                 INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
-#elif __linux
-                INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
-#endif
 
                 // if this is the first operation we reset the timer
                 // Note: it is assumed time always equals 0.0 for the first line
@@ -628,20 +618,7 @@ char **argv;
                     timer_reset(timer);
                 }
                 else {
-                    /*
                     // wait for for the next timer event
-                    // debug messsage by k-akashi
-                                uint64_t t;
-                                uint64_t next_ev;
-                                rdtsc(t);
-                                next_ev = timer->zero + (timer->cpu_frequency * (time * 1000000) / 1000000);
-                                printf("rdtsc_time_before = %llu\n", t);
-                                printf("next_ev_time      = %llu\n", next_ev);
-                                printf("CPU Frequency = %u\n", timer->cpu_frequency);
-                                struct timeval gettime;
-                                gettimeofday(&gettime, NULL);
-                                printf("Before : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
-                    */
 
                     if(timer_wait(timer, time * 1000000) < 0) {
 #ifdef __FreeBSD__
@@ -651,10 +628,6 @@ char **argv;
 #endif
                         //exit(1); // NOT NEEDED ANYMORE!!!!
                     }
-                    //            rdtsc(t);
-                    //            printf("rdtsc_time_after  = %llu\n", t);
-                    //            gettimeofday(&gettime, NULL);
-                    //            printf("After  : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
                 }
 
 
