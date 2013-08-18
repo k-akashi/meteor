@@ -152,23 +152,22 @@ struct nlmsghdr *n;
 }
 
 int
-add_tbf_qdisc(dev, parent_id, handle_id, qp)
+add_tbf_qdisc(dev, id, qp)
 char* dev;
-char* parent_id;
-char* handle_id;
+uint32_t id[4];
 struct qdisc_parameter qp;
 {
-	uint32_t handle;
+	char device[16];
+	char qdisc_kind[16] = "tbf";
+	uint32_t flags;
 	struct {
 		struct nlmsghdr n;
 		struct tcmsg t;
 		char buf[TCA_BUF_MAX];
 	} req;
-
-	uint32_t flags;
-	flags = NLM_F_EXCL|NLM_F_CREATE;
-
 	memset(&req, 0, sizeof(req));
+	flags = NLM_F_EXCL|NLM_F_CREATE;
+	strncpy(device, dev, sizeof(device) - 1);
 
 	tc_core_init();
 
@@ -177,27 +176,13 @@ struct qdisc_parameter qp;
 	req.n.nlmsg_type = RTM_NEWQDISC;
 	req.t.tcm_family = AF_UNSPEC;
 
-	// Qdisc kind
-	char qdisc_kind[16] = "tbf";
-
-	// device name
-	char device[16];
-	strncpy(device, dev, sizeof(device) - 1);
-
-	// set root or parent-id
-	if(strcmp(parent_id, "root") == 0) {
-		req.t.tcm_parent = TC_H_ROOT;
-	}
-	else {
-		if(get_tc_classid(&handle, parent_id))
-			dprintf(("[add_tbf_qdisc] Invalid parent id : %s\n", parent_id));
-		req.t.tcm_parent = handle;
-	}
-
-	// set handle-id
-	if(get_qdisc_handle(&handle, handle_id))
-		dprintf(("[add_tbf_qdisc] Invalid handle id : %s\n", handle_id));
-	req.t.tcm_handle = handle;
+    if(id[0] == TC_H_ROOT) {
+        req.t.tcm_parent = TC_H_ROOT;
+    }
+    else {
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
+    }
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
 
 	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
@@ -223,24 +208,24 @@ struct qdisc_parameter qp;
 }
 
 int
-change_tbf_qdisc(dev, parent_id, handle_id, qp)
+change_tbf_qdisc(dev, id, qp)
 char* dev;
-char* parent_id;
-char* handle_id;
+uint32_t id[4];
 struct qdisc_parameter qp;
 {
-	uint32_t handle;
+	char device[16];
+	char qdisc_kind[16] = "tbf";
+	uint32_t flags;
 	struct {
 		struct nlmsghdr n;
 		struct tcmsg t;
 		char buf[TCA_BUF_MAX];
 	} req;
-
 	memset(&req, 0, sizeof(req));
+	strncpy(device, dev, sizeof(device) - 1);
 
 	tc_core_init();
 
-	uint32_t flags;
 	flags = 0;
 
 	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
@@ -248,27 +233,13 @@ struct qdisc_parameter qp;
 	req.n.nlmsg_type = RTM_NEWQDISC;
 	req.t.tcm_family = AF_UNSPEC;
 
-	// Qdisc kind
-	char qdisc_kind[16] = "tbf";
-
-	// device name
-	char device[16];
-	strncpy(device, dev, sizeof(device) - 1);
-
-	// set root or parent-id
-	if(strcmp(parent_id, "root") == 0) {
-		req.t.tcm_parent = TC_H_ROOT;
-	}
-	else {
-		if(get_tc_classid(&handle, parent_id))
-			dprintf(("[change_tbf_qdisc] Invalid parent id : %s\n", parent_id));
-		req.t.tcm_parent = handle;
-	}
-
-	// set handle-id
-	if(get_qdisc_handle(&handle, handle_id))
-		dprintf(("[change_tbf_qdisc] Invalid handle id : %s\n", handle_id));
-	req.t.tcm_handle = handle;
+    if(id[0] == TC_H_ROOT) {
+        req.t.tcm_parent = TC_H_ROOT;
+    }
+    else {
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
+    }
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
 
 	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 

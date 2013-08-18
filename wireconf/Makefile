@@ -36,7 +36,8 @@ TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a do_wireconf
 TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o tbf.o
+#TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o q_netem.o iplink.o tc_filter.o htb.o netem.o tbf.o m_action.o f_u32.o
+TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o iplink.o tc_filter.o htb.o netem.o tbf.o m_action.o u32.o
 WCOBJ=q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 #WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
 TESTOBJ=test.o
@@ -52,6 +53,15 @@ endif
 all: $(TARGETS)
 
 ifeq ($(UNAME), Linux)
+#f_u32.so: f_u32.c
+#	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
+#
+#m_action.so: m_action.c
+#	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
+#
+#m_mirred.so: m_mirred.c
+#	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
+
 libnetlink.a: $(NLOBJ)
 	$(AR) rcs $@ $(NLOBJ) && ranlib $@
 

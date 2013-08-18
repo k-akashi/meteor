@@ -19,6 +19,9 @@
 #define TC_H_UNSPEC	(0U)
 #define TC_H_ROOT   (0xFFFFFFFFU)
 
+#define TC_HANDLE(maj, min) (maj << 16 | min)
+
+
 int preferred_family = AF_UNSPEC;
 int oneline = 0;
 char * _SL_ = NULL;
@@ -116,7 +119,9 @@ char *type;
 
     strncpy(d, dev, sizeof(d) - 1);
     if(cmd != RTM_DELQDISC) {
-        get_qdisc_handle(&handle, handleid);
+        //puts(handleid);
+        //get_qdisc_handle(&handle, handleid);
+        handle = TC_HANDLE(200, 1);
         req.t.tcm_handle = handle;
         dprintf(("[tc_cmd] req.t.tcm.handle = %d\n", req.t.tcm_handle));
     }

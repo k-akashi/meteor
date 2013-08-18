@@ -27,7 +27,10 @@
 
 #define usage() return(-1)
 
-int get_u32_handle(__u32* handle, char* str)
+int
+get_u32_handle(handle, str)
+__u32* handle;
+char* str;
 {
 	__u32 htid = 0;
 	__u32 hash = 0;
@@ -66,8 +69,10 @@ int get_u32_handle(__u32* handle, char* str)
 	return 0;
 }
 
-char*
-sprint_u32_handle(__u32 handle, char *buf)
+char
+*sprint_u32_handle(handle, buf)
+__u32 handle;
+char *buf;
 {
 	int bsize = SPRINT_BSIZE-1;
 	__u32 htid = TC_U32_HTID(handle);
@@ -96,8 +101,9 @@ sprint_u32_handle(__u32 handle, char *buf)
 			b += l;
 		}
 	}
-	if(show_raw)
+	if(show_raw) {
 		snprintf(b, bsize, "[%08x] ", handle);
+    }
 	return buf;
 }
 
@@ -237,8 +243,7 @@ int offmask;
 	if(get_u32(&mask, "0", 16))
 		return -1;
 
-// at
-/*
+/* at
 	if(parse_at(&argc, &argv, &off, &offmask))
 		return -1;
 	}
@@ -326,10 +331,11 @@ int off;
 	__u32 mask;
 	int offmask = 0;
 
-	if(get_prefix_1(&addr, match.arg, AF_INET))
+	if(get_prefix_1(&addr, match.arg, AF_INET)) {
 		return -1;
+    }
 
-/*
+/* at
 	if(argc > 0 && strcmp(argv[0], "at") == 0) {
 		NEXT_ARG();
 		if (parse_at(&argc, &argv, &off, &offmask))
@@ -338,10 +344,12 @@ int off;
 */
 
 	mask = 0;
-	if(addr.bitlen)
+	if(addr.bitlen) {
 		mask = htonl(0xFFFFFFFF << (24 - addr.bitlen));
-	if(pack_key(sel, addr.data[0], mask, off, offmask) < 0)
+    }
+	if(pack_key(sel, addr.data[0], mask, off, offmask) < 0) {
 		return -1;
+    }
 	res = 0;
 
 	return res;
@@ -407,65 +415,53 @@ struct tc_u32_sel *sel;
 		goto done;
 	}
 /*
-	if (strcmp(*argv, "tos") == 0 ||
-	    matches(*argv, "dsfield") == 0) {
-		NEXT_ARG();
-		res = parse_u8(&argc, &argv, sel, 1, 0);
+	if (strcmp(match.filter, "tos") == 0 ||
+		res = parse_u8(match, sel, 1, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "ihl") == 0) {
-		NEXT_ARG();
-		res = parse_u8(&argc, &argv, sel, 0, 0);
+	if (strcmp(match.filter, "ihl") == 0) {
+		res = parse_u8(match, sel, 0, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "protocol") == 0) {
-		NEXT_ARG();
-		res = parse_u8(&argc, &argv, sel, 9, 0);
+	if (strcmp(match.filter, "protocol") == 0) {
+		res = parse_u8(match, sel, 9, 0);
 		goto done;
 	}
-	if (matches(*argv, "precedence") == 0) {
-		NEXT_ARG();
-		res = parse_u8(&argc, &argv, sel, 1, 0);
+	if (matches(match.filter, "precedence") == 0) {
+		res = parse_u8(match, sel, 1, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "nofrag") == 0) {
-		argc--; argv++;
+	if (strcmp(match.filter, "nofrag") == 0) {
 		res = pack_key16(sel, 0, 0x3FFF, 6, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "firstfrag") == 0) {
+	if (strcmp(match.filter, "firstfrag") == 0) {
 		argc--; argv++;
 		res = pack_key16(sel, 0, 0x1FFF, 6, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "df") == 0) {
-		argc--; argv++;
+	if (strcmp(match.filter, "df") == 0) {
 		res = pack_key16(sel, 0x4000, 0x4000, 6, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "mf") == 0) {
-		argc--; argv++;
+	if (strcmp(match.filter, "mf") == 0) {
 		res = pack_key16(sel, 0x2000, 0x2000, 6, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "dport") == 0) {
-		NEXT_ARG();
-		res = parse_u16(&argc, &argv, sel, 22, 0);
+	if (strcmp(match.filter, "dport") == 0) {
+		res = parse_u16(match, sel, 22, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "sport") == 0) {
-		NEXT_ARG();
-		res = parse_u16(&argc, &argv, sel, 20, 0);
+	if (strcmp(match.filter, "sport") == 0) {
+		res = parse_u16(match, sel, 20, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "icmp_type") == 0) {
-		NEXT_ARG();
-		res = parse_u8(&argc, &argv, sel, 20, 0);
+	if (strcmp(match.filter, "icmp_type") == 0) {
+		res = parse_u8(match, sel, 20, 0);
 		goto done;
 	}
-	if (strcmp(*argv, "icmp_code") == 0) {
-		NEXT_ARG();
-		res = parse_u8(&argc, &argv, sel, 20, 1);
+	if (strcmp(match.filter, "icmp_code") == 0) {
+		res = parse_u8(match, sel, 20, 1);
 		goto done;
 	}
 */
@@ -637,6 +633,7 @@ struct nlmsghdr *n;
 {
 	int res = -1;
 
+    dprintf(("[parse_selector] match.prptocol : %s\n", match.protocol));
 	if (matches(match.protocol, "u32") == 0) {
 		res = parse_u32(sel, 0, 0);
 		goto done;
@@ -796,6 +793,7 @@ char* dev;
 
 	memset(&sel, 0, sizeof(sel));
 
+    dprintf(("[u32_parseopt] initalize\n"));
 	if(handle) {
 		dprintf(("[u32_parse_opt] handle : %s\n", handle));
 		if(get_u32_handle(&t->tcm_handle, handle)) {
@@ -807,7 +805,6 @@ char* dev;
 	tail = NLMSG_TAIL(n);
 	addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
-	// match
 	if(up.match.type) {
 		if(parse_selector(up.match, &sel.sel, n)) {
 			fprintf(stderr, "Illegal \"match\"\n");
@@ -833,10 +830,7 @@ char* dev;
 	// classid and flowid
 	if(up.classid) {
 		unsigned classid;
-		if(get_tc_classid(&classid, up.classid)) {
-			fprintf(stderr, "Illegal \"classid\"\n");
-			return -1;
-		}
+        classid = TC_HANDLE(up.classid[0], up.classid[1]);
 		addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &classid, 4);
 		sel.sel.flags |= TC_U32_TERMINAL;
 	}

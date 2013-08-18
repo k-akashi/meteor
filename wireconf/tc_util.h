@@ -14,6 +14,8 @@
 #define dprintf(x)
 #endif
 
+#define TC_HANDLE(maj, min) (maj << 16 | min)
+
 struct rtnl_handle rth;
 
 struct qdisc_parameter
@@ -43,7 +45,7 @@ struct u32_parameter
 	struct filter_match match;
 	char* offset;
 	char* hashkey;
-	char* classid;
+	uint32_t classid[2];
 	char* divisor;
 	char* order;
 	char* link;
@@ -100,17 +102,18 @@ extern int parse_action(char *, int, struct nlmsghdr *, char* dev);
 
 extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
 
-extern int add_netem_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
-extern int change_netem_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
+extern int add_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
+extern int change_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
 extern int delete_netem_qdisc(char* device);
-extern int add_htb_qdisc(char* device, char* parent_id, char* handle_id);
-extern int add_htb_class(char* device, char* parent_id, char* class_id, char* bnadwidth);
-extern int change_htb_class(char* device, char* parent_id, char* class_id, char* bnadwidth);
-extern int add_tbf_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
-extern int change_tbf_qdisc(char* device, char* parent_id, char* handle_id, struct qdisc_parameter qp);
+extern int add_htb_qdisc(char* device, uint32_t id[4]);
+extern int add_htb_class(char* device, uint32_t id[4], char* bnadwidth);
+extern int change_htb_class(char* device, uint32_t id[4], char* bnadwidth);
+extern int add_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
+extern int change_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
 
 extern char* get_route_info(char *info, char *addr);
 
-extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, char* parentid, char* handleid, char* protocolid, char* type, struct u32_parameter* up);
+extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, uint32_t id[4], char* protocolid, char* type, struct u32_parameter* up);
+extern int u32_filter_parse(struct filter_util *qu, uint32_t handle, struct u32_parameter up, struct nlmsghdr *n, char* dev);
 
 #endif

@@ -47,28 +47,34 @@ void *arg;
 	struct idxmap *im, **imp;
 	struct rtattr *tb[IFLA_MAX+1];
 
-	if(n->nlmsg_type != RTM_NEWLINK)
+	if(n->nlmsg_type != RTM_NEWLINK) {
 		return 0;
+    }
 
-	if(n->nlmsg_len < NLMSG_LENGTH(sizeof(ifi)))
+	if(n->nlmsg_len < NLMSG_LENGTH(sizeof(ifi))) {
 		return -1;
+    }
 
 
 	memset(tb, 0, sizeof(tb));
 	parse_rtattr(tb, IFLA_MAX, IFLA_RTA(ifi), IFLA_PAYLOAD(n));
-	if(tb[IFLA_IFNAME] == NULL)
+	if(tb[IFLA_IFNAME] == NULL) {
 		return 0;
+    }
 
 	h = ifi->ifi_index&0xF;
 
-	for(imp = &idxmap[h]; (im=*imp) != NULL; imp = &im->next)
-		if(im->index == ifi->ifi_index)
+	for(imp = &idxmap[h]; (im=*imp) != NULL; imp = &im->next) {
+		if(im->index == ifi->ifi_index) {
 			break;
+        }
+    }
 
 	if(im == NULL) {
 		im = malloc(sizeof(*im));
-		if(im == NULL)
+		if(im == NULL) {
 			return 0;
+        }
 		im->next = *imp;
 		im->index = ifi->ifi_index;
 		*imp = im;
@@ -79,10 +85,12 @@ void *arg;
 	if(tb[IFLA_ADDRESS]) {
 		int alen;
 		im->alen = alen = RTA_PAYLOAD(tb[IFLA_ADDRESS]);
-		if(alen > sizeof(im->addr))
+		if(alen > sizeof(im->addr)) {
 			alen = sizeof(im->addr);
+        }
 		memcpy(im->addr, RTA_DATA(tb[IFLA_ADDRESS]), alen);
-	} else {
+	}
+    else {
 		im->alen = 0;
 		memset(im->addr, 0, sizeof(im->addr));
 	}
@@ -130,11 +138,13 @@ const char *name;
 	struct idxmap *im;
 	int i;
 
-	if(name == NULL)
+	if(name == NULL) {
 		return 0;
+    }
 
-	if(icache && strcmp(name, ncache) == 0)
+	if(icache && strcmp(name, ncache) == 0) {
 		return icache;
+    }
 
 	for(i = 0; i < 16; i++) {
 		for(im = idxmap[i]; im; im = im->next) {

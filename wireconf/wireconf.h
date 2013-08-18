@@ -90,10 +90,13 @@ int get_rule(uint s, int16_t rulenum);
 int get_rule_linux(void);
 #endif
 
+#ifdef __linux
+int init_rule(char *dst);
+#endif
+
 // add an ipfw rule containing a dummynet pipe to the firewall
 // return SUCCESS on succes, ERROR on error
-int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, 
-	     int direction);
+int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, int direction);
 
 // delete an ipfw rule;
 // return SUCCESS on succes, ERROR on error

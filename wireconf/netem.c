@@ -61,40 +61,48 @@ struct nlmsghdr *n;
     memset(present, 0, sizeof(present));
 
     if(qp->limit) {
-        if(get_size(&opt.limit, qp->limit))
+        if(get_size(&opt.limit, qp->limit)) {
             return -1;
+        }
     }
     if(qp->delay) {
-        if(get_ticks(&opt.latency, qp->delay))
+        if(get_ticks(&opt.latency, qp->delay)) {
             return -1;
+        }
     }
     if(qp->jitter) {
-        if(get_ticks(&opt.jitter, qp->jitter))
+        if(get_ticks(&opt.jitter, qp->jitter)) {
             return -1;
+        }
     }
     if(qp->delay_corr) {
         ++present[TCA_NETEM_CORR];
-        if(get_percent(&cor.delay_corr, qp->delay_corr))
+        if(get_percent(&cor.delay_corr, qp->delay_corr)) {
             return -1;
+        }
     }
     if(qp->loss) {
-        if(get_percent(&opt.loss, qp->loss))
+        if(get_percent(&opt.loss, qp->loss)) {
             return -1;
+        }
     }
     if(qp->loss_corr) {
         ++present[TCA_NETEM_CORR];
-        if(get_percent(&cor.loss_corr, qp->loss_corr))
+        if(get_percent(&cor.loss_corr, qp->loss_corr)) {
             return -1;
+        }
     }
     if(qp->reorder_prob) {
         present[TCA_NETEM_REORDER] = 1;
-        if(get_percent(&reorder.probability, qp->reorder_prob))
+        if(get_percent(&reorder.probability, qp->reorder_prob)) {
             return -1;
+        }
     }
     if(qp->reorder_corr) {
         ++present[TCA_NETEM_CORR];
-        if(get_percent(&reorder.correlation, qp->reorder_corr))
+        if(get_percent(&reorder.correlation, qp->reorder_corr)) {
             return -1;
+        }
     }
 
     tail = NLMSG_TAIL(n);
@@ -103,34 +111,32 @@ struct nlmsghdr *n;
         if(opt.latency == 0) {
             fprintf(stderr, "reordering not possible without specifying some delay\n");
         }
-        if(opt.gap == 0)
+        if(opt.gap == 0) {
             opt.gap = 1;
+        }
     } else if(opt.gap > 0) {
         fprintf(stderr, "gap specified without reorder probability\n");
         return -1;
     }
-
     if(dist_data && (opt.latency == 0 || opt.jitter == 0)) {
         fprintf(stderr, "distribution specified but no latency and jitter values\n");
         return -1;
     }
-
-    if(addattr_l(n, TCA_BUF_MAX, TCA_OPTIONS, &opt, sizeof(opt)) < 0)
+    if(addattr_l(n, TCA_BUF_MAX, TCA_OPTIONS, &opt, sizeof(opt)) < 0) {
         return -1;
-
-    if(cor.delay_corr || cor.loss_corr || cor.dup_corr) {
-        if (present[TCA_NETEM_CORR] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof(cor)) < 0)
-            return -1;
     }
-
-    if(present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0)
+    if(cor.delay_corr || cor.loss_corr || cor.dup_corr) {
+        if (present[TCA_NETEM_CORR] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof(cor)) < 0) {
+            return -1;
+        }
+    }
+    if(present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0) {
         return -1;
-
+    }
     if(corrupt.probability) {
         if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0)
             return -1;
     }
-
     if(dist_data) {
         if(addattr_l(n, 32768, TCA_NETEM_DELAY_DIST, dist_data, dist_size * sizeof(dist_data[0])) < 0)
             return -1;
@@ -141,54 +147,41 @@ struct nlmsghdr *n;
 }
 
 int
-add_netem_qdisc(dev, parent_id, handle_id, qp)
+add_netem_qdisc(dev, id, qp)
 char* dev;
-char* parent_id;
-char* handle_id;
+uint32_t id[4];
 struct qdisc_parameter qp;
 {
-    uint32_t handle;
+    char device[16];
+    char qdisc_kind[16] = "netem";
+    uint32_t flags;
     struct {
         struct nlmsghdr n;
         struct tcmsg t;
         char buf[TCA_BUF_MAX];
     } req;
-    
     memset(&req, 0, sizeof(req));
+    strncpy(device, dev, sizeof(device) - 1);
 
     tc_core_init();
 
-    uint32_t flags;
     flags = NLM_F_EXCL|NLM_F_CREATE;
-
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type = RTM_NEWQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    // Qdisc kind
-    char qdisc_kind[16] = "netem";
-
-    // device name
-    char device[16];
-    strncpy(device, dev, sizeof(device) - 1);
-
-    // set root or parent-id
-    if(strcmp(parent_id, "root") == 0) {
+    if(id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
-        if(get_tc_classid(&handle, parent_id))
-            dprintf(("[add_netem_qdisc] Invalid parent id : %s\n", parent_id));
-        req.t.tcm_parent = handle;
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
     }
-
-    // set handle-id
-    if(get_qdisc_handle(&handle, handle_id))
-        dprintf(("[add_netem_qdisc] Invalid handle id : %s\n", handle_id));
-    req.t.tcm_handle = handle;
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+    dprintf(("[add_netem_qdisc] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[add_netem_qdisc] handle id = %d\n", req.t.tcm_handle));
 
     netem_opt(&qp, &req.n);
 
@@ -213,24 +206,24 @@ struct qdisc_parameter qp;
 }
 
 int
-change_netem_qdisc(dev, parent_id, handle_id, qp)
+change_netem_qdisc(dev, id, qp)
 char* dev;
-char* parent_id;
-char* handle_id;
+uint32_t id[4];
 struct qdisc_parameter qp;
 {
-    uint32_t handle;
+    uint32_t flags;
+    char device[16];
+    char qdisc_kind[16] = "netem";
     struct {
         struct nlmsghdr n;
         struct tcmsg t;
         char buf[TCA_BUF_MAX];
     } req;
-    
     memset(&req, 0, sizeof(req));
+    strncpy(device, dev, sizeof(device) - 1);
 
     tc_core_init();
 
-    uint32_t flags;
     flags = 0;
 
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
@@ -238,27 +231,15 @@ struct qdisc_parameter qp;
     req.n.nlmsg_type = RTM_NEWQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    // Qdisc kind
-    char qdisc_kind[16] = "netem";
-
-    // device name
-    char device[16];
-    strncpy(device, dev, sizeof(device) - 1);
-
-    // set root or parent-id
-    if(strcmp(parent_id, "root") == 0) {
+    if(id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
-        if(get_tc_classid(&handle, parent_id))
-            dprintf(("[change_netem_qdisc] Invalid parent id : %s\n", parent_id));
-        req.t.tcm_parent = handle;
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
     }
-
-    // set handle-id
-    if(get_qdisc_handle(&handle, handle_id))
-        dprintf(("[change_netem_qdisc] Invalid handle id : %s\n", handle_id));
-    req.t.tcm_handle = handle;
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
+    dprintf(("[change_netem_qdisc] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[change_netem_qdisc] handle id = %d\n", req.t.tcm_handle));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 

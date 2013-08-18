@@ -406,13 +406,10 @@ struct u32_parameter* up;
 		req.t.tcm_parent = handle;
 	}
 
-/*
 	if(fhandle)
 		duparg("handle", handleid);
 	fhandle = handleid;
-*/
 
-	// protocol set
 	__u16 id;
 	if(protocol)
 		duparg("protocol", protocolid);
@@ -420,7 +417,7 @@ struct u32_parameter* up;
 		invarg(protocolid, "invalid protocol");
 	protocol = id;
 
-    if (get_u32(&prio, "16", 0))
+    if(get_u32(&prio, "16", 0))
         invarg("16", "invalid prpriority value");
 
 	strncpy(k, type, sizeof(k) - 1);

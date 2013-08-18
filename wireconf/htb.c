@@ -73,24 +73,24 @@ char *bandwidth;
 }
 
 int
-add_htb_class(dev, parent_id, class_id, bandwidth)
+add_htb_class(dev, id, bandwidth)
 char* dev;
-char* parent_id;
-char* class_id;
+uint32_t id[4];
 char* bandwidth;
 {
-    uint32_t handle;
+	char device[16];
+    char class_kind[16] = "htb";
+	uint32_t flags;
 	struct {
 		struct nlmsghdr n;
 		struct tcmsg t;
 		char buf[4096];
 	} req;
-
-	uint32_t flags;
-	flags = NLM_F_EXCL|NLM_F_CREATE;
-
 	memset(&req, 0, sizeof(req));
+	strncpy(device, dev, sizeof(device) - 1);
 
+
+	flags = NLM_F_EXCL|NLM_F_CREATE;
 	tc_core_init();
 
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
@@ -98,23 +98,16 @@ char* bandwidth;
     req.n.nlmsg_type = RTM_NEWTCLASS;
     req.t.tcm_family = AF_UNSPEC;
 
-    char class_kind[16] = "htb";
 
-	char device[16];
-	strncpy(device, dev, sizeof(device) - 1);
-
-    if(strcmp(parent_id, "root")) {
+    if(id[0] == TC_H_ROOT) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
-        if(get_tc_classid(&handle, parent_id))
-            dprintf(("[add_htb_class] Invalid classid : %s\n", parent_id));
-        req.t.tcm_parent = handle;
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
     }
-
-    if(get_tc_classid(&handle, class_id))
-        dprintf(("[add_htb_class] Invalid handle id : %s\n", class_id));
-    req.t.tcm_handle = handle;
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
+    dprintf(("[add_htb_class] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[add_htb_class] handle id = %d\n", req.t.tcm_handle));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, class_kind, strlen(class_kind) + 1);
 
@@ -140,23 +133,21 @@ char* bandwidth;
 }
 
 int
-change_htb_class(dev, parent_id, class_id, bandwidth)
+change_htb_class(dev, id, bandwidth)
 char* dev;
-char* parent_id;
-char* class_id;
+uint32_t id[4];
 char* bandwidth;
 {
-    uint32_t handle;
+	char device[16];
+    char class_kind[16] = "htb";
+	uint32_t flags = 0;
 	struct {
 		struct nlmsghdr n;
 		struct tcmsg t;
 		char buf[4096];
 	} req;
-
-	uint32_t flags;
-	flags = 0;
-
 	memset(&req, 0, sizeof(req));
+	strncpy(device, dev, sizeof(device) - 1);
 
 	tc_core_init();
 
@@ -165,23 +156,16 @@ char* bandwidth;
     req.n.nlmsg_type = RTM_NEWTCLASS;
     req.t.tcm_family = AF_UNSPEC;
 
-    char class_kind[16] = "htb";
 
-	char device[16];
-	strncpy(device, dev, sizeof(device) - 1);
-
-    if(strcmp(parent_id, "root")) {
+    if(id[0] == TC_H_ROOT) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
-        if(get_tc_classid(&handle, parent_id))
-            dprintf(("[change_htb_class] Invalid classid : %s\n", parent_id));
-        req.t.tcm_parent = handle;
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
     }
-
-    if(get_tc_classid(&handle, class_id))
-        dprintf(("[change_htb_class] Invalid handle id : %s\n", class_id));
-    req.t.tcm_handle = handle;
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
+    dprintf(("[change_htb_class] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[change_htb_class] handle id = %d\n", req.t.tcm_handle));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, class_kind, strlen(class_kind) + 1);
 
@@ -229,12 +213,13 @@ struct nlmsghdr* n;
 }
 
 int
-add_htb_qdisc(dev, parent_id, handle_id)
+add_htb_qdisc(dev, id)
 char* dev;
-char* parent_id;
-char* handle_id;
+uint32_t id[4];
 {
-	uint32_t handle;
+	char device[16];
+	char qdisc_kind[16] = "htb";
+	uint32_t flags;
 	//struct qdisc_util *q = NULL;
 
 	struct {
@@ -242,36 +227,28 @@ char* handle_id;
 		struct tcmsg    t;
 		char            buf[TCA_BUF_MAX];
 	} req;
-
 	memset(&req, 0, sizeof(req));
 
-	tc_core_init();
-
-	uint32_t flags;
 	flags = NLM_F_EXCL|NLM_F_CREATE;
+	strncpy(device, dev, sizeof(device) - 1);
+
+	tc_core_init();
 
 	req.n.nlmsg_len   = NLMSG_LENGTH(sizeof(struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
 	req.n.nlmsg_type  = RTM_NEWQDISC;
 	req.t.tcm_family  = AF_UNSPEC;
 
-	char qdisc_kind[16] = "htb";
+    if(id[0] == TC_H_ROOT) {
+        req.t.tcm_parent = TC_H_ROOT;
+    }
+    else {
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
+    }
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
+    dprintf(("[add_htb_class] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[add_htb_class] handle id = %d\n", req.t.tcm_handle));
 
-	char device[16];
-	strncpy(device, dev, sizeof(device) - 1);
-
-	if(strcmp(parent_id, "root") == 0) {
-		req.t.tcm_parent = TC_H_ROOT;
-	}
-	else {
-		if(get_tc_classid(&handle, parent_id))
-			dprintf(("[add_htb_qdisc] Invalid classid : %s\n", parent_id));
-		req.t.tcm_parent = handle;
-	}
-
-	if(get_qdisc_handle(&handle, handle_id))
-		dprintf(("[add_htb_qdisc] Invalid handle id : %s\n", handle_id));
-	req.t.tcm_handle = handle;
 
 	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 

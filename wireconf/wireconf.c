@@ -73,6 +73,7 @@
 
 #ifdef __linux
 #define DEV_NAME 256
+#define OFFSET_RULE 32767
 #endif
 /////////////////////////////////////////////
 // Special defines
@@ -479,6 +480,28 @@ int direction;
 }
 #elif __linux
 int
+init_rule(dst)
+char *dst;
+{
+    char *device_name;
+    uint32_t htb_qdisc_id[4];
+
+    dprintf(("\n\n[init_rule] add htb qdisc\n"));
+    device_name = malloc(DEV_NAME);
+    device_name =  (char* )get_route_info("dev", dst);
+
+    htb_qdisc_id[0] = TC_H_ROOT;
+    htb_qdisc_id[1] = 0;
+    htb_qdisc_id[2] = 1;
+    htb_qdisc_id[3] = 0;
+
+    dprintf(("\n\n[add_rule] add htb qdisc\n"));
+    add_htb_qdisc(device_name, htb_qdisc_id);
+
+    return 0;
+}
+
+int
 add_rule(s, rulenum, handle_nr, src, dst, direction)
 int s;
 uint16_t rulenum;
@@ -487,14 +510,19 @@ char *src;
 char *dst;
 int direction;
 {
+    char *device_name;
     int i;
-    int32_t find_ifb_device = 0;
+    uint32_t htb_class_id[4];
+    uint32_t netem_qdisc_id[4];
+    uint32_t filter_id[4];
+    uint32_t find_ifb_device = 0;
     struct qdisc_parameter qp;
-    char* device_name;
-    char handleid[10];
+    struct u32_parameter ufp;
 
     device_name = malloc(DEV_NAME);
     device_name =  (char* )get_route_info("dev", dst);
+    memset(&qp, 0, sizeof(struct qdisc_parameter));
+    memset(&ufp, '\0', sizeof(struct u32_parameter));
 
 #ifdef TEST
     device_list = device_name;
@@ -504,118 +532,70 @@ int direction;
     dev_no++;
 #endif
 
-    // Qdisc Parameter set
-    memset(&qp, 0, sizeof(qp));
-
-    sprintf(handleid, "%d", handle_nr);
-    dprintf(("[add_rule] rulenum = %s\n", handleid));
-
-    // initialize Qdisc Parameter
+    dprintf(("[add_rule] rulenum = %d\n", handle_nr));
     qp.limit = "100000";
     qp.delay = "1us";
-    qp.jitter = "0";
-    qp.delay_corr = "0";
-    qp.loss = "0";
-    qp.loss_corr = "0";
-    qp.reorder_prob = "0";
-    qp.reorder_corr = "0";
     qp.rate = "1Gbit";
     qp.buffer = "1Mbit";
-
-    char netem_parent_id[10];
-    char netem_handle_id[10];
-
-    char htb_qdisc_parent_id[10];
-    char htb_qdisc_handle_id[10];
-
-    char htb_class_1_parent_id[10];
-    char htb_class_1_handle_id[10];
-
-    char htb_class_2_parent_id[10];
-    char htb_class_2_handle_id[10];
 
 #ifdef PFIFO
     char pfifo_handle_id[10];
     char pfifo_parent_id[10];
 #endif
 
-    char filter_parent_id[10];
-    char filter_handle_id[10];
     char dstaddr[20];
 
-    sprintf(htb_qdisc_parent_id, "root");
-    sprintf(htb_qdisc_handle_id, "%d:", handle_nr);
+    printf("handle_nr : %d\n", handle_nr);
+    htb_class_id[0] = 1;
+    htb_class_id[1] = 0;
+    htb_class_id[2] = 1;
+    htb_class_id[3] = handle_nr;
 
-    sprintf(htb_class_1_parent_id, "%d:",  handle_nr);
-    sprintf(htb_class_1_handle_id, "%d:1", handle_nr);
+    netem_qdisc_id[0] = 1;
+    netem_qdisc_id[1] = handle_nr;
+    netem_qdisc_id[2] = handle_nr;
+    netem_qdisc_id[3] = 0;
 
-    sprintf(htb_class_2_parent_id, "%d:",   handle_nr);
-    sprintf(htb_class_2_handle_id, "%d:11", handle_nr);
-
-    sprintf(netem_parent_id, "%d:11", handle_nr);
-    sprintf(netem_handle_id, "%d:", handle_nr + 1000);
-
-    sprintf(filter_parent_id, "%d:", handle_nr);
-    sprintf(filter_handle_id, "%d:11", handle_nr);
-
-/* master branch rule
-    sprintf(netemid, "%d", handle_nr + 1000);
-    sprintf(parent_netemid, "%d:1", handle_nr);
-
-    if(!TBF) {
-        sprintf(pfifoid, "%d", handle_nr + 2000);
-        sprintf(parent_pfifoid, "%s:1", netemid);
-    }
-    else {
-        sprintf(bwid, "%d", handle_nr + 2000);
-        sprintf(parent_bwid, "%s:1", netemid);
-        sprintf(pfifoid, "%d", handle_nr + 3000);
-        sprintf(parent_pfifoid, "%s:1", bwid);
-    }
-*/
+    filter_id[0] = 1;
+    filter_id[1] = handle_nr;
+    filter_id[2] = handle_nr;
+    filter_id[3] = 1;
 
     sprintf(dstaddr, "%s/32", dst);
-
     dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
 
-    struct u32_parameter ufp;
-
-    memset(&ufp, 0, sizeof(struct u32_parameter));
-
-    ufp.match.type = "u32";
-    ufp.match.protocol = "ip";
-    ufp.match.filter = "dst";
-    ufp.match.arg = dstaddr;
-    ufp.offset = NULL;
-    ufp.hashkey = NULL;
-    ufp.classid = "200:11";
-    //ufp.classid = parent_netemid;
-    ufp.divisor = NULL;
-    ufp.order = NULL;
-    ufp.link = NULL;
-    ufp.ht = NULL;
-    ufp.indev = NULL;
-    ufp.action = NULL;
-    ufp.police = NULL;
-    ufp.rdev = NULL;
 
     if(!INGRESS) {
-        dprintf(("\n\n[add_rule] add htb qdisc\n"));
-        add_htb_qdisc(device_name, htb_qdisc_parent_id, htb_qdisc_handle_id);
+
+        ufp.match.type = "u32";
+        ufp.match.protocol = "ip";
+        ufp.match.filter = "dst";
+        ufp.match.arg = dstaddr;
+        ufp.classid[0] = filter_id[2];
+        ufp.classid[1] = filter_id[3];
 
         dprintf(("\n\n[add_rule] add htb class\n"));
-        add_htb_class(device_name, htb_class_1_parent_id, htb_class_1_handle_id, "10000000");
-
-        dprintf(("\n\n[add_rule] add htb class\n"));
-        add_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, "10000000");
+        add_htb_class(device_name, htb_class_id, "10000000");
 
         dprintf(("\n\n[add_rule] add netem qdisc\n"));
-        add_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
+        add_netem_qdisc(device_name, netem_qdisc_id, qp);
 
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_parent_id, filter_handle_id, "ip", "u32", &ufp);
+        dprintf(("\n\n[add_rule] add tc filter\n"));
+        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_id, "ip", "u32", &ufp);
+/*
+        char *fcmd = NULL;
+        fcmd = malloc(1024);
+        sprintf(fcmd, "tc filter add dev %s protocol ip parent %d: prio 1 u32 match ip dst %s/32 flowid 1:c8", 
+            device_name, filter_id[0], dst);
+        dprintf(("[add_rule] filter command : %s\n", fcmd));
+        if(system(fcmd)) {
+            dprintf(("[add_rule] Failed add tc filter\n"));
+            exit(1);
+        }
+*/
     }
     else if(INGRESS) {
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, handleid, "ingress", qp, "ingress");
+        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, "1", "ingress", qp, "ingress");
         char ifb_device_name[5];
         for(i = 0; i <= MAX_IFB; i++) {
             if(!ifb_device[i]) {
@@ -629,20 +609,11 @@ int direction;
             fprintf(stderr, "Cannot file ifb device\n");
             exit(1);
         }
-        // filter-rule parameter
-        struct u32_parameter* up;
-        up->match.type = "u32";
-        up->offset = NULL;
-        up->hashkey = NULL;
-        up->classid = "1:1";
-        up->divisor = NULL;
-        up->order = NULL;
-        up->link = NULL;
-        up->ht = NULL;
-        up->indev = NULL;
-        up->action = "mirred";
-        up->police = NULL;
-        up->rdev = ifb_device_name;
+        ufp.match.type = "u32";
+        ufp.classid[0] = 1;
+        ufp.classid[1] = 1;
+        ufp.action = "mirred";
+        ufp.rdev = ifb_device_name;
 //        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
 //        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
 //        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parent_netemid, qp, "tbf");
@@ -702,22 +673,8 @@ uint32_t rule_number;
     device_name = malloc(DEV_NAME);
 
     device_name = (char*)get_route_info("dev", dst);
-    /*
-    qp.limit = "1000";
-    qp.delay = "1us";
-    qp.jitter = "0";
-    qp.delay_corr = "0";
-    qp.loss = "0";
-    qp.loss_corr = "0";
-    qp.reorder_prob = "0";
-    qp.reorder_corr = "0";
-    qp.rate = "1Gbit";
-    qp.buffer = "1Mbit";
-    */
 
-    //system("tc qdisc del dev lo root");
     if(!INGRESS) {
-//        tc_cmd(RTM_DELQDISC, 0, device_name, "1", "root", qp, "pfifo");
         delete_netem_qdisc(device_name);
     }
 
@@ -736,21 +693,16 @@ uint32_t rule_number;
             }
         }
         tc_cmd(RTM_DELQDISC, 0, ifb_device_name, "1", "root", qp, "pfifo");
-        //tc_cmd(RTM_DELQDISC, 0, device_name, "1", "root", qp, "ingress");
-        //sprintf(cmd, "tc qdisc del dev %s root", ifb_device_name);
-        //system(cmd);
         sprintf(cmd, "tc qdisc del dev %s ingress", device_name);
         ret = system(cmd);
         if(ret != 0) {
             exit(1);
         }
     }
-    //tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", dst), "1", "0", qp, "netem");
-    //tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", "127.0.0.1"), "1", "0", qp, "netem");
-#endif
 
     return SUCCESS;
 }
+#endif
 
 // print a rule structure
 #ifdef __FreeBSD__
@@ -821,34 +773,22 @@ int lossrate;
 }
 #elif __linux
 int
-convert_netemid(handle)
-int handle;
-{
-    int id;
-
-    id = handle;
-    id <<= 16;
-    id |= handle;
-
-    return id;
-}
-
-int
 configure_qdisc(s, dst, handle, bandwidth, delay, lossrate)
 int s;
 char* dst;
-int handle;
-int bandwidth;
-int delay;
+int32_t handle;
+int32_t bandwidth;
+int32_t delay;
 double lossrate;
 {
     struct qdisc_parameter qp;
     char *device_name;
     int config_netem = 0;
     int config_tbf = 0;
+    uint32_t htb_class_id[4];
+    uint32_t netem_qdisc_id[4];
     char delaystr[20];
     char loss[20];
-    char handleid[10];
     char rate[20];
     char buffer[20];
 
@@ -867,52 +807,22 @@ double lossrate;
     }
 #endif
 
-    /*
-    int netemid;
-    netemid = convert_netemid(handle);
-    netemid |= handle;
-    int parent;
-    parent = netemid;
-    parent >>= 16;
-    int child;
-    child = netemid;
-    child <<= 16;
-    child >>= 16;
-    dprintf(("[configure_qdisc] netem id = %d\n", netemid));
-    dprintf(("[configure_qdisc] parent id = %d\n", parent));
-    dprintf(("[configure_qdisc] child id = %d\n", child));
-    dprintf(("[configure_qdisc] rulenum = %d\n", handle));
-    */
+    htb_class_id[0] = 1;
+    htb_class_id[1] = 0;
+    htb_class_id[2] = 1;
+    htb_class_id[3] = handle;
 
-    sprintf(handleid, "%d", handle);
-
-    char htb_class_2_parent_id[10];
-    char htb_class_2_handle_id[10];
-    char netem_parent_id[10];
-    char netem_handle_id[10];
-
-    sprintf(htb_class_2_parent_id, "%d:",   handle);
-    sprintf(htb_class_2_handle_id, "%d:11", handle);
-    sprintf(netem_parent_id, "%d:11", handle);
-    sprintf(netem_handle_id, "%d:", handle + 1000);
-
-    // tmp
-    char netemid[10];
-    char parent_netemid[10];
-    char bwid[10];
-    char parent_bwid[10];
-    sprintf(netemid, "%d", handle + 1000);
-    sprintf(parent_netemid, "%d:1", handle);
-    sprintf(bwid, "%d", handle + 2000);
-    sprintf(parent_bwid, "%s:1", netemid);
-    //
+    netem_qdisc_id[0] = 1;
+    netem_qdisc_id[1] = handle;
+    netem_qdisc_id[2] = handle;
+    netem_qdisc_id[3] = 0;
 
     if(priv_delay != delay || priv_loss != lossrate) {
+         config_netem = 1;
          sprintf(delaystr, "%dms", delay);
          qp.delay = delaystr;
          priv_delay = delay;
-         config_netem = 1;
-         sprintf(loss, "%f", lossrate);
+         sprintf(loss, "%f", lossrate * 100);
          qp.loss = loss;
          priv_loss = lossrate;
     }
@@ -941,13 +851,7 @@ double lossrate;
 
     if(config_netem) {
         qp.limit = "100000";
-        qp.jitter = "0";
-        qp.delay_corr = "0";
-        qp.loss_corr = "0";
-        qp.reorder_prob = "0";
-        qp.reorder_corr = "0";
-
-        change_netem_qdisc(device_name, netem_parent_id, netem_handle_id, qp);
+        change_netem_qdisc(device_name, netem_qdisc_id, qp);
     }
 
     if(TBF) {
@@ -963,7 +867,7 @@ double lossrate;
         if(config_tbf) {
             qp.rate = rate;
             qp.buffer = buffer;
-            change_htb_class(device_name, htb_class_2_parent_id, htb_class_2_handle_id, rate);
+            change_htb_class(device_name, htb_class_id, rate);
         }
     }
 

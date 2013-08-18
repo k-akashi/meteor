@@ -137,12 +137,11 @@ char* buf;
 }
 
 int 
-tc_filter_modify(cmd, flags, dev, parentid, handleid, protocolid, type, up)
+tc_filter_modify(cmd, flags, dev, id, protocolid, type, up)
 int cmd;
 unsigned int flags;
 char* dev;
-char* parentid;
-char* handleid;
+uint32_t id[4];
 char* protocolid;
 char* type;
 struct u32_parameter* up;
@@ -155,7 +154,7 @@ struct u32_parameter* up;
 	struct filter_util* q = NULL;
 	__u32 prio = 0;
 	__u32 protocol = 0;
-	char* fhandle = NULL;
+	uint32_t fhandle = 0;
 	char  d[16];
 	char  k[16];
 	struct tc_estimator est;
@@ -171,44 +170,41 @@ struct u32_parameter* up;
 	req.n.nlmsg_type = cmd;
 	req.t.tcm_family = AF_UNSPEC;
 
-	dprintf(("\nfilter function\n"));
-
 	strncpy(d, dev, sizeof(d)-1);
 
-	if(*parentid == '0') {
-		if(req.t.tcm_parent) {
-			fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
-			return -1;
-		}
-		req.t.tcm_parent = TC_H_ROOT;
-	}
-	else {
-		__u32 handle;
-		if(req.t.tcm_parent)
-			duparg("parent", parentid);
-		if(get_tc_classid(&handle, parentid))
-			invarg(parentid, "Invalid parent ID");
-		req.t.tcm_parent = handle;
-	}
+    if(id[0] == 0) {
+        req.t.tcm_parent = TC_H_ROOT;
+    }
+    else {
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
+    }
+    dprintf(("[tc_filter_modify] parent id = %d\n", req.t.tcm_parent));
+
+	fhandle = TC_HANDLE(id[2], id[3]);
 
 /*
-	if(fhandle)
-		duparg("handle", handleid);
-	fhandle = handleid;
+    char *handleid;
+    handleid = malloc(10);
+    sprintf(handleid, "%d:%d", id[2], id[3]);
+    fhandle = handleid;
+    dprintf(("[tc_filter_modify] handle id = %s\n", handleid));
 */
 
-	// protocol set
-	__u16 id;
-	if(protocol)
+	__u16 protocol_id;
+	if(protocol) {
 		duparg("protocol", protocolid);
-	if(ll_proto_a2n(&id, protocolid))
+    }
+	if(ll_proto_a2n(&protocol_id, protocolid)) {
 		invarg(protocolid, "invalid protocol");
-	protocol = id;
+    }
+	protocol = protocol_id;
+    dprintf(("[tc_filter_modify] protocol = %d\n", protocol));
 
-    if (get_u32(&prio, "16", 0))
+    if(get_u32(&prio, "16", 0))
         invarg("16", "invalid prpriority value");
 
 	strncpy(k, type, sizeof(k) - 1);
+    dprintf(("[tc_filter_modify] kind = %s\n", k));
 	q = get_filter_kind(k);
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
@@ -219,10 +215,14 @@ struct u32_parameter* up;
 	if(up->rdev) {
 		sprintf(dev, "%s", up->rdev);
 	}
+
+    u32_filter_parse(q, fhandle, *up, &req.n, dev);
+/*
 	if(q) {
 		if(q->parse_fopt(q, fhandle, *up, &req.n, dev))
 			return 1;
 	}
+*/
 
 	if(est.ewma_log)
 		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));

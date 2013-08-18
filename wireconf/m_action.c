@@ -68,7 +68,8 @@ struct nlmsghdr *n;
 }
 */
 
-struct action_util *get_action_kind(str)
+struct action_util
+*get_action_kind(str)
 char *str;
 {
 	static void *aBODY;
@@ -126,7 +127,7 @@ noexist:
 	return a;
 }
 
-/*
+/* new_cmd
 int
 new_cmd(argv) 
 char **argv

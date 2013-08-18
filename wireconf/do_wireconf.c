@@ -507,6 +507,10 @@ char **argv;
         //get_rule(s, 123);
 
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, faddr, taddr);
+
+#ifdef __linux
+        init_rule(taddr);
+#endif
         if(add_rule(s, rulenum, pipe_nr, faddr, taddr, direction) < 0) {
             WARNING("Could not add rule #%d with pipe #%d from %s to %s", 
                     rulenum, pipe_nr, faddr, taddr);
@@ -517,6 +521,9 @@ char **argv;
         //exit(2);
     }
     else {
+#ifdef __linux
+        init_rule(taddr);
+#endif
         // usage (2) => sets of rules must be added
         // add rule & pipe for unicast traffic _to_ j
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
