@@ -35,7 +35,6 @@ char* str;
 	__u32 htid = 0;
 	__u32 hash = 0;
 	__u32 nodeid = 0;
-	dprintf(("[get_u32_handle] handle id = %s\n", str));
 
 	char* tmp = strchr(str, ':');
 

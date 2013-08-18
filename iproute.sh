@@ -18,9 +18,9 @@ sudo /sbin/tc qdisc del dev ${dev} root
 #sudo /sbin/tc filter   add dev ${dev} proto ip parent 200: prio 1 u32 match ip dst 127.0.0.0/8 flowid 200:11
 
 sudo /sbin/tc qdisc    add dev ${dev} root 					handle 1:			htb default 1
-sudo /sbin/tc class    add dev ${dev} parent 1:1            classid 1:200       htb rate 10Mbit
-sudo /sbin/tc qdisc    add dev ${dev} parent 1:200 	    	handle 200:1 		netem delay 10ms
-sudo /sbin/tc filter   add dev ${dev} proto ip parent 1: prio 1 u32 match ip dst 127.0.0.0/8 flowid 1:200
+sudo /sbin/tc class    add dev ${dev} parent 1:1            classid 1:c8       htb rate 10Mbit
+sudo /sbin/tc qdisc    add dev ${dev} parent 1:c8 	    	handle c8:1 		netem delay 10ms
+sudo /sbin/tc filter   add dev ${dev} proto ip parent 1: prio 1 u32 match ip dst 127.0.0.0/8 flowid 1:c8
 
 echo ""
 sudo /sbin/tc qdisc show dev ${dev}

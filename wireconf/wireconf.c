@@ -557,9 +557,9 @@ int direction;
     netem_qdisc_id[3] = 0;
 
     filter_id[0] = 1;
-    filter_id[1] = handle_nr;
-    filter_id[2] = handle_nr;
-    filter_id[3] = 1;
+    filter_id[1] = 0;
+    filter_id[2] = 1;
+    filter_id[3] = handle_nr;
 
     sprintf(dstaddr, "%s/32", dst);
     dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
