@@ -124,8 +124,7 @@
 
 #define INGRESS 0 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
-#define MAX_IFB 1
-char* ifb_device[MAX_IFB];
+char* ifb_device_name = "ifb0";
 #endif // INGRESS 
 
 #define MAX_DEV 16
@@ -485,18 +484,37 @@ char *dst;
 {
     char *device_name;
     uint32_t htb_qdisc_id[4];
+    //struct qdisc_parameter qp;
+    //struct u32_parameter ufp;
 
-    dprintf(("\n\n[init_rule] add htb qdisc\n"));
     device_name = malloc(DEV_NAME);
     device_name =  (char* )get_route_info("dev", dst);
 
+    if(INGRESS) {
+        dprintf(("\n\n[init_rule] add ingress qdisc\n"));
+        add_ingress_qdisc(device_name);
+        add_ingress_filter(device_name, ifb_device_name);
+
+        device_name = "ifb0";
+    }
+    dprintf(("\n\n[init_rule] add htb qdisc\n"));
+ 
     htb_qdisc_id[0] = TC_H_ROOT;
     htb_qdisc_id[1] = 0;
     htb_qdisc_id[2] = 1;
     htb_qdisc_id[3] = 0;
-
+ 
     dprintf(("\n\n[add_rule] add htb qdisc\n"));
     add_htb_qdisc(device_name, htb_qdisc_id);
+
+/* XXX
+        ufp.match.type = "u32";
+        ufp.classid[0] = 1;
+        ufp.classid[1] = 1;
+        ufp.action = "mirred";
+        ufp.rdev = ifb_device_name;
+        //tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
+*/
 
     return 0;
 }
@@ -511,11 +529,9 @@ char *dst;
 int direction;
 {
     char *device_name;
-    int i;
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
     uint32_t filter_id[4];
-    uint32_t find_ifb_device = 0;
     struct qdisc_parameter qp;
     struct u32_parameter ufp;
 
@@ -543,6 +559,7 @@ int direction;
     char pfifo_parent_id[10];
 #endif
 
+    char srcaddr[20];
     char dstaddr[20];
 
     printf("handle_nr : %d\n", handle_nr);
@@ -561,27 +578,31 @@ int direction;
     filter_id[2] = 1;
     filter_id[3] = handle_nr;
 
+    sprintf(srcaddr, "%s/32", src);
     sprintf(dstaddr, "%s/32", dst);
+    dprintf(("[add_rule] filter source address : %s\n", srcaddr));
     dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
 
 
-    if(!INGRESS) {
 
-        ufp.match.type = "u32";
-        ufp.match.protocol = "ip";
-        ufp.match.filter = "dst";
-        ufp.match.arg = dstaddr;
-        ufp.classid[0] = filter_id[2];
-        ufp.classid[1] = filter_id[3];
+    if(INGRESS) {
+        device_name = ifb_device_name;
+    }
+    ufp.match.type = "u32";
+    ufp.match.protocol = "ip";
+    ufp.match.filter = "dst";
+    ufp.match.arg = dstaddr;
+    ufp.classid[0] = filter_id[2];
+    ufp.classid[1] = filter_id[3];
 
-        dprintf(("\n\n[add_rule] add htb class\n"));
-        add_htb_class(device_name, htb_class_id, "10000000");
+    dprintf(("\n\n[add_rule] add htb class\n"));
+    add_htb_class(device_name, htb_class_id, "10000000");
 
-        dprintf(("\n\n[add_rule] add netem qdisc\n"));
-        add_netem_qdisc(device_name, netem_qdisc_id, qp);
+    dprintf(("\n\n[add_rule] add netem qdisc\n"));
+    add_netem_qdisc(device_name, netem_qdisc_id, qp);
 
-        dprintf(("\n\n[add_rule] add tc filter\n"));
-        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_id, "ip", "u32", &ufp);
+    dprintf(("\n\n[add_rule] add tc filter\n"));
+    tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_id, "ip", "u32", &ufp);
 /*
         char *fcmd = NULL;
         fcmd = malloc(1024);
@@ -593,33 +614,19 @@ int direction;
             exit(1);
         }
 */
-    }
-    else if(INGRESS) {
+/*
         tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, "1", "ingress", qp, "ingress");
-        char ifb_device_name[5];
-        for(i = 0; i <= MAX_IFB; i++) {
-            if(!ifb_device[i]) {
-                ifb_device[i] = device_name;
-                find_ifb_device = 1;
-                sprintf(ifb_device_name, "ifb%d", i);
-                break;
-            }
-        }
-        if(!find_ifb_device) {
-            fprintf(stderr, "Cannot file ifb device\n");
-            exit(1);
-        }
         ufp.match.type = "u32";
         ufp.classid[0] = 1;
         ufp.classid[1] = 1;
         ufp.action = "mirred";
         ufp.rdev = ifb_device_name;
+*/
 //        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
 //        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
 //        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parent_netemid, qp, "tbf");
 //        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, pfifoid, parent_bwid, qp, "pfifo");
 //        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
-    }
 
     return 0;
 }
@@ -679,19 +686,12 @@ uint32_t rule_number;
     }
 
     if(INGRESS) {
-        int i;
         int ret;
         int cmd_len = 1024;
         char *cmd;
         char ifb_device_name[5];
 
         cmd = malloc(cmd_len);
-        for(i = 0; i <= MAX_IFB; i++) {
-            if(strcmp(ifb_device[i], device_name) == 0) {
-                sprintf(ifb_device_name, "ifb%d", i);
-                break;
-            }
-        }
         tc_cmd(RTM_DELQDISC, 0, ifb_device_name, "1", "root", qp, "pfifo");
         sprintf(cmd, "tc qdisc del dev %s ingress", device_name);
         ret = system(cmd);
@@ -840,13 +840,7 @@ double lossrate;
     }
 
     if(INGRESS) {
-        int i;
-        for(i = 0; i <= MAX_IFB; i++) {
-            if(strcmp(ifb_device[i], device_name) == 0) {
-                sprintf(device_name, "ifb%d", i);
-                break;
-            }
-        }
+        device_name = ifb_device_name;
     }
 
     if(config_netem) {
@@ -856,13 +850,7 @@ double lossrate;
 
     if(TBF) {
         if(INGRESS) {
-            int i;
-            for(i = 0; i <= MAX_IFB; i++) {
-                if(strcmp(ifb_device[i], device_name) == 0) {
-                    sprintf(device_name, "ifb%d", i);
-                    break;
-                }
-            }
+            device_name = ifb_device_name;
         }
         if(config_tbf) {
             qp.rate = rate;

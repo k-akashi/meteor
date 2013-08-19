@@ -4,6 +4,7 @@
 #define MAX_MSG 16384
 #include <linux/pkt_sched.h>
 #include <linux/pkt_cls.h>
+#include <linux/tc_act/tc_mirred.h>
 #include <linux/gen_stats.h>
 #include "tc_core.h"
 #include "libnetlink.h"
@@ -115,5 +116,7 @@ extern char* get_route_info(char *info, char *addr);
 
 extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, uint32_t id[4], char* protocolid, char* type, struct u32_parameter* up);
 extern int u32_filter_parse(struct filter_util *qu, uint32_t handle, struct u32_parameter up, struct nlmsghdr *n, char* dev);
+extern int add_ingress_qdisc(char *dev);
+extern int add_ingress_filter(char *dev, char *ifb_dev);
 
 #endif

@@ -194,7 +194,6 @@ struct qdisc_parameter qp;
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
         }
-		idx = 1;
         req.t.tcm_ifindex = idx;
         dprintf(("[add_netem_qdisc] netem ifindex = %d\n", idx));
     }
