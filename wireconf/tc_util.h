@@ -105,7 +105,7 @@ extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, str
 
 extern int add_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
 extern int change_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
-extern int delete_netem_qdisc(char* device);
+extern int delete_netem_qdisc(char* device, int ingress);
 extern int add_htb_qdisc(char* device, uint32_t id[4]);
 extern int add_htb_class(char* device, uint32_t id[4], char* bnadwidth);
 extern int change_htb_class(char* device, uint32_t id[4], char* bnadwidth);

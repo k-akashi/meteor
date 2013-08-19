@@ -122,7 +122,7 @@
 #define TBF 0
 #endif // TBF
 
-#define INGRESS 0 // 1 : ingress mode, 0 : egress mode
+#define INGRESS 1 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
 char* ifb_device_name = "ifb0";
 #endif // INGRESS 
@@ -494,8 +494,13 @@ char *dst;
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
-
-        device_name = "ifb0";
+/*
+        char *cmd;
+        cmd = malloc(1024);
+        sprintf(cmd, "sudo /sbin/tc filter add dev %s parent ffff: protocol all prio 10 u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev %s", device_name, ifb_device_name);
+        system(cmd);
+*/
+        device_name = ifb_device_name;
     }
     dprintf(("\n\n[init_rule] add htb qdisc\n"));
  
@@ -682,22 +687,25 @@ uint32_t rule_number;
     device_name = (char*)get_route_info("dev", dst);
 
     if(!INGRESS) {
-        delete_netem_qdisc(device_name);
+        delete_netem_qdisc(device_name, 0);
     }
 
     if(INGRESS) {
+/*
         int ret;
         int cmd_len = 1024;
         char *cmd;
-        char ifb_device_name[5];
 
         cmd = malloc(cmd_len);
         tc_cmd(RTM_DELQDISC, 0, ifb_device_name, "1", "root", qp, "pfifo");
-        sprintf(cmd, "tc qdisc del dev %s ingress", device_name);
+        sprintf(cmd, "tc qdisc del dev %s root", device_name);
         ret = system(cmd);
         if(ret != 0) {
             exit(1);
         }
+*/
+        delete_netem_qdisc(device_name, 0);
+        delete_netem_qdisc(ifb_device_name, 1);
     }
 
     return SUCCESS;

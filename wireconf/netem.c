@@ -265,15 +265,15 @@ struct qdisc_parameter qp;
 }
 
 int
-delete_netem_qdisc(dev)
+delete_netem_qdisc(dev, ingress)
 char* dev;
+int ingress;
 {
 	struct {
 		struct nlmsghdr n;
 		struct tcmsg t;
 		char buf[TCA_BUF_MAX];
 	} req;
-
 
     memset(&req, 0, sizeof(req));
 
@@ -287,11 +287,15 @@ char* dev;
     req.n.nlmsg_type = RTM_DELQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    // device name
     char device[16];
     strncpy(device, dev, sizeof(device) - 1);
 
-	req.t.tcm_parent = TC_H_ROOT;
+    if(ingress == 0) {
+	    req.t.tcm_parent = 0xffff0000;
+    }
+    else {
+	    req.t.tcm_parent = TC_H_ROOT;
+    }
 	
     if(device[0]) {
         int idx;
