@@ -246,9 +246,8 @@ uint32_t id[4];
         req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
     }
     req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
-    dprintf(("[add_htb_class] parent id = %d\n", req.t.tcm_parent));
-    dprintf(("[add_htb_class] handle id = %d\n", req.t.tcm_handle));
-
+    dprintf(("[add_htb_qdisc] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[add_htb_qdisc] handle id = %d\n", req.t.tcm_handle));
 
 	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 

@@ -15,6 +15,12 @@
 #define dprintf(x)
 #endif
 
+#define FILTER_MAX 4
+#define MAC_SRC 0
+#define MAC_DST 1
+#define IP_SRC 2
+#define IP_DST 3
+
 #define TC_HANDLE(maj, min) (maj << 16 | min)
 
 struct rtnl_handle rth;
@@ -41,9 +47,8 @@ struct filter_match {
 };
 
 
-struct u32_parameter
-{
-	struct filter_match match;
+struct u32_parameter {
+	struct filter_match match[FILTER_MAX];
 	char* offset;
 	char* hashkey;
 	uint32_t classid[2];
@@ -115,7 +120,8 @@ extern int change_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter
 extern char* get_route_info(char *info, char *addr);
 
 extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, uint32_t id[4], char* protocolid, char* type, struct u32_parameter* up);
-extern int u32_filter_parse(struct filter_util *qu, uint32_t handle, struct u32_parameter up, struct nlmsghdr *n, char* dev);
+extern int add_tc_filter(char* dev, uint32_t id[4], char* protocolid, char* type, struct u32_parameter* up);
+extern int u32_filter_parse(uint32_t handle, struct u32_parameter up, struct nlmsghdr *n, char* dev);
 extern int add_ingress_qdisc(char *dev);
 extern int add_ingress_filter(char *dev, char *ifb_dev);
 

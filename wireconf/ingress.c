@@ -44,8 +44,8 @@ char* dev;
     req.t.tcm_parent = TC_H_INGRESS;
     req.t.tcm_handle = 0xffff0000;
 
-    dprintf(("[add_htb_class] parent id = %d\n", req.t.tcm_parent));
-    dprintf(("[add_htb_class] handle id = %d\n", req.t.tcm_handle));
+    dprintf(("[add_ingress_qdisc] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[add_ingress_qdisc] handle id = %d\n", req.t.tcm_handle));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
@@ -59,11 +59,12 @@ char* dev;
             return 1;
         }
         req.t.tcm_ifindex = idx;
-        dprintf(("[add_htb_qdisc] HTB ifindex : %d\n", idx));
+        dprintf(("[add_htb_qdisc] Ingress ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return 2;
+    }
 
     return 0;
 }

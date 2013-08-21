@@ -71,6 +71,9 @@
 // Basic constants
 /////////////////////////////////////////////
 
+#define BIN_SC 1
+#define TXT_SC 2
+
 #define PARAMETERS_TOTAL        19
 #define PARAMETERS_UNUSED       13
 
@@ -182,6 +185,8 @@ int p_size;
     int line_nr = 0;
     FILE *fd;
 
+    char node_name[20];
+    char interface[20];
     int node_id;
     char node_ip[IP_ADDR_SIZE];
 
@@ -194,14 +199,13 @@ int p_size;
         line_nr++;
 
         if(i >= p_size) {
-            WARNING("Maximum number of IP addresses (%d) exceeded",
-                    p_size);
+            WARNING("Maximum number of IP addresses (%d) exceeded", p_size);
             fclose(fd);
             return -1;
         }
         else {
             int scaned_items;
-            scaned_items=sscanf(buf, "%d %16s", &node_id, node_ip);
+            scaned_items = sscanf(buf, "%s %s %d %16s",node_name, interface,  &node_id, node_ip);
             if(scaned_items < 2) {
                 WARNING("Skipped invalid line #%d in settings file '%s'", 
                         line_nr, path);
@@ -270,9 +274,13 @@ char **argv;
     char *argv0;
     char *faddr;
     char *taddr, buf[BUFSIZ];
-    uint32_t s, fid, tid, from, to, pipe_nr;
+    uint32_t s;
+    uint32_t fid, tid;
+    uint32_t from, to;
+    uint32_t pipe_nr;
     uint16_t rulenum;
 
+    uint32_t sc_type;
     uint32_t usage_type;
 
     float time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
@@ -341,12 +349,28 @@ char **argv;
         exit(1);
     }
 
-    while((ch = getopt(argc, argv, "hq:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
+    while((ch = getopt(argc, argv, "hq:Q:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
         switch(ch) {
             case 'h':
                 usage();
                 exit(0);
             case 'q':
+                if(sc_type == TXT_SC) {
+                    WARNING("Already read scenario data.");
+                    exit(1);
+                }
+                sc_type = BIN_SC;
+                if((fd = fopen(optarg, "r")) == NULL) {
+                    WARNING("Could not open QOMET output file '%s'", optarg);
+                    exit(1);
+                }
+                break;
+            case 'Q':
+                if(sc_type == BIN_SC) {
+                    WARNING("Already read scenario data.");
+                    exit(1);
+                }
+                sc_type = TXT_SC;
                 if((fd = fopen(optarg, "r")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
@@ -571,6 +595,8 @@ char **argv;
             }
         }
     }
+
+    exit(1);
 
     // get the time at the beginning of the experiment
     gettimeofday(&tp_begin, NULL);
@@ -936,6 +962,7 @@ char **argv;
     else {
         // usage (2) => delete multiple rules
         // delete the unicast dummynet rules
+#ifdef __FreeBSD__
         for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
             if(j == my_id) {
                 continue;
@@ -943,15 +970,9 @@ char **argv;
 
             offset_num = j;
             INFO("Deleting rule %d...", MIN_PIPE_ID_OUT + offset_num);
-#ifdef __FreeBSD__
             if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num) == ERROR) {
                 WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT + offset_num);
             }
-#elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num) == ERROR) {
-                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT + offset_num);
-            }
-#endif
         }
 
         //delete broadcast dummynet rules
@@ -962,16 +983,15 @@ char **argv;
 
             offset_num = j;
             INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST + offset_num);
-#ifdef __FreeBSD__
             if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num) == ERROR) {
                 WARNING("Could not delete rule #%d", MIN_PIPE_ID_IN_BCAST+offset_num);
             }
-#elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST + offset_num) == ERROR) {
-                WARNING("Could not delete rule #%d", MIN_PIPE_ID_IN_BCAST + offset_num);
-            }
-#endif
         }
+#elif __linux
+        if(delete_netem(s, taddr, rulenum) == ERROR) {
+            WARNING("Could not delete netem rule");
+        }
+#endif
     }
 
     // get the time at the end of the experiment

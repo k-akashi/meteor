@@ -20,8 +20,8 @@ output_name=${test_name}
 
 from_node=1
 to_node=2
-client_address=127.0.0.1
-server_address=127.0.0.1
+client_address=192.50.109.78
+server_address=192.50.109.2
 #server_address=192.168.200.2
 rule_number=100
 pipe_number=200

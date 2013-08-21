@@ -61,6 +61,7 @@
 #include "wireconf.h"
 #ifdef __linux
 #include "utils.h"
+#include <net/if.h>
 #include "ip_common.h"
 #include "tc_common.h"
 #include "tc_util.h"
@@ -125,19 +126,15 @@
 #define INGRESS 1 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
 char* ifb_device_name = "ifb0";
-#endif // INGRESS 
+struct if_list iflist;
 
 #define MAX_DEV 16
-#define TEST 1
-#ifdef TEST
-char* device_list;
-#else
 int dev_no = 0;
 struct DEVICE_LIST {
-    char dst_address[20];
-    char device[20];
+    char *dst_address;
+    char *device;
 } device_list[MAX_DEV];
-#endif // TEST
+#endif // INGRESS 
 #endif // __linux
 
 //static struct 
@@ -332,7 +329,6 @@ uint s;
 int16_t rulenum;
 {
 #ifdef __FreeBSD__
-    //int RULES=100;
     int i = 0;
     struct ip_fw rules[10];
 
@@ -340,9 +336,7 @@ int16_t rulenum;
 
     bzero(&rules, sizeof(rules));
     rules_size=sizeof(rules);
-    //rule.rulenum = rulenum;
 
-    //  printf("Get rule: "); print_rule(&rule);
     if(getsockopt(s, IPPROTO_IP, IP_FW_GET, &rules, &rules_size) < 0) {
         WARNING("Error getting socket options");
         perror("getsockopt");
@@ -487,13 +481,46 @@ char *dst;
     //struct qdisc_parameter qp;
     //struct u32_parameter ufp;
 
-    device_name = malloc(DEV_NAME);
-    device_name =  (char* )get_route_info("dev", dst);
-
+    if(!INGRESS) {
+        device_name = malloc(DEV_NAME);
+        device_name =  (char* )get_route_info("dev", dst);
+    }
     if(INGRESS) {
+        set_ifb(ifb_device_name, IF_UP);
+        if(rtnl_open(&rth, 0) < 0) {
+            return 1;
+        }
+        device_name = "eth0";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
+
+/*
+    int32_t len;
+    int32_t attr_len;
+    struct ifinfomsg *ifinfo;
+    struct nlmsghdr *n;
+    struct rtattr *rta;
+
+        get_if_list(&iflist);
+        n = &(iflist.n);
+        for(; NLMSG_OK(&iflist.n, len); n = NLMSG_NEXT(n, len)) {
+            ifinfo = NLMSG_DATA(n);
+            rta = IFLA_RTA(ifinfo);
+            attr_len = IFLA_PAYLOAD(n);
+            for(; RTA_OK(rta, attr_len); rta = RTA_NEXT(rta, attr_len)) {
+                if(rta->rta_type == IFLA_IFNAME) {
+                    device_name = (char *)RTA_DATA(rta);
+                }
+            }
+            dprintf(("\n\n[init_rule] add ingress qdisc\n"));
+            add_ingress_qdisc(device_name);
+            add_ingress_filter(device_name, ifb_device_name);
+            if(n->nlmsg_type == NLMSG_DONE) {
+                break;
+            }
+        }
+*/
 /*
         char *cmd;
         cmd = malloc(1024);
@@ -543,7 +570,7 @@ int direction;
     device_name = malloc(DEV_NAME);
     device_name =  (char* )get_route_info("dev", dst);
     memset(&qp, 0, sizeof(struct qdisc_parameter));
-    memset(&ufp, '\0', sizeof(struct u32_parameter));
+    memset(&ufp, 0, sizeof(struct u32_parameter));
 
 #ifdef TEST
     device_list = device_name;
@@ -593,10 +620,14 @@ int direction;
     if(INGRESS) {
         device_name = ifb_device_name;
     }
-    ufp.match.type = "u32";
-    ufp.match.protocol = "ip";
-    ufp.match.filter = "dst";
-    ufp.match.arg = dstaddr;
+    ufp.match[IP_SRC].type = "u32";
+    ufp.match[IP_SRC].protocol = "ip";
+    ufp.match[IP_SRC].filter = "src";
+    ufp.match[IP_SRC].arg = srcaddr;
+    ufp.match[IP_DST].type = "u32";
+    ufp.match[IP_DST].protocol = "ip";
+    ufp.match[IP_DST].filter = "dst";
+    ufp.match[IP_DST].arg = dstaddr;
     ufp.classid[0] = filter_id[2];
     ufp.classid[1] = filter_id[3];
 
@@ -607,7 +638,12 @@ int direction;
     add_netem_qdisc(device_name, netem_qdisc_id, qp);
 
     dprintf(("\n\n[add_rule] add tc filter\n"));
-    tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_id, "ip", "u32", &ufp);
+    add_tc_filter(device_name, filter_id, "ip", "u32", &ufp);
+
+    ufp.match[IP_SRC].arg = dstaddr;
+    ufp.match[IP_DST].arg = srcaddr;
+    add_tc_filter(device_name, filter_id, "ip", "u32", &ufp);
+    //tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_id, "ip", "u32", &ufp);
 /*
         char *fcmd = NULL;
         fcmd = malloc(1024);
@@ -684,13 +720,14 @@ uint32_t rule_number;
     memset(&qp, 0, sizeof(qp));
     device_name = malloc(DEV_NAME);
 
-    device_name = (char*)get_route_info("dev", dst);
 
     if(!INGRESS) {
+        device_name = (char*)get_route_info("dev", dst);
         delete_netem_qdisc(device_name, 0);
     }
 
     if(INGRESS) {
+        device_name = "eth0";
 /*
         int ret;
         int cmd_len = 1024;

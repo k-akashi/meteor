@@ -59,5 +59,5 @@
 
 #define FIRST_NODE_ID                   0
 
-#define MAX_NODES                       40
+#define MAX_NODES                       500
 
