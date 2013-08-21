@@ -24,7 +24,7 @@ ifeq ($(UNAME), Linux)
 # netem and debug message
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG -fPIC
 # netem and tbf or htb
-CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC -DTCDEBUG
+CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
 # netem only
 #CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -fPIC
 

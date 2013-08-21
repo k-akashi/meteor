@@ -200,7 +200,7 @@ struct nlmsghdr* n;
 
 	memset(&opt, 0, sizeof(opt));
 
-	opt.rate2quantum = 10;
+	opt.rate2quantum = 100000;
 	opt.version = 3;
 
 	tail = NLMSG_TAIL(n);

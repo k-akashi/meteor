@@ -11,42 +11,28 @@
 #include "tc_util.h"
 #include "ip_common.h"
 
+#define MAX_DEV 16
+
 int
-get_if_list(iflist)
-struct if_list *iflist;
-{ 
-    ssize_t ret;
-    struct {
-        struct nlmsghdr n;
-        struct ifinfomsg ifinfo;
-    } req;
-    struct {
-        struct nlmsghdr n;
-        uint8_t payload[1024];
-    } res;
-
-    memset(&req, 0, sizeof(req));
-
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(req.ifinfo));
-    req.n.nlmsg_type = RTM_GETLINK;
-    req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
-    req.ifinfo.ifi_family = AF_UNSPEC;
-
-    if(send(rth.fd, &req, sizeof(req), 0) == -1) {
-        perror("send");
-        return 1;
+get_iface_list(ifc)
+struct ifconf *ifc;
+{
+    int sk;
+    int val;
+    
+    sk = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sk < 0) {
+        perror("socket");
+        return (-1);
     }
 
-    ret = recv(rth.fd, &res, sizeof(res), 0);
-    if(ret == -1) {
-        perror("recv");
-        return 1;
-    }
-
-    iflist->n = res.n;
-    iflist->len = ret;
-
-    return 0;
+    ifc->ifc_ifcu.ifcu_buf = sizeof(struct ifreq) * MAX_DEV;
+    if((val = ioctl(sk, SIOCGIFCONF , (char*)ifc)) < 0) {
+         perror("ioctl(SIOGIFCONF)");
+     }
+    close(sk);
+    
+    return val;
 }
 
 static int 

@@ -137,12 +137,6 @@ struct DEVICE_LIST {
 #endif // INGRESS 
 #endif // __linux
 
-//static struct 
-//{
-//  char netem_child[20];
-//  char tbf_child[20];
-//}rootid;
-
 ///////////////////////////////////////////////
 // IPv4 address data structure and manipulation
 ///////////////////////////////////////////////
@@ -492,44 +486,44 @@ char *dst;
         }
         device_name = "eth4";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
+        delete_netem_qdisc(device_name, 0);
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
 
         device_name = "eth5";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
+        delete_netem_qdisc(device_name, 0);
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
-/*
-    int32_t len;
-    int32_t attr_len;
-    struct ifinfomsg *ifinfo;
-    struct nlmsghdr *n;
-    struct rtattr *rta;
+        device_name = ifb_device_name;
 
-        get_if_list(&iflist);
-        n = &(iflist.n);
-        for(; NLMSG_OK(&iflist.n, len); n = NLMSG_NEXT(n, len)) {
-            ifinfo = NLMSG_DATA(n);
-            rta = IFLA_RTA(ifinfo);
-            attr_len = IFLA_PAYLOAD(n);
-            for(; RTA_OK(rta, attr_len); rta = RTA_NEXT(rta, attr_len)) {
-                if(rta->rta_type == IFLA_IFNAME) {
-                    device_name = (char *)RTA_DATA(rta);
-                }
-            }
+/*
+        int i;
+        int nifaces;
+        struct ifconf ifconf;
+        static struct ifreq ifreqs[MAX_DEV];
+
+        memset(&ifconf, 0, sizeof(ifconf));
+        ifconf.ifc_buf = (char*) (ifreqs);
+        ifconf.ifc_len = sizeof(ifreqs);
+
+        dprintf(("[init_rule] add ingress device \n"));
+        if(get_iface_list(&ifconf) < 0) {
+            return -1;
+        }
+        dprintf(("[init_rule] ifconf.ifc_len : %d\n", ifconf.ifc_len));
+        dprintf(("[init_rule] struct ifreq len : %d\n", sizeof(struct ifreq)));
+        nifaces =  ifconf.ifc_len / sizeof(struct ifreq);
+        dprintf(("Interfaces (count = %d)\n", nifaces));
+        for(i = 0; i < nifaces; i++) {
+            device_name = ifreqs[i].ifr_name;
+            dprintf(("[init_rule] add ingress device %s\n", device_name));
+
             dprintf(("\n\n[init_rule] add ingress qdisc\n"));
+            delete_netem_qdisc(device_name, 0);
             add_ingress_qdisc(device_name);
             add_ingress_filter(device_name, ifb_device_name);
-            if(n->nlmsg_type == NLMSG_DONE) {
-                break;
-            }
         }
-*/
-/*
-        char *cmd;
-        cmd = malloc(1024);
-        sprintf(cmd, "sudo /sbin/tc filter add dev %s parent ffff: protocol all prio 10 u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev %s", device_name, ifb_device_name);
-        system(cmd);
 */
         device_name = ifb_device_name;
     }
@@ -540,7 +534,8 @@ char *dst;
     htb_qdisc_id[2] = 1;
     htb_qdisc_id[3] = 0;
  
-    dprintf(("\n\n[add_rule] add htb qdisc\n"));
+    delete_netem_qdisc(device_name, 0);
+    dprintf(("\n\n[init_rule] add htb qdisc\n"));
     add_htb_qdisc(device_name, htb_qdisc_id);
 
 /* XXX
@@ -571,8 +566,10 @@ int direction;
     struct qdisc_parameter qp;
     struct u32_parameter ufp;
 
-    device_name = malloc(DEV_NAME);
-    device_name =  (char* )get_route_info("dev", dst);
+    if(!INGRESS) {
+        device_name = malloc(DEV_NAME);
+        device_name =  (char* )get_route_info("dev", dst);
+    }
     memset(&qp, 0, sizeof(struct qdisc_parameter));
     memset(&ufp, 0, sizeof(struct u32_parameter));
 
@@ -745,7 +742,9 @@ uint32_t rule_number;
             exit(1);
         }
 */
-        delete_netem_qdisc(device_name, 0);
+        //delete_netem_qdisc(device_name, 0);
+        delete_netem_qdisc("eth4", 0);
+        delete_netem_qdisc("eth5", 0);
         delete_netem_qdisc(ifb_device_name, 1);
     }
 
@@ -904,7 +903,8 @@ double lossrate;
         if(config_tbf) {
             qp.rate = rate;
             qp.buffer = buffer;
-            change_htb_class(device_name, htb_class_id, rate);
+            change_htb_class(device_name, htb_class_id, "1Gbit");
+//            change_htb_class(device_name, htb_class_id, rate);
         }
     }
 
