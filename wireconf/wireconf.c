@@ -490,11 +490,15 @@ char *dst;
         if(rtnl_open(&rth, 0) < 0) {
             return 1;
         }
-        device_name = "eth0";
+        device_name = "eth4";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
 
+        device_name = "eth5";
+        dprintf(("\n\n[init_rule] add ingress qdisc\n"));
+        add_ingress_qdisc(device_name);
+        add_ingress_filter(device_name, ifb_device_name);
 /*
     int32_t len;
     int32_t attr_len;

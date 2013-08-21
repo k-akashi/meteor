@@ -596,8 +596,6 @@ char **argv;
         }
     }
 
-    exit(1);
-
     // get the time at the beginning of the experiment
     gettimeofday(&tp_begin, NULL);
 
