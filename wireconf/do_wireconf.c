@@ -263,7 +263,6 @@ int rule_count;
     }
 }
 
-// main function
 int
 main(argc, argv)
 int argc;
@@ -272,8 +271,8 @@ char **argv;
     char ch;
     char *p;
     char *argv0;
-    char *faddr;
-    char *taddr, buf[BUFSIZ];
+    char *faddr, *taddr;
+    char buf[BUFSIZ];
     uint32_t s;
     uint32_t fid, tid;
     uint32_t from, to;
@@ -288,21 +287,22 @@ char **argv;
     timer_handle *timer;
     int32_t loop_count = 0;
 
-    int32_t direction=DIRECTION_BOTH;
+    int32_t direction = DIRECTION_BOTH;
 
     struct timeval tp_begin, tp_end;
 
-    int32_t i;
+    int32_t i, j;
     int32_t my_id;
     in_addr_t IP_addresses[MAX_NODES];
     char IP_char_addresses[MAX_NODES*IP_ADDR_SIZE];
     int32_t node_number;
 
-    int32_t j, offset_num, rule_count, next_hop_id, rule_num;
+    int32_t offset_num, rule_count;
+    int32_t next_hop_id, rule_num;
+    uint32_t over_read;
     float time_period, next_time;
     qomet_param param_table[MAX_RULE_NUM];
     qomet_param param_over_read;
-    uint32_t over_read;
     char broadcast_address[IP_ADDR_SIZE];
 
     usage_type = 1;
@@ -630,15 +630,15 @@ char **argv;
             INFO("Skipped non-parametric line");
             continue;
         }
-        if(usage_type==1) {
+        if(usage_type == 1) {
             // check whether the from_node and to_node from the file
             // match the user selected ones
             if((from == fid) && (to == next_hop_id)) {
 
 #ifdef PREDEFINED_EXPERIMENT
-                bandwidth=BANDWIDTH;
-                delay=DELAY;
-                lossrate=PACKET_LOSS_RATE;
+                bandwidth = BANDWIDTH;
+                delay = DELAY;
+                lossrate = PACKET_LOSS_RATE;
 #endif
                 // print current configuration info
                 INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
@@ -652,11 +652,7 @@ char **argv;
                     // wait for for the next timer event
 
                     if(timer_wait(timer, time * 1000000) < 0) {
-#ifdef __FreeBSD__
                         WARNING("Timer deadline missed at time=%.2f s", time);
-#elif __linux
-                        WARNING("Timer deadline missed at time=%.2f s", time);
-#endif
                         //exit(1); // NOT NEEDED ANYMORE!!!!
                     }
                 }
@@ -698,16 +694,13 @@ char **argv;
                 configure_pipe(s, pipe_nr, bandwidth, delay, lossrate);
 #elif __linux
                 bandwidth = (int)round(bandwidth);     // * 2.56);
-                delay = (int)round(delay);             //(delay / 2);
+                //delay = (int)round(delay);             //(delay / 2);
                 //lossrate = (int)rint(lossrate * 0x7fffffff);
 
-                // do configure Qdisc
 				//TCHK_START(time);
                 configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
 				//TCHK_END(time);
 #endif
-
-                // increase loop counter
                 loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT

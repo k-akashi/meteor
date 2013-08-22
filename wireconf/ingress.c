@@ -43,10 +43,8 @@ char* dev;
 
     req.t.tcm_parent = TC_H_INGRESS;
     req.t.tcm_handle = 0xffff0000;
-
     dprintf(("[add_ingress_qdisc] parent id = %d\n", req.t.tcm_parent));
     dprintf(("[add_ingress_qdisc] handle id = %d\n", req.t.tcm_handle));
-
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
     if(dev) {
@@ -73,8 +71,8 @@ char* dev;
 static int
 pack_key(sel, key, mask, off, offmask)
 struct tc_u32_sel *sel;
-__u32 key;
-__u32 mask;
+uint32_t key;
+uint32_t mask;
 int off;
 int offmask;
 {
@@ -83,37 +81,31 @@ int offmask;
 
     key &= mask;
 
-    for (i=0; i<hwm; i++) {
-        if (sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
-            __u32 intersect = mask&sel->keys[i].mask;
+    for(i = 0; i < hwm; i++) {
+        if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
+            uint32_t intersect = mask&sel->keys[i].mask;
 
-            if ((key^sel->keys[i].val) & intersect)
+            if((key ^ sel->keys[i].val) & intersect) {
                 return -1;
+            }
             sel->keys[i].val |= key;
             sel->keys[i].mask |= mask;
+
             return 0;
         }
     }
 
-    if (hwm >= 128)
+    if(hwm >= 128) {
         return -1;
-    if (off % 4)
+    }
+    if(off % 4) {
         return -1;
+    }
     sel->keys[hwm].val = key;
     sel->keys[hwm].mask = mask;
     sel->keys[hwm].off = off;
     sel->keys[hwm].offmask = offmask;
     sel->nkeys++;
-    return 0;
-}
-
-int
-match_ingress_filter(sel, n)
-struct tc_u32_sel *sel;
-struct nlmsghdr *n;
-{
-// match-
-
 
     return 0;
 }
@@ -128,11 +120,11 @@ char *ifb;
 
     memset(&p, 0, sizeof(struct tc_mirred));
 
-// mirred : parse_egress(a, &argc, &argv, TCA_U32_CLASSID, n);
     p.eaction = TCA_EGRESS_REDIR;
     p.action = TC_ACT_STOLEN;
 
     ll_init_map(&rth);
+
     p.ifindex = ll_name_to_index(ifb);
     dprintf(("[add_ingress_filter] redirect interface = %d\n", p.ifindex));
 

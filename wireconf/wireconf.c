@@ -826,7 +826,7 @@ int s;
 char* dst;
 int32_t handle;
 int32_t bandwidth;
-int32_t delay;
+float delay;
 double lossrate;
 {
     struct qdisc_parameter qp;
@@ -867,7 +867,7 @@ double lossrate;
 
     if(priv_delay != delay || priv_loss != lossrate) {
          config_netem = 1;
-         sprintf(delaystr, "%dms", delay);
+         sprintf(delaystr, "%.4fms", delay);
          qp.delay = delaystr;
          priv_delay = delay;
          sprintf(loss, "%f", lossrate * 100);
