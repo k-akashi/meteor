@@ -124,9 +124,9 @@ int
 tc_core_init()
 {
     FILE *fp = fopen("/proc/net/psched", "r");
-    __u32 clock_res;
-    __u32 t2us;
-    __u32 us2t;
+    uint32_t clock_res;
+    uint32_t t2us;
+    uint32_t us2t;
 
     if (fp == NULL)
         return -1;

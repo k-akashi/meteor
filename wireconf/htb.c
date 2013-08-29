@@ -34,9 +34,15 @@ char *bandwidth;
 
 	get_rate(&opt.rate.rate, bandwidth);
 
-    if (!opt.ceil.rate) opt.ceil = opt.rate;
-    if (!buffer) buffer = opt.rate.rate / get_hz() + mtu;
-    if (!cbuffer) cbuffer = opt.ceil.rate / get_hz() + mtu;
+    if(!opt.ceil.rate) {
+        opt.ceil = opt.rate;
+    }
+    if(!buffer) {
+        buffer = opt.rate.rate / get_hz() + mtu;
+    }
+    if(!cbuffer) {
+        cbuffer = opt.ceil.rate / get_hz() + mtu;
+    }
 
     opt.ceil.overhead = overhead;
     opt.rate.overhead = overhead;

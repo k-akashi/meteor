@@ -714,7 +714,6 @@ char* dev;
 
     for(i = 0; i < FILTER_MAX; i++) {
     	if(up.match[i].type) {
-            dprintf(("FILTER Type ; %d\n", i));
     		if(parse_selector(up.match[i], &sel.sel, n)) {
     			fprintf(stderr, "Illegal \"match\"\n");
     			return -1;

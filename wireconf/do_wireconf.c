@@ -641,7 +641,9 @@ char **argv;
                 lossrate = PACKET_LOSS_RATE;
 #endif
                 // print current configuration info
+#ifdef TCDEBUG
                 INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+#endif
 
                 // if this is the first operation we reset the timer
                 // Note: it is assumed time always equals 0.0 for the first line

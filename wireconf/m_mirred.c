@@ -181,9 +181,3 @@ char* dev;
 
 	return -1;
 }
-
-struct action_util mirred_action_util = {
-	.id = "mirred",
-	.parse_aopt = parse_mirred,
-	.print_aopt = NULL,
-};

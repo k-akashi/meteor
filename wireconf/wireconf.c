@@ -123,7 +123,7 @@
 #define TBF 0
 #endif // TBF
 
-#define INGRESS 1 // 1 : ingress mode, 0 : egress mode
+#define INGRESS 0 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
 char* ifb_device_name = "ifb0";
 struct if_list iflist;
@@ -131,8 +131,8 @@ struct if_list iflist;
 #define MAX_DEV 16
 int dev_no = 0;
 struct DEVICE_LIST {
-    char *dst_address;
-    char *device;
+    char dst_address[15];
+    char device[16];
 } device_list[MAX_DEV];
 #endif // INGRESS 
 #endif // __linux
@@ -475,15 +475,16 @@ char *dst;
     //struct qdisc_parameter qp;
     //struct u32_parameter ufp;
 
+    if(rtnl_open(&rth, 0) < 0) {
+        return 1;
+    }
     if(!INGRESS) {
         device_name = malloc(DEV_NAME);
         device_name =  (char* )get_route_info("dev", dst);
+        device_name = "eth5";
     }
     if(INGRESS) {
         set_ifb(ifb_device_name, IF_UP);
-        if(rtnl_open(&rth, 0) < 0) {
-            return 1;
-        }
         device_name = "eth4";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         delete_netem_qdisc(device_name, 0);
@@ -495,7 +496,6 @@ char *dst;
         delete_netem_qdisc(device_name, 0);
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
-        device_name = ifb_device_name;
 
 /*
         int i;
@@ -569,6 +569,7 @@ int direction;
     if(!INGRESS) {
         device_name = malloc(DEV_NAME);
         device_name =  (char* )get_route_info("dev", dst);
+        device_name = "eth5";
     }
     memset(&qp, 0, sizeof(struct qdisc_parameter));
     memset(&ufp, 0, sizeof(struct u32_parameter));
@@ -576,8 +577,8 @@ int direction;
 #ifdef TEST
     device_list = device_name;
 #else
-    device_list[dev_no].dst_address = dst;
-    device_list[dev_no].device = device_name;
+    strcpy(device_list[dev_no].dst_address, dst);
+    strcpy(device_list[dev_no].device, device_name);
     dev_no++;
 #endif
 
@@ -595,7 +596,6 @@ int direction;
     char srcaddr[20];
     char dstaddr[20];
 
-    printf("handle_nr : %d\n", handle_nr);
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
     htb_class_id[2] = 1;
@@ -847,9 +847,9 @@ double lossrate;
     device_name = device_list;
 #else
     int i;
-    for(i = 0; i < dev_no; i++) {
-        if(strcmp(device_list[dev_no].dst_address, dst) == 0) {
-            device_name = device_list[dev_no].device;
+    for(i = 0; i <= dev_no; i++) {
+        if(strcmp(device_list[i].dst_address, dst) == 0) {
+            strcpy(device_name, device_list[i].device);
             break;
         }
     }

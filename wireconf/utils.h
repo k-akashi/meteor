@@ -39,14 +39,17 @@ extern void incomplete_command(void) __attribute__((noreturn));
 #define NEXT_ARG_OK() (argc - 1 > 0)
 #define PREV_ARG() do { argv--; argc++; } while(0)
 
-typedef struct
-{
-	__u8 family;
-	__u8 bytelen;
-	__s16 bitlen;
-	__u32 flags;
-	__u32 data[4];
+typedef struct {
+	uint8_t family;
+	uint8_t bytelen;
+	int16_t bitlen;
+	uint32_t flags;
+	uint32_t data[4];
 } inet_prefix;
+
+#define get_byte get_u8
+#define get_ushort get_u16
+#define get_short get_s16
 
 #define PREFIXLEN_SPECIFIED 1
 
@@ -57,7 +60,7 @@ typedef struct
 
 struct dn_naddr 
 {
-        unsigned short          a_len;
+        uint16_t a_len;
         unsigned char a_addr[DN_MAXADDL];
 };
 
@@ -68,7 +71,7 @@ struct ipx_addr {
 	u_int8_t  ipx_node[IPX_NODE_LEN];
 };
 
-extern __u32 get_addr32(const char *name);
+extern uint32_t get_addr32(const char *name);
 extern int get_addr_1(inet_prefix *dst, const char *arg, int family);
 extern int get_prefix_1(inet_prefix *dst, char *arg, int family);
 extern int get_addr(inet_prefix *dst, const char *arg, int family);
@@ -76,11 +79,8 @@ extern int get_prefix(inet_prefix *dst, char *arg, int family);
 
 extern int get_integer(int *val, const char *arg, int base);
 extern int get_unsigned(unsigned *val, const char *arg, int base);
-#define get_byte get_u8
-#define get_ushort get_u16
-#define get_short get_s16
 extern int get_u64(__u64 *val, const char *arg, int base);
-extern int get_u32(__u32 *val, const char *arg, int base);
+extern int get_u32(uint32_t *val, const char *arg, int base);
 extern int get_u16(__u16 *val, const char *arg, int base);
 extern int get_s16(__s16 *val, const char *arg, int base);
 extern int get_u8(__u8 *val, const char *arg, int base);
@@ -112,8 +112,10 @@ extern int __get_hz(void);
 
 static __inline__ int get_hz(void)
 {
-	if (__iproute2_hz_internal == 0)
+	if(__iproute2_hz_internal == 0) {
 		__iproute2_hz_internal = __get_hz();
+    }
+
 	return __iproute2_hz_internal;
 }
 
@@ -122,8 +124,10 @@ extern int __get_user_hz(void);
 
 static __inline__ int get_user_hz(void)
 {
-	if (__iproute2_user_hz_internal == 0)
+	if(__iproute2_user_hz_internal == 0) {
 		__iproute2_user_hz_internal = __get_user_hz();
+    }
+
 	return __iproute2_user_hz_internal;
 }
 
