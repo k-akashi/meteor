@@ -70,6 +70,13 @@
 #define WARNING(message...) /* message */
 #endif
 
+#ifdef TCDEBUG
+#define dprintf(x) printf x
+#else
+#define dprintf(x)
+#endif
+
+
 /////////////////////////////////////////////
 // Functions implemented by the timer library
 /////////////////////////////////////////////
@@ -88,19 +95,18 @@ unsigned int get_cpu_frequency(void)
 	FILE *cpuinfo;
 	double tmp_hz;
 	char str[256];
-	char buff[10];
+	char buff[256];
 
-    if((cpuinfo = fopen("/proc/cpuinfo", "rb")) == NULL)
-	{
+    if((cpuinfo = fopen("/proc/cpuinfo", "rb")) == NULL) {
 		printf("/proc/cpuinfo file cannot open\n");
 		exit(EXIT_FAILURE);
 	}
 
-	while(fgets(str, BUFSIZ, cpuinfo) != NULL)
-	{
-		if(strstr(str, "cpu MHz") != NULL){
-			//strncpy(buff, str + 11, (size_t)BUFSIZ);
-			strcpy(buff, str + 11);
+	while(fgets(str, sizeof(str), cpuinfo) != NULL) {
+		if(strstr(str, "cpu MHz") != NULL) {
+            memset(buff, 0, sizeof(buff));
+			strncpy(buff, str + 11, strlen(str + 11));
+			//strcpy(buff, str + 11);
 			tmp_hz = atof(buff);
 			hz = tmp_hz * 1000 * 1000;
 			break;
@@ -126,6 +132,7 @@ timer_handle *timer_init(void)
 
   // store CPU frequency
   handle->cpu_frequency = get_cpu_frequency();
+  dprintf(("[timer_init] handle->cpu_frequency : %u\n", handle->cpu_frequency));
 
   // reset the timer so that 'zero' has a reasonable value
   timer_reset(handle);
@@ -134,19 +141,30 @@ timer_handle *timer_init(void)
 }
 
 // reset the timer (set its relative "zero")
-void timer_reset(timer_handle *handle)
+void
+timer_reset(handle)
+timer_handle* handle;
 {
   // init the 'next_event' and 'zero' values
   rdtsc(handle->next_event);
   rdtsc(handle->zero);
+  dprintf(("[timer_reset] next_event : %lu\n", handle->next_event));
+  dprintf(("[timer_reset] zero : %lu\n", handle->zero));
 }
 
 // wait for a time to occur (specified in microseconds);
 // return SUCCESS on success, ERROR if deadline was missed
-int timer_wait(timer_handle *handle, uint64_t time_in_us)
+int 
+timer_wait(handle, time_in_us)
+timer_handle* handle;
+uint64_t time_in_us;
 {
   // the current time
   uint64_t crt_time;
+
+  dprintf(("[timer_wait] handle->zero : %lu\n", handle->zero));
+  dprintf(("[timer_wait] handle->cpu_frequency : %u\n", handle->cpu_frequency));
+  dprintf(("[timer_wait] time_in_us : %lu\n", time_in_us));
 
   // compute the value of the next timer event  
   handle->next_event = handle->zero + 
@@ -154,6 +172,9 @@ int timer_wait(timer_handle *handle, uint64_t time_in_us)
 
   // get current time
   rdtsc(crt_time);
+
+  dprintf(("[timer_wait] handle->next_event : %lu\n", handle->next_event));
+  dprintf(("[timer_wait] crt_time : %lu\n", crt_time));
 
   // if current time exceeds next event time
   // the deadline was missed
@@ -163,9 +184,9 @@ int timer_wait(timer_handle *handle, uint64_t time_in_us)
   // wait for the next event to occur
   do
     {
+	  //usleep(1);
       // get current time
       rdtsc(crt_time);
-	  usleep(1);
     } 
   while(handle->next_event >= crt_time);
 

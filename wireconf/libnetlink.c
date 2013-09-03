@@ -25,10 +25,10 @@
 
 #include "libnetlink.h"
 
-#ifdef TCDEBUG
-#define dprintf(x)      printf x
+#ifdef DEBUG_LEVEL255
+#define dprintf_l255(x)      printf x
 #else
-#define dprintf(x)
+#define dprintf_l255(x)
 #endif
 
 void
@@ -45,7 +45,7 @@ int rtnl_open_byproto(struct rtnl_handle *rth, unsigned subscriptions,
     int sndbuf = 32768;
     int rcvbuf = 32768;
 
-    memset(rth, 0, sizeof(rth));
+    memset(rth, 0, sizeof(struct rtnl_handle));
 
     rth->fd = socket(AF_NETLINK, SOCK_RAW, protocol);
     if (rth->fd < 0) {
@@ -239,13 +239,13 @@ skip_it:
 
 int
 rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
-    struct rtnl_handle* rtnl;
-    struct nlmsghdr* n;
-    pid_t peer;
-    unsigned groups;
-    struct nlmsghdr* answer;
-    rtnl_filter_t junk;
-    void *jarg;
+struct rtnl_handle* rtnl;
+struct nlmsghdr* n;
+pid_t peer;
+unsigned groups;
+struct nlmsghdr* answer;
+rtnl_filter_t junk;
+void *jarg;
 {
     int status;
     unsigned seq;
@@ -263,7 +263,7 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
     };
     char   buf[16384];
 
-    dprintf(("msghdr size = %d\n", sizeof(msg)));
+    dprintf_l255(("[rtnl_talk] msghdr size = %ld\n", sizeof(msg)));
     memset(&nladdr, 0, sizeof(nladdr));
     nladdr.nl_family = AF_NETLINK;
     nladdr.nl_pid = peer;
@@ -275,7 +275,7 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
         n->nlmsg_flags |= NLM_F_ACK;
 
     status = sendmsg(rtnl->fd, &msg, 0);
-    dprintf(("status sendmsg = %d\n", status));
+    dprintf_l255(("[rtnl_talk] status sendmsg = %d\n", status));
 
     if(status < 0) {
         perror("Cannot talk to rtnetlink");
@@ -286,10 +286,10 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
 
     iov.iov_base = buf;
 
-    while (1){
+    while(1){
         iov.iov_len = sizeof(buf);
         status = recvmsg(rtnl->fd, &msg, 0);
-        dprintf(("status recvmsg = %d\n", status));
+        dprintf_l255(("[rtnl_talk] status recvmsg = %d\n", status));
 
         if(status < 0) {
             if(errno == EINTR)
@@ -310,13 +310,13 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
             int len = h->nlmsg_len;
             int l = len - sizeof(*h);
 
-            dprintf(("nlmsg       = %d\n", (int)sizeof(*h)));
-            dprintf(("nlmsg_len   = %d\n", h->nlmsg_len));
-            dprintf(("nlmsg_type  = %d\n", h->nlmsg_type));
-            dprintf(("nlmsg_flags = %d\n", h->nlmsg_flags));
-            dprintf(("nlmsg_seq   = %d\n", h->nlmsg_seq));
-            dprintf(("nlmsg_pid   = %d\n", h->nlmsg_pid));
-            dprintf(("l = %d\n", l));
+            dprintf_l255(("[rtnl_talk] nlmsg       = %d\n", (int)sizeof(*h)));
+            dprintf_l255(("[rtnl_talk] nlmsg_len   = %d\n", h->nlmsg_len));
+            dprintf_l255(("[rtnl_talk] nlmsg_type  = %d\n", h->nlmsg_type));
+            dprintf_l255(("[rtnl_talk] nlmsg_flags = %d\n", h->nlmsg_flags));
+            dprintf_l255(("[rtnl_talk] nlmsg_seq   = %d\n", h->nlmsg_seq));
+            dprintf_l255(("[rtnl_talk] nlmsg_pid   = %d\n", h->nlmsg_pid));
+            dprintf_l255(("[rtnl_talk] Payload len = %d\n", l));
 
             if(l < 0 || len > status){
                 if(msg.msg_flags & MSG_TRUNC){
@@ -341,15 +341,14 @@ rtnl_talk(rtnl, n, peer, groups, answer, junk, jarg)
 
             if(h->nlmsg_type == NLMSG_ERROR){
                 struct nlmsgerr* err = (struct nlmsgerr*)NLMSG_DATA(h);
-                dprintf(("error no = %d\n", err->error));
+                dprintf_l255(("[rtnl_talk] error no = %d\n", err->error));
                 if(l < sizeof(struct nlmsgerr)){
                     fprintf(stderr, "ERROR truncated\n");
                 } 
                 else {
                     errno = -err->error;
-                    dprintf(("errno = %d\n", -err->error));
+                    dprintf_l255(("[rtnl_talk] errno = %d\n", -err->error));
                     if(errno == 0) {
-                        dprintf(("errno = 0\n"));
                         if(answer)
                             memcpy(answer, h, h->nlmsg_len);
                         return 0;
@@ -470,7 +469,9 @@ void *jarg;
     nladdr.nl_groups = 0;
 
     while(1) {
-        int err, len, type;
+        int err;
+        int len;
+        int type;
         int l;
 
         status = fread(&buf, 1, sizeof(*h), rtnl);
@@ -489,8 +490,7 @@ void *jarg;
         l = len - sizeof(*h);
 
         if(l < 0 || len > sizeof(buf)) {
-            fprintf(stderr, "!!!malformed message: len=%d @%lu\n",
-                    len, ftell(rtnl));
+            fprintf(stderr, "!!!malformed message: len=%d type=%d @%lu\n", len, type, ftell(rtnl));
             return -1;
         }
 
@@ -533,7 +533,7 @@ int addattr_l(struct nlmsghdr *n, int maxlen, int type, const void *data,
     int len = RTA_LENGTH(alen);
     struct rtattr *rta;
 
-    if (NLMSG_ALIGN(n->nlmsg_len) + RTA_ALIGN(len) > maxlen) {
+    if(NLMSG_ALIGN(n->nlmsg_len) + RTA_ALIGN(len) > maxlen) {
         fprintf(stderr, "addattr_l ERROR: message exceeded bound of %d\n",maxlen);
         return -1;
     }

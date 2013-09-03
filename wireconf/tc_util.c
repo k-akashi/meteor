@@ -24,10 +24,13 @@
 #include "utils.h"
 #include "tc_util.h"
 
-int get_qdisc_handle(__u32 *h, const char *str)
+int
+get_qdisc_handle(h, str)
+uint32_t* h;
+const char* str;
 {
-	__u32 maj;
-	char *p;
+	uint32_t maj;
+	char*    p;
 
 	maj = TC_H_UNSPEC;
 	if(strcmp(str, "none") == 0)
@@ -43,12 +46,16 @@ ok:
 	return 0;
 }
 
-int get_tc_classid(__u32 *h, const char *str)
+int
+get_tc_classid(h, str)
+uint32_t* h;
+const char* str;
 {
-	__u32 maj, min;
-	char *p;
+	uint32_t maj;
+	uint32_t min;
+	char*    p;
 
-	dprintf(("str = %s\n", str));
+	dprintf(("[get_tc_classid] Parent ID = %s\n", str));
 	maj = TC_H_ROOT;
 	if(strcmp(str, "root") == 0)
 		goto ok;
@@ -56,30 +63,23 @@ int get_tc_classid(__u32 *h, const char *str)
 	if(strcmp(str, "none") == 0)
 		goto ok;
 	maj = strtoul(str, &p, 16);
-	dprintf(("1st id = %u\n", maj));
 	if(p == str) {
-		dprintf(("p == str\n"));
 		maj = 0;
 		if(*p != ':')
 			return -1;
 	}
 	if(*p == ':') {
-		dprintf(("id = %s\n", p));
+		dprintf(("[get_tc_classid] Leaf ID = %s\n", p));
 		if(maj >= (1<<16))
 			return -1;
-        dprintf(("before id = %u\n", maj));
         maj <<= 16;
-        dprintf(("after id = %u\n", maj));
-        str = p+1;
-        dprintf(("str id = %s\n", str));
+        str = p + 1;
         min = strtoul(str, &p, 16);
-        dprintf(("min id = %u\n", min));
 		if(*p != 0)
 			return -1;
-		if(min >= (1<<16))
+		if(min >= (1 << 16))
 			return -1;
 		maj |= min;
-		dprintf(("last id = %u\n", maj));
 	} else if(*p != 0)
 		return -1;
 
@@ -88,29 +88,6 @@ ok:
 	return 0;
 }
 
-int print_tc_classid(char *buf, int len, __u32 h)
-{
-	if(h == TC_H_ROOT)
-		sprintf(buf, "root");
-	else if(h == TC_H_UNSPEC)
-		snprintf(buf, len, "none");
-	else if(TC_H_MAJ(h) == 0)
-		snprintf(buf, len, ":%x", TC_H_MIN(h));
-	else if(TC_H_MIN(h) == 0)
-		snprintf(buf, len, "%x:", TC_H_MAJ(h)>>16);
-	else
-		snprintf(buf, len, "%x:%x", TC_H_MAJ(h)>>16, TC_H_MIN(h));
-	return 0;
-}
-
-char * sprint_tc_classid(__u32 h, char *buf)
-{
-	if(print_tc_classid(buf, SPRINT_BSIZE-1, h))
-		strcpy(buf, "???");
-	return buf;
-}
-
-/* See http://physics.nist.gov/cuu/Units/binary.html */
 static const struct rate_suffix {
 	const char *name;
 	double scale;
@@ -137,11 +114,14 @@ static const struct rate_suffix {
 };
 
 
-int get_rate(unsigned *rate, const char *str)
+int
+get_rate(rate, str)
+uint32_t* rate;
+const char* str;
 {
-	char *p;
+	char* p;
 	double bps = strtod(str, &p);
-	const struct rate_suffix *s;
+	const struct rate_suffix* s;
 
 	if(p == str)
 		return -1;
@@ -161,81 +141,59 @@ int get_rate(unsigned *rate, const char *str)
 	return -1;
 }
 
-int get_rate_and_cell(unsigned *rate, int *cell_log, char *str)
+void
+print_rate(buf, len, rate)
+char* buf;
+int len;
+uint32_t rate;
 {
-	char * slash = strchr(str, '/');
-
-	if(slash)
-		*slash = 0;
-
-	if(get_rate(rate, str))
-		return -1;
-
-	if(slash) {
-		int cell;
-		int i;
-
-		if(get_integer(&cell, slash+1, 0))
-			return -1;
-		*slash = '/';
-
-		for (i=0; i<32; i++) {
-			if((1<<i) == cell) {
-				*cell_log = i;
-				return 0;
-			}
-		}
-		return -1;
-	}
-	return 0;
-}
-
-void print_rate(char *buf, int len, __u32 rate)
-{
-	double tmp = (double)rate*8;
+	double tmp = (double)rate * 8;
 	extern int use_iec;
 
 	if(use_iec) {
-		if(tmp >= 1000.0*1024.0*1024.0)
-			snprintf(buf, len, "%.0fMibit", tmp/1024.0*1024.0);
-		else if(tmp >= 1000.0*1024)
-			snprintf(buf, len, "%.0fKibit", tmp/1024);
+		if(tmp >= 1000.0 * 1024.0 * 1024.0)
+			snprintf(buf, len, "%.0fMibit", tmp / 1024.0 * 1024.0);
+		else if(tmp >= 1000.0 * 1024)
+			snprintf(buf, len, "%.0fKibit", tmp / 1024);
 		else
 			snprintf(buf, len, "%.0fbit", tmp);
 	} else {
-		if(tmp >= 1000.0*1000000.0)
-			snprintf(buf, len, "%.0fMbit", tmp/1000000.0);
+		if(tmp >= 1000.0 * 1000000.0)
+			snprintf(buf, len, "%.0fMbit", tmp / 1000000.0);
 		else if(tmp >= 1000.0 * 1000.0)
-			snprintf(buf, len, "%.0fKbit", tmp/1000.0);
+			snprintf(buf, len, "%.0fKbit", tmp / 1000.0);
 		else
 			snprintf(buf, len, "%.0fbit",  tmp);
 	}
 }
 
-char * sprint_rate(__u32 rate, char *buf)
+char*
+sprint_rate(rate, buf)
+uint32_t rate;
+char* buf;
 {
-	print_rate(buf, SPRINT_BSIZE-1, rate);
+	print_rate(buf, SPRINT_BSIZE - 1, rate);
 	return buf;
 }
 
-int get_usecs(unsigned *usecs, const char *str)
+int
+get_usecs(usecs, str)
+unsigned* usecs;
+const char* str;
 {
 	double t;
-	char *p;
+	char* p;
 
 	t = strtod(str, &p);
 	if(p == str)
 		return -1;
 
 	if(*p) {
-		if(strcasecmp(p, "s") == 0 || strcasecmp(p, "sec")==0 ||
-		    strcasecmp(p, "secs")==0)
+		if(strcasecmp(p, "s") == 0 || strcasecmp(p, "sec")==0 || strcasecmp(p, "secs") == 0)
 			t *= 1000000;
-		else if(strcasecmp(p, "ms") == 0 || strcasecmp(p, "msec")==0 ||
-			 strcasecmp(p, "msecs") == 0)
+		else if(strcasecmp(p, "ms") == 0 || strcasecmp(p, "msec")==0 || strcasecmp(p, "msecs") == 0)
 			t *= 1000;
-		else if(strcasecmp(p, "us") == 0 || strcasecmp(p, "usec")==0 ||
-			 strcasecmp(p, "usecs") == 0)
+		else if(strcasecmp(p, "us") == 0 || strcasecmp(p, "usec")==0 || strcasecmp(p, "usecs") == 0)
 			t *= 1;
 		else
 			return -1;
@@ -245,26 +203,10 @@ int get_usecs(unsigned *usecs, const char *str)
 	return 0;
 }
 
-
-void print_usecs(char *buf, int len, __u32 usec)
-{
-	double tmp = usec;
-
-	if(tmp >= 1000000)
-		snprintf(buf, len, "%.1fs", tmp/1000000);
-	else if(tmp >= 1000)
-		snprintf(buf, len, "%.1fms", tmp/1000);
-	else
-		snprintf(buf, len, "%uus", usec);
-}
-
-char * sprint_usecs(__u32 usecs, char *buf)
-{
-	print_usecs(buf, SPRINT_BSIZE-1, usecs);
-	return buf;
-}
-
-int get_size(unsigned* size, char* str)
+int 
+get_size(size, str)
+unsigned* size;
+char* str;
 {
 	double sz;
 	char *p;
@@ -277,15 +219,15 @@ int get_size(unsigned* size, char* str)
 		if(strcasecmp(p, "kb") == 0 || strcasecmp(p, "k")==0)
 			sz *= 1024;
 		else if(strcasecmp(p, "gb") == 0 || strcasecmp(p, "g")==0)
-			sz *= 1024*1024*1024;
+			sz *= 1024 * 1024 * 1024;
 		else if(strcasecmp(p, "gbit") == 0)
-			sz *= 1024*1024*1024/8;
+			sz *= 1024 * 1024 * 1024 / 8;
 		else if(strcasecmp(p, "mb") == 0 || strcasecmp(p, "m")==0)
-			sz *= 1024*1024;
+			sz *= 1024 * 1024;
 		else if(strcasecmp(p, "mbit") == 0)
-			sz *= 1024*1024/8;
+			sz *= 1024 * 1024 / 8;
 		else if(strcasecmp(p, "kbit") == 0)
-			sz *= 1024/8;
+			sz *= 1024 / 8;
 		else if(strcasecmp(p, "b") != 0)
 			return -1;
 	}
@@ -294,9 +236,13 @@ int get_size(unsigned* size, char* str)
 	return 0;
 }
 
-int get_size_and_cell(unsigned *size, int *cell_log, char *str)
+int 
+get_size_and_cell(size, cell_log, str)
+unsigned* size;
+int* cell_log;
+char* str;
 {
-	char * slash = strchr(str, '/');
+	char* slash = strchr(str, '/');
 
 	if(slash)
 		*slash = 0;
@@ -308,12 +254,12 @@ int get_size_and_cell(unsigned *size, int *cell_log, char *str)
 		int cell;
 		int i;
 
-		if(get_integer(&cell, slash+1, 0))
+		if(get_integer(&cell, slash + 1, 0))
 			return -1;
 		*slash = '/';
 
-		for (i=0; i<32; i++) {
-			if((1<<i) == cell) {
+		for (i = 0; i < 32; i++) {
+			if((1 << i) == cell) {
 				*cell_log = i;
 				return 0;
 			}
@@ -321,24 +267,6 @@ int get_size_and_cell(unsigned *size, int *cell_log, char *str)
 		return -1;
 	}
 	return 0;
-}
-
-void print_size(char *buf, int len, __u32 sz)
-{
-	double tmp = sz;
-
-	if(sz >= 1024*1024 && fabs(1024*1024*rint(tmp/(1024*1024)) - sz) < 1024)
-		snprintf(buf, len, "%gMb", rint(tmp/(1024*1024)));
-	else if(sz >= 1024 && fabs(1024*rint(tmp/1024) - sz) < 16)
-		snprintf(buf, len, "%gKb", rint(tmp/1024));
-	else
-		snprintf(buf, len, "%ub", sz);
-}
-
-char * sprint_size(__u32 size, char *buf)
-{
-	print_size(buf, SPRINT_BSIZE-1, size);
-	return buf;
 }
 
 static const double max_percent_value = 0xffffffff;
@@ -357,53 +285,38 @@ int get_percent(__u32 *percent, const char *str)
 	return 0;
 }
 
-void print_percent(char *buf, int len, __u32 per)
-{
-	snprintf(buf, len, "%g%%", 100. * (double) per / max_percent_value);
-}
-
-char * sprint_percent(__u32 per, char *buf)
-{
-	print_percent(buf, SPRINT_BSIZE-1, per);
-	return buf;
-}
-
-void print_qdisc_handle(char *buf, int len, __u32 h)
-{
-	snprintf(buf, len, "%x:", TC_H_MAJ(h)>>16);
-}
-
-char * sprint_qdisc_handle(__u32 h, char *buf)
-{
-	print_qdisc_handle(buf, SPRINT_BSIZE-1, h);
-	return buf;
-}
-
-char * action_n2a(int action, char *buf, int len)
+char*
+action_n2a(action, buf, len)
+int action;
+char* buf;
+int len;
 {
 	switch (action) {
-	case -1:
-		return "continue";
-		break;
-	case TC_ACT_OK:
-		return "pass";
-		break;
-	case TC_ACT_SHOT:
-		return "drop";
-		break;
-	case TC_ACT_RECLASSIFY:
-		return "reclassify";
-	case TC_ACT_PIPE:
-		return "pipe";
-	case TC_ACT_STOLEN:
-		return "stolen";
-	default:
-		snprintf(buf, len, "%d", action);
-		return buf;
+		case -1:
+			return "continue";
+			break;
+		case TC_ACT_OK:
+			return "pass";
+			break;
+		case TC_ACT_SHOT:
+			return "drop";
+			break;
+		case TC_ACT_RECLASSIFY:
+			return "reclassify";
+		case TC_ACT_PIPE:
+			return "pipe";
+		case TC_ACT_STOLEN:
+			return "stolen";
+		default:
+			snprintf(buf, len, "%d", action);
+			return buf;
 	}
 }
 
-int action_a2n(char *arg, int *result)
+int
+action_a2n(arg, result)
+char* arg;
+int* result;
 {
 	int res;
 
@@ -425,104 +338,7 @@ int action_a2n(char *arg, int *result)
 			return -1;
 	}
 	*result = res;
+
 	return 0;
-}
-
-void print_tm(FILE * f, const struct tcf_t *tm)
-{
-	int hz = get_user_hz();
-	if(tm->install != 0)
-		fprintf(f, " installed %u sec", (unsigned)(tm->install/hz));
-	if(tm->lastuse != 0)
-		fprintf(f, " used %u sec", (unsigned)(tm->lastuse/hz));
-	if(tm->expires != 0)
-		fprintf(f, " expires %u sec", (unsigned)(tm->expires/hz));
-}
-
-void print_tcstats2_attr(FILE *fp, struct rtattr *rta, char *prefix, struct rtattr **xstats)
-{
-	SPRINT_BUF(b1);
-	struct rtattr *tbs[TCA_STATS_MAX + 1];
-
-	parse_rtattr_nested(tbs, TCA_STATS_MAX, rta);
-
-	if(tbs[TCA_STATS_BASIC]) {
-		struct gnet_stats_basic bs = {0};
-		memcpy(&bs, RTA_DATA(tbs[TCA_STATS_BASIC]), MIN(RTA_PAYLOAD(tbs[TCA_STATS_BASIC]), sizeof(bs)));
-		fprintf(fp, "%sSent %llu bytes %u pkt",
-			prefix, (unsigned long long) bs.bytes, bs.packets);
-	}
-
-	if(tbs[TCA_STATS_QUEUE]) {
-		struct gnet_stats_queue q = {0};
-		memcpy(&q, RTA_DATA(tbs[TCA_STATS_QUEUE]), MIN(RTA_PAYLOAD(tbs[TCA_STATS_QUEUE]), sizeof(q)));
-		fprintf(fp, " (dropped %u, overlimits %u requeues %u) ",
-			q.drops, q.overlimits, q.requeues);
-	}
-			
-	if(tbs[TCA_STATS_RATE_EST]) {
-		struct gnet_stats_rate_est re = {0};
-		memcpy(&re, RTA_DATA(tbs[TCA_STATS_RATE_EST]), MIN(RTA_PAYLOAD(tbs[TCA_STATS_RATE_EST]), sizeof(re)));
-		fprintf(fp, "\n%srate %s %upps ",
-			prefix, sprint_rate(re.bps, b1), re.pps);
-	}
-
-	if(tbs[TCA_STATS_QUEUE]) {
-		struct gnet_stats_queue q = {0};
-		memcpy(&q, RTA_DATA(tbs[TCA_STATS_QUEUE]), MIN(RTA_PAYLOAD(tbs[TCA_STATS_QUEUE]), sizeof(q)));
-		if(!tbs[TCA_STATS_RATE_EST])
-			fprintf(fp, "\n%s", prefix);
-		fprintf(fp, "backlog %s %up requeues %u ",
-			sprint_size(q.backlog, b1), q.qlen, q.requeues);
-	}
-
-	if(xstats)
-		*xstats = tbs[TCA_STATS_APP] ? : NULL;
-}
-
-void print_tcstats_attr(FILE *fp, struct rtattr *tb[], char *prefix, struct rtattr **xstats)
-{
-	SPRINT_BUF(b1);
-
-	if(tb[TCA_STATS2]) {
-		print_tcstats2_attr(fp, tb[TCA_STATS2], prefix, xstats);
-		if(xstats && NULL == *xstats)
-			goto compat_xstats;
-		return;
-	}
-	/* backward compatibility */
-	if(tb[TCA_STATS]) {
-		struct tc_stats st;
-
-		/* handle case where kernel returns more/less than we know about */
-		memset(&st, 0, sizeof(st));
-		memcpy(&st, RTA_DATA(tb[TCA_STATS]), MIN(RTA_PAYLOAD(tb[TCA_STATS]), sizeof(st)));
-
-		fprintf(fp, "%sSent %llu bytes %u pkts (dropped %u, overlimits %u) ",
-			prefix, (unsigned long long)st.bytes, st.packets, st.drops, 
-			st.overlimits);
-
-		if(st.bps || st.pps || st.qlen || st.backlog) {
-			fprintf(fp, "\n%s", prefix);
-			if(st.bps || st.pps) {
-				fprintf(fp, "rate ");
-				if(st.bps)
-					fprintf(fp, "%s ", sprint_rate(st.bps, b1));
-				if(st.pps)
-					fprintf(fp, "%upps ", st.pps);
-			}
-			if(st.qlen || st.backlog) {
-				fprintf(fp, "backlog ");
-				if(st.backlog)
-					fprintf(fp, "%s ", sprint_size(st.backlog, b1));
-				if(st.qlen)
-					fprintf(fp, "%up ", st.qlen);
-			}
-		}
-	}
-
-compat_xstats:
-	if(tb[TCA_XSTATS] && xstats)
-		*xstats = tb[TCA_XSTATS];
 }
 

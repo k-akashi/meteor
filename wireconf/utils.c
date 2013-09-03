@@ -211,8 +211,9 @@ get_prefix_1(inet_prefix* dst, char* arg, int family)
 	if (strcmp(arg, "default") == 0 ||
 	    strcmp(arg, "any") == 0 ||
 	    strcmp(arg, "all") == 0) {
-		if (family == AF_DECnet)
+		if (family == AF_DECnet) {
 			return -1;
+        }
 		dst->family = family;
 		dst->bytelen = 0;
 		dst->bitlen = 0;
@@ -355,19 +356,20 @@ int inet_addr_match(const inet_prefix* a, const inet_prefix* b, int bits)
 
 int __iproute2_hz_internal;
 
-int __get_hz(void)
+int 
+__get_hz(void)
 {
 	char name[1024];
 	int hz = 0;
-	FILE *fp;
+	FILE* fp;
 
 	if (getenv("HZ"))
 		return atoi(getenv("HZ")) ? : HZ;
 
 	if (getenv("PROC_NET_PSCHED")) {
-		snprintf(name, sizeof(name)-1, "%s", getenv("PROC_NET_PSCHED"));
+		snprintf(name, sizeof(name) - 1, "%s", getenv("PROC_NET_PSCHED"));
 	} else if (getenv("PROC_ROOT")) {
-		snprintf(name, sizeof(name)-1, "%s/net/psched", getenv("PROC_ROOT"));
+		snprintf(name, sizeof(name) - 1, "%s/net/psched", getenv("PROC_ROOT"));
 	} else {
 		strcpy(name, "/proc/net/psched");
 	}

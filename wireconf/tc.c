@@ -44,7 +44,7 @@ static struct filter_util * filter_list;
 static int print_noqopt(struct qdisc_util *qu, FILE *f, 
 			struct rtattr *opt)
 {
-	if (opt && RTA_PAYLOAD(opt))
+	if(opt && RTA_PAYLOAD(opt))
 		fprintf(f, "[Unknown qdisc, optlen=%u] ", 
 			(unsigned) RTA_PAYLOAD(opt));
 	return 0;
@@ -52,7 +52,7 @@ static int print_noqopt(struct qdisc_util *qu, FILE *f,
 
 static int parse_noqopt(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr* n)
 {
-	if (qp) {
+	if(qp) {
 		fprintf(stderr, "Unknown qdisc \"%s\", hence option is unparsable\n", qu->id);
 		return -1;
 	}
@@ -61,10 +61,10 @@ static int parse_noqopt(struct qdisc_util *qu, struct qdisc_parameter* qp, struc
 
 static int print_nofopt(struct filter_util *qu, FILE *f, struct rtattr *opt, __u32 fhandle)
 {
-	if (opt && RTA_PAYLOAD(opt))
+	if(opt && RTA_PAYLOAD(opt))
 		fprintf(f, "fh %08x [Unknown filter, optlen=%u] ", 
 			fhandle, (unsigned) RTA_PAYLOAD(opt));
-	else if (fhandle)
+	else if(fhandle)
 		fprintf(f, "fh %08x ", fhandle);
 	return 0;
 }
@@ -73,9 +73,9 @@ static int parse_nofopt(struct filter_util *qu, char *fhandle, struct u32_parame
 {
 	__u32 handle;
 
-	if (fhandle) {
+	if(fhandle) {
 		struct tcmsg *t = NLMSG_DATA(n);
-		if (get_u32(&handle, fhandle, 16)) {
+		if(get_u32(&handle, fhandle, 16)) {
 			fprintf(stderr, "Unparsable filter ID \"%s\"\n", fhandle);
 			return -1;
 		}
@@ -90,26 +90,26 @@ struct qdisc_util* get_qdisc_kind(const char* str)
 	char buf[256];
 	struct qdisc_util* q;
 
-	for (q = qdisc_list; q; q = q->next)
-		if (strcmp(q->id, str) == 0)
+	for(q = qdisc_list; q; q = q->next)
+		if(strcmp(q->id, str) == 0)
 			return q;
 
 	snprintf(buf, sizeof(buf), "./wireconf/q_%s.so", str);
 	printf("buf = %s\n", buf);
 	dlh = dlopen(buf, RTLD_LAZY);
-	if (!dlh) {
+	if(!dlh) {
 		/* look in current binary, only open once */
 		dlh = BODY;
-		if (dlh == NULL) {
+		if(dlh == NULL) {
 			dlh = BODY = dlopen(NULL, RTLD_LAZY);
-			if (dlh == NULL)
+			if(dlh == NULL)
 				goto noexist;
 		}
 	}
 
 	snprintf(buf, sizeof(buf), "%s_qdisc_util", str);
 	q = dlsym(dlh, buf);
-	if (q == NULL)
+	if(q == NULL)
 		goto noexist;
 
 reg:
@@ -119,9 +119,9 @@ reg:
 
 noexist:
 	q = malloc(sizeof(*q));
-	if (q) {
+	if(q) {
 		memset(q, 0, sizeof(*q));
-		q->id = strcpy(malloc(strlen(str)+1), str);
+		q->id = strcpy(malloc(strlen(str) + 1), str);
 		q->parse_qopt = parse_noqopt;
 		q->print_qopt = print_noqopt;
 		goto reg;
@@ -144,18 +144,18 @@ struct filter_util *get_filter_kind(const char *str)
 
 	snprintf(buf, sizeof(buf), "./wireconf/f_%s.so", str);
 	dlh = dlopen(buf, RTLD_LAZY);
-	if (dlh == NULL) {
+	if(dlh == NULL) {
 		dlh = BODY;
-		if (dlh == NULL) {
+		if(dlh == NULL) {
 			dlh = BODY = dlopen(NULL, RTLD_LAZY);
-			if (dlh == NULL)
+			if(dlh == NULL)
 				goto noexist;
 		}
 	}
 
 	snprintf(buf, sizeof(buf), "%s_filter_util", str);
 	q = dlsym(dlh, buf);
-	if (q == NULL) {
+	if(q == NULL) {
 		goto noexist;
 	}
 
@@ -165,7 +165,7 @@ reg:
 	return q;
 noexist:
 	q = malloc(sizeof(*q));
-	if (q) {
+	if(q) {
 		memset(q, 0, sizeof(*q));
 		strncpy(q->id, str, 15);
 		q->parse_fopt = parse_nofopt;
@@ -186,19 +186,19 @@ static void usage(void)
 
 static int do_cmd(int argc, char **argv)
 {
-	if (matches(*argv, "qdisc") == 0)
+	if(matches(*argv, "qdisc") == 0)
 		return do_qdisc(argc-1, argv+1);
 
-	if (matches(*argv, "class") == 0)
+	if(matches(*argv, "class") == 0)
 		return do_class(argc-1, argv+1);
 
-	if (matches(*argv, "filter") == 0)
+	if(matches(*argv, "filter") == 0)
 		return do_filter(argc-1, argv+1);
 
-	if (matches(*argv, "actions") == 0)
+	if(matches(*argv, "actions") == 0)
 		return do_action(argc-1, argv+1);
 
-	if (matches(*argv, "help") == 0) {
+	if(matches(*argv, "help") == 0) {
 		usage();
 		return 0;
 	}
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 	char *batchfile = NULL;
 
 	tc_core_init();
-	if (rtnl_open(&rth, 0) < 0) {
+	if(rtnl_open(&rth, 0) < 0) {
 		fprintf(stderr, "Cannot open rtnetlink\n");
 		exit(1);
 	}

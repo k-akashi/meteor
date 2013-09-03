@@ -19,6 +19,9 @@
 #define TC_H_UNSPEC	(0U)
 #define TC_H_ROOT   (0xFFFFFFFFU)
 
+#define TC_HANDLE(maj, min) (maj << 16 | min)
+
+
 int preferred_family = AF_UNSPEC;
 int oneline = 0;
 char * _SL_ = NULL;
@@ -65,15 +68,17 @@ char *addr;
                     RTA_DATA(tb[RTA_GATEWAY]),
                     abuf, sizeof(abuf)) == NULL) {
             return addr;
-        } else {
-            dprintf(("%s\n",  (char* )inet_ntop(r->rtm_family,
+        }
+        else {
+            dprintf(("[get_route_info] %s\n",  (char* )inet_ntop(r->rtm_family,
                             RTA_DATA(tb[RTA_GATEWAY]),
                             abuf, sizeof(abuf))));
             return (char* )inet_ntop(r->rtm_family,
                     RTA_DATA(tb[RTA_GATEWAY]),
                     abuf, sizeof(abuf));
         }
-    } else {
+    }
+    else {
         return "null";
     }
 
@@ -84,13 +89,13 @@ int
 tc_cmd(cmd, flags, dev, handleid, root, qp, type)
 int cmd;
 int flags;
-char* dev;
-char* handleid;
-char* root;
+char *dev;
+char *handleid;
+char *root;
 struct qdisc_parameter qp;
-char* type;
+char *type;
 {
-    struct qdisc_util* q = NULL;
+    struct qdisc_util *q = NULL;
     char d[16];
     char k[16];
     __u32 handle;
@@ -101,7 +106,7 @@ char* type;
     } req;
 
     tc_core_init();
-    dprintf(("Start tc_cmd function!! type = %s\n", type));
+    dprintf(("[tc_cmd] Start tc_cmd function type = %s\n", type));
 
     memset(&req, 0, sizeof(req));
     memset(&d, 0, sizeof(d));
@@ -114,9 +119,11 @@ char* type;
 
     strncpy(d, dev, sizeof(d) - 1);
     if(cmd != RTM_DELQDISC) {
-        get_qdisc_handle(&handle, handleid);
+        //puts(handleid);
+        //get_qdisc_handle(&handle, handleid);
+        handle = TC_HANDLE(200, 1);
         req.t.tcm_handle = handle;
-        dprintf(("req.t.tcm.handle = %d\n", req.t.tcm_handle));
+        dprintf(("[tc_cmd] req.t.tcm.handle = %d\n", req.t.tcm_handle));
     }
     if(strcmp(root, "root") == 0)
         req.t.tcm_parent = TC_H_ROOT;
@@ -139,7 +146,7 @@ char* type;
             invarg(handleid, "invalid parent ID");
         }
         req.t.tcm_parent = handle;
-        dprintf(("req.t.tcm.parent = %d\n", req.t.tcm_parent));
+        dprintf(("[tc_cmd] req.t.tcm.parent = %d\n", req.t.tcm_parent));
     }
 
     /*
@@ -152,24 +159,23 @@ char* type;
        return 1;
        }
        req.t.tcm_ifindex = idx;
-       */
+    */
 
-    if(cmd != RTM_DELQDISC){
+    if(cmd != RTM_DELQDISC) {
         strncpy(k, type, sizeof(k) - 1);
         q = get_qdisc_kind(k);
     }
 
-    if(k[0]){
+    if(k[0]) {
         addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);
     }
 
-    if(q){
+    if(q) {
         if(q->parse_qopt(q, &qp, &req.n)) {
             return 1;
         }
     }
-
-    if(d[0]){
+    if(d[0]) {
         int idx;
 
         ll_init_map(&rth);
@@ -179,46 +185,44 @@ char* type;
             return 1;
         }
         req.t.tcm_ifindex = idx;
-        dprintf(("netem interface = %s\n", &d[0]));
+        dprintf(("[tc_cmd] tc ifindex = %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
+    }
 
     return 0;
 }
 
-/*
-// test code
+/* test code
 int
-main(int argc, char **argv)
+main(argc, argv)
+int argc;
+char **argv;
 {
-char* ret;
-struct qdisc_parameter qp =  {"1000", "10ms", "10", "0", "0.01", "0", "0", "0"};
-
-ret = (char*)get_route_info(argv[1], argv[2]);
-printf("result = %s\n", ret);
-
-if(strcmp("add", argv[3]) == 0)
-{
-if(tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
-printf("missing tc\n");
-}
-else if(strcmp("change", argv[3]) == 0)
-{
-if(tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
-printf("missing tc\n");
-}
-else if(strcmp("del", argv[3]) == 0)
-{
-if(tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
-printf("missing tc\n");
-}
-else
-{
-printf("implememtation only add, del\n");
-}
-
-return 0;
+    char* ret;
+    struct qdisc_parameter qp =  {"1000", "10ms", "10", "0", "0.01", "0", "0", "0"};
+    
+    ret = (char*)get_route_info(argv[1], argv[2]);
+    printf("result = %s\n", ret);
+    
+    if(strcmp("add", argv[3]) == 0) {
+        if(tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+        printf("missing tc\n");
+    }
+    else if(strcmp("change", argv[3]) == 0) {
+        if(tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+        printf("missing tc\n");
+    }
+    else if(strcmp("del", argv[3]) == 0) {
+        if(tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+        printf("missing tc\n");
+    }
+    else {
+        printf("implememtation only add, del\n");
+    }
+    
+    return 0;
 }
 */

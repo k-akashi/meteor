@@ -19,9 +19,15 @@ COMPILE_TYPE=release
 #endif
 
 # only need to define EXPAT_PATH for non-standard installations of expat
+ifeq ($(OS_NAME),FreeBSD)
 EXPAT_PATH=/usr/local
 EXPAT_INC=-I${EXPAT_PATH}/include
 EXPAT_LIB=-L${EXPAT_PATH}/lib -lexpat
+else 
+EXPAT_PATH=/usr/lib/x86_64-linux-gnu
+EXPAT_INC=-I${EXPAT_PATH}/include
+EXPAT_LIB=-L${EXPAT_PATH} -lexpat
+endif
 
 # paths for various QOMET components
 
@@ -29,7 +35,7 @@ CHANEL_PATH=./chanel
 
 DELTAQ_PATH=./deltaQ
 DELTAQ_INC=-I${DELTAQ_PATH}
-DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ
+DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ -lm
 
 ROUTING_PATH=./routing
 
@@ -38,8 +44,7 @@ WIRECONF_PATH=./wireconf
 # different options and flags
 INCS=${EXPAT_INC} ${DELTAQ_INC}
 LIBS=-lm ${EXPAT_LIB} ${DELTAQ_LIB}
-
-GENERAL_FLAGS=$(SVN_DEFINE) -Wall -Wall
+GENERAL_FLAGS=$(SVN_DEFINE) -Wall
 
 # compiler flags
 ifeq ($(COMPILE_TYPE), debug)
@@ -77,17 +82,17 @@ MAKE_CMD = make
 endif
 
 # defining revision info
-SVN_REVISION := "$(shell svnversion -n .)"
+#SVN_REVISION := "$(shell svnversion -n .)"
 
 # if revision info cannot be obtained from SVN, try to get it from a file
 ifeq ($(SVN_REVISION), "")
 #$(warning No SVN revision info, trying to get it from 'svn_revision.txt')
-SVN_REVISION := "$(shell cat svn_revision.txt)"
+#SVN_REVISION := "$(shell cat svn_revision.txt)"
 else
 #$(warning Writing revision info to file 'svn_revision.txt')
-$(shell echo "$(SVN_REVISION)" | cat > svn_revision.txt)
+#$(shell echo "$(SVN_REVISION)" | cat > svn_revision.txt)
 endif
-SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
+#SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
 
 
 # created object qomet.o so that module dependencies
@@ -99,13 +104,13 @@ SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
 #.PHONY: revision
 
 qomet : qomet.o
-	gcc $(GCC_FLAGS) qomet.o -o qomet ${INCS} ${LIBS}
+	gcc $(GCC_FLAGS) qomet.o ./deltaQ/libdeltaQ.a -o qomet ${INCS} ${LIBS}
 
 qomet.o : qomet.c ${DELTAQ_PATH}/libdeltaQ.a
 	gcc $(GCC_FLAGS) -c qomet.c ${INCS}
 
 generate_scenario : generate_scenario.c ${DELTAQ_PATH}/libdeltaQ.a
-	gcc $(GCC_FLAGS) generate_scenario.c -o generate_scenario ${INCS} ${LIBS}
+	gcc $(GCC_FLAGS) generate_scenario.c ./deltaQ/libdeltaQ.a -o generate_scenario ${INCS} ${LIBS}
 
 ${CHANEL_PATH}/do_chanel : ${CHANEL_PATH}/*.c ${CHANEL_PATH}/*.h
 	cd ${CHANEL_PATH}; ${MAKE_CMD} COMPILE_TYPE=$(COMPILE_TYPE)

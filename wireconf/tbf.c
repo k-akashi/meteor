@@ -1,15 +1,3 @@
-/*
- * q_tbf.c		TBF.
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- *
- * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,31 +10,15 @@
 
 #include "utils.h"
 #include "tc_util.h"
-
-/*
-static void explain(void)
-{
-	fprintf(stderr, "Usage: ... tbf limit BYTES burst BYTES[/BYTES] rate KBPS [ mtu BYTES[/BYTES] ]\n");
-	fprintf(stderr, "               [ peakrate KBPS ] [ latency TIME ]\n");
-}
-
-static void explain1(char *arg)
-{
-	fprintf(stderr, "Illegal \"%s\"\n", arg);
-}
-*/
-
-#define usage() return(-1)
+#include "tc_common.h"
 
 static int
-tbf_parse_opt(qu, qp, n)
-struct qdisc_util *qu;
+tbf_opt(qp, n)
 struct qdisc_parameter* qp;
 struct nlmsghdr *n;
 {
-//	int ok=0;
 	struct tc_tbf_qopt opt;
-	__u32 rtab[256];
+	uint32_t rtab[256];
 //	__u32 ptab[256];
 	unsigned buffer  = 0;
 	unsigned mtu     = 0; 
@@ -161,7 +133,7 @@ struct nlmsghdr *n;
 		opt.limit = lim;
 	}
 
-	if((Rcell_log = tc_calc_rtable(opt.rate.rate, rtab, Rcell_log, mtu, mpu)) < 0) {
+	if((Rcell_log = tc_calc_rtable(&opt.rate, rtab, Rcell_log, mtu, mpu)) < 0) {
 		fprintf(stderr, "TBF: failed to calculate rate table.\n");
 		return -1;
 	}
@@ -179,72 +151,115 @@ struct nlmsghdr *n;
 	return 0;
 }
 
-static int
-tbf_print_opt(qu, f, opt)
-struct qdisc_util *qu;
-FILE *f;
-struct rtattr *opt;
+int
+add_tbf_qdisc(dev, id, qp)
+char* dev;
+uint32_t id[4];
+struct qdisc_parameter qp;
 {
-	struct rtattr *tb[TCA_TBF_PTAB+1];
-	struct tc_tbf_qopt *qopt;
-	double buffer, mtu;
-	double latency;
-	SPRINT_BUF(b1);
-	SPRINT_BUF(b2);
+	char device[16];
+	char qdisc_kind[16] = "tbf";
+	uint32_t flags;
+	struct {
+		struct nlmsghdr n;
+		struct tcmsg t;
+		char buf[TCA_BUF_MAX];
+	} req;
+	memset(&req, 0, sizeof(req));
+	flags = NLM_F_EXCL|NLM_F_CREATE;
+	strncpy(device, dev, sizeof(device) - 1);
 
-	if(opt == NULL)
-		return 0;
+	tc_core_init();
 
-	parse_rtattr_nested(tb, TCA_TBF_PTAB, opt);
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
+	req.n.nlmsg_type = RTM_NEWQDISC;
+	req.t.tcm_family = AF_UNSPEC;
 
-	if(tb[TCA_TBF_PARMS] == NULL)
-		return -1;
+    if(id[0] == TC_H_ROOT) {
+        req.t.tcm_parent = TC_H_ROOT;
+    }
+    else {
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
+    }
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
 
-	qopt = RTA_DATA(tb[TCA_TBF_PARMS]);
-	if(RTA_PAYLOAD(tb[TCA_TBF_PARMS])  < sizeof(*qopt))
-		return -1;
-	fprintf(f, "rate %s ", sprint_rate(qopt->rate.rate, b1));
-	buffer = ((double)qopt->rate.rate * tc_core_tick2usec(qopt->buffer)) / 1000000;
-	if(show_details) {
-		fprintf(f, "burst %s/%u mpu %s ", sprint_size(buffer, b1),
-			1<<qopt->rate.cell_log, sprint_size(qopt->rate.mpu, b2));
-	} else {
-		fprintf(f, "burst %s ", sprint_size(buffer, b1));
-	}
-	if(show_raw)
-		fprintf(f, "[%08x] ", qopt->buffer);
-	if(qopt->peakrate.rate) {
-		fprintf(f, "peakrate %s ", sprint_rate(qopt->peakrate.rate, b1));
-		if(qopt->mtu || qopt->peakrate.mpu) {
-			mtu = ((double)qopt->peakrate.rate * tc_core_tick2usec(qopt->mtu)) / 1000000;
-			if(show_details) {
-				fprintf(f, "mtu %s/%u mpu %s ", sprint_size(mtu, b1),
-					1 << qopt->peakrate.cell_log, sprint_size(qopt->peakrate.mpu, b2));
-			} else {
-				fprintf(f, "minburst %s ", sprint_size(mtu, b1));
-			}
-			if(show_raw)
-				fprintf(f, "[%08x] ", qopt->mtu);
+	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+
+	tbf_opt(&qp, &req.n);
+
+	if(device[0]) {
+		int idx;
+
+		ll_init_map(&rth);
+
+		if((idx = ll_name_to_index(device)) == 0) {
+			fprintf(stderr, "Cannot find device \"%s\"\n", device);
+			return 1;
 		}
+		req.t.tcm_ifindex = idx;
+		dprintf(("[add_tbf_qdisc] TBF ifindex = %d\n", idx));
 	}
 
-	if(show_raw)
-		fprintf(f, "limit %s ", sprint_size(qopt->limit, b1));
-
-	latency = 1000000 * (qopt->limit / (double)qopt->rate.rate) - tc_core_tick2usec(qopt->buffer);
-	if(qopt->peakrate.rate) {
-		double lat2 = 1000000 * (qopt->limit / (double)qopt->peakrate.rate) - tc_core_tick2usec(qopt->mtu);
-		if(lat2 > latency)
-			latency = lat2;
-	}
-	fprintf(f, "lat %s ", sprint_usecs(tc_core_tick2usec(latency), b1));
+	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+		return -1;
 
 	return 0;
 }
 
-struct qdisc_util tbf_qdisc_util = {
-	.id		= "tbf",
-	.parse_qopt	= tbf_parse_opt,
-	.print_qopt	= tbf_print_opt,
-};
+int
+change_tbf_qdisc(dev, id, qp)
+char* dev;
+uint32_t id[4];
+struct qdisc_parameter qp;
+{
+	char device[16];
+	char qdisc_kind[16] = "tbf";
+	uint32_t flags;
+	struct {
+		struct nlmsghdr n;
+		struct tcmsg t;
+		char buf[TCA_BUF_MAX];
+	} req;
+	memset(&req, 0, sizeof(req));
+	strncpy(device, dev, sizeof(device) - 1);
 
+	tc_core_init();
+
+	flags = 0;
+
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
+	req.n.nlmsg_type = RTM_NEWQDISC;
+	req.t.tcm_family = AF_UNSPEC;
+
+    if(id[0] == TC_H_ROOT) {
+        req.t.tcm_parent = TC_H_ROOT;
+    }
+    else {
+        req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
+    }
+    req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
+
+	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+
+	tbf_opt(&qp, &req.n);
+
+	if(device[0]) {
+		int idx;
+
+		ll_init_map(&rth);
+
+		if((idx = ll_name_to_index(device)) == 0) {
+			fprintf(stderr, "Cannot find device \"%s\"\n", device);
+			return 1;
+		}
+		req.t.tcm_ifindex = idx;
+		dprintf(("[change_tbf_qdisc] TBF ifindex = %d\n", idx));
+	}
+
+	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+		return -1;
+
+	return 0;
+}

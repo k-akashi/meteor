@@ -1,15 +1,3 @@
-/*
- * tc_filter.c		"tc filter".
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- *
- * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -137,40 +125,32 @@ char* buf;
 }
 
 int 
-tc_filter_modify(cmd, flags, dev, id, protocolid, type, up)
-int cmd;
-unsigned int flags;
+add_tc_filter(dev, id, protocolid, type, up)
 char* dev;
 uint32_t id[4];
 char* protocolid;
 char* type;
 struct u32_parameter* up;
 {
-	struct {
-		struct nlmsghdr 	n;
-		struct tcmsg 		t;
-		char   			buf[MAX_MSG];
-	} req;
-	struct filter_util* q = NULL;
-	__u32 prio = 0;
-	__u32 protocol = 0;
-	uint32_t fhandle = 0;
-	char  d[16];
-	char  k[16];
+	uint16_t protocol_id;
+	uint32_t prio = 16;
+	uint32_t protocol = 0;
+	uint32_t handle = 0;
 	struct tc_estimator est;
+	struct {
+		struct nlmsghdr n;
+		struct tcmsg t;
+		char buf[MAX_MSG];
+	} req;
 
 	memset(&req, 0, sizeof(req));
 	memset(&est, 0, sizeof(est));
-	memset(d, 0, sizeof(d));
-	memset(k, 0, sizeof(k));
 	memset(&req, 0, sizeof(req));
 
 	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
-	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
-	req.n.nlmsg_type = cmd;
+	req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE;
+	req.n.nlmsg_type = RTM_NEWTFILTER;
 	req.t.tcm_family = AF_UNSPEC;
-
-	strncpy(d, dev, sizeof(d)-1);
 
     if(id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
@@ -178,19 +158,9 @@ struct u32_parameter* up;
     else {
         req.t.tcm_parent = TC_HANDLE(id[0], id[1]);
     }
-    dprintf(("[tc_filter_modify] parent id = %d\n", req.t.tcm_parent));
+    dprintf(("[add_tc_filter] parent id = %d\n", req.t.tcm_parent));
+	handle = TC_HANDLE(id[2], id[3]);
 
-	fhandle = TC_HANDLE(id[2], id[3]);
-
-/*
-    char *handleid;
-    handleid = malloc(10);
-    sprintf(handleid, "%d:%d", id[2], id[3]);
-    fhandle = handleid;
-    dprintf(("[tc_filter_modify] handle id = %s\n", handleid));
-*/
-
-	__u16 protocol_id;
 	if(protocol) {
 		duparg("protocol", protocolid);
     }
@@ -198,42 +168,24 @@ struct u32_parameter* up;
 		invarg(protocolid, "invalid protocol");
     }
 	protocol = protocol_id;
-    dprintf(("[tc_filter_modify] protocol = %d\n", protocol));
+    dprintf(("[add_tc_filter] protocol = %d\n", protocol));
 
-    if(get_u32(&prio, "16", 0))
-        invarg("16", "invalid prpriority value");
-
-	strncpy(k, type, sizeof(k) - 1);
-    dprintf(("[tc_filter_modify] kind = %s\n", k));
-	q = get_filter_kind(k);
+    dprintf(("[ad_tc_filter] kind = %s\n", type));
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
-	if(k[0])
-		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
+    addattr_l(&req.n, sizeof(req), TCA_KIND, type, strlen(type) + 1);
 
 	if(up->rdev) {
 		sprintf(dev, "%s", up->rdev);
 	}
 
-    u32_filter_parse(q, fhandle, *up, &req.n, dev);
-/*
-	if(q) {
-		if(q->parse_fopt(q, fhandle, *up, &req.n, dev))
-			return 1;
-	}
-*/
+    u32_filter_parse(handle, *up, &req.n, dev);
 
-	if(est.ewma_log)
-		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
-
-	if(d[0]) {
- 		ll_init_map(&rth);
-
-		if ((req.t.tcm_ifindex = ll_name_to_index(d)) == 0) {
-			fprintf(stderr, "Cannot find device \"%s\"\n", d);
-			return 1;
-		}
+    ll_init_map(&rth);
+    if((req.t.tcm_ifindex = ll_name_to_index(dev)) == 0) {
+        fprintf(stderr, "Cannot find device \"%s\"\n", dev);
+        return 1;
 	}
 
  	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
@@ -243,16 +195,3 @@ struct u32_parameter* up;
 
 	return 0;
 }
-
-
-/*
-// filter_modify function uasage
-// add filter rule
-		return tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, argc-1, argv+1);
-// change filter rule
-		return tc_filter_modify(RTM_NEWTFILTER, 0, argc-1, argv+1);
-// replace filter rule
-		return tc_filter_modify(RTM_NEWTFILTER, NLM_F_CREATE, argc-1, argv+1);
-// delete filter rule
-		return tc_filter_modify(RTM_DELTFILTER, 0,  argc-1, argv+1);
-*/

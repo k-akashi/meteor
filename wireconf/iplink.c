@@ -5,8 +5,35 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "tc_util.h"
+#include "ip_common.h"
+
+#define MAX_DEV 16
+
+int
+get_iface_list(ifc)
+struct ifconf *ifc;
+{
+    int sk;
+    int val;
+    
+    sk = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sk < 0) {
+        perror("socket");
+        return (-1);
+    }
+
+    ifc->ifc_ifcu.ifcu_buf = sizeof(struct ifreq) * MAX_DEV;
+    if((val = ioctl(sk, SIOCGIFCONF , (char*)ifc)) < 0) {
+         perror("ioctl(SIOGIFCONF)");
+     }
+    close(sk);
+    
+    return val;
+}
 
 static int 
 get_ctl_fd(void)
@@ -14,18 +41,21 @@ get_ctl_fd(void)
     int s_errno;
     int fd;
 
-	fd = socket(PF_INET, SOCK_DGRAM, 0);
-	if (fd >= 0)
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd >= 0) {
 		return fd;
+    }
 
 	s_errno = errno;
-	fd = socket(PF_PACKET, SOCK_DGRAM, 0);
-	if (fd >= 0)
+	fd = socket(AF_PACKET, SOCK_DGRAM, 0);
+	if (fd >= 0) {
 		return fd;
+    }
 
-	fd = socket(PF_INET6, SOCK_DGRAM, 0);
-	if (fd >= 0)
+	fd = socket(AF_INET6, SOCK_DGRAM, 0);
+	if (fd >= 0) {
 		return fd;
+    }
 
 	errno = s_errno;
 	perror("Cannot create control socket");
@@ -34,63 +64,55 @@ get_ctl_fd(void)
 }
 
 int
-set_ifb(device, cmd)
-char* device;
-char* cmd;
+set_ifb(dev, cmd)
+char* dev;
+int cmd;
 {
 	int fd;
 	int err;
-	char* dev;
-	__u32 mask;
-	__u32 flags;
+	uint32_t mask;
+	uint32_t flags;
 	struct ifreq ifr;
 	
-	dev = NULL;
 	mask = 0;
 	flags = 0;
+    memset(&ifr, 0, sizeof(struct ifreq));
 
-	dev = device;
-	if( strcmp(cmd, "up") == 0) {
+	if(cmd == IF_UP) {
 		mask |= IFF_UP;
 		flags |= IFF_UP;
 	}
-	else if(strcmp(cmd, "down") == 0) {
+	else if(cmd  == IF_DOWN) {
 		mask |= IFF_UP;
 		flags &= ~IFF_UP;
 	}
 
-	if(!dev){
-		fprintf(stderr, "devname is required.\n");
-		exit(-1);
-	}
-
 	strncpy(ifr.ifr_name, dev, IFNAMSIZ);
 	fd = get_ctl_fd();
-	if(fd < 0)
+	if(fd < 0) {
 		return -1;
+    }
 
 	err = ioctl(fd, SIOCGIFFLAGS, &ifr);
-
 	if(err) {
 		perror("SIOCGIFFLAGS");
 		close(fd);
 		return -1;
 	}
-
-	if((ifr.ifr_flags^flags)&mask) {
+	if((ifr.ifr_flags ^ flags) & mask) {
 		ifr.ifr_flags &= ~mask;
 		ifr.ifr_flags |= mask&flags;
 		err = ioctl(fd, SIOCSIFFLAGS, &ifr);
-		if(err)
+		if(err) {
 			perror("SIOCSIFFLAGS");
+        }
 	}
 	close(fd);
 
 	return 0;
 }
 
-/*
-// test code
+/* test code
 int
 main(argc, argv)
 int argc;
@@ -99,8 +121,7 @@ char** argv;
 	char* devname;
 
 	devname = "ifb1";
-
-	if(set_ifb(devname, "down") < 0 ) {
+	if(set_ifb(devname, IF_DOWN) < 0 ) {
 		return 1;
 	}
 

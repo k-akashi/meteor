@@ -37,6 +37,7 @@
  *           drive the netwrok emulator dummynet on FreeBSD 
  *
  * Authors: Junya Nakata, Lan Nguyen Tien, Razvan Beuran
+ * Changes : Kunio AKASHI
  *
  *   $Revision: 128 $
  *   $LastChangedDate: 2009-02-06 10:21:50 +0900 (Fri, 06 Feb 2009) $
@@ -70,6 +71,9 @@
 // Basic constants
 /////////////////////////////////////////////
 
+#define BIN_SC 1
+#define TXT_SC 2
+
 #define PARAMETERS_TOTAL        19
 #define PARAMETERS_UNUSED       13
 
@@ -81,28 +85,30 @@
 
 // time measurement macro
 #define TCHK_START(name)           \
-    struct timeval name##_prev;    \
-struct timeval name##_current; \
+struct timeval name##_prev;        \
+struct timeval name##_current;     \
 gettimeofday(&name##_prev, NULL)
 
 #define TCHK_END(name)                                                             \
     gettimeofday(&name##_current, NULL);                                           \
 time_t name##_sec;                                                                 \
 suseconds_t name##_usec;                                                           \
-if (name##_current.tv_sec == name##_prev.tv_sec) {                                 \
+if(name##_current.tv_sec == name##_prev.tv_sec) {                                  \
     name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
     name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                    \
-} else if (name ##_current.tv_sec != name##_prev.tv_sec) {                         \
+}                                                                                  \
+else if(name ##_current.tv_sec != name##_prev.tv_sec) {                            \
     int name##_carry = 1000000;                                                    \
     name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
-    if (name##_prev.tv_usec > name##_current.tv_usec) {                            \
+    if(name##_prev.tv_usec > name##_current.tv_usec) {                             \
         name##_usec = name##_carry - name##_prev.tv_usec + name##_current.tv_usec; \
         name##_sec--;                                                              \
-        if (name##_usec > name##_carry) {                                          \
+        if(name##_usec > name##_carry) {                                           \
             name##_usec = name##_usec - name##_carry;                              \
             name##_sec++;                                                          \
         }                                                                          \
-    } else {                                                                       \
+    }                                                                              \
+    else {                                                                         \
         name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                \
     }                                                                              \
 }                                                                                  \
@@ -112,10 +118,9 @@ printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
 // Structure to hold QOMET parameters
 /////////////////////////////////////////////
 
-typedef struct
-{
+typedef struct {
     float time;
-    int next_hop_id;
+    int32_t next_hop_id;
     float bandwidth;
     float delay;
     float lossrate;
@@ -127,10 +132,10 @@ typedef struct
 ////////////////////////////////////////////////
 
 //#define PREDEFINED_EXPERIMENT          // enable predefined experiment
-#define BANDWIDTH               10e6   // bandwidth in bps
-#define DELAY                   5      // delay in ms 
-#define PACKET_LOSS_RATE        0      // loss rate in range [0,1]
-#define LOOP_COUNT              4      // number of iterations
+#define BANDWIDTH               10e6     // bandwidth in bps
+#define DELAY                   5        // delay in ms 
+#define PACKET_LOSS_RATE        0        // loss rate in range [0,1]
+#define LOOP_COUNT              4        // number of iterations
 
 
 ///////////////////////////////////
@@ -138,89 +143,85 @@ typedef struct
 ///////////////////////////////////
 
 // print a brief usage of this program
-void usage(char *argv0)
+void
+usage(argv0)
+char *argv0;
 {
-    fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET \
-            data.\n\n");
-    fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> \
-            in two different ways:\n");
-    fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address \
-        <from_node_addr>)\n");
-    fprintf(stderr, "    <to_node_id> (IP address <to_node_addr>) using the \
-            dummynet rule\n");
-    fprintf(stderr, "    <rule_number> and pipe <pipe_number>, optionally in \
-            direction 'in' or 'out'.\n");
+    fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET  data.\n\n");
+    fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> in two different ways:\n");
+    fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address <from_node_addr>)\n");
+    fprintf(stderr, "    <to_node_id> (IP address <to_node_addr>) using the dummynet rule\n");
+    fprintf(stderr, "    <rule_number> and pipe <pipe_number>, optionally in direction 'in' or 'out'.\n");
     fprintf(stderr, "    Usage: %s -q <qomet_output_file>\n"
             "\t\t\t-f <from_node_id> \t-F <from_node_addr>\n"
             "\t\t\t-t <to_node_id> \t-T <to_node_addr>\n"
             "\t\t\t-r <rule_number> \t-p <pipe_number>\n"
             "\t\t\t[-d {in|out}]\n", argv0);
-    fprintf(stderr, "(2) Configure all connections from the current node \
-            <current_id> given the\n");
-    fprintf(stderr, "    IP settings in <settings_file> and the OPTIONAL \
-            broadcast address\n");
-    fprintf(stderr, "    <broadcast_address>; Interval between configurations \
-            is <time_period>.\n");
-    fprintf(stderr, "    The settings file contains on each line pairs of ids \
-            and IP addresses.\n");
+    fprintf(stderr, "(2) Configure all connections from the current node <current_id> given the\n");
+    fprintf(stderr, "    IP settings in <settings_file> and the OPTIONAL broadcast address\n");
+    fprintf(stderr, "    <broadcast_address>; Interval between configurations is <time_period>.\n");
+    fprintf(stderr, "    The settings file contains on each line pairs of ids and IP addresses.\n");
     fprintf(stderr, "    Usage: %s -q <qomet_output_file>\n"
             "\t\t\t-i <current_id> \t-s <settings_file>\n"
             "\t\t\t-m <time_period> \t[-b <broadcast_address>]\n", argv0);
-    fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, \
-            otherwise usage (1) is assumed.\n");
+    fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, otherwise usage (1) is assumed.\n");
 }
 
+/*
 // read settings (node ids and corresponding IP adresses)
 // from a file, and store the adresses in the array p at
 // the corresponding index;
 // return the number of addresses successfully read, 
 // or -1 on ERROR
-int read_settings(char *path, in_addr_t *p, int p_size)
+*/
+int
+read_settings(path, p, p_size)
+char *path;
+in_addr_t *p;
+int p_size;
 {
     static char buf[BUFSIZ];
-    int i=0;
-    int line_nr=0;
+    int i = 0;
+    int line_nr = 0;
     FILE *fd;
 
+    char node_name[20];
+    char interface[20];
     int node_id;
     char node_ip[IP_ADDR_SIZE];
 
-    if((fd = fopen(path, "r")) == NULL)
-    {
+    if((fd = fopen(path, "r")) == NULL) {
         WARNING("Cannot open settings file '%s'", path);
         return -1;
     }
 
-    while(fgets(buf, BUFSIZ, fd) != NULL)
-    {
+    while(fgets(buf, BUFSIZ, fd) != NULL) {
         line_nr++;
 
-        if(i>=p_size)
-        {
-            WARNING("Maximum number of IP addresses (%d) exceeded",
-                    p_size);
+        if(i >= p_size) {
+            WARNING("Maximum number of IP addresses (%d) exceeded", p_size);
             fclose(fd);
             return -1;
         }
-        else
-        {
+        else {
             int scaned_items;
-            scaned_items=sscanf(buf, "%d %16s", &node_id, node_ip);
-            if(scaned_items<2)
-            {
-                WARNING("Skipped invalid line #%d in settings file '%s'", 
-                        line_nr, path);
+            scaned_items = sscanf(buf, "%s %s %d %16s",node_name, interface,  &node_id, node_ip);
+            if(scaned_items < 2) {
+#ifdef TCDEBUG
+                WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, path);
+#endif
                 continue;
             }
-            if(node_id<0 || node_id<FIRST_NODE_ID || node_id >= MAX_NODES)
-            {
-                WARNING("Node id %d is not within the permitted range [%d, %d]",
-                        node_id, FIRST_NODE_ID, MAX_NODES);
+            if(node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
+#ifdef TCDEBUG
+                WARNING("Node id %d is not within the permitted range [%d, %d]", node_id, FIRST_NODE_ID, MAX_NODES);
+#endif
                 fclose(fd);
                 return -1;
             }
-            if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE)
+            if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE) {
                 i++;
+            }
         }
     }
 
@@ -234,12 +235,16 @@ int read_settings(char *path, in_addr_t *p, int p_size)
  *        the number of rules in param table (rule_count)
  * Output: the id of rule in param_table or -1 if fail
  *********************************************************/
-int lookup_param(int next_hop_id, qomet_param *p, int rule_count)
+int
+lookup_param(next_hop_id, p, rule_count)
+int next_hop_id;
+qomet_param *p;
+int rule_count;
 {
     int i;
-    for (i = 0; i < rule_count; i++)
-    {
-        if (p[i].next_hop_id == next_hop_id)
+
+    for(i = 0; i < rule_count; i++) {
+        if(p[i].next_hop_id == next_hop_id)
             return i;
     }
 
@@ -247,45 +252,59 @@ int lookup_param(int next_hop_id, qomet_param *p, int rule_count)
 }
 
 // dump QOMET parameter table
-void dump_param_table(qomet_param *p, int rule_count)
+void
+dump_param_table(p, rule_count)
+qomet_param *p;
+int rule_count;
 {
     int i;
+
     INFO("Dumping the param_table (rule count=%d)...", rule_count);
-    for (i = 0; i < rule_count; i++)
-    {
-        INFO("%f \t %d \t %f \t %f \t %f", p[i].time, p[i].next_hop_id, 
-                p[i].bandwidth, p[i].delay, p[i].lossrate);
+    for(i = 0; i < rule_count; i++) {
+        INFO("%f \t %d \t %f \t %f \t %f", p[i].time, p[i].next_hop_id, p[i].bandwidth, p[i].delay, p[i].lossrate);
     }
 }
 
-// main function
-int main(int argc, char *argv[])
+int
+main(argc, argv)
+int argc;
+char **argv;
 {
-    char ch, *p, *argv0, *faddr, *taddr, buf[BUFSIZ];
-    int s, fid, tid, from, to, pipe_nr;
+    char ch;
+    char *p;
+    char *argv0;
+    char *faddr, *taddr;
+    char buf[BUFSIZ];
+    uint32_t s;
+    uint32_t fid, tid;
+    uint32_t from, to;
+    uint32_t pipe_nr;
     uint16_t rulenum;
 
-    int usage_type;
+    uint32_t sc_type;
+    uint32_t usage_type;
 
     float time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
     FILE *fd;
     timer_handle *timer;
-    int loop_count=0;
+    int32_t loop_count = 0;
 
-    int direction=DIRECTION_BOTH;
+    int32_t direction = DIRECTION_BOTH;
 
     struct timeval tp_begin, tp_end;
 
-    int i, my_id;
+    int32_t i, j;
+    int32_t my_id;
     in_addr_t IP_addresses[MAX_NODES];
     char IP_char_addresses[MAX_NODES*IP_ADDR_SIZE];
-    int node_number;
+    int32_t node_number;
 
-    int j, offset_num, rule_count, next_hop_id, rule_num;
+    int32_t offset_num, rule_count;
+    int32_t next_hop_id, rule_num;
+    uint32_t over_read;
     float time_period, next_time;
     qomet_param param_table[MAX_RULE_NUM];
     qomet_param param_over_read;
-    unsigned int over_read;
     char broadcast_address[IP_ADDR_SIZE];
 
     usage_type = 1;
@@ -312,48 +331,57 @@ int main(int argc, char *argv[])
     time_period = -1;
     strncpy(broadcast_address, "255.255.255.255", IP_ADDR_SIZE);
 
-// cpu affinity
-//#ifdef __linux__
-//    long int core_num;
-//    core_num = sysconf(_SC_NPROCESSORS_CONF);
-//    
-//    if(core_num != 1) {
-//        cpu_set_t mask;
-//        CPU_ZERO(&mask);
-//        CPU_SET(1, &mask);
-//        sched_setaffinity(0, sizeof(mask), &mask);
-//    }
-//#endif
+/* cpu affinity
+#ifdef __linux
+    uint32_t core_num;
+    core_num = sysconf(_SC_NPROCESSORS_CONF);
+    
+    if(core_num != 1) {
+        cpu_set_t mask;
+        CPU_ZERO(&mask);
+        CPU_SET(1, &mask);
+        sched_setaffinity(0, sizeof(mask), &mask);
+    }
+#endif
+*/
 
-    if(argc<2)
-    {
+    if(argc < 2) {
         WARNING("No arguments provided");
         usage(argv0);
         exit(1);
     }
 
-    // parse command-line options
-    while((ch = getopt(argc, argv, "q:f:F:t:T:r:p:d:i:s:m:b:")) != -1)
-    {
-        switch(ch)
-        {
-            //QOMET output file
+    while((ch = getopt(argc, argv, "hq:Q:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
+        switch(ch) {
+            case 'h':
+                usage();
+                exit(0);
             case 'q':
-                if((fd = fopen(optarg, "r")) == NULL) 
-                {
+                if(sc_type == TXT_SC) {
+                    WARNING("Already read scenario data.");
+                    exit(1);
+                }
+                sc_type = BIN_SC;
+                if((fd = fopen(optarg, "r")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
                 }
                 break;
-
-                /////////////////////////////////////////////
-                // Usage (1) parameters
-                /////////////////////////////////////////////
-                // from_node_id
+            case 'Q':
+                if(sc_type == BIN_SC) {
+                    WARNING("Already read scenario data.");
+                    exit(1);
+                }
+                sc_type = TXT_SC;
+                if((fd = fopen(optarg, "r")) == NULL) {
+                    WARNING("Could not open QOMET output file '%s'", optarg);
+                    exit(1);
+                }
+                break;
             case 'f':
+                // from_node_id
                 fid = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid from_node_id '%s'", optarg);
                     exit(1);
                 }
@@ -368,85 +396,76 @@ int main(int argc, char *argv[])
                 faddr = optarg;
                 break;
 
-                // to_node_id
             case 't':
+                // to_node_id
                 tid = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid to_node_id '%s'", optarg);
                     exit(1);
                 }
                 break;
 
-                // IP address of to_node
             case 'T':
+                // IP address of to_node
                 taddr = optarg;
                 break;
 
-                // rule number for dummynet configuration
             case 'r':
+                // rule number for dummynet configuration
                 rulenum = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid rule_number '%s'", optarg);
                     exit(1);
                 }
                 break;
 
-                // pipe number for dummynet configuration
             case 'p':
+                // pipe number for dummynet configuration
                 pipe_nr = strtol(optarg, &p, 10);
-                if((*optarg == '\0') || (*p != '\0'))
-                {
+                if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid pipe_number '%s'", optarg);
                     exit(1);
                 }
                 break;
 
-                // direction option for dummynet configuration
             case 'd':
-                if(strcmp(optarg, "in")==0)
-                {
+                // direction option for dummynet configuration
+                if(strcmp(optarg, "in") == 0) {
                     direction = DIRECTION_IN;
                 }
-                else if(strcmp(optarg, "out")==0)
-                {
+                else if(strcmp(optarg, "out") == 0) {
                     direction = DIRECTION_OUT;
                 }
-                else
-                {
+                else {
                     WARNING("Invalid direction '%s'", optarg);
                     exit(1);
                 }
                 break;
 
-                /////////////////////////////////////////////
-                // Usage (2) parameters
-                /////////////////////////////////////////////
-                // current node ID
             case 'i':
+                // current node ID
                 my_id = strtol(optarg, NULL, 10);
                 break;
 
-                // settings file
             case 's':
+                // settings file
                 usage_type = 2;
-                if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1)
-                {
+                if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
                     exit(1);
                 }
-                for(i = 0; i < node_number; i++)
+                for(i = 0; i < node_number; i++) {
                     snprintf(IP_char_addresses + i * IP_ADDR_SIZE, IP_ADDR_SIZE, 
                             "%hu.%hu.%hu.%hu",
                             *(((uint8_t *)&IP_addresses[i]) + 0),
                             *(((uint8_t *)&IP_addresses[i]) + 1),
                             *(((uint8_t *)&IP_addresses[i]) + 2),
                             *(((uint8_t *)&IP_addresses[i]) + 3));
+                }
                 break;
 
-                // time interval between settings
             case 'm':
+                // time interval between settings
                 // check if conversion was performed (we assume a time
                 // period of 0 is also invalid)
                 if ((time_period = strtod(optarg,NULL)) == 0)
@@ -460,104 +479,91 @@ int main(int argc, char *argv[])
                 strncpy(broadcast_address, optarg, IP_ADDR_SIZE);
                 break;
 
-                // help output
             case '?':
+                // help output
             default:
                 usage(argv0);
                 exit(1);
         }
     }
 
-    if((my_id<FIRST_NODE_ID) || (my_id>=node_number+FIRST_NODE_ID))
-    {
-        WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id,
-                FIRST_NODE_ID, node_number+FIRST_NODE_ID-1);
+    if((my_id < FIRST_NODE_ID) || (my_id >= node_number + FIRST_NODE_ID)) {
+        WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id, FIRST_NODE_ID, node_number+FIRST_NODE_ID - 1);
         exit(1);
     }
 
-    // update argument-related counter and pointer
     argc -= optind;
     argv += optind;
 
-    // check that all the required arguments were provided
-    if(fd == NULL)
-    {
+    if(fd == NULL) {
         WARNING("No QOMET data file was provided");
         usage(argv0);
         exit(1);
     }
 
-    if((usage_type == 1) &&
-            ((fid == -1) || (faddr == NULL) ||
-             (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535)))
-    {
+    if((usage_type == 1) && ((fid == -1) || (faddr == NULL) || (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535))) {
         WARNING("Insufficient arguments were provided for usage (1)");
         usage(argv0);
         fclose(fd);
         exit(1);
     }
-    //  else if ((my_id == -1) || (node_number == -1) || (time_period == -1))
-    //    {
-    //      WARNING("Insufficient arguments were provided for usage (2)");
-    //      usage(argv0);
-    //      fclose(fd);
-    //      exit(1);
-    //    }
+/*
+    else if ((my_id == -1) || (node_number == -1) || (time_period == -1)) {
+        WARNING("Insufficient arguments were provided for usage (2)");
+        usage(argv0);
+        fclose(fd);
+        exit(1);
+    }
+*/
 
 
-    // initialize timer
     DEBUG("Initialize timer...");
-    if((timer = timer_init()) == NULL)
-    {
+    if((timer = timer_init()) == NULL) {
         WARNING("Could not initialize timer");
         exit(1);
     }
-
-    // open control socket
     DEBUG("Open control socket...");
-    if((s = get_socket()) < 0)
-    {
+    if((s = get_socket()) < 0) {
         WARNING("Could not open control socket (requires root priviledges)\n");
         exit(1);
     }
 
     // add pipe to dummynet in normal manner
-    if(usage_type==1)
-    {
-        // get rule
+    if(usage_type == 1) {
         //get_rule(s, 123);
 
-        INFO("Add rule #%d with pipe #%d from %s to %s", 
-                rulenum, pipe_nr, faddr, taddr);
-        if(add_rule(s, rulenum, pipe_nr, faddr, taddr, direction) < 0)
-        {
+        INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, faddr, taddr);
+
+#ifdef __linux
+        init_rule(taddr);
+#endif
+        if(add_rule(s, rulenum, pipe_nr, faddr, taddr, direction) < 0) {
             WARNING("Could not add rule #%d with pipe #%d from %s to %s", 
                     rulenum, pipe_nr, faddr, taddr);
             exit(1);
         }
-
-        // get rule
         //get_rule(s, 123);
 
         //exit(2);
     }
-    else // usage (2) => sets of rules must be added
-    {
+    else {
+#ifdef __linux
+        init_rule(taddr);
+#endif
+        // usage (2) => sets of rules must be added
         // add rule & pipe for unicast traffic _to_ j
-        for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
-        {
+        for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
             if(j == my_id)
                 continue;
 
             offset_num = j; 
 
             INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
-                    my_id, MIN_PIPE_ID_OUT+offset_num, MIN_PIPE_ID_OUT+offset_num, 
-                    IP_char_addresses+(j-FIRST_NODE_ID)*IP_ADDR_SIZE);
-            if(add_rule(s, MIN_PIPE_ID_OUT+offset_num, MIN_PIPE_ID_OUT+offset_num,
-                        "any", IP_char_addresses+(j-FIRST_NODE_ID)*IP_ADDR_SIZE, 
-                        DIRECTION_OUT) < 0)
-            {
+                    my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, 
+                    IP_char_addresses + (j - FIRST_NODE_ID) * IP_ADDR_SIZE);
+            if(add_rule(s, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num,
+                        "any", IP_char_addresses + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                        DIRECTION_OUT) < 0) {
                 WARNING("Node %d: Could not add rule #%d with pipe #%d to \
                         destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
                         MIN_PIPE_ID_OUT + offset_num, 
@@ -586,7 +592,7 @@ int main(int argc, char *argv[])
                 WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
                         destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
                         MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        IP_char_addresses+(j-FIRST_NODE_ID)*IP_ADDR_SIZE, broadcast_address);
+                        IP_char_addresses+(j - FIRST_NODE_ID) * IP_ADDR_SIZE, broadcast_address);
                 exit(1);
             }
         }
@@ -596,11 +602,11 @@ int main(int argc, char *argv[])
     gettimeofday(&tp_begin, NULL);
 
     // do this only for usage (1)
-    if(usage_type==1)
+    if(usage_type == 1)
     {
 #ifdef OLSR_ROUTING
         // get the next hop ID to find correct configuration lines
-        if( (next_hop_id = get_next_hop_id(tid, direction)) == ERROR )
+        if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR)
         {
             WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i, direction=%i", time, tid, direction);
             exit(1);
@@ -616,96 +622,70 @@ int main(int argc, char *argv[])
     // read input data from QOMET output file
     INFO("Reading QOMET data from file...");
     next_time = 0;
-    while(fgets(buf, BUFSIZ, fd) != NULL)
-    {
+    while(fgets(buf, BUFSIZ, fd) != NULL) {
         if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f "
-                    "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
-                    &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
-                    &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
-                    &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
-                    &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL)
-        {
+            "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
+            &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
+            &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
+            &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
+            &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL) {
+#ifdef TCDEBUG
             INFO("Skipped non-parametric line");
+#endif
             continue;
         }
-        if(usage_type==1)
-        {
+        if(usage_type == 1) {
             // check whether the from_node and to_node from the file
             // match the user selected ones
-            if((from == fid) && (to == next_hop_id))
-            {
+            if((from == fid) && (to == next_hop_id)) {
 
 #ifdef PREDEFINED_EXPERIMENT
-                bandwidth=BANDWIDTH;
-                delay=DELAY;
-                lossrate=PACKET_LOSS_RATE;
+                bandwidth = BANDWIDTH;
+                delay = DELAY;
+                lossrate = PACKET_LOSS_RATE;
 #endif
                 // print current configuration info
-#ifdef __FreeBSD__
-                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s \
-                        loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
-#elif __linux
-                INFO("* Wireconf configuration (time=%f s): bandwidth=%.2fbit/s \
-                        loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
+#ifdef TCDEBUG
+                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
 #endif
 
                 // if this is the first operation we reset the timer
                 // Note: it is assumed time always equals 0.0 for the first line
-                if(time == 0.0)
-                {
+                if(time == 0.0) {
                     timer_reset(timer);
                 }
-                else 
-                {
+                else {
                     // wait for for the next timer event
-                    // debug messsage by k-akashi
-                    //            uint64_t t;
-                    //            uint64_t next_ev;
-                    //            rdtsc(t);
-                    //            next_ev = timer->zero + (timer->cpu_frequency * (time * 1000000) / 1000000);
-                    //            printf("rdtsc_time_before = %llu\n", t);
-                    //            printf("next_ev_time      = %llu\n", next_ev);
-                    //            printf("CPU Frequency = %u\n", timer->cpu_frequency);
-                    //            struct timeval gettime;
-                    //            gettimeofday(&gettime, NULL);
-                    //            printf("Before : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
 
-                    if(timer_wait(timer, time * 1000000) < 0)
-                    {
-#ifdef __FreeBSD__
+                    if(timer_wait(timer, time * 1000000) < 0) {
                         WARNING("Timer deadline missed at time=%.2f s", time);
-#elif __linux
-                        WARNING("Timer deadline missed at time=%.2f s", time);
-                        dprintf(("Timer deadline missed at time=%.2f s", time));
-#endif
                         //exit(1); // NOT NEEDED ANYMORE!!!!
                     }
-                    //            rdtsc(t);
-                    //            printf("rdtsc_time_after  = %llu\n", t);
-                    //            gettimeofday(&gettime, NULL);
-                    //            printf("After  : sec:%lu usec:%06lu\n", gettime.tv_sec, gettime.tv_usec);
                 }
 
 
 #ifdef OLSR_ROUTING
                 // get the next hop ID to find correct configuration lines
-                if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR)
-                {
+                if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR) {
                     WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i,direction=%i", time, tid, direction);
                     exit(1);
                 }
-                else
+                else {
                     INFO("Time=%.2f: Next_hop=%i for destination=%i", time, next_hop_id, tid);
+                }
 #endif
 
-                // prepare adjusted values:
-                // 1. if packet size is known bandwidth could be adjusted:
-                //   multiplication factor 1.0778 was computed for 400 byte datagrams
-                //   because of 28 bytes header (428/400=1.07)
-                //   however we consider bandwidth at Ethernet level, therefore we
-                //   don't multiply here but when plotting results
-                //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
-                //         but we seem to obtain correct values using bits/second
+                /*
+                 prepare adjusted values:
+                 1. if packet size is known bandwidth could be adjusted:
+                   multiplication factor 1.0778 was computed for 400 byte datagrams
+                   because of 28 bytes header (428/400=1.07)
+                   however we consider bandwidth at Ethernet level, therefore we
+                   don't multiply here but when plotting results
+                   Note: ip_dummynet.h says that bandwidth is in bytes/tick
+                         but we seem to obtain correct values using bits/second
+                */
+
 #ifdef __FreeBSD__
                 bandwidth = (int)round(bandwidth);// * 2.56);
 
@@ -719,30 +699,28 @@ int main(int argc, char *argv[])
                 // do configure pipe
                 configure_pipe(s, pipe_nr, bandwidth, delay, lossrate);
 #elif __linux
-                bandwidth = (int)round(bandwidth);// * 2.56);
-                delay = (int)round(delay);//(delay / 2);
+                bandwidth = (int)round(bandwidth);     // * 2.56);
+                //delay = (int)round(delay);             //(delay / 2);
                 //lossrate = (int)rint(lossrate * 0x7fffffff);
+                lossrate = 0;
 
-                // do configure Qdisc
+				//TCHK_START(time);
                 configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
+				//TCHK_END(time);
 #endif
-
-                // increase loop counter
                 loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                if(loop_count>LOOP_COUNT)
+                if(loop_count>LOOP_COUNT) {
                     break;
+                }
 #endif
             }
         }
-        else // usage (2) => manage multiple rules
-        {
+        else { // usage (2) => manage multiple rules
             // add rules regarding next deadline to parameter table
-            if(time == next_time)
-            {
-                if(from == my_id)
-                {
+            if(time == next_time) {
+                if(from == my_id) {
                     param_table[rule_count].time = time;
                     param_table[rule_count].next_hop_id = to;
                     param_table[rule_count].bandwidth = bandwidth;
@@ -752,12 +730,10 @@ int main(int argc, char *argv[])
                 }
                 continue;
             }
-            else 
-            {
+            else {
                 // check the reading link, if it is involved, 
                 // store on the param_over_read
-                if(from == my_id)
-                {
+                if(from == my_id) {
                     over_read = 1;
                     param_over_read.time = time;
                     param_over_read.next_hop_id = to;
@@ -765,36 +741,34 @@ int main(int argc, char *argv[])
                     param_over_read.delay = delay;
                     param_over_read.lossrate = lossrate;
                 }
-                else
+                else {
                     over_read = 0;
+                }
 
                 // waiting for the next timer deadline event;
                 // if this is the first operation we reset the timer
                 // Note: it is assumed time always equals 0.0 for the first line
-                if(time == 0.0)
+                if(time == 0.0) {
                     timer_reset(timer);
-                else
-                {
+                }
+                else {
                     // wait for for the next timer event
-                    if(timer_wait(timer, time * 1000000) < 0)
-                    {
+                    if(timer_wait(timer, time * 1000000) < 0) {
                         WARNING("Timer deadline missed at time=%.2f s", time);
                     }
                 }
 
                 // when timer event comes, apply configuration for all 
                 // the unicast links with destination 'i'
-                for(i=FIRST_NODE_ID; i<(node_number+FIRST_NODE_ID); i++)
-                {
-                    if(i == my_id)
+                for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
+                    if(i == my_id) {
                         //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
                         continue;
+                    }
 
                     // get the next hop ID for destination i 
                     // to find correct configuration lines
-                    if((next_hop_id = get_next_hop_id(IP_addresses, IP_char_addresses, 
-                                    i, DIRECTION_OUT)) == ERROR)
-                    {
+                    if((next_hop_id = get_next_hop_id(IP_addresses, IP_char_addresses, i, DIRECTION_OUT)) == ERROR) {
                         WARNING("Could not locate the next hop for destination node %i", i);
                         exit(1);
                     }
@@ -802,9 +776,7 @@ int main(int argc, char *argv[])
                     //INFO("Next_hop=%i for destination=%i", next_hop_id, i);
 
                     offset_num = i;
-                    if((rule_num = lookup_param(next_hop_id, param_table, 
-                                    rule_count)) == -1) 
-                    {
+                    if((rule_num = lookup_param(next_hop_id, param_table, rule_count)) == -1) {
                         WARNING("Could not locate the rule number for next hop = %i", 
                                 next_hop_id);
                         dump_param_table(param_table, rule_count);
@@ -827,6 +799,7 @@ int main(int argc, char *argv[])
                             loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
                             time, bandwidth, lossrate, delay, offset_num);
 
+                    /*
                     // prepare adjusted values:
                     // 1. if packet size is known bandwidth could be adjusted:
                     //   multiplication factor 1.0778 was computed for 400 byte datagrams
@@ -835,6 +808,7 @@ int main(int argc, char *argv[])
                     //   don't multiply here but when plotting results
                     //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
                     //   but we seem to obtain correct values using bits/second
+                    */
 #ifdef __FreeBSD__
                     bandwidth = (int)round(bandwidth);// * 2.56);
                     // 2. no adjustment necessary for delay expressed in ms
@@ -857,21 +831,20 @@ int main(int argc, char *argv[])
                     loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count>LOOP_COUNT)
+                    if(loop_count>LOOP_COUNT) {
                         break;
+                    }
 #endif
                 }// end for loop
 
                 // config the broadcast links have source node id = i
-                for(i=FIRST_NODE_ID; i<(node_number+FIRST_NODE_ID); i++)
-                {
+                for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
                     if(i == my_id)
                         //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
                         continue;
 
                     offset_num = i;
-                    if((rule_num = lookup_param(i, param_table, rule_count)) == -1)
-                    {
+                    if((rule_num = lookup_param(i, param_table, rule_count)) == -1) {
                         WARNING("Could not locate the rule number for next hop = %d with rule count = %d", 
                                 i, rule_count);
                         dump_param_table(param_table, rule_count);
@@ -895,6 +868,7 @@ int main(int argc, char *argv[])
                             loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
                             time, bandwidth, lossrate, delay, offset_num);
 
+                    /*
                     // prepare adjusted values:
                     // 1. if packet size is known bandwidth could be adjusted:
                     //   multiplication factor 1.0778 was computed for 400 byte datagrams
@@ -903,6 +877,7 @@ int main(int argc, char *argv[])
                     //   don't multiply here but when plotting results
                     //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
                     //   but we seem to obtain correct values using bits/second
+                    */
 #ifdef __FreeBSD__
                     bandwidth = (int)round(bandwidth);// * 2.56);
                     // 2. no adjustment necessary for delay expressed in ms
@@ -915,7 +890,7 @@ int main(int argc, char *argv[])
                     configure_pipe(s, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
 #elif __linux
                     bandwidth = (int)rint(bandwidth);// * 2.56);
-                    delay = (int) rint(delay);//(delay / 2);
+                    delay = (int)rint(delay);//(delay / 2);
                     lossrate = (int)rint(lossrate * 0x7fffffff);
 #endif
 
@@ -923,20 +898,20 @@ int main(int argc, char *argv[])
                     loop_count++;
 
 #ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count>LOOP_COUNT)
+                    if(loop_count > LOOP_COUNT) {
                         break;
+                    }
 #endif
                 }// end for loop for broadcast
                 // End config for broadcast traffic
 
                 // Reset the parameter and param_table for the next time
-                memset(param_table, 0, sizeof(qomet_param)*MAX_RULE_NUM);
+                memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
                 rule_count = 0;
                 next_time += time_period;
                 INFO("New timer deadline=%f", next_time);
                 // if there is over read then assign to param_table
-                if(over_read == 1)
-                {
+                if(over_read == 1) {
                     param_table[0].time = param_over_read.time;
                     param_table[0].next_hop_id = param_over_read.next_hop_id;
                     param_table[0].bandwidth = param_over_read.bandwidth;
@@ -956,89 +931,72 @@ int main(int argc, char *argv[])
 
     // if the loop was not entered not even once
     // there is an error
-    if(loop_count == 0)
-    {
-        if(usage_type==1)
-            WARNING("The specified pair from_node_id=%d & to_node_id=%d "
-                    "could not be found", fid, tid);
-        else
+    if(loop_count == 0) {
+        if(usage_type == 1) {
+            WARNING("The specified pair from_node_id=%d & to_node_id=%d could not be found", fid, tid);
+        }
+        else {
             WARNING("No valid line was found for the node %d", my_id); 
+        }
     }
 
     // release the timer
     timer_free(timer);
 
     // delete the dummynet rule
-    if(usage_type==1)
-    {
+    if(usage_type==1) {
 #ifdef __FreeBSD__
-        if(delete_rule(s, rulenum)==ERROR)
-        {
+        if(delete_rule(s, rulenum) == ERROR) {
             WARNING("Could not delete rule #%d", rulenum);
             exit(1);
         }
 #elif __linux
-        if(delete_netem(s, taddr, rulenum)==ERROR)
-        {
+        if(delete_netem(s, taddr, rulenum) == ERROR) {
             WARNING("Could not delete rule #%d", rulenum);
             exit(1);
         }
 #endif
     }
-    else // usage (2) => delete multiple rules
-    {
+    else {
+        // usage (2) => delete multiple rules
         // delete the unicast dummynet rules
-        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
-        {
-            if(j == my_id)
+#ifdef __FreeBSD__
+        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+            if(j == my_id) {
                 continue;
+            }
 
             offset_num = j;
-            INFO("Deleting rule %d...", MIN_PIPE_ID_OUT+offset_num);
-#ifdef __FreeBSD__
-            if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num)==ERROR)
-            {
-                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
+            INFO("Deleting rule %d...", MIN_PIPE_ID_OUT + offset_num);
+            if(delete_rule(s, MIN_PIPE_ID_OUT+offset_num) == ERROR) {
+                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT + offset_num);
             }
-#elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_OUT+offset_num)==ERROR)
-            {
-                WARNING("Could not delete rule #%d", MIN_PIPE_ID_OUT+offset_num);
-            }
-#endif
         }
 
         //delete broadcast dummynet rules
-        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
-        {
-            if(j == my_id)
+        for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+            if(j == my_id) {
                 continue;
+            }
 
             offset_num = j;
-            INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST+offset_num);
-#ifdef __FreeBSD__
-            if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR)
-            {
-                WARNING("Could not delete rule #%d", 
-                        MIN_PIPE_ID_IN_BCAST+offset_num);
+            INFO("Deleting rule %d...", MIN_PIPE_ID_IN_BCAST + offset_num);
+            if(delete_rule(s, MIN_PIPE_ID_IN_BCAST+offset_num) == ERROR) {
+                WARNING("Could not delete rule #%d", MIN_PIPE_ID_IN_BCAST+offset_num);
             }
-#elif __linux
-            if(delete_netem(s, taddr, MIN_PIPE_ID_IN_BCAST+offset_num)==ERROR)
-            {
-                WARNING("Could not delete rule #%d", 
-                        MIN_PIPE_ID_IN_BCAST+offset_num);
-            }
-#endif
         }
+#elif __linux
+        if(delete_netem(s, taddr, rulenum) == ERROR) {
+            WARNING("Could not delete netem rule");
+        }
+#endif
     }
 
     // get the time at the end of the experiment
     gettimeofday(&tp_end, NULL);
 
     // print execution time
-    INFO("Experiment execution time=%.4f s", 
-            (tp_end.tv_sec+tp_end.tv_usec/1.0e6) - 
-            (tp_begin.tv_sec+tp_begin.tv_usec/1.0e6));
+    INFO("Experiment execution time=%.4f s", (tp_end.tv_sec+tp_end.tv_usec / 1.0e6) - (tp_begin.tv_sec+tp_begin.tv_usec / 1.0e6));
 
     // close socket
     DEBUG("Closing socket...");

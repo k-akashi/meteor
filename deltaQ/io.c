@@ -99,7 +99,7 @@ void io_write_to_file(connection_class *connection,
     }
 
   // write current connection description to file
-  fprintf(file_global, "%.2f %d %.6f %.6f %.6f %d %.6f %.6f %.6f %.4f \
+  fprintf(file_global, "%.6f %d %.6f %.6f %.6f %d %.6f %.6f %.6f %.4f \
 %.4f %.4f %.4f %.2f %.2f %.2f %.4f %.4f %.4f\n", time, from_node->id, 
 	  from_node->position.c[0], from_node->position.c[1], 
 	  from_node->position.c[2], to_node->id, 
