@@ -10,18 +10,14 @@ else
 MAKE = make
 endif
 
-all: deltaQ extras wireconf
+DELTAQ_PATH=./deltaQ
+EXTRAS_PATH=./extras
+#STATION_PATH=./station
+TIMER_PATH=./timer
+WIRECONF_PATH=./wireconf
 
-deltaQ: 
-	${MAKE} -C deltaQ
+all :
+	make -C ${DELTAQ_PATH} all && make -C ${EXTRAS_PATH} all && make -C ${TIMER_PATH} all && make -C ${STATION_PATH} all && make -C ${WIRECONF_PATH} all
 
-extras:
-	${MAKE} -C extras
-
-wideconf:
-	${MAKE} -C wireconf
-
-clean: 
-	${MAKE} -C deltaQ clean
-	${MAKE} -C extras clean
-	${MAKE} -C wireconf clean
+clean:
+	make -C ${DELTAQ_PATH} clean && make -C ${EXTRAS_PATH} clean && make -C ${STATION_PATH} clean && make -C ${TIMER_PATH} clean && make -C ${WIRECONF_PATH} clean

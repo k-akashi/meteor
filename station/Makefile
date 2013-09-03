@@ -30,7 +30,7 @@ ifeq (${COMPILE_TYPE}, release)
 GCC_FLAGS = ${GENERAL_FLAGS}
 endif
 
-LIBS = -lrt -lm -lpthread -L. -lstation -L../timer -ltimer
+LIBS = -lrt -lm -pthread -L. -lstation -L../timer -ltimer
 
 TARGETS = libstation.a test_station stationd
 
@@ -49,7 +49,7 @@ test_station: test_station.o libstation.a
 	gcc ${GCC_FLAGS} -o test_station test_station.o ${LIBS}
 
 test_station.o: test_station.c station.h station_global.h station_message.h
-	gcc ${GCC_FLAGS} -c test_station.c
+	gcc ${GCC_FLAGS} -c test_station.c ${LIBS}
 
 stationd: stationd.o libstation.a
 	gcc ${GCC_FLAGS} -o stationd stationd.o ${LIBS}

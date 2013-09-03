@@ -14,7 +14,7 @@ CC      = gcc
 HOSTCC  = gcc
 
 ifeq ($(UNAME), Linux)
-CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DTBF -fPIC
+CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DTBF -fPIC -DTCDEBUG
 
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
