@@ -2,101 +2,26 @@
 # Makefile for qomet: network emulation tool
 ###########################################
 
-ifeq ($(OS_NAME),FreeBSD)
-EXPAT_PATH=/usr/local
-EXPAT_INC=-I${EXPAT_PATH}/include
-EXPAT_LIB=-L${EXPAT_PATH}/lib -lexpat
-else 
-EXPAT_PATH=/usr/lib/x86_64-linux-gnu
-EXPAT_INC=-I${EXPAT_PATH}/include
-EXPAT_LIB=-L${EXPAT_PATH} -lexpat
-endif
-
-# paths for various QOMET components
-
-CHANEL_PATH=./chanel
-
-DELTAQ_PATH=./deltaQ
-DELTAQ_INC=-I${DELTAQ_PATH}
-DELTAQ_LIB=-L${DELTAQ_PATH} -ldeltaQ -lm
-
-ROUTING_PATH=./routing
-
-WIRECONF_PATH=./wireconf
-
-# different options and flags
-INCS=${EXPAT_INC} ${DELTAQ_INC}
-LIBS=-lm ${EXPAT_LIB} ${DELTAQ_LIB}
-GENERAL_FLAGS=$(SVN_DEFINE) -Wall
-
-# compiler flags
-ifeq ($(COMPILE_TYPE), debug)
-GCC_FLAGS = $(GENERAL_FLAGS) -g    # generate debugging info
-endif
-
-ifeq ($(COMPILE_TYPE), profile)
-GCC_FLAGS = $(GENERAL_FLAGS) -pg   # generate profiling info
-endif
-
-ifeq ($(COMPILE_TYPE), release)
-GCC_FLAGS = $(GENERAL_FLAGS)       # no additional info
-endif
-
-# get the name of the operating system
 OS_NAME=$(shell uname)
 
-ANY_OS_TARGETS = ${DELTAQ_PATH}/libdeltaQ.a ${CHANEL_PATH}/do_chanel ${CHANEL_PATH}/chanel_config
-FREEBSD_TARGETS = ${WIRECONF_PATH}/wireconf ${ROUTING_PATH}/routing
-LINUX_TARGETS = ${WIRECONF_PATH}/wireconf
-
-# compile wireconf only of FreeBSD systems
 ifeq ($(OS_NAME),FreeBSD)
-all : ${ANY_OS_TARGETS} ${FREEBSD_TARGETS}
-endif
-ifeq ($(OS_NAME),Linux)
-all : ${ANY_OS_TARGETS} ${LINUX_TARGETS}
-endif
-
-# decide what make command will be used for submodules
-ifeq ($(OS_NAME),FreeBSD)
-MAKE_CMD = gmake
+MAKE = gmake
 else
-MAKE_CMD = make
+MAKE = make
 endif
 
-# defining revision info
-#SVN_REVISION := "$(shell svnversion -n .)"
+all: deltaQ extras wireconf
 
-# if revision info cannot be obtained from SVN, try to get it from a file
-ifeq ($(SVN_REVISION), "")
-#$(warning No SVN revision info, trying to get it from 'svn_revision.txt')
-#SVN_REVISION := "$(shell cat svn_revision.txt)"
-else
-#$(warning Writing revision info to file 'svn_revision.txt')
-#$(shell echo "$(SVN_REVISION)" | cat > svn_revision.txt)
-endif
-#SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
+deltaQ: 
+	${MAKE} -C deltaQ
 
+extras:
+	${MAKE} -C extras
 
-#.PHONY: revision
+wideconf:
+	${MAKE} -C wireconf
 
-deltaQ : 
-	make -C ${DELTAQ_PATH}
-
-${CHANEL_PATH}/do_chanel : ${CHANEL_PATH}/*.c ${CHANEL_PATH}/*.h
-	cd ${CHANEL_PATH}; ${MAKE_CMD} COMPILE_TYPE=$(COMPILE_TYPE)
-
-${CHANEL_PATH}/chanel_config : ${CHANEL_PATH}/*.c ${CHANEL_PATH}/*.h
-	cd ${CHANEL_PATH}; ${MAKE_CMD} COMPILE_TYPE=$(COMPILE_TYPE)
-
-${DELTAQ_PATH}/libdeltaQ.a :  ${DELTAQ_PATH}/*.c ${DELTAQ_PATH}/*.h
-	cd ${DELTAQ_PATH}; ${MAKE_CMD} COMPILE_TYPE=$(COMPILE_TYPE)
-
-${WIRECONF_PATH}/wireconf : ${WIRECONF_PATH}/*.c ${WIRECONF_PATH}/*.h
-	cd ${WIRECONF_PATH}; ${MAKE_CMD}
-
-${ROUTING_PATH}/routing : ${ROUTING_PATH}/*.c ${ROUTING_PATH}/*.h
-	cd ${ROUTING_PATH}; ${MAKE_CMD}
-
-clean:
-	rm -f ${ANY_OS_TARGETS} ${FREEBSD_TARGETS} *.o core; (cd ${CHANEL_PATH} && ${MAKE_CMD} clean); (cd ${DELTAQ_PATH} && ${MAKE_CMD} clean); (cd ${WIRECONF_PATH} && ${MAKE_CMD} clean); (cd ${ROUTING_PATH} && ${MAKE_CMD} clean)
+clean: 
+	${MAKE} -C deltaQ clean
+	${MAKE} -C extras clean
+	${MAKE} -C wireconf clean

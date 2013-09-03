@@ -1,0 +1,16 @@
+
+Overview
+========
+
+The timer library is used to time the periodic execution of updates of
+the network configuration by QOMET programs such as do_wireconf.
+
+To compile the library, use the command "make".
+
+For an usage example of the library, see the file "test_timer.c".
+This program also serves as a validation tools for the library.
+Executing "test_timer" will display the expected and actual durations
+of a test, and report a warning in case they differ by more than a
+predefined threshold. Feel free to change the parameter values in
+"test_timer.c" in order to various conditions.
+

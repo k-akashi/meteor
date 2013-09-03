@@ -1,0 +1,41 @@
+
+Extra tools for QOMET
+=====================
+
+run_experiment.sh
+-----------------
+Run an emulation experiment. Various parameters must be provided, as shown in 
+the examples test_local-dl.sh, test_local-bw.sh, etc.
+
+The experiments make use of the tools "ping" and "iperf" which must be
+installed in advance. The path to iperf can be configured in the
+script in order to make possible using a particular version.
+
+The experiment also uses "sudo", which must be installed and
+configured to _not_ require a password for the user running the
+experiment. This can be achieved by modifying /etc/sudoers similarly
+to the following line:
+   <user_name>   ALL=(ALL)   NOPASSWD: ALL
+
+test_local-XX.sh
+-------------------------
+Run a local experiment. XX can be either "bw" for badwidth
+experiments, or "dl" for delay and loss experiments. 
+
+Note that these experiments must be run on a PC on which ipfw3 as well
+as QOMET is installed. See the scripts for more details.
+
+test_2_hosts-XX.sh
+-------------------------
+Run an experiment on 2 hosts. XX can be either "bw" for badwidth
+experiments, or "dl" for delay and loss experiments. 
+
+Note that these experiments must be started from a PC on that can
+connect via ssh without password to the experiment hosts on which
+which the experiments is effectively run, which also should have ipfw3
+as well as QOMET is installed. See the scripts for more details.
+
+show_bin
+--------
+Show the contents of a QOMET binary output file.
+
