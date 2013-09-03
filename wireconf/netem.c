@@ -249,7 +249,6 @@ struct qdisc_parameter qp;
         int idx;
 
         ll_init_map(&rth);
-
         if((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
@@ -290,7 +289,7 @@ int ingress;
     char device[16];
     strncpy(device, dev, sizeof(device) - 1);
 
-    if(ingress == 0) {
+    if(ingress == 1) {
 	    req.t.tcm_parent = 0xffff0000;
     }
     else {
@@ -301,7 +300,6 @@ int ingress;
         int idx;
 
         ll_init_map(&rth);
-
         if((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;

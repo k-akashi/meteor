@@ -207,13 +207,15 @@ int p_size;
             int scaned_items;
             scaned_items = sscanf(buf, "%s %s %d %16s",node_name, interface,  &node_id, node_ip);
             if(scaned_items < 2) {
-                WARNING("Skipped invalid line #%d in settings file '%s'", 
-                        line_nr, path);
+#ifdef TCDEBUG
+                WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, path);
+#endif
                 continue;
             }
             if(node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
-                WARNING("Node id %d is not within the permitted range [%d, %d]",
-                        node_id, FIRST_NODE_ID, MAX_NODES);
+#ifdef TCDEBUG
+                WARNING("Node id %d is not within the permitted range [%d, %d]", node_id, FIRST_NODE_ID, MAX_NODES);
+#endif
                 fclose(fd);
                 return -1;
             }
@@ -627,7 +629,9 @@ char **argv;
             &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
             &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
             &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL) {
+#ifdef TCDEBUG
             INFO("Skipped non-parametric line");
+#endif
             continue;
         }
         if(usage_type == 1) {
@@ -698,6 +702,7 @@ char **argv;
                 bandwidth = (int)round(bandwidth);     // * 2.56);
                 //delay = (int)round(delay);             //(delay / 2);
                 //lossrate = (int)rint(lossrate * 0x7fffffff);
+                lossrate = 0;
 
 				//TCHK_START(time);
                 configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);

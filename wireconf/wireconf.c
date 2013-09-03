@@ -485,17 +485,19 @@ char *dst;
     }
     if(INGRESS) {
         set_ifb(ifb_device_name, IF_UP);
+/*
         device_name = "eth4";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         delete_netem_qdisc(device_name, 0);
         add_ingress_qdisc(device_name);
         add_ingress_filter(device_name, ifb_device_name);
+*/
 
         device_name = "eth5";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         delete_netem_qdisc(device_name, 0);
-        add_ingress_qdisc(device_name);
-        add_ingress_filter(device_name, ifb_device_name);
+//        add_ingress_qdisc(device_name);
+//        add_ingress_filter(device_name, ifb_device_name);
 
 /*
         int i;
@@ -724,9 +726,9 @@ uint32_t rule_number;
 
     if(!INGRESS) {
         device_name = (char*)get_route_info("dev", dst);
-        delete_netem_qdisc(device_name, 0);
+        //delete_netem_qdisc(device_name, 0);
+        delete_netem_qdisc("eth5", INGRESS);
     }
-
     if(INGRESS) {
         device_name = "eth0";
 /*
@@ -743,9 +745,8 @@ uint32_t rule_number;
         }
 */
         //delete_netem_qdisc(device_name, 0);
-        delete_netem_qdisc("eth4", 0);
-        delete_netem_qdisc("eth5", 0);
-        delete_netem_qdisc(ifb_device_name, 1);
+        //delete_netem_qdisc(ifb_device_name, 1);
+        delete_netem_qdisc("eth5", INGRESS);
     }
 
     return SUCCESS;
@@ -854,6 +855,7 @@ double lossrate;
         }
     }
 #endif
+    device_name = "eth5";
 
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
