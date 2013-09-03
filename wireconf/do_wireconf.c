@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
  *
@@ -39,10 +38,6 @@
  * Authors: Junya Nakata, Lan Nguyen Tien, Razvan Beuran
  * Changes : Kunio AKASHI
  *
- *   $Revision: 128 $
- *   $LastChangedDate: 2009-02-06 10:21:50 +0900 (Fri, 06 Feb 2009) $
- *   $LastChangedBy: razvan $
- *
  ***********************************************************************/
 
 #include <stdio.h>
@@ -63,13 +58,7 @@
 #include <sched.h>
 #endif
 
-// use this define to enable support for OLSR routing
-// in usage (1) type
 //#define OLSR_ROUTING
-
-/////////////////////////////////////////////
-// Basic constants
-/////////////////////////////////////////////
 
 #define BIN_SC 1
 #define TXT_SC 2
@@ -83,7 +72,6 @@
 
 #define MAX_RULE_NUM            100
 
-// time measurement macro
 #define TCHK_START(name)           \
 struct timeval name##_prev;        \
 struct timeval name##_current;     \
@@ -114,10 +102,6 @@ else if(name ##_current.tv_sec != name##_prev.tv_sec) {                         
 }                                                                                  \
 printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
 
-/////////////////////////////////////////////
-// Structure to hold QOMET parameters
-/////////////////////////////////////////////
-
 typedef struct {
     float time;
     int32_t next_hop_id;
@@ -126,23 +110,6 @@ typedef struct {
     float lossrate;
 } qomet_param;
 
-
-////////////////////////////////////////////////
-// Constants for making a predefined experiment
-////////////////////////////////////////////////
-
-//#define PREDEFINED_EXPERIMENT          // enable predefined experiment
-#define BANDWIDTH               10e6     // bandwidth in bps
-#define DELAY                   5        // delay in ms 
-#define PACKET_LOSS_RATE        0        // loss rate in range [0,1]
-#define LOOP_COUNT              4        // number of iterations
-
-
-///////////////////////////////////
-// Generic variables and functions
-///////////////////////////////////
-
-// print a brief usage of this program
 void
 usage(argv0)
 char *argv0;
@@ -167,13 +134,6 @@ char *argv0;
     fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, otherwise usage (1) is assumed.\n");
 }
 
-/*
-// read settings (node ids and corresponding IP adresses)
-// from a file, and store the adresses in the array p at
-// the corresponding index;
-// return the number of addresses successfully read, 
-// or -1 on ERROR
-*/
 int
 read_settings(path, p, p_size)
 char *path;
@@ -207,15 +167,11 @@ int p_size;
             int scaned_items;
             scaned_items = sscanf(buf, "%s %s %d %16s",node_name, interface,  &node_id, node_ip);
             if(scaned_items < 2) {
-#ifdef TCDEBUG
                 WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, path);
-#endif
                 continue;
             }
             if(node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
-#ifdef TCDEBUG
                 WARNING("Node id %d is not within the permitted range [%d, %d]", node_id, FIRST_NODE_ID, MAX_NODES);
-#endif
                 fclose(fd);
                 return -1;
             }
@@ -229,12 +185,6 @@ int p_size;
     return i;
 }
 
-// lookup parameters in QOMET parameter table
-/*********************************************************
- * Input: next hop id, pointer to param_table(p),
- *        the number of rules in param table (rule_count)
- * Output: the id of rule in param_table or -1 if fail
- *********************************************************/
 int
 lookup_param(next_hop_id, p, rule_count)
 int next_hop_id;
@@ -251,7 +201,6 @@ int rule_count;
     return -1;
 }
 
-// dump QOMET parameter table
 void
 dump_param_table(p, rule_count)
 qomet_param *p;
@@ -285,7 +234,7 @@ char **argv;
     uint32_t usage_type;
 
     float time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
-    FILE *fd;
+    FILE *qomet_fd;
     timer_handle *timer;
     int32_t loop_count = 0;
 
@@ -309,8 +258,7 @@ char **argv;
 
     usage_type = 1;
 
-    // initializing the param_table
-    memset(param_table, 0, sizeof(qomet_param)*MAX_RULE_NUM);
+    memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
     memset(&param_over_read, 0, sizeof(qomet_param));
     over_read = 0;
     rule_count = 0;
@@ -318,9 +266,8 @@ char **argv;
     next_hop_id = 0;
     rule_num = -1;
 
-    // init variables to invalid values
     argv0 = argv[0];
-    fd = NULL;
+    qomet_fd = NULL;
 
     faddr = taddr = NULL;
     fid = tid = pipe_nr = -1;
@@ -351,85 +298,71 @@ char **argv;
         exit(1);
     }
 
-    while((ch = getopt(argc, argv, "hq:Q:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
+    while((ch = getopt(argc, argv, "hq:a:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
         switch(ch) {
             case 'h':
                 usage();
                 exit(0);
-            case 'q':
+            case 'a':
                 if(sc_type == TXT_SC) {
                     WARNING("Already read scenario data.");
                     exit(1);
                 }
                 sc_type = BIN_SC;
-                if((fd = fopen(optarg, "r")) == NULL) {
+                if((qomet_fd = fopen(optarg, "rb")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
                 }
                 break;
-            case 'Q':
+            case 'q':
                 if(sc_type == BIN_SC) {
                     WARNING("Already read scenario data.");
                     exit(1);
                 }
                 sc_type = TXT_SC;
-                if((fd = fopen(optarg, "r")) == NULL) {
+                printf("sc_type : %d\n", sc_type);
+                if((qomet_fd = fopen(optarg, "r")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
                 }
                 break;
             case 'f':
-                // from_node_id
                 fid = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid from_node_id '%s'", optarg);
                     exit(1);
                 }
-                // add my_id Fix me
                 my_id = fid;
-                // add node_number tmp Fix me
-                node_number = 2;
+                node_number = 2; // add node_number tmp Fix me
                 break;
-
-                // IP address of from_node
             case 'F':
                 faddr = optarg;
                 break;
-
             case 't':
-                // to_node_id
                 tid = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid to_node_id '%s'", optarg);
                     exit(1);
                 }
                 break;
-
             case 'T':
-                // IP address of to_node
                 taddr = optarg;
                 break;
-
             case 'r':
-                // rule number for dummynet configuration
                 rulenum = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid rule_number '%s'", optarg);
                     exit(1);
                 }
                 break;
-
             case 'p':
-                // pipe number for dummynet configuration
                 pipe_nr = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
                     WARNING("Invalid pipe_number '%s'", optarg);
                     exit(1);
                 }
                 break;
-
             case 'd':
-                // direction option for dummynet configuration
                 if(strcmp(optarg, "in") == 0) {
                     direction = DIRECTION_IN;
                 }
@@ -441,14 +374,10 @@ char **argv;
                     exit(1);
                 }
                 break;
-
             case 'i':
-                // current node ID
                 my_id = strtol(optarg, NULL, 10);
                 break;
-
             case 's':
-                // settings file
                 usage_type = 2;
                 if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
@@ -463,24 +392,15 @@ char **argv;
                             *(((uint8_t *)&IP_addresses[i]) + 3));
                 }
                 break;
-
             case 'm':
-                // time interval between settings
-                // check if conversion was performed (we assume a time
-                // period of 0 is also invalid)
-                if ((time_period = strtod(optarg,NULL)) == 0)
-                {
+                if((time_period = strtod(optarg, NULL)) == 0) {
                     WARNING("Invalid time period");
                     exit(1);
                 }
                 break;
-
             case 'b':
                 strncpy(broadcast_address, optarg, IP_ADDR_SIZE);
                 break;
-
-            case '?':
-                // help output
             default:
                 usage(argv0);
                 exit(1);
@@ -495,7 +415,7 @@ char **argv;
     argc -= optind;
     argv += optind;
 
-    if(fd == NULL) {
+    if(qomet_fd == NULL) {
         WARNING("No QOMET data file was provided");
         usage(argv0);
         exit(1);
@@ -504,14 +424,14 @@ char **argv;
     if((usage_type == 1) && ((fid == -1) || (faddr == NULL) || (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535))) {
         WARNING("Insufficient arguments were provided for usage (1)");
         usage(argv0);
-        fclose(fd);
+        fclose(qomet_fd);
         exit(1);
     }
 /*
     else if ((my_id == -1) || (node_number == -1) || (time_period == -1)) {
         WARNING("Insufficient arguments were provided for usage (2)");
         usage(argv0);
-        fclose(fd);
+        fclose(qomet_fd);
         exit(1);
     }
 */
@@ -528,36 +448,25 @@ char **argv;
         exit(1);
     }
 
-    // add pipe to dummynet in normal manner
-    if(usage_type == 1) {
-        //get_rule(s, 123);
+#ifdef __linux
+    init_rule(taddr);
+#endif
 
+    if(usage_type == 1) {
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, faddr, taddr);
 
-#ifdef __linux
-        init_rule(taddr);
-#endif
         if(add_rule(s, rulenum, pipe_nr, faddr, taddr, direction) < 0) {
             WARNING("Could not add rule #%d with pipe #%d from %s to %s", 
                     rulenum, pipe_nr, faddr, taddr);
             exit(1);
         }
-        //get_rule(s, 123);
-
-        //exit(2);
     }
     else {
-#ifdef __linux
-        init_rule(taddr);
-#endif
-        // usage (2) => sets of rules must be added
-        // add rule & pipe for unicast traffic _to_ j
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
-            if(j == my_id)
+            if(j == my_id) {
                 continue;
-
+            }
             offset_num = j; 
-
             INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
                     my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, 
                     IP_char_addresses + (j - FIRST_NODE_ID) * IP_ADDR_SIZE);
@@ -570,15 +479,12 @@ char **argv;
                         IP_char_addresses + (j-FIRST_NODE_ID) * IP_ADDR_SIZE);
                 exit(1);
             }
-        }// end for loop
-
-
-        // add rule & pipe for broadcast traffic _from_ j
+        }
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++)
         {
-            if(j == my_id)
+            if(j == my_id) {
                 continue;
-
+            }
             offset_num = j; 
 
             INFO("Node %d: Add rule #%d with pipe #%d to destination %s",
@@ -597,340 +503,219 @@ char **argv;
             }
         }
     }
-
-    // get the time at the beginning of the experiment
     gettimeofday(&tp_begin, NULL);
 
-    // do this only for usage (1)
-    if(usage_type == 1)
-    {
+    if(usage_type == 1) {
 #ifdef OLSR_ROUTING
-        // get the next hop ID to find correct configuration lines
-        if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR)
-        {
+        if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR) {
             WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i, direction=%i", time, tid, direction);
             exit(1);
         } 
-        else
-            INFO("Time=%.2f: Next_hop=%i for destination=%i", time, 
-                    next_hop_id, tid);
+        else {
+            INFO("Time=%.2f: Next_hop=%i for destination=%i", time, next_hop_id, tid);
+        }
 #else
         next_hop_id = tid;
 #endif
     }
 
-    // read input data from QOMET output file
     INFO("Reading QOMET data from file...");
     next_time = 0;
-    while(fgets(buf, BUFSIZ, fd) != NULL) {
-        if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f "
-            "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
-            &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
-            &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
-            &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
-            &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL) {
-#ifdef TCDEBUG
-            INFO("Skipped non-parametric line");
-#endif
-            continue;
-        }
-        if(usage_type == 1) {
-            // check whether the from_node and to_node from the file
-            // match the user selected ones
-            if((from == fid) && (to == next_hop_id)) {
 
-#ifdef PREDEFINED_EXPERIMENT
-                bandwidth = BANDWIDTH;
-                delay = DELAY;
-                lossrate = PACKET_LOSS_RATE;
-#endif
-                // print current configuration info
-#ifdef TCDEBUG
-                INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", time, bandwidth, lossrate, delay);
-#endif
-
-                // if this is the first operation we reset the timer
-                // Note: it is assumed time always equals 0.0 for the first line
-                if(time == 0.0) {
-                    timer_reset(timer);
-                }
-                else {
-                    // wait for for the next timer event
-
-                    if(timer_wait(timer, time * 1000000) < 0) {
-                        WARNING("Timer deadline missed at time=%.2f s", time);
-                        //exit(1); // NOT NEEDED ANYMORE!!!!
-                    }
-                }
-
-
-#ifdef OLSR_ROUTING
-                // get the next hop ID to find correct configuration lines
-                if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR) {
-                    WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i,direction=%i", time, tid, direction);
-                    exit(1);
-                }
-                else {
-                    INFO("Time=%.2f: Next_hop=%i for destination=%i", time, next_hop_id, tid);
-                }
-#endif
-
-                /*
-                 prepare adjusted values:
-                 1. if packet size is known bandwidth could be adjusted:
-                   multiplication factor 1.0778 was computed for 400 byte datagrams
-                   because of 28 bytes header (428/400=1.07)
-                   however we consider bandwidth at Ethernet level, therefore we
-                   don't multiply here but when plotting results
-                   Note: ip_dummynet.h says that bandwidth is in bytes/tick
-                         but we seem to obtain correct values using bits/second
-                */
-
-#ifdef __FreeBSD__
-                bandwidth = (int)round(bandwidth);// * 2.56);
-
-                // 2. no adjustment necessary for delay expressed in ms
-                delay = (int) round(delay);//(delay / 2);
-
-                // 3. loss rate probability must be extended to 
-                //    2^31-1 (=0x7fffffff) range, equivalent to 100% loss
-                lossrate = (int)round(lossrate * 0x7fffffff);
-
-                // do configure pipe
-                configure_pipe(s, pipe_nr, bandwidth, delay, lossrate);
-#elif __linux
-                bandwidth = (int)round(bandwidth);     // * 2.56);
-                //delay = (int)round(delay);             //(delay / 2);
-                //lossrate = (int)rint(lossrate * 0x7fffffff);
-                lossrate = 0;
-
-				//TCHK_START(time);
-                configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
-				//TCHK_END(time);
-#endif
-                loop_count++;
-
-#ifdef PREDEFINED_EXPERIMENT
-                if(loop_count>LOOP_COUNT) {
-                    break;
-                }
-#endif
-            }
-        }
-        else { // usage (2) => manage multiple rules
-            // add rules regarding next deadline to parameter table
-            if(time == next_time) {
-                if(from == my_id) {
-                    param_table[rule_count].time = time;
-                    param_table[rule_count].next_hop_id = to;
-                    param_table[rule_count].bandwidth = bandwidth;
-                    param_table[rule_count].delay = delay;
-                    param_table[rule_count].lossrate = lossrate;
-                    rule_count++;
-                }
+    if(sc_type == BIN_SC) {
+        printf("not implemented. %d\n", sc_type);
+    }
+    else if(sc_type == TXT_SC) {
+        while(fgets(buf, BUFSIZ, qomet_fd) != NULL) {
+            if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f "
+                "%f %f %f %f %f %f %f", &time, &from, &dummy[0],
+                &dummy[1], &dummy[2], &to, &dummy[3], &dummy[4],
+                &dummy[5],  &dummy[6], &dummy[7], &dummy[8],
+                &dummy[9], &dummy[10], &dummy[11], &bandwidth, 
+                &lossrate, &delay, &dummy[12]) != PARAMETERS_TOTAL) {
+                INFO("Skipped non-parametric line");
                 continue;
             }
-            else {
-                // check the reading link, if it is involved, 
-                // store on the param_over_read
-                if(from == my_id) {
-                    over_read = 1;
-                    param_over_read.time = time;
-                    param_over_read.next_hop_id = to;
-                    param_over_read.bandwidth = bandwidth;
-                    param_over_read.delay = delay;
-                    param_over_read.lossrate = lossrate;
+            if(usage_type == 1) {
+                if((from == fid) && (to == next_hop_id)) {
+                    INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s loss_rate=%.4f delay=%.4f ms", \
+                        time, bandwidth, lossrate, delay);
+    
+                    if(time == 0.0) {
+                        timer_reset(timer);
+                    }
+                    else {
+                        if(timer_wait(timer, time * 1000000) < 0) {
+                            WARNING("Timer deadline missed at time=%.2f s", time);
+                        }
+                    }
+    
+    
+#ifdef OLSR_ROUTING
+                    if((next_hop_id = get_next_hop_id(tid, direction)) == ERROR) {
+                        WARNING("Time=%.2f: Couldn't locate the next hop for destination node %i,direction=%i", \
+                            time, tid, direction);
+                        exit(1);
+                    }
+                    else {
+                        INFO("Time=%.2f: Next_hop=%i for destination=%i", time, next_hop_id, tid);
+                    }
+#endif
+    
+#ifdef __FreeBSD__
+                    bandwidth = (int)round(bandwidth);
+                    delay = (int) round(delay);
+                    lossrate = (int)round(lossrate * 0x7fffffff);
+    
+                    configure_pipe(s, pipe_nr, bandwidth, delay, lossrate);
+#elif __linux
+                    bandwidth = (int)round(bandwidth);
+                    //delay = (int)round(delay);
+                    lossrate = (int)rint(lossrate * 0x7fffffff);
+                    lossrate = 0;
+    
+    				//TCHK_START(time);
+                    configure_qdisc(s, taddr, pipe_nr, bandwidth, delay, lossrate);
+    				//TCHK_END(time);
+#endif
+                    loop_count++;
+                }
+            }
+            else { 
+                if(time == next_time) {
+                    if(from == my_id) {
+                        param_table[rule_count].time = time;
+                        param_table[rule_count].next_hop_id = to;
+                        param_table[rule_count].bandwidth = bandwidth;
+                        param_table[rule_count].delay = delay;
+                        param_table[rule_count].lossrate = lossrate;
+                        rule_count++;
+                    }
+                    continue;
                 }
                 else {
+                    if(from == my_id) {
+                        over_read = 1;
+                        param_over_read.time = time;
+                        param_over_read.next_hop_id = to;
+                        param_over_read.bandwidth = bandwidth;
+                        param_over_read.delay = delay;
+                        param_over_read.lossrate = lossrate;
+                    }
+                    else {
+                        over_read = 0;
+                    }
+    
+                    if(time == 0.0) {
+                        timer_reset(timer);
+                    }
+                    else {
+                        if(timer_wait(timer, time * 1000000) < 0) {
+                            WARNING("Timer deadline missed at time=%.2f s", time);
+                        }
+                    }
+    
+                    for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
+                        if(i == my_id) {
+                            continue;
+                        }
+    
+                        if((next_hop_id = get_next_hop_id(IP_addresses, IP_char_addresses, i, DIRECTION_OUT)) == ERROR) {
+                            WARNING("Could not locate the next hop for destination node %i", i);
+                            exit(1);
+                        }
+    
+                        offset_num = i;
+                        if((rule_num = lookup_param(next_hop_id, param_table, rule_count)) == -1) {
+                            WARNING("Could not locate the rule number for next hop = %i", 
+                                    next_hop_id);
+                            dump_param_table(param_table, rule_count);
+                            exit(1);
+                        }
+    
+                        time = param_table[rule_num].time;
+                        bandwidth = param_table[rule_num].bandwidth;
+                        delay = param_table[rule_num].delay;
+                        lossrate = param_table[rule_num].lossrate;
+    
+                        INFO("* Wireconf: #%d UCAST to #%d [%s] (time=%.2f s): bandwidth=%.2fbit/s \
+                                loss_rate=%.4f delay=%.4f ms, offset=%d", \
+                                my_id, i, IP_char_addresses + (i - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                                time, bandwidth, lossrate, delay, offset_num);
+    
+#ifdef __FreeBSD__
+                        bandwidth = (int)round(bandwidth);// * 2.56);
+                        delay = (int) round(delay);//(delay / 2);
+                        lossrate = (int)round(lossrate * 0x7fffffff);
+    
+                        configure_pipe(s, MIN_PIPE_ID_OUT + offset_num, bandwidth, delay, lossrate);
+#elif __linux
+                        bandwidth = (int)rint(bandwidth);// * 2.56);
+                        delay = (int) rint(delay);//(delay / 2);
+                        lossrate = (int)rint(lossrate * 0x7fffffff);
+
+                        configure_qdisc(s, taddr, MIN_PIPE_ID_OUT + offset_num, bandwidth, delay, lossrate);
+#endif
+                        loop_count++;
+                    }
+    
+                    for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
+                        if(i == my_id)
+                            continue;
+    
+                        offset_num = i;
+                        if((rule_num = lookup_param(i, param_table, rule_count)) == -1) {
+                            WARNING("Could not locate the rule number for next hop = %d with rule count = %d", 
+                                    i, rule_count);
+                            dump_param_table(param_table, rule_count);
+                            exit(1);
+                        }
+    
+                        time = param_table[rule_num].time;
+                        bandwidth = param_table[rule_num].bandwidth;
+                        delay = param_table[rule_num].delay;
+                        lossrate = param_table[rule_num].lossrate;
+    
+                        INFO("* Wireconf: #%d BCAST from #%d [%s] (time=%.2f s): bandwidth=%.2fbit/s \
+                                loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, \
+                                IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
+                                time, bandwidth, lossrate, delay, offset_num);
+#ifdef __FreeBSD__
+                        bandwidth = (int)round(bandwidth);// * 2.56);
+                        delay = (int) round(delay);//(delay / 2);
+                        lossrate = (int)round(lossrate * 0x7fffffff);
+    
+                        configure_pipe(s, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
+#elif __linux
+                        bandwidth = (int)rint(bandwidth);// * 2.56);
+                        delay = (int)rint(delay);//(delay / 2);
+                        lossrate = (int)rint(lossrate * 0x7fffffff);
+
+                        configure_qdisc(s, taddr, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
+#endif
+                        loop_count++;
+                    }
+    
+                    memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
+                    rule_count = 0;
+                    next_time += time_period;
+                    INFO("New timer deadline=%f", next_time);
+
+                    if(over_read == 1) {
+                        param_table[0].time = param_over_read.time;
+                        param_table[0].next_hop_id = param_over_read.next_hop_id;
+                        param_table[0].bandwidth = param_over_read.bandwidth;
+                        param_table[0].delay = param_over_read.delay;
+                        param_table[0].lossrate = param_over_read.lossrate;
+                        rule_count++;
+                    }
+                    memset(&param_over_read, 0, sizeof(qomet_param));
                     over_read = 0;
                 }
-
-                // waiting for the next timer deadline event;
-                // if this is the first operation we reset the timer
-                // Note: it is assumed time always equals 0.0 for the first line
-                if(time == 0.0) {
-                    timer_reset(timer);
-                }
-                else {
-                    // wait for for the next timer event
-                    if(timer_wait(timer, time * 1000000) < 0) {
-                        WARNING("Timer deadline missed at time=%.2f s", time);
-                    }
-                }
-
-                // when timer event comes, apply configuration for all 
-                // the unicast links with destination 'i'
-                for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
-                    if(i == my_id) {
-                        //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
-                        continue;
-                    }
-
-                    // get the next hop ID for destination i 
-                    // to find correct configuration lines
-                    if((next_hop_id = get_next_hop_id(IP_addresses, IP_char_addresses, i, DIRECTION_OUT)) == ERROR) {
-                        WARNING("Could not locate the next hop for destination node %i", i);
-                        exit(1);
-                    }
-                    //else
-                    //INFO("Next_hop=%i for destination=%i", next_hop_id, i);
-
-                    offset_num = i;
-                    if((rule_num = lookup_param(next_hop_id, param_table, rule_count)) == -1) {
-                        WARNING("Could not locate the rule number for next hop = %i", 
-                                next_hop_id);
-                        dump_param_table(param_table, rule_count);
-                        exit(1);
-                    }
-
-                    // prepare the configuration parameters
-                    time = param_table[rule_num].time;
-                    bandwidth = param_table[rule_num].bandwidth;
-                    delay = param_table[rule_num].delay;
-                    lossrate = param_table[rule_num].lossrate;
-
-#ifdef PREDEFINED_EXPERIMENT
-                    bandwidth=BANDWIDTH;
-                    delay=DELAY;
-                    lossrate=PACKET_LOSS_RATE;
-#endif
-                    // print current configuration info
-                    INFO("* Wireconf: #%d UCAST to #%d [%s] (time=%.2f s): bandwidth=%.2fbit/s \
-                            loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
-                            time, bandwidth, lossrate, delay, offset_num);
-
-                    /*
-                    // prepare adjusted values:
-                    // 1. if packet size is known bandwidth could be adjusted:
-                    //   multiplication factor 1.0778 was computed for 400 byte datagrams
-                    //   because of 28 bytes header (428/400=1.07)
-                    //   however we consider bandwidth at Ethernet level, therefore we
-                    //   don't multiply here but when plotting results
-                    //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
-                    //   but we seem to obtain correct values using bits/second
-                    */
-#ifdef __FreeBSD__
-                    bandwidth = (int)round(bandwidth);// * 2.56);
-                    // 2. no adjustment necessary for delay expressed in ms
-                    delay = (int) round(delay);//(delay / 2);
-                    // 3. loss rate probability must be extended to
-                    //    2^31-1 (=0x7fffffff) range, equivalent to 100% loss
-                    lossrate = (int)round(lossrate * 0x7fffffff);
-                    // just configure pipe for the output traffic as in proposed solution for OLSR
-                    //configure_pipe(s, MIN_PIPE_ID_IN + offset_num, bandwidth, delay, lossrate);
-
-                    //dump_param_table(param_table, rule_count);
-                    configure_pipe(s, MIN_PIPE_ID_OUT + offset_num, bandwidth, delay, lossrate);
-#elif __linux
-                    bandwidth = (int)rint(bandwidth);// * 2.56);
-                    delay = (int) rint(delay);//(delay / 2);
-                    lossrate = (int)rint(lossrate * 0x7fffffff);
-#endif
-
-                    // increase loop counter
-                    loop_count++;
-
-#ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count>LOOP_COUNT) {
-                        break;
-                    }
-#endif
-                }// end for loop
-
-                // config the broadcast links have source node id = i
-                for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
-                    if(i == my_id)
-                        //if ( (j != 1) || (i != 2) )		// Lan optimize for the routing experiment
-                        continue;
-
-                    offset_num = i;
-                    if((rule_num = lookup_param(i, param_table, rule_count)) == -1) {
-                        WARNING("Could not locate the rule number for next hop = %d with rule count = %d", 
-                                i, rule_count);
-                        dump_param_table(param_table, rule_count);
-                        exit(1);
-                    }
-
-                    // prepare the configuration parameters
-                    time = param_table[rule_num].time;
-                    bandwidth = param_table[rule_num].bandwidth;
-                    delay = param_table[rule_num].delay;
-                    lossrate = param_table[rule_num].lossrate;
-
-#ifdef PREDEFINED_EXPERIMENT
-                    bandwidth=BANDWIDTH;
-                    delay=DELAY;
-                    lossrate=PACKET_LOSS_RATE;
-#endif
-
-                    // print current configuration info
-                    INFO("* Wireconf: #%d BCAST from #%d [%s] (time=%.2f s): bandwidth=%.2fbit/s \
-                            loss_rate=%.4f delay=%.4f ms, offset=%d", my_id, i, IP_char_addresses+(i-FIRST_NODE_ID)*IP_ADDR_SIZE, 
-                            time, bandwidth, lossrate, delay, offset_num);
-
-                    /*
-                    // prepare adjusted values:
-                    // 1. if packet size is known bandwidth could be adjusted:
-                    //   multiplication factor 1.0778 was computed for 400 byte datagrams
-                    //   because of 28 bytes header (428/400=1.07)
-                    //   however we consider bandwidth at Ethernet level, therefore we
-                    //   don't multiply here but when plotting results
-                    //   Note: ip_dummynet.h says that bandwidth is in bytes/tick
-                    //   but we seem to obtain correct values using bits/second
-                    */
-#ifdef __FreeBSD__
-                    bandwidth = (int)round(bandwidth);// * 2.56);
-                    // 2. no adjustment necessary for delay expressed in ms
-                    delay = (int) round(delay);//(delay / 2);
-                    // 3. loss rate probability must be extended to
-                    //    2^31-1 (=0x7fffffff) range, equivalent to 100% loss
-                    lossrate = (int)round(lossrate * 0x7fffffff);
-
-                    //dump_param_table(param_table, rule_count);
-                    configure_pipe(s, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
-#elif __linux
-                    bandwidth = (int)rint(bandwidth);// * 2.56);
-                    delay = (int)rint(delay);//(delay / 2);
-                    lossrate = (int)rint(lossrate * 0x7fffffff);
-#endif
-
-                    // increase loop counter
-                    loop_count++;
-
-#ifdef PREDEFINED_EXPERIMENT
-                    if(loop_count > LOOP_COUNT) {
-                        break;
-                    }
-#endif
-                }// end for loop for broadcast
-                // End config for broadcast traffic
-
-                // Reset the parameter and param_table for the next time
-                memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
-                rule_count = 0;
-                next_time += time_period;
-                INFO("New timer deadline=%f", next_time);
-                // if there is over read then assign to param_table
-                if(over_read == 1) {
-                    param_table[0].time = param_over_read.time;
-                    param_table[0].next_hop_id = param_over_read.next_hop_id;
-                    param_table[0].bandwidth = param_over_read.bandwidth;
-                    param_table[0].delay = param_over_read.delay;
-                    param_table[0].lossrate = param_over_read.lossrate;
-                    rule_count++;
-                }
-                memset(&param_over_read, 0, sizeof(qomet_param));
-                over_read = 0;
             }
-#if 0
-            if (loop_count > 10 )
-                break;
-#endif
-        } // end else, usage (2)
-    } // end while loop
+        } 
+    }
 
-    // if the loop was not entered not even once
-    // there is an error
     if(loop_count == 0) {
         if(usage_type == 1) {
             WARNING("The specified pair from_node_id=%d & to_node_id=%d could not be found", fid, tid);
@@ -939,11 +724,8 @@ char **argv;
             WARNING("No valid line was found for the node %d", my_id); 
         }
     }
-
-    // release the timer
     timer_free(timer);
 
-    // delete the dummynet rule
     if(usage_type==1) {
 #ifdef __FreeBSD__
         if(delete_rule(s, rulenum) == ERROR) {
@@ -958,8 +740,6 @@ char **argv;
 #endif
     }
     else {
-        // usage (2) => delete multiple rules
-        // delete the unicast dummynet rules
 #ifdef __FreeBSD__
         for (j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
             if(j == my_id) {
@@ -992,18 +772,13 @@ char **argv;
 #endif
     }
 
-    // get the time at the end of the experiment
     gettimeofday(&tp_end, NULL);
-
-    // print execution time
-    INFO("Experiment execution time=%.4f s", (tp_end.tv_sec+tp_end.tv_usec / 1.0e6) - (tp_begin.tv_sec+tp_begin.tv_usec / 1.0e6));
-
-    // close socket
+    INFO("Experiment execution time=%.4f s", \
+        (tp_end.tv_sec+tp_end.tv_usec / 1.0e6) - (tp_begin.tv_sec + tp_begin.tv_usec / 1.0e6));
     DEBUG("Closing socket...");
-    rtnl_close(&rth);
-    close_socket(s);
 
-    fclose(fd);
+    close_socket(s);
+    fclose(qomet_fd);
 
     return 0;
 }

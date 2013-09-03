@@ -1,0 +1,2135 @@
+* Capacity calculation for system bandwidth = 20.00 MHz (dl_symbols=35 ul_symbols=21)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 6.336000 Mbps
+UL: Data rate = 4.032000 Mbps
+Total data rate = 10.368000 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 9.504000 Mbps
+UL: Data rate = 6.048000 Mbps
+Total data rate = 15.552000 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 12.672000 Mbps
+UL: Data rate = 8.064000 Mbps
+Total data rate = 20.736000 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 19.008000 Mbps
+UL: Data rate = 12.096000 Mbps
+Total data rate = 31.104000 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 19.008000 Mbps
+UL: Data rate = 12.096000 Mbps
+Total data rate = 31.104000 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 25.344000 Mbps
+UL: Data rate = 16.128000 Mbps
+Total data rate = 41.472000 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 28.512000 Mbps
+UL: Data rate = 18.144000 Mbps
+Total data rate = 46.656000 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				20.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			22.4
+Sample time (1/F_s) [ns]			44
+FFT size (N_FFT)				2048
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			240
+number of data subcarriers			1440
+(b) Uplink
+System bandwidth [MHz]				20.00
+FFT size (N_FFT)				2048
+number of guard subcarriers			367
+number of used subcarriers			1681
+number of pilot subcarriers			560
+number of data subcarriers			1120
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 660
+UL: Number of slots = 420
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 31.680000 Mbps
+UL: Data rate = 20.160000 Mbps
+Total data rate = 51.840000 Mbps
+--------------------------------------------------------
+* Capacity calculation for system bandwidth = 10.00 MHz (dl_symbols=35 ul_symbols=21)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 3.168000 Mbps
+UL: Data rate = 2.016000 Mbps
+Total data rate = 5.184000 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 4.752000 Mbps
+UL: Data rate = 3.024000 Mbps
+Total data rate = 7.776000 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 6.336000 Mbps
+UL: Data rate = 4.032000 Mbps
+Total data rate = 10.368000 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 9.504000 Mbps
+UL: Data rate = 6.048000 Mbps
+Total data rate = 15.552000 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 9.504000 Mbps
+UL: Data rate = 6.048000 Mbps
+Total data rate = 15.552000 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 12.672000 Mbps
+UL: Data rate = 8.064000 Mbps
+Total data rate = 20.736000 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 14.256000 Mbps
+UL: Data rate = 9.072000 Mbps
+Total data rate = 23.328000 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				10.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			11.2
+Sample time (1/F_s) [ns]			89
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				10.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 330
+UL: Number of slots = 210
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 15.840000 Mbps
+UL: Data rate = 10.080000 Mbps
+Total data rate = 25.920000 Mbps
+--------------------------------------------------------
+* Capacity calculation for system bandwidth = 8.75 MHz (dl_symbols=30 ul_symbols=18)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 2.448000 Mbps
+UL: Data rate = 1.680000 Mbps
+Total data rate = 4.128000 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 3.672000 Mbps
+UL: Data rate = 2.520000 Mbps
+Total data rate = 6.192000 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 4.896000 Mbps
+UL: Data rate = 3.360000 Mbps
+Total data rate = 8.256000 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 7.344000 Mbps
+UL: Data rate = 5.040000 Mbps
+Total data rate = 12.384000 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 7.344000 Mbps
+UL: Data rate = 5.040000 Mbps
+Total data rate = 12.384000 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 9.792000 Mbps
+UL: Data rate = 6.720000 Mbps
+Total data rate = 16.512000 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 11.016000 Mbps
+UL: Data rate = 7.560000 Mbps
+Total data rate = 18.576000 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				8.75
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			10.0
+Sample time (1/F_s) [ns]			100
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		9.76
+Useful symbol time (T_b = 1/Delta_f) [us])	102.4
+Guard time (T_g = T_b/8) [us]			12.8
+OFDMA symbol time (T_s = T_b + T_g) [us]	115.2
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				8.75
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 41
+DL: Number of symbols = 30
+UL: Number of symbols = 18
+DL: Number of slots = 255
+UL: Number of slots = 175
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 12.240000 Mbps
+UL: Data rate = 8.400000 Mbps
+Total data rate = 20.640000 Mbps
+--------------------------------------------------------
+* Capacity calculation for system bandwidth = 7.00 MHz (dl_symbols=24 ul_symbols=15)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 1.008000 Mbps
+UL: Data rate = 1.344000 Mbps
+Total data rate = 2.352000 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 1.512000 Mbps
+UL: Data rate = 2.016000 Mbps
+Total data rate = 3.528000 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 2.016000 Mbps
+UL: Data rate = 2.688000 Mbps
+Total data rate = 4.704000 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 3.024000 Mbps
+UL: Data rate = 4.032000 Mbps
+Total data rate = 7.056000 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 3.024000 Mbps
+UL: Data rate = 4.032000 Mbps
+Total data rate = 7.056000 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 4.032000 Mbps
+UL: Data rate = 5.376000 Mbps
+Total data rate = 9.408000 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 4.536000 Mbps
+UL: Data rate = 6.048000 Mbps
+Total data rate = 10.584000 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				7.00
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			8.0
+Sample time (1/F_s) [ns]			125
+FFT size (N_FFT)				1024
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			120
+number of data subcarriers			720
+(b) Uplink
+System bandwidth [MHz]				7.00
+FFT size (N_FFT)				1024
+number of guard subcarriers			183
+number of used subcarriers			841
+number of pilot subcarriers			280
+number of data subcarriers			560
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 105
+UL: Number of slots = 140
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 5.040000 Mbps
+UL: Data rate = 6.720000 Mbps
+Total data rate = 11.760000 Mbps
+--------------------------------------------------------
+* Capacity calculation for system bandwidth = 5.00 MHz (dl_symbols=35 ul_symbols=21)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 1.296000 Mbps
+UL: Data rate = 0.979200 Mbps
+Total data rate = 2.275200 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 1.944000 Mbps
+UL: Data rate = 1.468800 Mbps
+Total data rate = 3.412800 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 2.592000 Mbps
+UL: Data rate = 1.958400 Mbps
+Total data rate = 4.550400 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 3.888000 Mbps
+UL: Data rate = 2.937600 Mbps
+Total data rate = 6.825600 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 3.888000 Mbps
+UL: Data rate = 2.937600 Mbps
+Total data rate = 6.825600 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 5.184000 Mbps
+UL: Data rate = 3.916800 Mbps
+Total data rate = 9.100800 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 5.832000 Mbps
+UL: Data rate = 4.406400 Mbps
+Total data rate = 10.238400 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				5.00
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			5.6
+Sample time (1/F_s) [ns]			178
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				5.00
+FFT size (N_FFT)				512
+number of guard subcarriers			103
+number of used subcarriers			409
+number of pilot subcarriers			136
+number of data subcarriers			272
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 35
+UL: Number of symbols = 21
+DL: Number of slots = 135
+UL: Number of slots = 102
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 6.480000 Mbps
+UL: Data rate = 4.896000 Mbps
+Total data rate = 11.376000 Mbps
+--------------------------------------------------------
+* Capacity calculation for system bandwidth = 3.50 MHz (dl_symbols=24 ul_symbols=15)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 0.499200 Mbps
+UL: Data rate = 0.672000 Mbps
+Total data rate = 1.171200 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 0.748800 Mbps
+UL: Data rate = 1.008000 Mbps
+Total data rate = 1.756800 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 0.998400 Mbps
+UL: Data rate = 1.344000 Mbps
+Total data rate = 2.342400 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 1.497600 Mbps
+UL: Data rate = 2.016000 Mbps
+Total data rate = 3.513600 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 1.497600 Mbps
+UL: Data rate = 2.016000 Mbps
+Total data rate = 3.513600 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 1.996800 Mbps
+UL: Data rate = 2.688000 Mbps
+Total data rate = 4.684800 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 2.246400 Mbps
+UL: Data rate = 3.024000 Mbps
+Total data rate = 5.270400 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				3.50
+Sampling factor					1.14
+Sampling frequency (F_s) [MHz]			4.0
+Sample time (1/F_s) [ns]			250
+FFT size (N_FFT)				512
+Subcarrier spacing (Delta_f) [kHz]		7.81
+Useful symbol time (T_b = 1/Delta_f) [us])	128.0
+Guard time (T_g = T_b/8) [us]			16.0
+OFDMA symbol time (T_s = T_b + T_g) [us]	144.0
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			60
+number of data subcarriers			360
+(b) Uplink
+System bandwidth [MHz]				3.50
+FFT size (N_FFT)				512
+number of guard subcarriers			91
+number of used subcarriers			421
+number of pilot subcarriers			140
+number of data subcarriers			280
+------------------------- OTHER ------------------------
+Total symbols per frame = 33
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 52
+UL: Number of slots = 70
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 2.496000 Mbps
+UL: Data rate = 3.360000 Mbps
+Total data rate = 5.856000 Mbps
+--------------------------------------------------------
+* Capacity calculation for system bandwidth = 1.25 MHz (dl_symbols=24 ul_symbols=15)
+** MCS = 3
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 6.00
+UL: Bytes per slot = 6.00
+DL: Data rate = 0.096000 Mbps
+UL: Data rate = 0.153600 Mbps
+Total data rate = 0.249600 Mbps
+--------------------------------------------------------
+** MCS = 4
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 9.00
+UL: Bytes per slot = 9.00
+DL: Data rate = 0.144000 Mbps
+UL: Data rate = 0.230400 Mbps
+Total data rate = 0.374400 Mbps
+--------------------------------------------------------
+** MCS = 5
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 12.00
+UL: Bytes per slot = 12.00
+DL: Data rate = 0.192000 Mbps
+UL: Data rate = 0.307200 Mbps
+Total data rate = 0.499200 Mbps
+--------------------------------------------------------
+** MCS = 7
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 0.288000 Mbps
+UL: Data rate = 0.460800 Mbps
+Total data rate = 0.748800 Mbps
+--------------------------------------------------------
+** MCS = 8
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 18.00
+UL: Bytes per slot = 18.00
+DL: Data rate = 0.288000 Mbps
+UL: Data rate = 0.460800 Mbps
+Total data rate = 0.748800 Mbps
+--------------------------------------------------------
+** MCS = 9
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 24.00
+UL: Bytes per slot = 24.00
+DL: Data rate = 0.384000 Mbps
+UL: Data rate = 0.614400 Mbps
+Total data rate = 0.998400 Mbps
+--------------------------------------------------------
+** MCS = 10
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 27.00
+UL: Bytes per slot = 27.00
+DL: Data rate = 0.432000 Mbps
+UL: Data rate = 0.691200 Mbps
+Total data rate = 1.123200 Mbps
+--------------------------------------------------------
+** MCS = 11
+------------------------ TABLE 1 -----------------------
+System bandwidth [MHz]				1.25
+Sampling factor					1.12
+Sampling frequency (F_s) [MHz]			1.4
+Sample time (1/F_s) [ns]			714
+FFT size (N_FFT)				128
+Subcarrier spacing (Delta_f) [kHz]		10.93
+Useful symbol time (T_b = 1/Delta_f) [us])	91.4
+Guard time (T_g = T_b/8) [us]			11.4
+OFDMA symbol time (T_s = T_b + T_g) [us]	102.8
+------------------------- TABLE 2 ----------------------
+(a) Downlink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			43
+number of used subcarriers			85
+number of pilot subcarriers			12
+number of data subcarriers			72
+(b) Uplink
+System bandwidth [MHz]				1.25
+FFT size (N_FFT)				128
+number of guard subcarriers			31
+number of used subcarriers			97
+number of pilot subcarriers			32
+number of data subcarriers			64
+------------------------- OTHER ------------------------
+Total symbols per frame = 47
+DL: Number of symbols = 24
+UL: Number of symbols = 15
+DL: Number of slots = 10
+UL: Number of slots = 16
+DL: Bytes per slot = 30.00
+UL: Bytes per slot = 30.00
+DL: Data rate = 0.480000 Mbps
+UL: Data rate = 0.768000 Mbps
+Total data rate = 1.248000 Mbps
+--------------------------------------------------------

@@ -25,8 +25,11 @@ const char* str;
 {
     unsigned t;
 
-    if(get_usecs(&t, str))
+    if(get_usecs(&t, str)) {
         return -1;
+    }
+
+    fprintf(stderr, "t : %d\n", t);
 
     if(tc_core_time2big(t)) {
         fprintf(stderr, "Illegal %u time (too large)\n", t);
@@ -36,6 +39,7 @@ const char* str;
     //*ticks = tc_core_usec2tick(t);
     *ticks = tc_core_time2tick(t);
 
+    fprintf(stderr, "tics : %d\n", *ticks);
     return 0;
 }
 
@@ -44,6 +48,7 @@ netem_opt(qp, n)
 struct qdisc_parameter* qp;
 struct nlmsghdr *n;
 {
+    uint32_t latency;
     size_t dist_size = 0;
     struct rtattr* tail;
     struct tc_netem_qopt opt;
@@ -61,14 +66,11 @@ struct nlmsghdr *n;
     memset(present, 0, sizeof(present));
 
     if(qp->limit) {
-        if(get_size(&opt.limit, qp->limit)) {
-            return -1;
-        }
+        opt.limit = qp->limit;
     }
     if(qp->delay) {
-        if(get_ticks(&opt.latency, qp->delay)) {
-            return -1;
-        }
+        latency = qp->delay * 1000;
+        opt.latency = tc_core_time2tick(latency);
     }
     if(qp->jitter) {
         if(get_ticks(&opt.jitter, qp->jitter)) {
@@ -77,32 +79,22 @@ struct nlmsghdr *n;
     }
     if(qp->delay_corr) {
         ++present[TCA_NETEM_CORR];
-        if(get_percent(&cor.delay_corr, qp->delay_corr)) {
-            return -1;
-        }
+        cor.delay_corr = qp->delay_corr;
     }
     if(qp->loss) {
-        if(get_percent(&opt.loss, qp->loss)) {
-            return -1;
-        }
+        opt.loss, qp->loss;
     }
     if(qp->loss_corr) {
         ++present[TCA_NETEM_CORR];
-        if(get_percent(&cor.loss_corr, qp->loss_corr)) {
-            return -1;
-        }
+        cor.loss_corr = qp->loss_corr;
     }
     if(qp->reorder_prob) {
         present[TCA_NETEM_REORDER] = 1;
-        if(get_percent(&reorder.probability, qp->reorder_prob)) {
-            return -1;
-        }
+        reorder.probability = qp->reorder_prob;
     }
     if(qp->reorder_corr) {
         ++present[TCA_NETEM_CORR];
-        if(get_percent(&reorder.correlation, qp->reorder_corr)) {
-            return -1;
-        }
+        reorder.correlation = qp->reorder_corr;
     }
 
     tail = NLMSG_TAIL(n);
@@ -134,12 +126,14 @@ struct nlmsghdr *n;
         return -1;
     }
     if(corrupt.probability) {
-        if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0)
+        if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0) {
             return -1;
+        }
     }
     if(dist_data) {
-        if(addattr_l(n, 32768, TCA_NETEM_DELAY_DIST, dist_data, dist_size * sizeof(dist_data[0])) < 0)
+        if(addattr_l(n, 32768, TCA_NETEM_DELAY_DIST, dist_data, dist_size * sizeof(dist_data[0])) < 0) {
             return -1;
+        }
     }
     tail->rta_len = (void*)NLMSG_TAIL(n) - (void*)tail;
 

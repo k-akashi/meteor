@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -36,9 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 140 $
- *   $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: wlan.h 146 2013-06-20 00:50:48Z razvan $
  *
  ***********************************************************************/
 
@@ -79,6 +56,10 @@
 // Note: PSDU is the same with MPDU (MAC Protocol Data Unit)
 #define PSDU_DSSS                       1024
 #define PSDU_OFDM                       1000
+
+// subcarrier spacing for 802.11a/g in kHz;
+// given by 1/symbol_time = 1/3.2 us [Ref: OFDM at morse.colorado.edu]
+#define WIFI_SUBCARRIER_SPACING         312.5
 
 // maximum number of transmissions of a frame before it is 
 // considered lost (without and with RTS/CTS mechanism, respectively)
@@ -129,9 +110,12 @@
 #define PHY_OVERHEAD_802_11BG_SHORT     96
 
 // thermal noise level associated to Pr-threshold 
-// determining technique; for 22 MHz frequency band 
-// of 802.11 b/g it is equal to -100 dB
-// Note: to be estimated later for 802.11a
+// determining technique; for the 22 MHz frequency band 
+// of 802.11 b/g it is equal to -100 dB (official band is 20 MHz, but
+// the standard specifies attenuation at 11 MHz on left and right of center frequency!
+// Formula: P_dBm = -174 + 10*log10(delta_f) [Wikipedia: Johnson-Nyquist noise]
+// with delta_f expressed in Hertz
+// Note: 802.11a uses the same bandwidth => same noise level
 #define STANDARD_NOISE                  -100.0
 
 ////////////////////////////////////////////////
@@ -140,7 +124,7 @@
 
 // constants associated with each operating rate
 #define B_RATE_1MBPS                    0
-#define B_RATE_2MPBS                    1
+#define B_RATE_2MBPS                    1
 #define B_RATE_5MBPS                    2
 #define B_RATE_11MBPS                   3
 
@@ -149,24 +133,24 @@
 
 // data structure to hold 802.11b parameters
 // Note: later all structures may be unified
-typedef struct
+struct parameters_802_11b
 {
   // name of the adapter
   char name[MAX_STRING];
 
   // constants of model 1 (Pr-threshold based model)
-  int use_model1;         // set to TRUE if model 1 is used, FALSE otherwise
-  float Pr_thresholds[B_RATES_NUMBER]; // receive sensitivity thresholds
-  float Pr_threshold_fer; // FER at the Pr-threshold (valid for DSSS 
-                          // encoding both in 802.11b and g)
-  float model1_alpha;     // constant of exponential dependency
+  int use_model1;		// set to TRUE if model 1 is used, FALSE otherwise
+  float Pr_thresholds[B_RATES_NUMBER];	// receive sensitivity thresholds
+  float Pr_threshold_fer;	// FER at the Pr-threshold (valid for DSSS 
+  // encoding both in 802.11b and g)
+  float model1_alpha;		// constant of exponential dependency
 
   // constants of model 2 (SNR-based model)
-  int use_model2;         // set to TRUE if model 2 is used, FALSE otherwise
-  float model2_a[B_RATES_NUMBER]; // parameter 'a' of the exponential fitting
-  float model2_b[B_RATES_NUMBER]; // parameter 'b' of the exponential fitting
+  int use_model2;		// set to TRUE if model 2 is used, FALSE otherwise
+  float model2_a[B_RATES_NUMBER];	// parameter 'a' of the exponential fitting
+  float model2_b[B_RATES_NUMBER];	// parameter 'b' of the exponential fitting
 
-} parameters_802_11b;
+};
 
 
 ////////////////////////////////////////////////
@@ -175,7 +159,7 @@ typedef struct
 
 // constants associated with each operating rate
 #define G_RATE_1MBPS                    0
-#define G_RATE_2MPBS                    1
+#define G_RATE_2MBPS                    1
 #define G_RATE_5MBPS                    2
 #define G_RATE_6MBPS                    3
 #define G_RATE_9MBPS                    4
@@ -191,22 +175,22 @@ typedef struct
 #define G_RATES_NUMBER                  12
 
 // data structure to hold 802.11g parameters
-typedef struct
+struct parameters_802_11g
 {
   // name of the adapter
   char name[MAX_STRING];
 
   // constants of model 1 (Pr-threshold based model)
-  int use_model1;          // set to TRUE if model 1 is used, FALSE otherwise
-  float Pr_thresholds[G_RATES_NUMBER]; // receive sensitivity thresholds
-  float Pr_threshold_fer;  // FER at the Pr-threshold (valid for DSSS 
-                           // encoding both in 802.11b and g)
-  float Pr_threshold_per;  // PER at the Pr-threshold (valid for OFDM
-                           // encoding); note that PER is only a different 
-                           // notation for FER
-  float model1_alpha;      // constant of exponential dependency
+  int use_model1;		// set to TRUE if model 1 is used, FALSE otherwise
+  float Pr_thresholds[G_RATES_NUMBER];	// receive sensitivity thresholds
+  float Pr_threshold_fer;	// FER at the Pr-threshold (valid for DSSS 
+  // encoding both in 802.11b and g)
+  float Pr_threshold_per;	// PER at the Pr-threshold (valid for OFDM
+  // encoding); note that PER is only a different 
+  // notation for FER
+  float model1_alpha;		// constant of exponential dependency
 
-} parameters_802_11g;
+};
 
 
 ////////////////////////////////////////////////
@@ -227,19 +211,19 @@ typedef struct
 #define A_RATES_NUMBER                  8
 
 // data structure to hold 802.11a parameters
-typedef struct
+struct parameters_802_11a
 {
   // name of the adapter
   char name[MAX_STRING];
 
   // constants of model 1 (Pr-threshold based model)
-  int use_model1;         // set to TRUE if model 1 is used, FALSE otherwise
-  float Pr_thresholds[A_RATES_NUMBER]; // receive sensitivity thresholds
-  float Pr_threshold_per; // PER at the Pr-threshold (valid for OFDM
-                          // encoding)
-  float model1_alpha;     // constant of exponential dependency
+  int use_model1;		// set to TRUE if model 1 is used, FALSE otherwise
+  float Pr_thresholds[A_RATES_NUMBER];	// receive sensitivity thresholds
+  float Pr_threshold_per;	// PER at the Pr-threshold (valid for OFDM
+  // encoding)
+  float model1_alpha;		// constant of exponential dependency
 
-} parameters_802_11a;
+};
 
 
 ////////////////////////////////////////////////
@@ -283,8 +267,8 @@ extern double a_operating_rates[];
 #define DEFAULT_NOISE_POWER             -100.0
 
 // defines for supported WLAN adapters
-#define ORINOCO                         0  
-#define DEI80211MR                      1  
+#define ORINOCO                         0
+#define DEI80211MR                      1
 #define CISCO_340                       2
 #define CISCO_ABG                       3
 
@@ -294,13 +278,13 @@ extern double a_operating_rates[];
 ////////////////////////////////////////////////
 
 // various constants
-#define MINIMUM_NOISE_POWER             -100
+#define MINIMUM_NOISE_POWER             -100.0
 //define POWER_EPSILON                   1e-6        // not used anymore
 #define MAXIMUM_ERROR_RATE              0.999999999
 
 // maximum number of iterations when trying to determine 
 // the steady state of a connection during init phase
-#define MAXIMUM_PRECOMPUTE              13 
+#define MAXIMUM_PRECOMPUTE              13
 
 
 ///////////////////////////////////////
@@ -308,88 +292,116 @@ extern double a_operating_rates[];
 ///////////////////////////////////////
 
 // print parameters of an 802.11b model
-void print_802_11b_parameters(parameters_802_11b *params);
+void print_802_11b_parameters (struct parameters_802_11b *params);
 
 // print parameters of an 802.11g model
-void print_802_11g_parameters(parameters_802_11g *params);
+void print_802_11g_parameters (struct parameters_802_11g *params);
 
 // print parameters of an 802.11a model
-void print_802_11a_parameters(parameters_802_11a *params);
+void print_802_11a_parameters (struct parameters_802_11a *params);
 
 // do various post-init configurations;
 // return SUCCESS on succes, ERROR on error
-//int wlan_connection_post_init(connection_class *connection);
+//int wlan_connection_post_init(struct connection_class *connection);
 
-// update node Pr0, which is the power radiated by _this_ node 
+// update Pr0, which is the power radiated by _this_ interface
 // at the distance of 1 m
-void wlan_node_update_Pr0(node_class *node);
+void wlan_interface_update_Pr0 (struct interface_class *interface);
 
 // update the changing properties of a connection (e.g., relative distance, Pr)
 // after the state of the system changed;
 // return SUCCESS on succes, ERROR on error
-int wlan_connection_update(connection_class *connection, 
-			   scenario_class *scenario);
+int wlan_connection_update (struct connection_class *connection,
+			    struct scenario_class *scenario);
 
 // get a pointer to a parameter structure corresponding to 
-// the receiving node adapter and the connection standard;
+// the receiving interface adapter and the connection standard;
 // return value is this pointer
-void *wlan_get_node_adapter(connection_class *connection, node_class *node);
+void *wlan_get_interface_adapter (struct connection_class *connection,
+				  struct interface_class *interface);
 
 // do compute channel interference between the current connection
 // and a potentially interfering connection 'connection_i';
 // return SUCCESS on succes, ERROR on error
-int compute_channel_interference(connection_class *connection, 
-				 connection_class *connection_i, 
-				 scenario_class *scenario);
+int compute_channel_interference (struct connection_class *connection,
+				  struct connection_class *connection_i,
+				  struct scenario_class *scenario);
 
 // compute the interference caused by other stations
 // through either concurrent transmission or through noise;
 // return SUCCESS on succes, ERROR on error
-int wlan_interference(connection_class *connection, 
-		      scenario_class *scenario);
+int wlan_interference (struct connection_class *connection,
+		       struct scenario_class *scenario);
 
 // compute FER corresponding to the current conditions
 // for a given operating rate;
 // return SUCCESS on succes, ERROR on error
-int wlan_fer(connection_class *connection, scenario_class *scenario, 
-	     int operating_rate, double *fer);
+int wlan_fer (struct connection_class *connection,
+	      struct scenario_class *scenario, int operating_rate,
+	      double *fer);
 
 // compute the average number of retransmissions corresponding 
 // to the current conditions for ALL frames (including errored ones);
 // return SUCCESS on succes, ERROR on error
-int wlan_retransmissions(connection_class *connection, 
-			 scenario_class *scenario, 
-			 double *num_retransmissions);
+int wlan_retransmissions (struct connection_class *connection,
+			  struct scenario_class *scenario,
+			  double *num_retransmissions);
 
 // compute loss rate based on FER;
 // return SUCCESS on succes, ERROR on error
-int wlan_loss_rate(connection_class *connection, 
-		   scenario_class *scenario, double *loss_rate);
+int wlan_loss_rate (struct connection_class *connection,
+		    struct scenario_class *scenario, double *loss_rate);
+
+// compute loss rate based on FER (we assume FER was 
+// already calculated);
+// return SUCCESS on succes, ERROR on error
+int
+wlan_do_compute_loss_rate (struct connection_class *connection,
+			   double *loss_rate);
 
 // compute operating rate based on FER and a model of the ARF mechanism;
 // return SUCCESS on succes, ERROR on error
-int wlan_operating_rate(connection_class *connection, 
-			scenario_class *scenario, int *operating_rate);
+int wlan_operating_rate (struct connection_class *connection,
+			 struct scenario_class *scenario,
+			 int *operating_rate);
 
 // calculate PPDU duration in us for 802.11 WLAN specified by 'connection';
 // the results will be rounded up using ceil function;
 // return SUCCESS on succes, ERROR on error
-int wlan_ppdu_duration(connection_class *connection, double *ppdu_duration,
-		       int *slot_time);
+int wlan_ppdu_duration (struct connection_class *connection,
+			double *ppdu_duration, int *slot_time);
 
 // compute delay & jitter and return values in arguments
 // Note: To obtain correct results the call to this function 
 // must follow the call to "wlan_loss_rate()" since it 
 // uses the field "frame_error_rate" internally;
 // return SUCCESS on succes, ERROR on error
-int wlan_delay_jitter(connection_class *connection, 
-		      scenario_class *scenario, double *variable_delay,
-		      double *delay, double *jitter);
+int wlan_delay_jitter (struct connection_class *connection,
+		       struct scenario_class *scenario,
+		       double *variable_delay, double *delay, double *jitter);
+
+// compute variable delay & jitter and return values in arguments
+// Note: To obtain correct results, the call to this function 
+// must follow the call to "wlan_loss_rate()" since it 
+// uses the field "frame_error_rate" internally;
+// return SUCCESS on succes, ERROR on error
+int
+wlan_do_compute_delay_jitter (struct connection_class *connection,
+			      double *avg_delay, double *avg_jitter,
+			      float total_channel_utilization_others);
 
 // compute bandwidth based on operating rate, delay and packet size;
 // return SUCCESS on succes, ERROR on error
-int wlan_bandwidth(connection_class *connection, 
-		   scenario_class *scenario, double *bandwidth);
+int wlan_bandwidth (struct connection_class *connection,
+		    struct scenario_class *scenario, double *bandwidth);
 
+// do compute bandwidth based on operating rate, delay and packet size;
+// return SUCCESS on succes, ERROR on error
+int wlan_do_compute_bandwidth (struct connection_class *connection,
+			       double *bandwidth);
+
+// used in wireconf/statistics.c
+int wlan_operating_rate_index (struct connection_class *connection,
+			       float op_rate);
 
 #endif

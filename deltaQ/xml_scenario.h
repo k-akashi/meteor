@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -36,9 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 142 $
- *   $LastChangedDate: 2009-03-31 09:09:45 +0900 (Tue, 31 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: xml_scenario.h 145 2013-06-07 01:11:09Z razvan $
  *
  ***********************************************************************/
 
@@ -48,7 +25,7 @@
 
 
 #include <float.h>
-#include <expat.h>   // required by the XML parser library
+#include <expat.h>		// required by the XML parser library
 
 #include "deltaQ.h"
 
@@ -110,23 +87,36 @@ int xml_depth;
 #define NODE_CONNECTION_AD_HOC_STRING         "ad_hoc"
 #define NODE_CONNECTION_INFRASTRUCTURE_STRING "infrastructure"
 #define NODE_CONNECTION_ANY_STRING            "any"
-#define NODE_ADAPTER_STRING                   "adapter"
-#define NODE_ADAPTER_ORINOCO_STRING           "orinoco"
-#define NODE_ADAPTER_DEI80211MR_STRING        "dei80211mr"
-#define NODE_ADAPTER_CISCO_340_STRING         "cisco_340"
-#define NODE_ADAPTER_CISCO_ABG_STRING         "cisco_abg"
-#define NODE_ADAPTER_JENNIC_STRING            "jennic"
-#define NODE_ADAPTER_S_NODE_STRING            "s_node"
 #define NODE_X_STRING                         "x"
 #define NODE_Y_STRING                         "y"
 #define NODE_Z_STRING                         "z"
-#define NODE_PT_STRING                        "Pt"
-#define NODE_ANTENNA_GAIN_STRING              "antenna_gain"
-#define NODE_AZIMUTH_ORIENTATION_STRING       "azimuth_orientation"
-#define NODE_AZIMUTH_BEAMWIDTH_STRING         "azimuth_beamwidth"
-#define NODE_ELEVATION_ORIENTATION_STRING     "elevation_orientation"
-#define NODE_ELEVATION_BEAMWIDTH_STRING       "elevation_beamwidth"
 #define NODE_INTERNAL_DELAY_STRING            "internal_delay"
+
+// When adding new parameters make sure to update 
+// the corresponding 'copy' functions
+
+// interface element and attribute names
+#define INTERFACE_STRING                      "interface"
+#define INTERFACE_NAME_STRING                 "name"
+#define INTERFACE_ADAPTER_STRING              "adapter"
+#define INTERFACE_ADAPTER_ORINOCO_STRING      "orinoco"
+#define INTERFACE_ADAPTER_DEI80211MR_STRING   "dei80211mr"
+#define INTERFACE_ADAPTER_CISCO_340_STRING    "cisco_340"
+#define INTERFACE_ADAPTER_CISCO_ABG_STRING    "cisco_abg"
+#define INTERFACE_ADAPTER_JENNIC_STRING       "jennic"
+#define INTERFACE_ADAPTER_S_NODE_STRING       "s_node"
+#define INTERFACE_ADAPTER_NS3_WIMAX_STRING    "ns3_wimax"
+#define INTERFACE_IP_ADDRESS_STRING           "ip_address"
+#define INTERFACE_PT_STRING                   "Pt"
+#define INTERFACE_ANTENNA_GAIN_STRING         "antenna_gain"
+#define INTERFACE_AZIMUTH_ORIENTATION_STRING  "azimuth_orientation"
+#define INTERFACE_AZIMUTH_BEAMWIDTH_STRING    "azimuth_beamwidth"
+#define INTERFACE_ELEVATION_ORIENTATION_STRING "elevation_orientation"
+#define INTERFACE_ELEVATION_BEAMWIDTH_STRING  "elevation_beamwidth"
+#define INTERFACE_ANTENNA_COUNT_STRING        "antenna_count"
+#define INTERFACE_NOISE_SOURCE_STRING         "noise_source"
+#define INTERFACE_NOISE_START_TIME_STRING     "noise_start_time"
+#define INTERFACE_NOISE_END_TIME_STRING       "noise_end_time"
 
 // When adding new parameters make sure to update 
 // the corresponding 'copy' functions
@@ -145,6 +135,8 @@ int xml_depth;
 #define OBJECT_HEIGHT_STRING                  "height"
 #define OBJECT_LOAD_FROM_JPGIS_FILE_STRING    "load_from_jpgis_file"
 #define OBJECT_MAKE_POLYGON_STRING            "make_polygon"
+#define OBJECT_LOAD_ALL_FROM_REGION_STRING    "load_all_from_region"
+
 //#define OBJECT_IS_METRIC_STRING               "is_metric"  //USED????????
 
 // When adding new parameters make sure to update 
@@ -156,7 +148,7 @@ int xml_depth;
 
 // When adding new parameters make sure to update 
 // the corresponding 'copy' functions
- 
+
 // environment element and attribute names
 #define ENVIRONMENT_STRING                    "environment"
 #define ENVIRONMENT_NAME_STRING               "name"
@@ -166,6 +158,9 @@ int xml_depth;
 #define ENVIRONMENT_SIGMA_STRING              "sigma"
 #define ENVIRONMENT_W_STRING                  "W"
 #define ENVIRONMENT_NOISE_POWER_STRING        "noise_power"
+#define ENVIRONMENT_FADING_STRING             "fading"
+#define ENVIRONMENT_FADING_AWGN_STRING        "AWGN"
+#define ENVIRONMENT_FADING_RAYLEIGH_STRING    "Rayleigh"
 
 // When adding new parameters make sure to update 
 // the corresponding 'copy' functions
@@ -179,6 +174,7 @@ int xml_depth;
 #define MOTION_TYPE_ROTATION_STRING           "rotation"
 #define MOTION_TYPE_RANDOM_WALK_STRING        "random_walk"
 #define MOTION_TYPE_BEHAVIORAL_STRING         "behavioral"
+#define MOTION_TYPE_QUALNET_STRING            "qualnet"
 #define MOTION_SPEED_X_STRING                 "speed_x"
 #define MOTION_SPEED_Y_STRING                 "speed_y"
 #define MOTION_SPEED_Z_STRING                 "speed_z"
@@ -195,6 +191,7 @@ int xml_depth;
 #define MOTION_ROTATION_ANGLE_VERTICAL_STRING "rotation_angle_vertical"
 #define MOTION_START_TIME_STRING              "start_time"
 #define MOTION_STOP_TIME_STRING               "stop_time"
+#define MOTION_MOBILITY_FILENAME_STRING       "mobility_file_name"
 
 // When adding new parameters make sure to update 
 // the corresponding 'copy' functions
@@ -202,9 +199,11 @@ int xml_depth;
 // connection element and attribute names
 #define CONNECTION_STRING                     "connection"
 #define CONNECTION_FROM_NODE_STRING           "from_node"
+#define CONNECTION_FROM_INTERFACE_STRING      "from_interface"
 #define CONNECTION_TO_NODE_STRING             "to_node"
 //#define CONNECTION_TO_NODES_STRING            "to_nodes"
 #define CONNECTION_TO_NODE_AUTO_CONNECT_STRING "auto_connect"
+#define CONNECTION_TO_INTERFACE_STRING        "to_interface"
 #define CONNECTION_THROUGH_ENVIRONMENT_STRING "through_environment"
 #define CONNECTION_STANDARD_STRING            "standard"
 #define CONNECTION_STANDARD_802_11B_STRING    "802.11b"
@@ -215,6 +214,21 @@ int xml_depth;
 #define CONNECTION_STANDARD_ETH_1000_STRING   "eth_1000"
 #define CONNECTION_STANDARD_ACTIVE_TAG_STRING "active_tag"
 #define CONNECTION_STANDARD_ZIGBEE_STRING     "zigbee"
+#define CONNECTION_STANDARD_802_16_STRING     "802.16"
+#define CONNECTION_RATE_STRING                "rate"
+#define CONNECTION_RATE_ADAPTIVE_STRING       "adaptive"
+#define CONNECTION_RATE_1MBPS_STRING          "1Mbps"
+#define CONNECTION_RATE_2MBPS_STRING          "2Mbps"
+#define CONNECTION_RATE_5MBPS_STRING          "5.5Mbps"
+#define CONNECTION_RATE_11MBPS_STRING         "11Mbps"
+#define CONNECTION_RATE_6MBPS_STRING          "6Mbps"
+#define CONNECTION_RATE_9MBPS_STRING          "9Mbps"
+#define CONNECTION_RATE_12MBPS_STRING         "12Mbps"
+#define CONNECTION_RATE_18MBPS_STRING         "18Mbps"
+#define CONNECTION_RATE_24MBPS_STRING         "24Mbps"
+#define CONNECTION_RATE_36MBPS_STRING         "36Mbps"
+#define CONNECTION_RATE_48MBPS_STRING         "48Mbps"
+#define CONNECTION_RATE_54MBPS_STRING         "54Mbps"
 #define CONNECTION_CHANNEL_STRING             "channel"
 #define CONNECTION_RTS_CTS_THRESHOLD_STRING   "RTS_CTS_threshold"
 #define CONNECTION_PACKET_SIZE_STRING         "packet_size"
@@ -223,6 +237,10 @@ int xml_depth;
 #define CONNECTION_DELAY_STRING               "delay"
 #define CONNECTION_JITTER_STRING              "jitter"
 #define CONNECTION_CONSIDER_INTERFERENCE_STRING "consider_interference"
+#define FIXED_DELTAQ_STRING                   "fixed_deltaQ"
+#define FIXED_DELTAQ_START_TIME_STRING        "start_time"
+#define FIXED_DELTAQ_END_TIME_STRING          "end_time"
+
 
 // When adding new parameters make sure to update 
 // the corresponding 'copy' functions
@@ -240,11 +258,15 @@ int xml_depth;
 #define DEFAULT_NODE_SSID                     DEFAULT_STRING
 #define DEFAULT_NODE_CONNECTION               ANY_CONNECTION
 //????????????? CHANGE: CISCO_ABG NOT GOOD FOR ALL STANDARDS
-#define DEFAULT_NODE_ADAPTER_TYPE             CISCO_ABG
-#define DEFAULT_NODE_ANTENNA_GAIN             0.0
 #define DEFAULT_NODE_COORDINATE               0.0
-#define DEFAULT_NODE_PT                       20.0
 #define DEFAULT_NODE_INTERNAL_DELAY           0.0
+
+#define DEFAULT_INTERFACE_NAME                "interface0"
+#define DEFAULT_INTERFACE_ADAPTER_TYPE        CISCO_ABG
+#define DEFAULT_INTERFACE_ANTENNA_GAIN        0.0
+#define DEFAULT_INTERFACE_PT                  20.0
+#define DEFAULT_INTERFACE_IP                  "aaa.bbb.ccc.ddd"
+
 
 #define DEFAULT_OBJECT_NAME                   DEFAULT_STRING
 #define DEFAULT_OBJECT_COORD_1                -DBL_MAX
@@ -273,6 +295,12 @@ int xml_depth;
 #define DEFAULT_CONNECTION_CHANNEL            1
 #define DEFAULT_CONNECTION_RTS_CTS_THRESHOLD  MAX_PSDU_SIZE_B
 #define DEFAULT_CONNECTION_CONSIDER_INTERFERENCE TRUE
+#define DEFAULT_FIXED_DELTAQ_START_TIME       0.0
+#define DEFAULT_FIXED_DELTAQ_END_TIME         -1.0
+#define DEFAULT_FIXED_DELTAQ_BANDWIDTH       1e9
+#define DEFAULT_FIXED_DELTAQ_LOSS_RATE       0.0
+#define DEFAULT_FIXED_DELTAQ_DELAY           0.0
+#define DEFAULT_FIXED_DELTAQ_JITTER          0.0
 
 
 ///////////////////////////////////////////////////////////////
@@ -281,11 +309,13 @@ int xml_depth;
 
 #define ELEMENT_XML_SCENARIO                  0
 #define ELEMENT_NODE                          1
-#define ELEMENT_OBJECT                        2
-#define ELEMENT_COORDINATE                    3
-#define ELEMENT_ENVIRONMENT                   4
-#define ELEMENT_MOTION                        5
-#define ELEMENT_CONNECTION                    6
+#define ELEMENT_INTERFACE                     2
+#define ELEMENT_OBJECT                        3
+#define ELEMENT_COORDINATE                    4
+#define ELEMENT_ENVIRONMENT                   5
+#define ELEMENT_MOTION                        6
+#define ELEMENT_CONNECTION                    7
+#define ELEMENT_FIXED_DELTAQ                  8
 
 #define COORDINATE_NUMBER                     3
 
@@ -294,10 +324,10 @@ int xml_depth;
 // xml_scenario structure definition
 /////////////////////////////////////////
 
-struct xml_scenario_class_s
+struct xml_scenario_class
 {
   // main scenario components
-  scenario_class scenario;
+  struct scenario_class scenario;
 
   // scenario start time
   double start_time;
@@ -319,14 +349,14 @@ struct xml_scenario_class_s
   int xml_parse_error;
 
   // stack used during XML scenario parsing
-  stack_class stack;
+  struct stack_class stack;
 
   // buffer used internally during parsing of XML character data
   char buffer[MAX_STRING];
 
   // storage used internally for storing one coordinate
   // while parsing
-  coordinate_class coordinate;
+  struct coordinate_class coordinate;
 
   // JPGIS filename
   char jpgis_filename[MAX_STRING];
@@ -344,40 +374,40 @@ struct xml_scenario_class_s
 // flag 'cartesian_coord_syst' specifies whether
 // cartesian coordinates are used or not;
 // return SUCCESS on succes, ERROR on error
-int xml_node_init(node_class *node, const char **attributes, 
-		  int cartesian_coord_syst);
+int xml_node_init (struct node_class *node, const char **attributes,
+		   int cartesian_coord_syst);
 
 // initialize a topology object from XML attributes
 // flag 'cartesian_coord_syst' specifies whether
 // cartesian coordinates are used or not;
 // return SUCCESS on succes, ERROR on error
-int xml_object_init(object_class *object, const char **attributes,
-		    int cartesian_coord_syst);
+int xml_object_init (struct object_class *object, const char **attributes,
+		     int cartesian_coord_syst);
 
 // initialize an environment object from XML attributes
 // return SUCCESS on succes, ERROR on error
-int xml_environment_init(environment_class *environment, 
-			 const char **attributes);
+int xml_environment_init (struct environment_class *environment,
+			  const char **attributes);
 
 // initialize a motion object from XML attributes
 // flag 'cartesian_coord_syst' specifies whether
 // cartesian coordinates are used or not;
 // return SUCCESS on succes, ERROR on error
-int xml_motion_init(motion_class *motion, const char **attributes, 
-		    int cartesian_coord_syst);
+int xml_motion_init (struct motion_class *motion, const char **attributes,
+		     int cartesian_coord_syst);
 
 // initialize a connection object from XML attributes
 // return SUCCESS on succes, ERROR on error
-int xml_connection_init(connection_class *connection, 
-			const char **attributes);
+int xml_connection_init (struct connection_class *connection,
+			 const char **attributes);
 
 // initialize an xml_scenario object from XML attributes
 // return SUCCESS on succes, ERROR on error
-int xml_scenario_init(xml_scenario_class *xml_scenario, 
-		      const char **attributes);
+int xml_scenario_init (struct xml_scenario_class *xml_scenario,
+		       const char **attributes);
 
 // print the main properties of an XML scenario
-void xml_scenario_print(xml_scenario_class *xml_scenario);
+void xml_scenario_print (struct xml_scenario_class *xml_scenario);
 
 
 /////////////////////////////////////////////////
@@ -390,7 +420,7 @@ void xml_scenario_print(xml_scenario_class *xml_scenario);
 // Note: used as a static function in 'scenario.c', therefore
 // doesn't need to be defined
 //static void XMLCALL start_element(void *data, const char *element, 
-//			            const char **attributes);
+//                                  const char **attributes);
 
 // this function is executed when an element ends
 // Note: used as a static function in 'scenario.c', therefore
@@ -398,14 +428,15 @@ void xml_scenario_print(xml_scenario_class *xml_scenario);
 //static void XMLCALL end_element(void *data, const char *element);
 
 //static void XML character_data (void *userData, const XML_Char *string, 
-//				int length)
+//                              int length)
 
 /////////////////////////////////////////////////
 // Main XML parsing function 
 
 // parse scenario file and store results in scenario object
 // return SUCCESS on succes, ERROR on error
-int xml_scenario_parse(FILE *scenario_file, xml_scenario_class *xml_scenario);
+int xml_scenario_parse (FILE * scenario_file,
+			struct xml_scenario_class *xml_scenario);
 
 
 #endif

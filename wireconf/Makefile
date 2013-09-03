@@ -1,11 +1,6 @@
-
 ###########################################
 # Makefile for qomet library wireconf
 ###########################################
-
-#  $Revision: 128 $
-#  $LastChangedDate: 2009-02-06 10:21:50 +0900 (Fri, 06 Feb 2009) $
-#  $LastChangedBy: razvan $
 
 .SUFFIXES:  .c .o
 .c.o:
@@ -19,27 +14,17 @@ CC      = gcc
 HOSTCC  = gcc
 
 ifeq ($(UNAME), Linux)
-# netem and tbf and debug message
-#CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -DTCDEBUG -fPIC
-# netem and debug message
-#CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG -fPIC
-# netem and tbf or htb
-CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -DTBF -fPIC
-# netem only
-#CFLAGS  = -O3 -I. -g -Wall -Werror -D_GNU_SOURCE -DMESSAGE_WARNING -DMESSAGE_INFO -fPIC
+CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DTBF -fPIC
 
-#CFLAGS  = -O2 -I. -g -Wall -D_GNU_SOURCE -Wstrict-prototypes -DMESSAGE_WARNING -DMESSAGE_INFO
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
 LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl
 TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a do_wireconf 
-TOBJ=libnetlink.o #test.o iproute.o rtm_map.o
+TOBJ=libnetlink.o 
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-#TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o iplink.o tc_filter.o htb.o netem.o tbf.o m_action.o u32.o ingress.o
 TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o iplink.o filter.o htb.o netem.o tbf.o m_action.o u32.o ingress.o
-WCOBJ=q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
-#WCOBJ=q_tbf.o q_prio.o q_pfifo.o q_ingress.o m_action.o m_mirred.o
+WCOBJ=q_prio.o q_pfifo.o m_action.o m_mirred.o
 TESTOBJ=test.o
 endif
 
@@ -53,15 +38,6 @@ endif
 all: $(TARGETS)
 
 ifeq ($(UNAME), Linux)
-#f_u32.so: f_u32.c
-#	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
-#
-#m_action.so: m_action.c
-#	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
-#
-#m_mirred.so: m_mirred.c
-#	$(CC) $(CFLAGS) -DCONFIG_GACT -DCONFIG_GACT_PROB $(LDFLAGS) $(LDLIBS) -shared $< tc_core.o -o $@
-
 libnetlink.a: $(NLOBJ)
 	$(AR) rcs $@ $(NLOBJ) && ranlib $@
 
@@ -87,7 +63,6 @@ do_wireconf: do_wireconf.c routing_info.o libwireconf.a libtimer.a
 endif
 
 do_wireconf.o: do_wireconf.c
-
 routing_info.o: routing_info.c routing_info.h
 
 ifeq ($(UNAME), Linux)

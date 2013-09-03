@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -36,14 +15,16 @@
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 140 $
- *   $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: io.h 146 2013-06-20 00:50:48Z razvan $
  *
  ***********************************************************************/
 
 #ifndef __IO_H
 #define __IO_H
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
 
 #include "deltaQ.h"
 
@@ -60,40 +41,50 @@
 //////////////////////////////////
 
 // binary file header
-typedef struct
+struct binary_header_class
 {
   char signature[4];
   int major_version;
   int minor_version;
   int subminor_version;
   int svn_revision;
-  char reserved[4];
-  long int time_record_number;
-} binary_header_class;
+  //char reserved[4];
+  int interface_number;
+  int time_record_number;
+
+};
 
 // binary file time record
-typedef struct
+struct binary_time_record_class
 {
   float time;
   int record_number;
-} binary_time_record_class;
+};
 
-// binary file record
-// (only loss rate for now)
-typedef struct
+// binary file record holding most important fields
+// NOTE: update 'io_binary_print_record', 'io_binary_build_record', 
+// 'io_copy_record' and 'io_binary_compare_record' when making changes
+struct binary_record_class
 {
-  //float time;
-  int from_node;
-  int to_node;
+  int from_id;
+  int to_id;
+  float frame_error_rate;
+  float num_retransmissions;
+  int standard;
+  float operating_rate;
+  float bandwidth;
   float loss_rate;
-} binary_record_class;
+  float delay;
+  //float jitter; // not needed yet
+};
 
-typedef struct
+
+struct io_connection_state_class
 {
-  binary_time_record_class binary_time_record;
-  binary_record_class binary_records[MAX_CONNECTIONS];
+  struct binary_time_record_class binary_time_record;
+  struct binary_record_class binary_records[MAX_CONNECTIONS];
   int state_changed[MAX_CONNECTIONS];
-} io_connection_state_class;
+};
 
 
 ////////////////////////////////////////////////
@@ -101,109 +92,147 @@ typedef struct
 ////////////////////////////////////////////////
 
 // write the header of the file in which connection description will be stored
-void io_write_header_to_file(FILE *file_global, char *qomet_name);
+void io_write_header_to_file (FILE * file_global, char *qomet_name);
 
 // write connection description to file
-void io_write_to_file(connection_class *connection,
-		      scenario_class *scenario, double time, 
-		      int cartesian_coord_syst,
-		      FILE *file_global);
+void io_write_to_file (struct connection_class *connection,
+		       struct scenario_class *scenario, double time,
+		       int cartesian_coord_syst, FILE * file_global);
 
 // write header of motion file in NAM format;
 // return SUCCESS on succes, ERROR on error
-int io_write_nam_motion_header_to_file(scenario_class *scenario, 
-				       FILE *motion_file);
+int io_write_nam_motion_header_to_file (struct scenario_class *scenario,
+					FILE * motion_file);
 
 // write motion file information in NAM format;
 // return SUCCESS on succes, ERROR on error
-int io_write_nam_motion_info_to_file(scenario_class *scenario, 
-				     FILE *motion_file, float time);
+int io_write_nam_motion_info_to_file (struct scenario_class *scenario,
+				      FILE * motion_file, float time);
 
 // write header of motion file in NS-2 format;
 // return SUCCESS on succes, ERROR on error
-int io_write_ns2_motion_header_to_file(scenario_class *scenario, 
-				       FILE *motion_file);
+int io_write_ns2_motion_header_to_file (struct scenario_class *scenario,
+					FILE * motion_file);
 
 // write motion file information in NAM format;
 // return SUCCESS on succes, ERROR on error
-int io_write_ns2_motion_info_to_file(scenario_class *scenario, 
-				     FILE *motion_file, float time);
+int io_write_ns2_motion_info_to_file (struct scenario_class *scenario,
+				      FILE * motion_file, float time);
+
+// write objects to file;
+// return SUCCESS on succes, ERROR on error
+int io_write_objects (struct scenario_class *scenario,
+		      int cartesian_coord_syst, FILE * object_file);
+
+// generate the settings file based on scenario properties
+int io_write_settings_file (struct scenario_class *scenario,
+			    FILE * settings_file);
+
+// read the scenario settings (ids and corresponding IP adresses)
+// from a file, and store the adresses in the arrays p (binary) and 
+// p_char (string) at the corresponding index;
+// return the number of addresses (=interfaces) successfully read, 
+// or ERROR on error
+int io_read_settings_file (char *settings_filename,
+			   in_addr_t * p, char *p_char, int p_size);
+
+// read the MAC-level scenario settings (ids and corresponding MAC
+// adresses) from a file, and store the addresses in the array
+// 'mac_addresses' (binary form) at the corresponding index;
+// 'array_size' represents the number of entries allocated in the
+// 'mac_addresses' array;
+// return the number of addresses (=interfaces) successfully read, 
+// or ERROR on error
+int io_read_settings_file_mac (char *settings_filename,
+			       in_addr_t * p, char *p_char,
+			       unsigned char mac_addresses[][ETH_SIZE],
+			       char mac_char_addresses[][MAC_ADDR_SIZE],
+			       int array_size);
+
 
 ////////////////////////////////////////////////
 // Binary I/O functions
 ////////////////////////////////////////////////
 
 // print binary header
-void io_binary_print_header(binary_header_class *binary_header);
+void io_binary_print_header (struct binary_header_class *binary_header);
 
 // print binary time record
-void io_binary_print_time_record(binary_time_record_class *binary_time_record);
+void io_binary_print_time_record (struct binary_time_record_class
+				  *binary_time_record);
 
 // print binary record
-void io_binary_print_record(binary_record_class *binary_record);
+void io_binary_print_record (struct binary_record_class *binary_record);
+
+// copy binary record
+void io_binary_copy_record (struct binary_record_class *binary_record_dst,
+			    struct binary_record_class *binary_record_src);
 
 // build binary record
-void io_binary_build_record(binary_record_class *binary_record, 
-			    connection_class *connection,
-			    scenario_class *scenario);
+void io_binary_build_record (struct binary_record_class *binary_record,
+			     struct connection_class *connection,
+			     struct scenario_class *scenario);
 
 // compare with binary record;
 // return TRUE if data is same with the one in the record,
 // FALSE otherwise
-int io_binary_compare_record(binary_record_class *binary_record, 
-			     connection_class *connection,
-			     scenario_class *scenario);
+int io_binary_compare_record (struct binary_record_class *binary_record,
+			      struct connection_class *connection,
+			      struct scenario_class *scenario);
 
 // read header of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_read_binary_header_from_file(binary_header_class *binary_header,
-				    FILE *binary_input_file);
+int io_binary_read_header_from_file (struct binary_header_class
+				     *binary_header,
+				     FILE * binary_input_file);
 
 // write header of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_write_binary_header_to_file(long int time_record_number, 
-				   int major_version,
-				   int minor_version,
-				   int subminor_version,
-				   int svn_revision,
-				   FILE *binary_file);
+int io_binary_write_header_to_file (int interface_number,
+				    long int time_record_number,
+				    int major_version,
+				    int minor_version,
+				    int subminor_version,
+				    int svn_revision, FILE * binary_file);
 
 // read a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_read_binary_time_record_from_file(binary_time_record_class *
-					 binary_time_record,
-					 FILE *binary_input_file);
+int io_binary_read_time_record_from_file (struct binary_time_record_class
+					  *binary_time_record,
+					  FILE * binary_input_file);
 
 // write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_write_binary_time_record_to_file(float time, int record_number,
-					FILE *binary_file);
+int io_binary_write_time_record_to_file (float time, int record_number,
+					 FILE * binary_file);
 
 // directly write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_write_binary_time_record_to_file2(binary_time_record_class *
-					 binary_time_record, FILE *binary_file);
+int io_binary_write_time_record_to_file2 (struct binary_time_record_class
+					  *binary_time_record,
+					  FILE * binary_file);
 
 // read a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_read_binary_record_from_file(binary_record_class *binary_record,
-				    FILE *binary_input_file);
+int io_binary_read_record_from_file (struct binary_record_class
+				     *binary_record,
+				     FILE * binary_input_file);
 
 // read 'number_records' records from a QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_read_binary_records_from_file(binary_record_class *binary_records,
-				     int number_records,
-				     FILE *binary_input_file);
+int io_binary_read_records_from_file (struct binary_record_class
+				      *binary_records, int number_records,
+				      FILE * binary_input_file);
 
 // write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_write_binary_record_to_file(connection_class *connection,
-				   scenario_class *scenario,
-				   FILE *binary_file);
+int io_binary_write_record_to_file (struct connection_class *connection,
+				    struct scenario_class *scenario,
+				    FILE * binary_file);
 
 // directly write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_write_binary_record_to_file2(binary_record_class *binary_record,
-				    FILE *binary_file);
+int io_binary_write_record_to_file2 (struct binary_record_class
+				     *binary_record, FILE * binary_file);
 
 #endif

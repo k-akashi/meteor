@@ -1,0 +1,63 @@
+* Calculation for system bandwidth = 20.00 MHz (dl_symbols=35 ul_symbols=21)
+MCS =  2: PHY data rate [Mbps]: DL =  6.34  UL =  4.03
+MCS =  3: PHY data rate [Mbps]: DL =  9.50  UL =  6.05
+MCS =  4: PHY data rate [Mbps]: DL = 12.67  UL =  8.06
+MCS =  6: PHY data rate [Mbps]: DL = 19.01  UL = 12.10
+MCS =  7: PHY data rate [Mbps]: DL = 19.01  UL = 12.10
+MCS =  8: PHY data rate [Mbps]: DL = 25.34  UL = 16.13
+MCS =  9: PHY data rate [Mbps]: DL = 28.51  UL = 18.14
+MCS = 10: PHY data rate [Mbps]: DL = 31.68  UL = 20.16
+* Calculation for system bandwidth = 10.00 MHz (dl_symbols=35 ul_symbols=21)
+MCS =  2: PHY data rate [Mbps]: DL =  3.17  UL =  2.02
+MCS =  3: PHY data rate [Mbps]: DL =  4.75  UL =  3.02
+MCS =  4: PHY data rate [Mbps]: DL =  6.34  UL =  4.03
+MCS =  6: PHY data rate [Mbps]: DL =  9.50  UL =  6.05
+MCS =  7: PHY data rate [Mbps]: DL =  9.50  UL =  6.05
+MCS =  8: PHY data rate [Mbps]: DL = 12.67  UL =  8.06
+MCS =  9: PHY data rate [Mbps]: DL = 14.26  UL =  9.07
+MCS = 10: PHY data rate [Mbps]: DL = 15.84  UL = 10.08
+* Calculation for system bandwidth = 8.75 MHz (dl_symbols=30 ul_symbols=18)
+MCS =  2: PHY data rate [Mbps]: DL =  2.30  UL =  1.68
+MCS =  3: PHY data rate [Mbps]: DL =  3.46  UL =  2.52
+MCS =  4: PHY data rate [Mbps]: DL =  4.61  UL =  3.36
+MCS =  6: PHY data rate [Mbps]: DL =  6.91  UL =  5.04
+MCS =  7: PHY data rate [Mbps]: DL =  6.91  UL =  5.04
+MCS =  8: PHY data rate [Mbps]: DL =  9.22  UL =  6.72
+MCS =  9: PHY data rate [Mbps]: DL = 10.37  UL =  7.56
+MCS = 10: PHY data rate [Mbps]: DL = 11.52  UL =  8.40
+* Calculation for system bandwidth = 7.00 MHz (dl_symbols=24 ul_symbols=15)
+MCS =  2: PHY data rate [Mbps]: DL =  1.44  UL =  1.34
+MCS =  3: PHY data rate [Mbps]: DL =  2.16  UL =  2.02
+MCS =  4: PHY data rate [Mbps]: DL =  2.88  UL =  2.69
+MCS =  6: PHY data rate [Mbps]: DL =  4.32  UL =  4.03
+MCS =  7: PHY data rate [Mbps]: DL =  4.32  UL =  4.03
+MCS =  8: PHY data rate [Mbps]: DL =  5.76  UL =  5.38
+MCS =  9: PHY data rate [Mbps]: DL =  6.48  UL =  6.05
+MCS = 10: PHY data rate [Mbps]: DL =  7.20  UL =  6.72
+* Calculation for system bandwidth = 5.00 MHz (dl_symbols=35 ul_symbols=21)
+MCS =  2: PHY data rate [Mbps]: DL =  1.30  UL =  0.98
+MCS =  3: PHY data rate [Mbps]: DL =  1.94  UL =  1.47
+MCS =  4: PHY data rate [Mbps]: DL =  2.59  UL =  1.96
+MCS =  6: PHY data rate [Mbps]: DL =  3.89  UL =  2.94
+MCS =  7: PHY data rate [Mbps]: DL =  3.89  UL =  2.94
+MCS =  8: PHY data rate [Mbps]: DL =  5.18  UL =  3.92
+MCS =  9: PHY data rate [Mbps]: DL =  5.83  UL =  4.41
+MCS = 10: PHY data rate [Mbps]: DL =  6.48  UL =  4.90
+* Calculation for system bandwidth = 3.50 MHz (dl_symbols=24 ul_symbols=15)
+MCS =  2: PHY data rate [Mbps]: DL =  0.43  UL =  0.65
+MCS =  3: PHY data rate [Mbps]: DL =  0.65  UL =  0.98
+MCS =  4: PHY data rate [Mbps]: DL =  0.86  UL =  1.31
+MCS =  6: PHY data rate [Mbps]: DL =  1.30  UL =  1.96
+MCS =  7: PHY data rate [Mbps]: DL =  1.30  UL =  1.96
+MCS =  8: PHY data rate [Mbps]: DL =  1.73  UL =  2.61
+MCS =  9: PHY data rate [Mbps]: DL =  1.94  UL =  2.94
+MCS = 10: PHY data rate [Mbps]: DL =  2.16  UL =  3.26
+* Calculation for system bandwidth = 1.25 MHz (dl_symbols=35 ul_symbols=21)
+MCS =  2: PHY data rate [Mbps]: DL =  0.26  UL =  0.23
+MCS =  3: PHY data rate [Mbps]: DL =  0.39  UL =  0.35
+MCS =  4: PHY data rate [Mbps]: DL =  0.52  UL =  0.46
+MCS =  6: PHY data rate [Mbps]: DL =  0.78  UL =  0.69
+MCS =  7: PHY data rate [Mbps]: DL =  0.78  UL =  0.69
+MCS =  8: PHY data rate [Mbps]: DL =  1.04  UL =  0.92
+MCS =  9: PHY data rate [Mbps]: DL =  1.17  UL =  1.04
+MCS = 10: PHY data rate [Mbps]: DL =  1.30  UL =  1.15

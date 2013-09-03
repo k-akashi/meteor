@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -36,9 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 140 $
- *   $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: connection.h 146 2013-06-20 00:50:48Z razvan $
  *
  ***********************************************************************/
 
@@ -48,7 +25,7 @@
 
 
 #include "global.h"
-
+#include "fixed_deltaQ.h"
 
 //////////////////////////////////
 // Global variables
@@ -61,7 +38,7 @@ extern char *connection_standards[];
 // Connection structure definition
 ////////////////////////////////////////////////
 
-struct connection_class_s
+struct connection_class
 {
   // node from which the connection starts
   char from_node[MAX_STRING];
@@ -71,6 +48,17 @@ struct connection_class_s
   // an initial search for the defined node
   int from_node_index;
 
+  // interface from which the connection starts
+  char from_interface[MAX_STRING];
+
+  // from_interface index in 'node' structure;
+  // default value (0) can be replaced during 
+  // an initial search for the defined interface
+  int from_interface_index;
+
+  // global id of the sender
+  int from_id;
+
   // node to which the connection goes
   char to_node[MAX_STRING];
 
@@ -78,6 +66,17 @@ struct connection_class_s
   // default value (INVALID_INDEX) is replaced during 
   // an initial search for the defined node
   int to_node_index;
+
+  // interface to which the connection goes
+  char to_interface[MAX_STRING];
+
+  // to_interface index in 'node' structure;
+  // default value (0) can be replaced during 
+  // an initial search for the defined interface
+  int to_interface_index;
+
+  // global id of the receiver
+  int to_id;
 
   // environment through which the connection takes place
   char through_environment[MAX_STRING];
@@ -101,7 +100,7 @@ struct connection_class_s
   // of the current receiver by CSMA/CA mechanism
   int concurrent_stations;
 
-  // boolean value set to TRUE for 802.11g receviers 
+  // boolean value set to TRUE for 802.11g receivers 
   // if 802.11b stations are present in its neighbourhood,
   // case which requires operation in compatibility mode;
   // set to FALSE otherwise
@@ -130,6 +129,10 @@ struct connection_class_s
   // next operating rate after rate adaptation calculation
   int new_operating_rate;
 
+  // set to TRUE if operating rate is to be adaptive;
+  // FALSE otherwise
+  int adaptive_operating_rate;
+
   // average frame error rate
   double frame_error_rate;
 
@@ -155,6 +158,11 @@ struct connection_class_s
   // parameters were pre-defined
   int loss_rate_defined, delay_defined, jitter_defined, bandwidth_defined;
 
+  struct fixed_deltaQ_class fixed_deltaQs[MAX_FIXED_DELTAQ];
+  int fixed_deltaQ_number;
+  int fixed_deltaQ_crt;
+
+  //struct capacity_class wimax_capacity;
 };
 
 
@@ -164,38 +172,45 @@ struct connection_class_s
 
 // init a connection
 // return SUCCESS on succes, ERROR on error
-int connection_init(connection_class *connection, char *from_node, 
-		    char *to_node, char *through_environment, 
-		    int packet_size, int standard, int channel, 
-		    int RTS_CTS_threshold, int consider_interference);
+int connection_init (struct connection_class *connection, char *from_node,
+		     char *to_node, char *through_environment,
+		     int packet_size, int standard, int channel,
+		     int RTS_CTS_threshold, int consider_interference);
 
 // initialize all parameters related to a specific WLAN standard;
 // return SUCCESS on succes, ERROR on error
-int connection_init_standard(connection_class *connection, int standard);
+int connection_init_standard (struct connection_class *connection,
+			      int standard);
+
+// initialize all parameters related to the connection operating rate;
+// return SUCCESS on succes, ERROR on error
+int connection_init_operating_rate (struct connection_class *connection,
+				    int operating_rate);
 
 // initialize the local indexes for the from_node, to_node, and
 // through_environment of a connection;
 // return SUCCESS on succes, ERROR on error
-int connection_init_indexes(connection_class *connection, 
-			    scenario_class *scenario);
+int connection_init_indexes (struct connection_class *connection,
+			     struct scenario_class *scenario);
 
 // print the fields of a connection
-void connection_print(connection_class *connection);
+void connection_print (struct connection_class *connection);
 
 // copy the information in connection_src to connection_dest
-void connection_copy(connection_class *connection_dest, 
-		     connection_class * connection_src);
+void connection_copy (struct connection_class *connection_dest,
+		      struct connection_class *connection_src);
 
 // return the current operating rate of a connection
-double connection_operating_rate(connection_class *connection);
+double connection_get_operating_rate (struct connection_class *connection);
 
 // compute deltaQ parameters of a connection;
 // deltaQ parameters are returned in the corresponding fields of
 // the connection object and set the last argument to TRUE if any 
 // parameter values were changed, or FALSE otherwise;
 // return SUCCESS on succes, ERROR on error
-int connection_do_compute(connection_class *connection, 
-			  scenario_class *scenario, int *deltaQ_changed);
+int connection_do_compute (struct connection_class *connection,
+			   struct scenario_class *scenario,
+			   int *deltaQ_changed);
 
 // update the state and calculate all deltaQ parameters 
 // for the current connection;
@@ -203,8 +218,11 @@ int connection_do_compute(connection_class *connection,
 // the connection objects and the last argument is set to TRUE if 
 // any parameter values were changed, or to FALSE otherwise;
 // return SUCCESS on succes, ERROR on error
-int connection_deltaQ(connection_class *connection, scenario_class *scenario,
-		      int *deltaQ_changed);
+int connection_deltaQ (struct connection_class *connection,
+		       struct scenario_class *scenario, int *deltaQ_changed);
+
+struct fixed_deltaQ_class *connection_add_fixed_deltaQ
+  (struct connection_class *connection,
+   struct fixed_deltaQ_class *fixed_deltaQ);
 
 #endif
-

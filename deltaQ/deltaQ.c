@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -32,367 +11,1118 @@
  * QOMET Emulator Implementation
  *
  * File name: deltaQ.c
- * Function: Main source file of the deltaQ computation library
+ * Function: Main source file of the deltaQ program that uses the deltaQ
+ *           library to compute the communication conditions between
+ *           emulated nodes
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 140 $
- *   $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: deltaQ.c 146 2013-06-20 00:50:48Z razvan $
  *
  ***********************************************************************/
 
+
 #include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include <string.h>
-#include <stdarg.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <math.h>
+#include <getopt.h>
+#include <errno.h>
+#include <limits.h>
+#include <string.h>
+#include <time.h>
 
-#include "deltaQ.h"
-#include "motion.h"
-
+#include "deltaQ.h"		// include file of deltaQ library
 #include "message.h"
-#include "scenario.h"
-#include "wlan.h"
-#include "ethernet.h"
-#include "active_tag.h"
-#include "zigbee.h"
+
+//#define DISABLE_EMPTY_TIME_RECORDS
 
 
-///////////////////////////////////////////////////////////////////////
-// XML scenario structure functions
-// Note: actually defined in scenario.c, but included in deltaQ.h 
-// so that they are available for users only including this header file
-///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// Various constants
+///////////////////////////////////////////////////////////
 
-// parse scenario file and store results in scenario object
-// return 0 if no error occured, non-0 values otherwise
-//int xml_scenario_parse(FILE *scenario_file, 
-//		       xml_scenario_class *xml_scenario);
-
-// print the main properties of an XML scenario
-//void xml_scenario_print(xml_scenario_class *xml_scenario);
+// type of motion output
+#define MOTION_OUTPUT_NAM         0
+#define MOTION_OUTPUT_NS2         1
 
 
-///////////////////////////////////////////////////////////////////////
-// Geodesy functions
-///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// Constants used to add artificial noise;
+// currently only used for specific experimental purposes;
+// may become configurable at user level in future versions
+///////////////////////////////////////////////////////////
 
-/*
-   The code below is based on the Matlab files blh2xyz.m and xyz2blh.m
-   from Leibniz Supercomputing Center:
-     http://www.lrz-muenchen.de/~t5712ap/webserver/webdata/de/lehre/uebungsmaterial/blh2xyz.m
-     http://www.lrz-muenchen.de/~t5712ap/webserver/webdata/de/lehre/uebungsmaterial/xyz2blh.m
+// Uncomment the line to enable noise addition
+//#define ADD_NOISE
 
-   Razvan did some evaluations by comparing the results with those of a 
-   website-based conversion and found that difference are of the order of 
-   centimeters, therefore can be ignored. The website is available at:
-     http://vldb.gsi.go.jp/sokuchi/surveycalc/transf.html
+#ifdef ADD_NOISE
 
-   Razvan decided to use WGS84 data, since it seems to be widely accepted as
-   the latest data for GIS systems.
+#define NOISE_DEFAULT   -95	// default noise level
+#define NOISE_START1     30	// start time for first noise source
+#define NOISE_STOP1      90	// stop time for first noise source
+#define NOISE_LEVEL1    -50	// level of first noise source
 
-   The formulas used are taken from "GPS in der Praxis" by 
-   Hofmann-Wellenhof et al.(1994)
+#define NOISE_START2    150	// start time for second noise source
+#define NOISE_STOP2     210	// stop time for second noise source
+#define NOISE_LEVEL2    -60	// level of first second source
 
-   x, y, z coordinates are given in meters.
-   Latitude and longitude are given in decimal notation (e.g., 33.3319193487).
+#endif
 
-   No negative heights are allowed.
 
-   Note that these functions can be used for a 3D model of earth, but not 
-   for calculating map coordinates, our main interest. For this purpose the 
-   functions ll2xy and xy2ll should be used (see below).
+///////////////////////////////////////////////////////////
+// Constant used to activate the auto-connect feature
+// (currently only used for active tags)
+// PROBABLY SHOULD BE REMOVED??????????
+///////////////////////////////////////////////////////////
 
-*/
+//#define AUTO_CONNECT_ACTIVE_TAGS
 
-// compute x, y, z coordinates from latitude, longitude and height;
-// input data is in point_blh, output data in point_xyz;
-// algorithm verified with "A guide to coordinate systems in Great Britain",
-// Annex B, pp. 41:
-//   http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
-// return SUCCESS on success, ERROR on error
-int blh2xyz(const coordinate_class *point_blh, coordinate_class *point_xyz)
+
+///////////////////////////////////
+// Generic variables and functions
+///////////////////////////////////
+
+// structure holding the names of long options and their 
+// short version; when updating also change the 'short_options' 
+// structure below
+static struct option long_options[] = {
+  {"help", 0, 0, 'h'},
+  {"version", 0, 0, 'v'},
+  {"license", 0, 0, 'l'},
+
+  {"text-only", 0, 0, 't'},
+  {"binary-only", 0, 0, 'b'},
+  {"no-deltaQ", 0, 0, 'n'},
+  {"motion-nam", 0, 0, 'm'},
+  {"motion-ns", 0, 0, 's'},
+  {"object", 0, 0, 'j'},
+  {"output", 1, 0, 'o'},
+
+  {"disable-deltaQ", 0, 0, 'd'},
+
+  {0, 0, 0, 0}
+};
+
+// structure holding name of short options; 
+// should match the 'long_options' structure above 
+static char *short_options = "hvltbnmsjo:d";
+
+
+// print license info
+static void
+license (FILE * f)
 {
-  double latitude, longitude; // coordinates in radians
-  double a, f, b;             // geoid parameters
+  fprintf
+    (f,
+     "Copyright (c) 2006-2013 The StarBED Project  All rights reserved.\n"
+     "\n"
+     "Redistribution and use in source and binary forms, with or without\n"
+     "modification, are permitted provided that the following conditions\n"
+     "are met:\n"
+     "1. Redistributions of source code must retain the above copyright\n"
+     "   notice, this list of conditions and the following disclaimer.\n"
+     "2. Redistributions in binary form must reproduce the above copyright\n"
+     "   notice, this list of conditions and the following disclaimer in the\n"
+     "   documentation and/or other materials provided with the distribution.\n"
+     "3. Neither the name of the project nor the names of its contributors\n"
+     "   may be used to endorse or promote products derived from this software\n"
+     "   without specific prior written permission.\n"
+     "\n"
+     "THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS \"AS IS\" AND\n"
+     "ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n"
+     "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n"
+     "ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE\n"
+     "FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n"
+     "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS\n"
+     "OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)\n"
+     "HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT\n"
+     "LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY\n"
+     "OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF\n"
+     "SUCH DAMAGE.\n\n");
+}
 
-  double e_square;
-  double n;
+// print usage info
+static void
+usage (FILE * f)
+{
+  fprintf (f, "\nUsage: deltaQ [options] <scenario_file.xml>\n");
+  fprintf (f, "General options:\n");
+  fprintf (f, " -h, --help             - print this help message and exit\n");
+  fprintf (f,
+	   " -v, --version          - print version information and exit\n");
+  fprintf (f,
+	   " -l, --license          - print license information and exit\n");
+  fprintf (f, "Output control:\n");
+  fprintf (f, " -t, --text-only        - enable ONLY text deltaQ output \
+(no binary output)\n");
+  fprintf (f, " -b, --binary-only      - enable ONLY binary deltaQ output \
+(no text output)\n");
+  fprintf (f, " -n, --no-deltaQ        - NO text NOR binary deltaQ output \
+will be written\n");
+  fprintf (f, " -m, --motion-nam       - enable output of motion data \
+in NAM format\n");
+  fprintf (f, " -s, --motion-ns        - enable output of motion data \
+in NS-2 format\n");
+  fprintf (f, " -j, --object           - enable output of object data\n");
+  fprintf (f, " -o, --output <base>    - use <base> as base for generating \
+output files,\n");
+  fprintf (f, "                          instead of the input file name\n");
+  fprintf (f, "Computation control:\n");
+  fprintf (f, " -d, --disable-deltaQ   - disable deltaQ computation \
+(output still generated)\n");
+  fprintf (f, "\n");
+  fprintf (f, "See the documentation for more usage details.\n");
+  fprintf (f, "Please send any comments or bug reports to \
+'info@starbed.org'.\n\n");
+}
 
-  // check whether negative height was provided
-  if(point_blh->c[2]<0)
+long int
+parse_svn_revision (char *svn_revision_str)
+{
+  /* According to svnversion version 1.4.2 (r22196) 
+     this is the expected output:
+
+     The version number will be a single number if the working
+     copy is single revision, unmodified, not switched and with
+     an URL that matches the TRAIL_URL argument.  If the working
+     copy is unusual the version number will be more complex:
+
+     4123:4168     mixed revision working copy  [=> use most recent (highest) number]
+     4168M         modified working copy        [=> use number part]
+     4123S         switched working copy        [=> use number part]
+     4123:4168MS   mixed revision, modified, switched working copy [=> use most recent (highest) number part]
+
+   */
+
+  char *end_ptr, *next_ptr;
+  long int return_value, backup_value;
+
+  errno = 0;
+  return_value = strtol (svn_revision_str, &end_ptr, 10);
+
+  if ((errno == ERANGE &&
+       (return_value == LONG_MAX || return_value == LONG_MIN))
+      || (errno != 0 && return_value == 0))
     {
-      WARNING("Cannot process negative heights in latitude longitude \
-to xyz conversion");
+      WARNING ("Could not parse integer.");
+      perror ("strtol");
       return ERROR;
     }
 
-  // transfor latitude and longitude from decimal degrees to radians
-  latitude = point_blh->c[0]/(180/M_PI);
-  longitude = point_blh->c[1]/(180/M_PI);
-
-  // initialize geoid parameters
-  a = GEOID_A;
-  f = GEOID_F;
-  b = (1-f)*a;
-
-  // compute intermediate values
-  e_square = (pow(a,2)-pow(b,2))/pow(a,2);
-  n = a/sqrt(1-e_square*pow(sin(latitude),2));
-
-  // compute x,y,z coordinates
-  point_xyz->c[0] = (n+point_blh->c[2]) * cos(latitude) * cos(longitude);
-  point_xyz->c[1] = (n+point_blh->c[2]) * cos(latitude) * sin(longitude);
-  point_xyz->c[2] = (n*(1-e_square) + point_blh->c[2]) * sin(latitude);
-
-  return SUCCESS;
-}
-
-// compute latitude, longitude and height from x, y, z coordinates;
-// input data is in point_xyz, output data in point_blh;
-// algorithm is different than  the one given in "A guide to coordinate 
-// systems in Great Britain", Annex B, pp. 41:
-//   http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
-// return SUCCESS on success, ERROR on error
-int xyz2blh(const coordinate_class *point_xyz, coordinate_class *point_blh)
-{
-  double latitude, longitude; // coordinates in radians
-  double a, f, b;             // geoid parameters
-
-  double e1q, e2q;
-  double p, t, n;
-
-  if(point_xyz->c[2]<0)
+  if (end_ptr == svn_revision_str)
     {
-      WARNING("Cannot process negative heights in xyz to latitude longitude \
-height conversion");
+      WARNING ("No digits were found");
       return ERROR;
     }
 
-  // initialize geoid parameters
-  a = GEOID_A;
-  f = GEOID_F;
-  b = (1-f)*a;
+  // if we got here, strtol() successfully parsed a number
 
-  // compute intermediate values
-  e1q = (pow(a,2)-pow(b,2))/pow(a,2);
-  e2q = (pow(a,2)-pow(b,2))/pow(b,2);
+  DEBUG ("Function strtol() returned %ld.", return_value);
 
-  p = sqrt(pow(point_xyz->c[0],2)+pow(point_xyz->c[1],2));
-  t = atan(point_xyz->c[2]*a/(p*b));
-
-  // compute latitude and longitude
-  latitude = atan((point_xyz->c[2] + e2q*b*pow(sin(t),3))/
-		  (p - e1q*a*pow(cos(t),3)));
-  longitude = atan2(point_xyz->c[1], point_xyz->c[0]);
-
-  // compute intermediate value needed for height calculation
-  n = a/sqrt(1 - e1q*pow(sin(latitude),2));
-
-  // compute results
-  point_blh->c[0] = latitude * (180/M_PI);
-  point_blh->c[1] = longitude * (180/M_PI);
-  point_blh->c[2] = p/cos(latitude) - n;
-
-  return SUCCESS;
-}
-
-/* The functions below are based on Visual Basic code provided with
-   "A guide to coordinate systems in Great Britain", as well as on 
-   the formulas given in Annex B, pp. 43-45:
-     http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
-
-   Razvan checked the results with the website:
-     http://vldb.gsi.go.jp/sokuchi/surveycalc/bl2xyf.html
-   and found they don't excees a few centimeters when using world model
-*/
-
-// compute the meridional arc given the ellipsoid semi major axis
-// multiplied by central meridian scale factor 'bF0' in meters,
-// intermediate value 'n' (computed from a, b and F0), latitude of
-// false origin 'phi0_rad' and initial or final latitude of point 
-// 'phi_rad' in radians; 
-// returns the meridional arc
-double meridional_arc(double bF0, double n, double phi0_rad, double phi_rad)
-{
-  return bF0 *
-    (((1 + n + (5.0/4.0)*pow(n,2) + (5.0/4.0)*pow(n,3)) * 
-      (phi_rad - phi0_rad)) - 
-     ((3*n + 3*pow(n,2) + (21.0/8.0) * pow(n,3)) * 
-      sin(phi_rad - phi0_rad) * cos(phi_rad + phi0_rad)) + 
-     (((15.0/8.0)*pow(n,2) + (15.0/8.0)*pow(n,3)) * 
-      sin(2*(phi_rad - phi0_rad)) * cos(2*(phi_rad + phi0_rad))) - 
-     ((35.0/24.0)*pow(n,3) * sin(3*(phi_rad-phi0_rad)) * 
-      cos(3*(phi_rad + phi0_rad))));
-}
-
-
-// convert latitude & longitude coordinates to easting & northing 
-// (xy map coordinates);
-// height/z parameter is copied;
-// input data is in point_blh, output data in point_xyz
-void ll2en(coordinate_class  *point_blh, coordinate_class *point_xyz)
-{
-  double E0 = GEOID_COORD_E0;          // easting of true origin
-  double N0 = GEOID_COORD_N0;          // northing of true origin
-  double F0 = GEOID_COORD_F0;          // scale factor of central meridian (m0)
-  double phi0 = GEOID_COORD_PHI0;      // latitude of true origin
-  double phi0_rad = phi0*(M_PI/180);
-  double lambda0 = GEOID_COORD_LAMBDA0;// longitude of true origin and 
-                                       // central meridian
-  double lambda0_rad = lambda0*(M_PI/180);
-
-  double a = GEOID_A;          // semi-major axis length
-  double f = GEOID_F;          // reciprocal of flattening
-  double b = (1-f)*a;          // semi-minor axis length
-  double aF0 = a*F0;
-  double bF0 = b*F0;
-
-  double phi = point_blh->c[0];          // latitude
-  double lambda = point_blh->c[1];       // longitude
-  double phi_rad = phi*(M_PI/180);       // latitude in radians
-  double lambda_rad = lambda*(M_PI/180); // longitude in radians
-
-  double e_squared = (pow(aF0,2)-pow(bF0,2))/pow(aF0,2);
-
-  double n = (aF0-bF0)/(aF0+bF0);// why not (a-b)/(a+b)?????
-  double nu = aF0/sqrt(1 - (e_squared*pow(sin(phi_rad),2)));
-  double rho = (nu*(1 - e_squared))/(1 - (e_squared*pow(sin(phi_rad),2)));
-  double eta_squared = (nu/rho)-1;
-  double delta_lambda_rad = lambda_rad-lambda0_rad;
-  double M = meridional_arc(bF0, n, phi0_rad, phi_rad);
-
-  double I = M + N0;
-  double II = (nu / 2) * sin(phi_rad) * cos(phi_rad);
-  double III = (nu / 24) * sin(phi_rad) * pow(cos(phi_rad),3) * 
-    (5 - pow(tan(phi_rad),2) + (9 * eta_squared));//???
-  double IIIA = (nu / 720) * sin(phi_rad) * pow(cos(phi_rad),5) * 
-    (61 - (58 * pow(tan(phi_rad),2)) + pow(tan(phi_rad),4));
-  double IV = nu * cos(phi_rad);
-  double V = (nu / 6) * pow(cos(phi_rad),3)*((nu / rho)-pow(tan(phi_rad),2));
-  double VI = (nu / 120) * pow(cos(phi_rad),5) * 
-    (5 - (18*pow(tan(phi_rad),2)) + pow(tan(phi_rad),4) + (14*eta_squared) -
-     (58 * pow(tan(phi_rad),2) * eta_squared));
-
-  DEBUG("phi=%.8e lambda=%.8e phi_rad=%.8e lambda_rad=%.8e phi0_rad=%.8e \
-lambda0_rad=%.8e aF0=%.8e bF0=%.8e", phi, lambda, phi_rad, lambda_rad, 
-	phi0_rad, lambda0_rad, aF0, bF0);
-
-  DEBUG("e2=%.8e n=%.8e nu=%.8e rho=%.8e eta2=%.8e dl=%.8e M=%.8e I=%.8e \
-II=%.8e III=%.8e IIIA=%.8e IV=%.8e V=%.8e VI=%.8e", e_squared, n, nu, rho, 
-	eta_squared, delta_lambda_rad, M, I, II, III, IIIA, IV, V, VI);
-
-  // compute x,y
-  point_xyz->c[0] = E0 + (IV * delta_lambda_rad) + 
-    (V * pow(delta_lambda_rad,3)) +
-    (VI * pow(delta_lambda_rad,5));
-  point_xyz->c[1] = I + (II * pow(delta_lambda_rad,2)) + 
-    (III * pow(delta_lambda_rad,4)) + (IIIA * pow(delta_lambda_rad,6));
-
-  // copy height
-  point_xyz->c[2] = point_blh->c[2];
-}
-
-// compute initial value of latitude given the northing of point 'North' 
-// and northing of false origin 'n0' in meters, semi major axis multiplied 
-// by central meridian scale factor 'aF0' in meters, latitude of false origin 
-// 'phi0' in radians, intermediate value 'n' (computed from a, b and f0) and
-// ellipsoid semi major axis multiplied by central meridian scale factor 'bf0'
-// in meters;
-// returns the initial value of latitude
-double initial_latitude(double North, double n0, double aF0, double phi0,
-			double n, double bF0)
-{
-  double phi1 = ((North - n0) / aF0) + phi0;
-  double M = meridional_arc(bF0, n, phi0, phi1);
-  double phi2 = ((North - n0 - M) / aF0) + phi1;
-  
-  int count=0; // count number of iterations
-
-  while(fabs(North - n0 - M) > 0.00001)
+  if (*end_ptr != '\0')		// not necessarily an error...
     {
-      phi2 = ((North - n0 - M) / aF0) + phi1;
-      M = meridional_arc(bF0, n, phi0, phi2);
-      phi1 = phi2;
-      count++;
+      DEBUG ("Further characters after number: '%s'", end_ptr);
 
-      // if too many iterations are performed, abort
-      // (the value of phi2 at that moment will be returned)
-      if(count>10000)
+      // if ':' appeared, it means we must parse the next number, 
+      // otherwise we ignore what follows
+      if (*end_ptr == ':')
 	{
-	  WARNING("Too many iterations. Aborting");
-	  break;
+	  next_ptr = end_ptr + 1;
+	  backup_value = return_value;
+
+	  errno = 0;
+	  return_value = strtol (next_ptr, &end_ptr, 10);
+
+	  if ((errno == ERANGE &&
+	       (return_value == LONG_MAX || return_value == LONG_MIN))
+	      || (errno != 0 && return_value == 0))
+	    {
+	      perror ("strtol");
+	      return ERROR;
+	    }
+
+	  if (end_ptr == next_ptr)
+	    {
+	      WARNING ("No digits were found");
+	      return_value = backup_value;
+	      printf ("restoring %ld\n", return_value);
+	    }
+	  else
+	    DEBUG ("Function strtol() returned %ld", return_value);
+
+	  if (*end_ptr != '\0')	// not necessarily an error...
+	    ;
 	}
     }
-    
-  return phi2;
+
+  return return_value;
 }
 
-// convert easting & northing (xy map coordinates) to 
-// latitude & longitude;
-// height/z parameter is copied;
-// input data is in point_blh, output data in point_xyz
-void en2ll(coordinate_class  *point_xyz, coordinate_class *point_blh)
+
+///////////////////////////////////////////////////
+// main function
+///////////////////////////////////////////////////
+
+int
+main (int argc, char *argv[])
 {
-  double E0 = GEOID_COORD_E0;          // easting of true origin
-  double N0 = GEOID_COORD_N0;          // northing of true origin
-  double F0 = GEOID_COORD_F0;          // scale factor of central meridian (m0)
-  double phi0 = GEOID_COORD_PHI0;      // latitude of true origin
-  double phi0_rad = phi0*(M_PI/180);
-  double lambda0 = GEOID_COORD_LAMBDA0;// longitude of true origin and 
-                                       // central meridian
-  double lambda0_rad = lambda0*(M_PI/180);
+  int error_status = SUCCESS;
 
-  double a = GEOID_A;          // semi-major axis length
-  double f = GEOID_F;          // reciprocal of flattening
-  double b = (1-f)*a;          // semi-minor axis length
-  double aF0 = a*F0;
-  double bF0 = b*F0;
+  // xml scenario object
+  struct xml_scenario_class *xml_scenario = NULL;
 
-  double e_squared = (pow(aF0,2)-pow(bF0,2))/pow(aF0,2);
+  // helper scenario object used temporarily
+  struct scenario_class *scenario;
 
-  double n = (aF0-bF0)/(aF0+bF0);   // why not (a-b)/(a+b)?????
+  // current time during scenario
+  double current_time;
+  long int time_record_number = 0;
 
-  double East  = point_xyz->c[0];   // easting
-  double North = point_xyz->c[1];   // northing
-  double Et = East - E0;
+  // various indexes for scenario elements
+#ifdef MESSAGE_DEBUG
+  int node_i, environment_i, object_i;
+#endif
+  int motion_i, connection_i;
 
-  double phi_d = initial_latitude(North, N0, aF0, phi0_rad, n, bF0);
+  // keep track whether any valid motion was found
+  int motion_found;
 
-  double nu = aF0/sqrt(1 - (e_squared*pow(sin(phi_d),2)));
-  double rho = (nu * (1-e_squared))/(1 - (e_squared*pow(sin(phi_d),2)));
-  double eta_squared = (nu/rho)-1;
+  // file pointers
+  FILE *scenario_file = NULL;	// scenario file pointer
+  FILE *text_output_file = NULL;	// text output file pointer
+  FILE *binary_output_file = NULL;	// binary output file pointer
+  FILE *motion_file = NULL;	// motion file pointer
+  FILE *object_output_file = NULL;	// object output file pointer
 
-  //compute latitude params
-  double VII = tan(phi_d) / (2*rho*nu);
-  double VIII = (tan(phi_d) / (24*rho*pow(nu,3))) * 
-    (5 + (3 * (pow(tan(phi_d),2))) + eta_squared - 
-     (9 * eta_squared * (pow(tan(phi_d),2))));
-  double IX = (tan(phi_d) / (720*rho*pow(nu,5))) * 
-    (61 + (90 * (pow(tan(phi_d),2))) + (45 * (pow(tan(phi_d),4))));
-    
-  //compute longitude params
-  double X = pow(cos(phi_d),-1) / nu;
-  double XI = (pow(cos(phi_d),-1) / (6 * pow(nu,3))) * 
-    ((nu / rho) + 2*pow(tan(phi_d),2));
-  double XII = ((pow(cos(phi_d),-1) / (120 * pow(nu,5)))) * 
-    (5 + (28 * pow(tan(phi_d),2)) + (24*pow(tan(phi_d),4)));
-  double XIIA = (pow(cos(phi_d),-1) / (5040 * pow(nu,7))) * 
-    (61 + (662 * (pow(tan(phi_d),2))) + (1320 * (pow(tan(phi_d),4))) + 
-     (720 * (pow(tan(phi_d),6))));
+  FILE *settings_file = NULL;	// settings file pointer
 
-  // latitude
-  point_blh->c[0] = (180 / M_PI) * 
-    (phi_d - (pow(Et,2)*VII) + (pow(Et,4)*VIII) - (pow(Et,6)*IX));
+  // file name related strings
+  char scenario_filename[MAX_STRING];
+  char text_output_filename[MAX_STRING];
+  char binary_output_filename[MAX_STRING];
+  char motion_filename[MAX_STRING];
+  char settings_filename[MAX_STRING];
+  char object_output_filename[MAX_STRING];
 
-  // longitude
-  point_blh->c[1] = (180 / M_PI) * 
-    (lambda0_rad + (Et*X) - (pow(Et,3)*XI) + (pow(Et,5)*XII) - 
-     (pow(Et,7)*XIIA));
+  // revision related variables
+  long int svn_revision;
+  char svn_revision_str[MAX_STRING];
+  char qomet_name[MAX_STRING];
+  char c;
 
-  // altitude
-  point_blh->c[2] = point_xyz->c[2];
+  // output control variables
+  int motion_output_enabled;
+  int motion_output_type;
+  int text_output_enabled;
+  int binary_output_enabled;
+  int text_only_enabled;
+  int binary_only_enabled;
+  int no_deltaQ_enabled;
+  int object_output_enabled;
+
+  char output_filename_base[MAX_STRING];
+  int output_filename_provided;
+
+  // computation control variables
+  int deltaQ_disabled;
+
+  struct io_connection_state_class io_connection_state;
+
+  int divider_i;
+  double motion_step, motion_current_time;
+
+
+  ////////////////////////////////////////////////////////////
+  // initialization
+
+#ifndef SVN_REVISION
+  DEBUG ("SVN_REVISION not defined.");
+  svn_revision = ERROR;
+#else
+  if ((strcmp (SVN_REVISION, "exported") == 0)
+      || (strlen (SVN_REVISION) == 0))
+    {
+      DEBUG ("SVN_REVISION defined but equal to 'exported' or ''.");
+      svn_revision = ERROR;
+    }
+  else
+    {
+      DEBUG ("SVN_REVISION defined.");
+      svn_revision = parse_svn_revision (SVN_REVISION);
+    }
+#endif
+
+  if (svn_revision == ERROR)
+    {
+      WARNING ("Could not identify revision number.");
+      sprintf (svn_revision_str, "N/A");
+    }
+  else
+    sprintf (svn_revision_str, "%ld", svn_revision);
+
+  snprintf (qomet_name, MAX_STRING,
+	    "QOMET v%d.%d.%d %s- deltaQ (revision %s)", MAJOR_VERSION,
+	    MINOR_VERSION, SUBMINOR_VERSION, (IS_BETA == TRUE) ? "beta " : "",
+	    svn_revision_str);
+
+
+  ////////////////////////////////////////////////////////////
+  // option parsing
+
+  // uncomment the following line to disable 
+  // option parsing error printing
+  //opterr = 0;
+
+  // default values for output
+  text_output_enabled = TRUE;
+  binary_output_enabled = TRUE;
+  motion_output_enabled = FALSE;
+  motion_output_type = MOTION_OUTPUT_NAM;
+  output_filename_provided = FALSE;
+
+  // option values initialization
+  text_only_enabled = FALSE;
+  binary_only_enabled = FALSE;
+  no_deltaQ_enabled = FALSE;
+  deltaQ_disabled = FALSE;
+  object_output_enabled = FALSE;
+
+  // parse options
+  while ((c = getopt_long (argc, argv, short_options,
+			   long_options, NULL)) != -1)
+    {
+      switch (c)
+	{
+	  // generic options
+	case 'h':
+	  printf ("\n%s: A versatile wireless network emulator.\n",
+		  qomet_name);
+	  usage (stdout);
+	  exit (0);
+	case 'v':
+	  printf ("\n%s.  Copyright (c) 2006-2013 The StarBED Project.\n\n",
+		  qomet_name);
+	  exit (0);
+	case 'l':
+	  printf ("\n%s.\n", qomet_name);
+	  license (stdout);
+	  exit (0);
+
+	  // output control
+	case 't':
+	  text_only_enabled = TRUE;
+	  break;
+	case 'b':
+	  binary_only_enabled = TRUE;
+	  break;
+	case 'n':
+	  no_deltaQ_enabled = TRUE;
+	  break;
+	case 'm':
+	  // check whether motion output has already been enabled
+	  if (motion_output_enabled == TRUE)
+	    {
+	      WARNING
+		("Multiple arguments related to motion output detected.");
+	      WARNING ("Note that arguments '-m' and '-s' are mutually \
+exclusive.");
+	      usage (stdout);
+	      exit (1);
+	    }
+	  else
+	    {
+	      motion_output_enabled = TRUE;
+	      motion_output_type = MOTION_OUTPUT_NAM;
+	    }
+	  break;
+	case 's':
+	  // check whether motion output has already been enabled
+	  if (motion_output_enabled == TRUE)
+	    {
+	      WARNING
+		("Multiple arguments related to motion output detected.");
+	      WARNING ("Note that arguments '-m' and '-s' are mutually \
+exclusive.");
+	      usage (stdout);
+	      exit (1);
+	    }
+	  else
+	    {
+	      motion_output_enabled = TRUE;
+	      motion_output_type = MOTION_OUTPUT_NS2;
+	    }
+	  break;
+	case 'j':
+	  object_output_enabled = TRUE;
+	  break;
+	case 'o':
+	  output_filename_provided = TRUE;
+	  strncpy (output_filename_base, optarg, MAX_STRING - 1);
+	  break;
+
+	  // computation control
+	case 'd':
+	  deltaQ_disabled = TRUE;
+	  break;
+
+	  // unknown options
+	case '?':
+	  printf ("Try --help for more info\n");
+	  exit (1);
+	default:
+	  WARNING ("Unimplemented option -- %c", c);
+	  WARNING ("Try --help for more info");
+	  exit (1);
+	}
+    }
+
+  if ((text_only_enabled == TRUE && binary_only_enabled == TRUE) ||
+      (text_only_enabled == TRUE && no_deltaQ_enabled == TRUE) ||
+      (binary_only_enabled == TRUE && no_deltaQ_enabled == TRUE))
+    {
+      WARNING ("The output control options 'text-only', 'binary-only', and \
+'no-deltaQ' are mutually exclusive and cannot be used together!");
+      usage (stdout);
+      exit (1);
+    }
+
+  // check if text-only output is enabled
+  if (text_only_enabled == TRUE)
+    {
+      text_output_enabled = TRUE;
+      binary_output_enabled = FALSE;
+    }
+  // check if binary-only output is enabled
+  else if (binary_only_enabled == TRUE)
+    {
+      text_output_enabled = FALSE;
+      binary_output_enabled = TRUE;
+    }
+  // check if no-deltaQ output is enabled
+  else if (no_deltaQ_enabled == TRUE)
+    {
+      text_output_enabled = FALSE;
+      binary_output_enabled = FALSE;
+    }
+
+  // optind represents the index where option parsing stopped
+  // and where non-option arguments parsing can start;
+  // check whether non-option arguments are present
+  if (argc == optind)
+    {
+      WARNING ("No scenario configuration file was provided.");
+      printf ("\n%s: A versatile wireless network emulator.\n", qomet_name);
+      usage (stdout);
+      exit (1);
+    }
+
+
+  ////////////////////////////////////////////////////////////
+  // more initialization
+
+  INFO ("\n-- Wireless network emulator %s --", qomet_name);
+  INFO ("Starting...");
+
+#ifdef ADD_NOISE
+  fprintf (stderr, "Noise will be added to your experiment!\n");
+  fprintf (stderr, "Press <Return> to continue...\n");
+  getchar ();
+#endif
+
+
+  // try to allocate the xml_scenario object
+  xml_scenario =
+    (struct xml_scenario_class *) malloc (sizeof (struct xml_scenario_class));
+
+  if (xml_scenario == NULL)
+    {
+      WARNING
+	("Cannot allocate memory (tried %zd bytes); you may need to reduce \
+maximum scenario size by editing the maximum data sizes constants in the \
+file 'deltaQ/scenario.h' (MAX_NODES, MAX_OBJECTS, MAX_ENVIRONMENTS, \
+MAX_MOTIONS and MAX_CONNECTIONS)", sizeof (struct xml_scenario_class));
+      goto ERROR_HANDLE;
+    }
+  else
+    DEBUG ("Allocated %.2f MB (%zd bytes) for internal scenario storage.",
+	   sizeof (struct xml_scenario_class) / 1048576.0,
+	   sizeof (struct xml_scenario_class));
+
+  // initialize the scenario object
+  scenario_init (&(xml_scenario->scenario));
+
+
+  ////////////////////////////////////////////////////////////
+  // scenario parsing phase
+
+  INFO ("\n-- QOMET Emulator: Scenario Parsing --\n");
+
+  if (strlen (argv[optind]) > MAX_STRING)
+    {
+      WARNING ("Input file name '%s' longer than %d characters!",
+	       argv[optind], MAX_STRING);
+      goto ERROR_HANDLE;
+    }
+  else
+    strncpy (scenario_filename, argv[optind], MAX_STRING - 1);
+
+  // set the output filename base to the scenario filename
+  // if no output filename base was provided
+  if (output_filename_provided == FALSE)
+    strncpy (output_filename_base, scenario_filename, MAX_STRING - 1);
+
+  // open scenario file
+  scenario_file = fopen (scenario_filename, "r");
+  if (scenario_file == NULL)
+    {
+      WARNING ("Cannot open scenario file '%s'!", scenario_filename);
+      goto ERROR_HANDLE;
+    }
+
+  // parse scenario file
+  if (xml_scenario_parse (scenario_file, xml_scenario) == ERROR)
+    {
+      WARNING ("Cannot parse scenario file '%s'!", scenario_filename);
+      goto ERROR_HANDLE;
+    }
+
+  // print parse summary
+  INFO ("Scenario file '%s' parsed.", scenario_filename);
+#ifdef MESSAGE_DEBUG
+  DEBUG ("Loaded scenario file summary:");
+  xml_scenario_print (xml_scenario);
+#endif
+
+  // even more initialization
+  motion_step = xml_scenario->step / xml_scenario->motion_step_divider;
+
+  // save a pointer to the scenario data structure
+  scenario = &(xml_scenario->scenario);
+
+
+  ////////////////////////////////////////////////////////////
+  // computation phase
+
+  // Latest version of expat (expat-2.0.1-11.el6_2.i686) fixed a bug
+  // related to hash functions by initializing internally the random
+  // number generator seed to values obtained from the clock. This causes
+  // random values computed by us to change at each run. To fix this
+  // we initialize the random number generator seed to its default
+  // value (1).
+  // References:
+  // [1] http://cmeerw.org/blog/759.html
+  // [2] https://bugzilla.redhat.com/show_bug.cgi?id=786617
+  // [3] https://rhn.redhat.com/errata/RHSA-2012-0731.html
+  DEBUG ("Initialize random seed because it was changed by expat during \
+parsing.\n");
+  srand (1);
+
+  INFO ("\n-- QOMET Emulator: Scenario Computation --");
+
+  // check if settings output is enabled
+  if (!(text_only_enabled || binary_only_enabled))
+    {
+      // prepare settings filename
+      strncpy (settings_filename, output_filename_base, MAX_STRING - 1);
+
+      if (strlen (settings_filename) > MAX_STRING - 10)
+	{
+	  WARNING ("Cannot create settings file name because input \
+filename '%s' exceeds %d characters!", settings_filename, MAX_STRING - 10);
+	  goto ERROR_HANDLE;
+	}
+
+      // append extension ".settings"
+      strncat (settings_filename, ".settings",
+	       MAX_STRING - strlen (settings_filename) - 10);
+      settings_file = fopen (settings_filename, "w");
+      if (settings_file == NULL)
+	{
+	  WARNING ("Cannot open settings file '%s' for writing!",
+		   settings_filename);
+	  goto ERROR_HANDLE;
+	}
+    }
+
+  // check if binary output is enabled
+  if (binary_output_enabled == TRUE)
+    {
+      // prepare binary output filename
+      strncpy (binary_output_filename, output_filename_base, MAX_STRING - 1);
+
+      if (strlen (binary_output_filename) > MAX_STRING - 5)
+	{
+	  WARNING ("Cannot create binary output file name because input \
+filename '%s' exceeds %d characters!", output_filename_base, MAX_STRING - 5);
+	  goto ERROR_HANDLE;
+	}
+
+      // append extension ".bin"
+      strncat (binary_output_filename, ".bin",
+	       MAX_STRING - strlen (binary_output_filename) - 5);
+      binary_output_file = fopen (binary_output_filename, "w");
+      if (binary_output_file == NULL)
+	{
+	  WARNING ("Cannot open binary output file '%s' for writing!",
+		   binary_output_filename);
+	  goto ERROR_HANDLE;
+	}
+
+      // start writing binary output
+      io_binary_write_header_to_file (scenario->interface_number, 0,
+				      MAJOR_VERSION, MINOR_VERSION,
+				      SUBMINOR_VERSION, svn_revision,
+				      binary_output_file);
+    }
+
+  // check if text output is enabled
+  if (text_output_enabled == TRUE)
+    {
+      // prepare text output filename
+      strncpy (text_output_filename, output_filename_base, MAX_STRING - 1);
+
+      if (strlen (text_output_filename) > MAX_STRING - 5)
+	{
+	  WARNING ("Cannot create output file name because input filename \
+'%s' exceeds %d characters!", output_filename_base, MAX_STRING - 5);
+	  goto ERROR_HANDLE;
+	}
+
+      // append extension ".out"
+      strncat (text_output_filename, ".out",
+	       MAX_STRING - strlen (text_output_filename) - 5);
+
+      // open file
+      text_output_file = fopen (text_output_filename, "w");
+      if (text_output_file == NULL)
+	{
+	  WARNING ("Cannot open text output file '%s'! for writing",
+		   text_output_filename);
+	  goto ERROR_HANDLE;
+	}
+
+      // write global file header for matlab
+      io_write_header_to_file (text_output_file, qomet_name);
+    }
+
+  // check if motion output is enabled
+  if (motion_output_enabled == TRUE)
+    {
+      // prepare motion filename
+      strncpy (motion_filename, output_filename_base, MAX_STRING - 1);
+
+      if (strlen (motion_filename) > MAX_STRING - 5)
+	{
+	  WARNING ("Cannot create motion file name because input filename \
+'%s' exceeds %d characters!", output_filename_base, MAX_STRING - 5);
+	  goto ERROR_HANDLE;
+	}
+
+      if (motion_output_type == MOTION_OUTPUT_NAM)
+	{
+	  // append extension ".nam"
+	  strncat (motion_filename, ".nam",
+		   MAX_STRING - strlen (motion_filename) - 5);
+	}
+      else if (motion_output_type == MOTION_OUTPUT_NS2)
+	{
+	  // append extension ".ns2"
+	  strncat (motion_filename, ".ns2",
+		   MAX_STRING - strlen (motion_filename) - 5);
+	}
+      else
+	{
+	  WARNING ("Unknown motion output type (%d)!", motion_output_type);
+	  goto ERROR_HANDLE;
+	}
+
+      motion_file = fopen (motion_filename, "w");
+      if (motion_file == NULL)
+	{
+	  WARNING ("Cannot open motion file '%s' for writing!",
+		   motion_filename);
+	  goto ERROR_HANDLE;
+	}
+    }
+
+#ifdef MESSAGE_DEBUG
+
+  // print the initial condition of the scenario
+  printf ("\n-- Initial condition:\n");
+  fprintf (stderr, "\n-- Initial condition:\n");
+  for (node_i = 0; node_i < scenario->node_number; node_i++)
+    node_print (&(scenario->nodes[node_i]));
+  for (object_i = 0; object_i < scenario->object_number; object_i++)
+    object_print (&(scenario->objects[object_i]));
+  for (environment_i = 0; environment_i < scenario->environment_number;
+       environment_i++)
+    environment_print (&(scenario->environments[environment_i]));
+  for (motion_i = 0; motion_i < scenario->motion_number; motion_i++)
+    motion_print (&(scenario->motions[motion_i]));
+  for (connection_i = 0; connection_i < scenario->connection_number;
+       connection_i++)
+    connection_print (&(scenario->connections[connection_i]));
+
+#endif
+
+  // initialize scenario state
+  INFO ("\n-- Scenario initialization:");
+  fprintf (stderr, "\n-- Scenario initialization:\n");
+
+  if (scenario_init_state (scenario, xml_scenario->jpgis_filename_provided,
+			   xml_scenario->jpgis_filename,
+			   xml_scenario->cartesian_coord_syst,
+			   deltaQ_disabled) == ERROR)
+    {
+      fflush (stdout);
+      WARNING ("Error during scenario initialization. Aborting...");
+      goto ERROR_HANDLE;
+    }
+
+
+
+  // it is now late enough to output objects if enabled
+  if (object_output_enabled == TRUE)
+    {
+      // prepare object output filename
+      strncpy (object_output_filename, output_filename_base, MAX_STRING - 1);
+
+      if (strlen (object_output_filename) > MAX_STRING - 5)
+	{
+	  WARNING ("Cannot create object output file name because input \
+filename '%s' exceeds %d characters!", output_filename_base, MAX_STRING - 5);
+	  goto ERROR_HANDLE;
+	}
+
+      // append extension ".obj"
+      strncat (object_output_filename, ".obj",
+	       MAX_STRING - strlen (object_output_filename) - 5);
+      object_output_file = fopen (object_output_filename, "w");
+      if (object_output_file == NULL)
+	{
+	  WARNING ("Cannot open object output file '%s' for writing!",
+		   object_output_filename);
+	  goto ERROR_HANDLE;
+	}
+
+      // write object output
+      io_write_objects (scenario, xml_scenario->cartesian_coord_syst,
+			object_output_file);
+
+      fclose (object_output_file);
+    }
+
+
+
+  ////////////////////////////////////////////////////////////
+  // processing phase
+
+  // start processing the scenario
+  INFO ("\n-- Scenario processing:");
+  fprintf (stderr, "\n-- Scenario processing:\n");
+
+  for (current_time = xml_scenario->start_time;
+       current_time <=
+       (xml_scenario->duration + xml_scenario->start_time + EPSILON);
+       current_time += xml_scenario->step)
+    {
+      // print the current state
+      INFO ("* Current time=%.3f", current_time);
+      fprintf (stderr,
+	       "* Time=%.3f s: DONE                                 \r",
+	       current_time);
+
+      // save current time for internal use
+      scenario->current_time = current_time;
+
+      // check if motion output is enabled
+      if (motion_output_enabled == TRUE)
+	{
+	  if (current_time == xml_scenario->start_time)
+	    {
+	      // write motion file header
+	      if (motion_output_type == MOTION_OUTPUT_NAM)
+		io_write_nam_motion_header_to_file (scenario, motion_file);
+	      else
+		io_write_ns2_motion_header_to_file (scenario, motion_file);
+	    }
+	  else
+	    {
+	      // write motion info 
+	      if (motion_output_type == MOTION_OUTPUT_NAM)
+		io_write_nam_motion_info_to_file (scenario, motion_file,
+						  current_time);
+	      else
+		io_write_ns2_motion_info_to_file (scenario, motion_file,
+						  current_time);
+	    }
+	}
+
+#ifdef ADD_NOISE
+      // special noise addition
+      if (current_time >= NOISE_START1 && current_time < NOISE_STOP1)
+	scenario->environments[0].noise_power[0] = NOISE_LEVEL1;
+      else if (current_time >= NOISE_START2 && current_time < NOISE_STOP2)
+	scenario->environments[0].noise_power[0] = NOISE_LEVEL2;
+      else
+	scenario->environments[0].noise_power[0] = NOISE_DEFAULT;
+#endif
+
+#ifdef AUTO_CONNECT_ACTIVE_TAGS
+
+      INFO ("Auto-connecting active tag nodes...");
+      if (scenario_auto_connect_nodes_at (scenario) == ERROR)
+	{
+	  WARNING ("Error auto-connecting active tag nodes");
+	  return ERROR;
+	}
+#endif
+
+      if (deltaQ_disabled == FALSE)
+	{
+	  // compute deltaQ parameters
+	  INFO ("  DELTA_Q CALCULATION");
+	  if (scenario_deltaQ (scenario, current_time) == ERROR)
+	    {
+	      WARNING ("Error while calculating deltaQ. Aborting...");
+	      goto ERROR_HANDLE;
+	    }
+	}
+
+      // check if binary output is enabled
+      if (binary_output_enabled == TRUE)
+	{
+	  io_connection_state.binary_time_record.time = current_time;
+	  io_connection_state.binary_time_record.record_number = 0;
+	}
+
+      // write all node status to files
+      for (connection_i = 0; connection_i < scenario->connection_number;
+	   connection_i++)
+	{
+	  struct connection_class *connection
+	    = &(scenario->connections[connection_i]);
+
+	  // do not output connections which start from a noise
+	  // source, since they are only meant to be used internally
+	  // for interference computation purposes
+	  if (scenario->nodes
+	      [connection->from_node_index].interfaces[connection->
+						       from_interface_index].
+	      noise_source == TRUE)
+	    continue;
+
+	  // check if text output is enabled
+	  if (text_output_enabled == TRUE)
+	    io_write_to_file (&(scenario->connections[connection_i]),
+			      scenario, current_time,
+			      xml_scenario->cartesian_coord_syst,
+			      text_output_file);
+
+	  // check if binary output is enabled
+	  if (binary_output_enabled == TRUE)
+	    {
+	      // check if we are processing first time
+	      if (current_time == xml_scenario->start_time)
+		{
+		  //save state without any checking
+		  io_binary_build_record
+		    (&(io_connection_state.binary_records[connection_i]),
+		     &(scenario->connections[connection_i]), scenario);
+		  io_connection_state.state_changed[connection_i] = TRUE;
+		  io_connection_state.binary_time_record.record_number++;
+		}
+	      else
+		{
+		  //check if state changed
+		  if (io_binary_compare_record
+		      (&(io_connection_state.binary_records[connection_i]),
+		       &(scenario->connections[connection_i]),
+		       scenario) == FALSE)
+		    {
+		      //save state
+		      io_binary_build_record
+			(&(io_connection_state.binary_records[connection_i]),
+			 &(scenario->connections[connection_i]), scenario);
+		      io_connection_state.state_changed[connection_i] = TRUE;
+		      io_connection_state.binary_time_record.record_number++;
+		    }
+		  else
+		    // state didn't change
+		    io_connection_state.state_changed[connection_i] = FALSE;
+		}
+	    }
+	}
+
+      // check if binary output is enabled
+      if (binary_output_enabled == TRUE)
+	{
+	  int record_i, connection_i;
+
+#ifdef DISABLE_EMPTY_TIME_RECORDS
+	  if (io_connection_state.binary_time_record.record_number > 0)
+	    {
+#endif
+	      time_record_number++;
+
+	      io_binary_write_time_record_to_file2
+		(&(io_connection_state.binary_time_record),
+		 binary_output_file);
+
+	      record_i = 0;
+	      for (connection_i = 0;
+		   connection_i < scenario->connection_number; connection_i++)
+		{
+
+		  struct connection_class *connection
+		    = &(scenario->connections[connection_i]);
+
+		  // do not output connections which start from a noise
+		  // source, since they are only meant to be used internally
+		  // for interference computation purposes
+		  if (scenario->nodes
+		      [connection->from_node_index].interfaces[connection->
+							       from_interface_index].
+		      noise_source == TRUE)
+		    continue;
+
+		  if (io_connection_state.state_changed[connection_i] == TRUE)
+		    {
+		      io_binary_write_record_to_file2
+			(&(io_connection_state.binary_records[connection_i]),
+			 binary_output_file);
+#ifdef MESSAGE_DEBUG
+		      io_binary_print_record
+			(&(io_connection_state.binary_records[connection_i]));
+#endif
+
+		      // check if there are any more records 
+		      // to write for this time interval
+		      if (record_i <
+			  io_connection_state.
+			  binary_time_record.record_number)
+			record_i++;
+		      else
+			break;
+		    }
+		}
+
+	      if (record_i <
+		  io_connection_state.binary_time_record.record_number)
+		WARNING ("At time %f wrote ONLY %d binary records out of %d",
+			 current_time, record_i,
+			 io_connection_state.
+			 binary_time_record.record_number);
+	      else
+		INFO ("At time %f wrote %d binary records", current_time,
+		      record_i);
+#ifdef DISABLE_EMPTY_TIME_RECORDS
+	    }
+#endif
+	}
+
+      for (divider_i = 0; divider_i < xml_scenario->motion_step_divider;
+	   divider_i++)
+	{
+	  motion_current_time = current_time + divider_i * motion_step;
+
+	  if (motion_current_time >
+	      (xml_scenario->duration + xml_scenario->start_time + EPSILON))
+	    break;
+
+	  // move nodes according to the 'motions' object in 'scenario'
+	  // for the next step of evaluation
+	  INFO ("  NODE MOVEMENT (sub-step %d)", divider_i);
+	  motion_found = FALSE;
+	  for (motion_i = 0; motion_i < scenario->motion_number; motion_i++)
+	    if ((scenario->motions[motion_i].start_time
+		 <= motion_current_time) &&
+		(scenario->motions[motion_i].stop_time > motion_current_time))
+	      {
+		fprintf (stderr, "\t\t\tcalculation => \
+motion %d             \r", motion_i);
+		// TEMPORARY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		//if(motion_i!=45) continue;     // 0 corresponds to id 1
+
+		if (motion_apply (&(scenario->motions[motion_i]), scenario,
+				  motion_current_time, motion_step) == ERROR)
+		  goto ERROR_HANDLE;
+
+		motion_found = TRUE;
+	      }
+#ifdef MESSAGE_INFO
+	  if (motion_found == FALSE)
+	    INFO ("  No valid motion found");
+#endif
+	}
+    }
+
+  // check if binary output is enabled
+  if (binary_output_enabled == TRUE)
+    {
+      // rewrite binary header now that all information is available
+      rewind (binary_output_file);
+      io_binary_write_header_to_file
+	(scenario->interface_number, time_record_number,
+	 MAJOR_VERSION, MINOR_VERSION, SUBMINOR_VERSION,
+	 svn_revision, binary_output_file);
+    }
+
+  // write settings file
+  if (!(text_only_enabled || binary_only_enabled))
+    io_write_settings_file (scenario, settings_file);
+
+  // if no errors occurred, skip next instruction
+  goto FINAL_HANDLE;
+
+ERROR_HANDLE:
+  error_status = ERROR;
+
+
+  ////////////////////////////////////////////////////////////
+  // finalizing phase
+
+FINAL_HANDLE:
+
+  if (error_status == SUCCESS)
+    {
+      // print this in case of successful processing
+      INFO ("\n-- Scenario processing completed successfully\n\n");
+      fprintf (stderr,
+	       "\n\n-- Scenario processing completed successfully\n\n");
+    }
+  else
+    {
+      // print this in case of unsuccessful processing
+      INFO ("\n-- Scenario processing completed with errors \
+(see the WARNING messages above)\n\n");
+      fprintf (stderr, "\n\n-- Scenario processing completed with errors \
+(see the WARNING messages above)\n\n");
+    }
+
+  // close output files
+  if (scenario_file != NULL)
+    fclose (scenario_file);
+
+  if (settings_file != NULL)
+    fclose (settings_file);
+
+  // check if text output is enabled
+  if (text_output_file != NULL)
+    fclose (text_output_file);
+
+  // check if binary output is enabled
+  if (binary_output_file != NULL)
+    fclose (binary_output_file);
+
+  // check if motion output is enabled
+  if (motion_file != NULL)
+    fclose (motion_file);
+
+  if (xml_scenario != NULL)
+    free (xml_scenario);
+
+  return error_status;
 }
-

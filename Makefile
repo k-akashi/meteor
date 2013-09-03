@@ -1,24 +1,7 @@
-
 ###########################################
 # Makefile for qomet: network emulation tool
 ###########################################
 
-#  $Revision: 140 $
-#  $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
-#  $LastChangedBy: razvan $
-
-
-#COMPILE_TYPE=debug
-#COMPILE_TYPE=profile
-COMPILE_TYPE=release
-
-#SVN_DEFINE = -D'SVN_REVISION="$(shell svnversion -n .)"'
-
-#ifneq ($SVN_DEFINE, aaa)
-#	@echo $SVN_DEFINE
-#endif
-
-# only need to define EXPAT_PATH for non-standard installations of expat
 ifeq ($(OS_NAME),FreeBSD)
 EXPAT_PATH=/usr/local
 EXPAT_INC=-I${EXPAT_PATH}/include
@@ -62,7 +45,7 @@ endif
 # get the name of the operating system
 OS_NAME=$(shell uname)
 
-ANY_OS_TARGETS = qomet generate_scenario ${DELTAQ_PATH}/libdeltaQ.a ${CHANEL_PATH}/do_chanel ${CHANEL_PATH}/chanel_config
+ANY_OS_TARGETS = ${DELTAQ_PATH}/libdeltaQ.a ${CHANEL_PATH}/do_chanel ${CHANEL_PATH}/chanel_config
 FREEBSD_TARGETS = ${WIRECONF_PATH}/wireconf ${ROUTING_PATH}/routing
 LINUX_TARGETS = ${WIRECONF_PATH}/wireconf
 
@@ -95,22 +78,10 @@ endif
 #SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
 
 
-# created object qomet.o so that module dependencies
-# can be visualized using "nmdepend"
-
-#qomet : qomet.c qomet.h ${DELTAQ_PATH}/libdeltaQ.a
-#	gcc $(GCC_FLAGS) qomet.c -o qomet ${INCS} ${LIBS}
-
 #.PHONY: revision
 
-qomet : qomet.o
-	gcc $(GCC_FLAGS) qomet.o ./deltaQ/libdeltaQ.a -o qomet ${INCS} ${LIBS}
-
-qomet.o : qomet.c ${DELTAQ_PATH}/libdeltaQ.a
-	gcc $(GCC_FLAGS) -c qomet.c ${INCS}
-
-generate_scenario : generate_scenario.c ${DELTAQ_PATH}/libdeltaQ.a
-	gcc $(GCC_FLAGS) generate_scenario.c ./deltaQ/libdeltaQ.a -o generate_scenario ${INCS} ${LIBS}
+deltaQ : 
+	make -C ${DELTAQ_PATH}
 
 ${CHANEL_PATH}/do_chanel : ${CHANEL_PATH}/*.c ${CHANEL_PATH}/*.h
 	cd ${CHANEL_PATH}; ${MAKE_CMD} COMPILE_TYPE=$(COMPILE_TYPE)

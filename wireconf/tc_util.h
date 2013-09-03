@@ -23,20 +23,25 @@
 
 #define TC_HANDLE(maj, min) (maj << 16 | min)
 
+#define Bit      1
+#define Kiloabit 1000
+#define Megabit  1000000
+#define Gigabit  1000000000
+
 struct rtnl_handle rth;
 
 struct qdisc_parameter
 {
-	char* limit;
-	char* delay;
-	char* jitter;
-	char* delay_corr;
-	char* loss;
-	char* loss_corr;
-	char* reorder_prob;
-	char* reorder_corr;
-	char* rate;
-	char* buffer;
+	uint32_t limit;
+	double delay;
+	double jitter;
+	double delay_corr;
+	double loss;
+	double loss_corr;
+	float reorder_prob;
+	float reorder_corr;
+	uint32_t rate;
+	uint32_t buffer;
 };
 
 struct filter_match {
@@ -113,8 +118,8 @@ extern int add_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter 
 extern int change_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
 extern int delete_netem_qdisc(char* device, int ingress);
 extern int add_htb_qdisc(char* device, uint32_t id[4]);
-extern int add_htb_class(char* device, uint32_t id[4], char* bnadwidth);
-extern int change_htb_class(char* device, uint32_t id[4], char* bnadwidth);
+extern int add_htb_class(char* device, uint32_t id[4], uint32_t bnadwidth);
+extern int change_htb_class(char* device, uint32_t id[4], uint32_t bnadwidth);
 extern int add_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
 extern int change_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
 

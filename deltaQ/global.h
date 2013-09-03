@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -36,9 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 140 $
- *   $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: global.h 145 2013-06-07 01:11:09Z razvan $
  *
  ***********************************************************************/
 
@@ -58,7 +35,23 @@
 #define SUCCESS                         0
 #define ERROR                           -1
 
+//#ifndef MAX_STRING
 #define MAX_STRING                      256
+//#endif
+#define MAX_STRING_STR                  "255"
+
+// this is long enough to hold IPv4 addresses
+// (4x3 digits + 3x1 dots + '\0')?
+// it should be increased to 40(?!) if IPv6 addresses are used
+#define IP_ADDR_SIZE                    16
+
+// this is long enough to hold Ethernet MAC addresses
+// (2x6 digits + 5x1 colon + '\0')?
+#define MAC_ADDR_SIZE                   18
+
+#ifndef ETH_SIZE
+#define ETH_SIZE                        6
+#endif
 
 
 /////////////////////////////////////////////
@@ -66,21 +59,14 @@
 // (used to avoid circular references)
 /////////////////////////////////////////////
 
-struct node_class_s;
-struct object_class_s;
-struct environment_class_s;
-struct motion_class_s;
-struct connection_class_s;
-struct scenario_class_s;
-struct scenario_class_s;
-
-typedef struct node_class_s node_class;
-typedef struct object_class_s object_class;
-typedef struct environment_class_s environment_class;
-typedef struct motion_class_s motion_class;
-typedef struct connection_class_s connection_class;
-typedef struct scenario_class_s scenario_class;
-typedef struct xml_scenario_class_s xml_scenario_class;
-typedef struct xml_jpgis_class_s xml_jpgis_class;
+struct node_class;
+struct interface_class;
+struct object_class;
+struct environment_class;
+struct motion_class;
+struct connection_class;
+struct scenario_class;
+struct xml_scenario_class;
+struct xml_jpgis_class;
 
 #endif

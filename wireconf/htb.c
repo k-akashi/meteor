@@ -15,7 +15,7 @@
 static int
 htb_class_opt(n, bandwidth)
 struct nlmsghdr *n;
-char *bandwidth;
+uint32_t bandwidth;
 {
 	struct tc_htb_opt opt;
 	struct rtattr* tail;
@@ -32,7 +32,8 @@ char *bandwidth;
 	memset(&opt, 0, sizeof(opt));
 	mtu = 1600;
 
-	get_rate(&opt.rate.rate, bandwidth);
+//	get_rate(&opt.rate.rate, bandwidth);
+    opt.rate.rate = bandwidth;
 
     if(!opt.ceil.rate) {
         opt.ceil = opt.rate;
@@ -82,7 +83,7 @@ int
 add_htb_class(dev, id, bandwidth)
 char* dev;
 uint32_t id[4];
-char* bandwidth;
+uint32_t bandwidth;
 {
 	char device[16];
     char class_kind[16] = "htb";
@@ -142,7 +143,7 @@ int
 change_htb_class(dev, id, bandwidth)
 char* dev;
 uint32_t id[4];
-char* bandwidth;
+uint32_t bandwidth;
 {
 	char device[16];
     char class_kind[16] = "htb";

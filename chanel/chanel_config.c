@@ -111,7 +111,7 @@ int main(void)
     }
 
   // read and check binary header
-  if(io_read_binary_header_from_file(&binary_header, fd)==ERROR)
+  if(io_binary_read_header_from_file(&binary_header, fd)==ERROR)
     {
       INFO_("Aborting on input error (binary header)");
       return ERROR;
@@ -121,7 +121,7 @@ int main(void)
 
   for(time_i=0; time_i<binary_header.time_record_number; time_i++)
     {
-      if(io_read_binary_time_record_from_file(&binary_time_record, 
+      if(io_binary_read_time_record_from_file(&binary_time_record, 
 					      fd)==ERROR)
 	{
 	  INFO_("Aborting on input error (time record)");
@@ -139,7 +139,7 @@ int main(void)
 	  return ERROR;
 	}
 
-      if(io_read_binary_records_from_file(binary_records, 
+      if(io_binary_read_records_from_file(binary_records, 
 					  binary_time_record.record_number,
 					  fd)==ERROR)
 	{

@@ -1,30 +1,9 @@
 
 /*
- * Copyright (c) 2006-2009 The StarBED Project  All rights reserved.
+ * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * See the file 'LICENSE' for licensing information.
  *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 /************************************************************************
@@ -37,9 +16,7 @@
  *
  * Author: Razvan Beuran
  *
- *   $Revision: 140 $
- *   $LastChangedDate: 2009-03-26 10:41:59 +0900 (Thu, 26 Mar 2009) $
- *   $LastChangedBy: razvan $
+ * $Id: deltaQ.h 146 2013-06-20 00:50:48Z razvan $
  *
  ***********************************************************************/
 
@@ -48,7 +25,7 @@
 #define __DELTAQ_H
 
 
-#include <stdio.h> // needed for declaration of FILE
+#include <stdio.h>		// needed for declaration of FILE
 
 #include "global.h"
 #include "stack.h"
@@ -62,6 +39,17 @@
 #include "scenario.h"
 #include "xml_scenario.h"
 #include "io.h"
+
+
+///////////////////////////////////////////////////////////
+// Version management constants
+///////////////////////////////////////////////////////////
+
+#define MAJOR_VERSION              2
+#define MINOR_VERSION              1
+#define SUBMINOR_VERSION           0
+#define IS_BETA                    FALSE	//TRUE
+
 
 /////////////////////////////////////////////
 // Windows Visual C specific defines
@@ -82,7 +70,8 @@
 
 #define UNDEFINED_VALUE                 -1
 
-#define EPSILON                        1e-6
+// a small value used when comparing doubles for equality
+#define EPSILON                        1e-5	//1e-6
 
 // defines for supported network technologies
 // currently: 802.11 and Ethernet standards
@@ -94,6 +83,7 @@
 #define ETHERNET_1000                   5
 #define ACTIVE_TAG                      6
 #define ZIGBEE                          7
+#define WIMAX_802_16                    8
 
 
 ////////////////////////////////////////////////
@@ -129,22 +119,22 @@
 #define JAPAN_IX_COORDINATES
 //#define UK_COORDINATES
 
-#ifdef JAPAN_IX_COORDINATES // Japan values (zone IX - Tokyo etc.)
-#define GEOID_COORD_E0      0.0          //easting of true origin
-#define GEOID_COORD_N0      0.0          // northing of true origin
-#define GEOID_COORD_F0      0.9999       // scale factor of central 
-                                         // meridian (m0)
-#define GEOID_COORD_PHI0    36.0         // latitude of true origin
-#define GEOID_COORD_LAMBDA0 139.8333333; // longitude of true origin and 
-                                         // central meridian
-#elif UK_COORDINATES        // UK values
-#define GEOID_COORD_E0      400000.0     //easting of true origin
-#define GEOID_COORD_N0      -100000.0    // northing of true origin
-#define GEOID_COORD_F0      0.9996012717 // scale factor of central 
-                                         // meridian (m0)
-#define GEOID_COORD_PHI0    49.0         // latitude of true origin
-#define GEOID_COORD_LAMBDA0 -2.0         // longitude of true origin and 
-                                         // central meridian
+#ifdef JAPAN_IX_COORDINATES	// Japan values (zone IX - Tokyo etc.)
+#define GEOID_COORD_E0      0.0	//easting of true origin
+#define GEOID_COORD_N0      0.0	// northing of true origin
+#define GEOID_COORD_F0      0.9999	// scale factor of central
+					 // meridian (m0)
+#define GEOID_COORD_PHI0    36.0	// latitude of true origin
+#define GEOID_COORD_LAMBDA0 139.8333333;	// longitude of true origin and
+					 // central meridian
+#elif UK_COORDINATES		// UK values
+#define GEOID_COORD_E0      400000.0	//easting of true origin
+#define GEOID_COORD_N0      -100000.0	// northing of true origin
+#define GEOID_COORD_F0      0.9996012717	// scale factor of central
+					 // meridian (m0)
+#define GEOID_COORD_PHI0    49.0	// latitude of true origin
+#define GEOID_COORD_LAMBDA0 -2.0	// longitude of true origin and
+					 // central meridian
 #endif
 
 
@@ -159,10 +149,11 @@
 
 // parse scenario file and store results in scenario object;
 // return 0 if no error occured, non-0 values otherwise
-int xml_scenario_parse(FILE *scenario_file, xml_scenario_class *xml_scenario);
+int xml_scenario_parse (FILE * scenario_file,
+			struct xml_scenario_class *xml_scenario);
 
 // print the main properties of an XML scenario
-void xml_scenario_print(xml_scenario_class *xml_scenario);
+void xml_scenario_print (struct xml_scenario_class *xml_scenario);
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -176,7 +167,8 @@ void xml_scenario_print(xml_scenario_class *xml_scenario);
 // Annex B, pp. 41:
 //   http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
 // return SUCCESS on success, ERROR on error
-int blh2xyz(const coordinate_class *point_blh, coordinate_class *point_xyz);
+int blh2xyz (const struct coordinate_class *point_blh,
+	     struct coordinate_class *point_xyz);
 
 // compute latitude, longitude and height from x, y, z coordinates;
 // input data is in point_xyz, output data in point_blh;
@@ -184,7 +176,8 @@ int blh2xyz(const coordinate_class *point_blh, coordinate_class *point_xyz);
 // systems in Great Britain", Annex B, pp. 41:
 //   http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
 // return SUCCESS on success, ERROR on error
-int xyz2blh(const coordinate_class *point_xyz, coordinate_class *point_blh);
+int xyz2blh (const struct coordinate_class *point_xyz,
+	     struct coordinate_class *point_blh);
 
 // compute the meridional arc given the ellipsoid semi major axis
 // multiplied by central meridian scale factor 'bF0' in meters,
@@ -192,13 +185,14 @@ int xyz2blh(const coordinate_class *point_xyz, coordinate_class *point_blh);
 // false origin 'phi0_rad' and initial or final latitude of point 
 // 'phi_rad' in radians; 
 // returns the meridional arc
-double meridional_arc(double bF0, double n, double phi0_rad, double phi_rad);
+double meridional_arc (double bF0, double n, double phi0_rad, double phi_rad);
 
 // convert latitude & longitude coordinates to easting & northing 
 // (xy map coordinates);
 // height/z parameter is copied;
 // input data is in point_blh, output data in point_xyz
-void ll2en(coordinate_class  *point_blh, coordinate_class *point_xyz);
+void ll2en (struct coordinate_class *point_blh,
+	    struct coordinate_class *point_xyz);
 
 // compute initial value of latitude given the northing of point 'North' 
 // and northing of false origin 'n0' in meters, semi major axis multiplied 
@@ -207,14 +201,15 @@ void ll2en(coordinate_class  *point_blh, coordinate_class *point_xyz);
 // ellipsoid semi major axis multiplied by central meridian scale factor 'bf0'
 // in meters;
 // returns the initial value of latitude
-double initial_latitude(double North, double n0, double aF0, double phi0,
-			double n, double bF0);
+double initial_latitude (double North, double n0, double aF0, double phi0,
+			 double n, double bF0);
 
 // convert easting & northing (xy map coordinates) to 
 // latitude & longitude;
 // height/z parameter is copied;
 // input data is in point_blh, output data in point_xyz
-void en2ll(coordinate_class  *point_xyz, coordinate_class *point_blh);
+void en2ll (struct coordinate_class *point_xyz,
+	    struct coordinate_class *point_blh);
 
 
 #endif
