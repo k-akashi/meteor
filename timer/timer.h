@@ -22,6 +22,19 @@
  ***********************************************************************/
 
 
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/sysctl.h>
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#ifdef __linux
+#include <string.h>
+#endif
+
 #ifndef __TIMER_H
 #define __TIMER_H
 
@@ -37,6 +50,7 @@
 // structure for the timer handle
 struct timer_handle
 {
+  uint32_t cpu_frequency;
   // the relative "zero" of the timer
   struct timespec zero_tp;
 

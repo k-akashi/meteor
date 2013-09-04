@@ -39,6 +39,7 @@ all: ${TARGETS}
 
 libtimer.a: timer.o
 	ar rc libtimer.a timer.o && ranlib libtimer.a	
+	cp libtimer.a ../libs
 
 timer.o: timer.c timer.h timer_global.h timer_message.h
 	$(CC) ${GCC_FLAGS} -c timer.c
@@ -50,5 +51,5 @@ test_timer.o: test_timer.c timer.h timer_global.h timer_message.h
 	$(CC) ${GCC_FLAGS} -c test_timer.c
 
 clean:
-	rm -f ${TARGETS} *.o *.a core
+	rm -f ${TARGETS} *.o *.a core ../libs/libtimer.a
 

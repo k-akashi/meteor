@@ -70,7 +70,7 @@ DEBUG_print_timespec (struct timespec *time)
 // reset the timer (set its relative "zero" and the logical time
 // associated to it
 void
-timer_reset (struct timer_handle *handle, double zero_time)
+timer_reset(struct timer_handle *handle, double zero_time)
 {
   DEBUG ("Resetting timer...");
 

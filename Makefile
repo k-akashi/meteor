@@ -17,7 +17,7 @@ TIMER_PATH=./timer
 WIRECONF_PATH=./wireconf
 
 all :
-	make -C ${DELTAQ_PATH} all && make -C ${EXTRAS_PATH} all && make -C ${TIMER_PATH} all && make -C ${STATION_PATH} all && make -C ${WIRECONF_PATH} all
+	make -C ${DELTAQ_PATH} all && make -C ${EXTRAS_PATH} all && make -C ${TIMER_PATH} all && make -C ${WIRECONF_PATH} all
 
 clean:
-	make -C ${DELTAQ_PATH} clean && make -C ${EXTRAS_PATH} clean && make -C ${STATION_PATH} clean && make -C ${TIMER_PATH} clean && make -C ${WIRECONF_PATH} clean
+	make -C ${DELTAQ_PATH} clean && make -C ${EXTRAS_PATH} clean && make -C ${TIMER_PATH} clean && make -C ${WIRECONF_PATH} clean

@@ -58,6 +58,3 @@
 #define IP_ADDR_SIZE                    16
 
 #define FIRST_NODE_ID                   0
-
-#define MAX_NODES                       500
-

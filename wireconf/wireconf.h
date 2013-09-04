@@ -37,6 +37,7 @@
  * Authors: Junya Nakata, Razvan Beuran
  *
  ***********************************************************************/
+
 #ifdef __FreeBSD__
 #include <netinet/ip_fw.h>
 #include <netinet/ip_dummynet.h>
@@ -65,6 +66,7 @@
 #define DIRECTION_IN                    1
 #define DIRECTION_OUT                   2
 
+#define MAX_NODES                       500
 
 /////////////////////////////////////////////
 // Socket manipulation functions
@@ -124,4 +126,37 @@ int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate);
 int configure_qdisc(int s, char* dst, int handle, int bandwidth, float delay, double lossrate);
 #endif
 
-#endif /* !__WIRECONF_H */
+struct wireconf_class {
+    struct timespec start_time;
+    int my_id;
+    struct in_addr *IP_addresses;
+    int node_count;
+    pthread_t stats_send_thread;
+    int do_interrupt_send;
+    int stats_provide_pipe[2];
+    pthread_t stats_listen_thread;
+    int do_interrupt_listen;
+    float *total_channel_utilizations;
+    float *total_transmission_probabilities;
+    float *self_channel_utilizations;
+    float *self_transmission_probabilities;
+    float total_channel_utilization_others;
+    float total_transmission_probability_others;
+    float total_self_number_packets;
+    float **channel_utilization_per_source;
+    /* NOTE: the code below intended for the next version of wireconf,
+       that will be able to read QOMET binary output
+
+    // data queue of this chanel
+    data_queue_class data_queue;
+
+    // array of flags showing which destinations are
+    // active (TRUE=>active, FALSE=>inactive)
+    int active_destinations[MAX_DESTINATIONS];
+
+    // configuration array
+    deltaQ_class configurations[MAX_DESTINATIONS];
+     */
+
+};
+#endif

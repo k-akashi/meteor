@@ -14,12 +14,12 @@ CC      = gcc
 HOSTCC  = gcc
 
 ifeq ($(UNAME), Linux)
-CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -DTBF -fPIC -DTCDEBUG
+CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -fPIC -DTCDEBUG -DMESSAGE_WARNING -DMESSAGE_INFO
 
 DEFINES = -DRESOLVE_HOSTNAMES
 LDFLAGS = -L.
-LDLIBS  = -lnetlink -ltc -lwireconf -ltimer -lm -ldl
-TARGETS = libnetlink.a libtc.a libwireconf.a libtimer.a do_wireconf 
+LDLIBS  = -lexpat -lnetlink -ltc -lwireconf -lm -ldl -L../libs -ltimer -ldeltaQ /usr/lib/x86_64-linux-gnu/libexpat.a
+TARGETS = libnetlink.a libtc.a libwireconf.a do_wireconf 
 TOBJ=libnetlink.o 
 ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
@@ -32,7 +32,7 @@ ifeq ($(UNAME), FreeBSD)
 CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO
 LDFLAGS = -L.
 LDLIBS  = -lwireconf -ltimer -lm
-TARGETS = libwireconf.a libtimer.a do_wireconf
+TARGETS = libwireconf.a do_wireconf
 endif
 
 all: $(TARGETS)
@@ -47,18 +47,17 @@ libtc.a: $(TCOBJ)
 #ip: $(IPOBJ) $(LIBNETLINK) $(LIBUTIL)
 endif
 
-libwireconf.a: wireconf.h wireconf.c wireconf.o global.h message.h
-	ar rcs libwireconf.a wireconf.o $(TCOBJ) $(NLOBJ) && ranlib libwireconf.a
+libwireconf.a: wireconf.h wireconf.c wireconf.o global.h message.h statistics.o
+	ar rcs libwireconf.a wireconf.o statistics.o $(TCOBJ) $(NLOBJ) && ranlib libwireconf.a
 
-libtimer.a: timer.h timer.c timer.o global.h message.h
-	ar rcs libtimer.a timer.o && ranlib libtimer.a   
+statistics.o: statistics.c statistics.h
 
 ifeq ($(UNAME), Linux)
-do_wireconf: do_wireconf.o routing_info.o libwireconf.a libtimer.a libtc.a libnetlink.a $(WCOBJ)
+do_wireconf: do_wireconf.o routing_info.o libwireconf.a libtc.a libnetlink.a $(WCOBJ)
 	$(CC) $(CFLAGS) -g -export-dynamic -o $@ do_wireconf.o routing_info.o $(WCOBJ) $(LDFLAGS) $(LDLIBS)
 endif
 ifeq ($(UNAME), FreeBSD)
-do_wireconf: do_wireconf.c routing_info.o libwireconf.a libtimer.a 
+do_wireconf: do_wireconf.c routing_info.o libwireconf.a  
 	$(CC) $(CFLAGS) -o $@ do_wireconf.c routing_info.o $(LDFLAGS) $(LDLIBS)
 endif
 

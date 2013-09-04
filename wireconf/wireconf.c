@@ -217,10 +217,8 @@ socklen_t option_length;
 {
     switch(option_id) {
         case IP_FW_ADD:
-#ifdef MESSAGE_DEBUG
             DEBUG("Add ipfw rule: "); 
             print_rule((struct ip_fw*)option);
-#endif
 
             if(getsockopt(s, IPPROTO_IP, option_id, option, &option_length) < 0) {
                 WARNING("Error getting socket options");
@@ -240,10 +238,8 @@ socklen_t option_length;
             }
             break;
         case IP_DUMMYNET_CONFIGURE:
-#ifdef MESSAGE_DEBUG
             DEBUG("Configure ipfw dummynet pipe: "); 
             print_pipe((struct dn_pipe*)option);
-#endif
             if(setsockopt(s, IPPROTO_IP, option_id, option, option_length) < 0) {
                 WARNING("Error setting socket options");
                 perror("setsockopt");

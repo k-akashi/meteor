@@ -18,8 +18,8 @@ fi
 test_name=$1
 output_name=${test_name}
 
-from_node=1
-to_node=2
+from_node=0
+to_node=1
 client_address=10.100.10.1
 server_address=10.100.10.2
 #server_address=192.168.200.2
@@ -87,8 +87,8 @@ echo ----------------------------
 
 # Start the QOMET emulation
 echo "* Starting QOMET emulation..." 
-echo "sudo time ./wireconf/do_wireconf -Q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out"
-sudo time ./wireconf/do_wireconf -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out
+echo "sudo time ./wireconf/do_wireconf -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out"
+sudo time ./wireconf/do_wireconf -c 4 -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out
 
 echo "finish!!"
 echo ----------------------------
