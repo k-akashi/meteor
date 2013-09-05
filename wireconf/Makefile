@@ -2,30 +2,27 @@
 # Makefile for qomet library wireconf
 ###########################################
 
-CC=gcc
-HOSTCC=gcc
+CC = gcc
+HOSTCC = gcc
 
-BINDIR=../bin
-LIBDIR=../lib
-INCDIR=../include
+BINDIR = ../bin
+LIBDIR = ../lib
+INCDIR = ../include
 
-INCS=-I${INCDIR}
-LIBS=-L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat
+INCS = -I${INCDIR}
+LIBS = -L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat
 
-MESSAGE_FLAGS=-DMESSAGE_WARNING -DMESSAGE_INFO
-CFLAGS=-g -O3 -Wall ${MESSAGE_FLAGS}
+MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO
+CFLAGS = -g -O3 -Wall ${MESSAGE_FLAGS}
 
 UNAME = $(shell uname)
 ifeq ($(UNAME), Linux)
-CFLAGS+=-D_GNU_SOURCE -fPIC -DTCDEBUG 
-LIBS+=-lnetlink -ltc -ldl
-LIB_TARGET=libnetlink.a libtc.a libwireconf.a 
-BIN_TARGET=do_wireconf 
+CFLAGS += -D_GNU_SOURCE -fPIC -DTCDEBUG 
+LIBS += -ltc -lnetlink -ldl
+LIB_TARGET = libwireconf.a 
+BIN_TARGET = do_wireconf 
 TARGETS = ${LIB_TARGET} ${BIN_TARGET}
-TOBJ=libnetlink.o 
-NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
-TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o iplink.o filter.o htb.o netem.o tbf.o m_action.o u32.o ingress.o
-WCOBJ=q_prio.o q_pfifo.o m_action.o m_mirred.o
+TOBJ = libnetlink.o 
 ALLOBJ=${TOBJ} ${TCOBJ} ${NLOBJ} ${WCOBJ}
 else ifeq ($(UNAME), FreeBSD)
 LDFLAGS = -L.
