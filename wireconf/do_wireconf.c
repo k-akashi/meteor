@@ -149,15 +149,9 @@ char *argv0;
 
 typedef struct
 {
-    // stored CPU frequency
     uint32_t cpu_frequency;
-
-    // the relative "zero" of the timer
     uint64_t zero;
-
-    // the time of the next timer event
     uint64_t next_event;
-
 } timer_handle;
 
 int
@@ -352,6 +346,7 @@ char **argv;
     char *argv0;
     char *faddr, *taddr;
     char buf[BUFSIZ];
+    char settings_file_name[BUFSIZ];
     uint32_t s;
     uint32_t fid, tid;
     uint32_t from, to;
@@ -529,6 +524,8 @@ char **argv;
                 my_id = strtol(optarg, NULL, 10);
                 break;
             case 's':
+                strncpy(settings_file_name, optarg, MAX_STRING - 1);
+            /*
                 usage_type = 2;
                 if((node_number = read_settings(optarg, IP_addresses, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
@@ -542,6 +539,7 @@ char **argv;
                             *(((uint8_t *)&IP_addresses[i]) + 2),
                             *(((uint8_t *)&IP_addresses[i]) + 3));
                 }
+            */
                 break;
             case 'm':
                 if((time_period = strtod(optarg, NULL)) == 0) {
@@ -558,10 +556,12 @@ char **argv;
         }
     }
 
+/*
     if((my_id < FIRST_NODE_ID) || (my_id >= node_number + FIRST_NODE_ID)) {
         WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id, FIRST_NODE_ID, node_number+FIRST_NODE_ID - 1);
         exit(1);
     }
+*/
 
     argc -= optind;
     argv += optind;
@@ -572,13 +572,13 @@ char **argv;
         exit(1);
     }
 
+/*
     if((usage_type == 1) && ((fid == -1) || (faddr == NULL) || (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535))) {
         WARNING("Insufficient arguments were provided for usage (1)");
         usage(argv0);
         fclose(qomet_fd);
         exit(1);
     }
-/*
     else if ((my_id == -1) || (node_number == -1) || (time_period == -1)) {
         WARNING("Insufficient arguments were provided for usage (2)");
         usage(argv0);
@@ -587,6 +587,32 @@ char **argv;
     }
 */
 
+    if(sc_type == BIN_SC) {
+        if(USE_MAC_ADDRESS == TRUE) {
+        /*
+            if((node_count = io_read_settings_file_mac (settings_file_name,
+                IP_addresses, IP_char_addresses, MAC_addresses, MAC_char_addresses, MAX_NODES_W)) < 1) {
+                WARNING("Invalid MAC address settings file: '%s'", settings_file_name);
+                exit(1);
+            }
+        */
+            /*
+               for (node_i=0; node_i<MAX_NODES_W; node_i++)
+               {
+               IP_addresses[node_i]=node_i;
+               sprintf(IP_char_addresses + (node_i*IP_ADDR_SIZE), 
+               "0.0.0.%d", node_i);
+               }
+            */
+        }
+        else {
+            if((node_count = io_read_settings_file (settings_file_name, IP_addresses,
+                IP_char_addresses, MAX_NODES)) < 1) {
+                WARNING ("Invalid IP address settings file: '%s'", settings_file_name);
+                exit(1);
+            }
+        }
+    }
 
     DEBUG("Initialize timer...");
     if((timer = timer_init()) == NULL) {
@@ -664,7 +690,7 @@ char **argv;
     next_time = 0;
 
     if(sc_type == BIN_SC) {
-        if(io_binary_read_header_from_file (&binary_header, qomet_fd) == ERROR) {
+        if(io_binary_read_header_from_file(&binary_header, qomet_fd) == ERROR) {
             WARNING ("Aborting on input error (binary header)");
             exit(1);
         }
@@ -1073,7 +1099,8 @@ char **argv;
                         timer_reset(timer, crt_record_time);
                     }
                     else {
-                        if(timer_wait(timer, time * 1000000) < 0) {
+                        uint64_t time_usec = time * 1000000;
+                        if(timer_wait(timer, time_usec) < 0) {
                             WARNING("Timer deadline missed at time=%.2f s", time);
                         }
                     }

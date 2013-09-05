@@ -2,72 +2,77 @@
 # Makefile for qomet library wireconf
 ###########################################
 
-.SUFFIXES:  .c .o
-.c.o:
-	$(CC) $(CFLAGS) -c -o $@ $<
-.o:
-	$(CC) -o $@ $< $(LDFLAGS) $(LDLIBS)
+CC=gcc
+HOSTCC=gcc
+
+BINDIR=../bin
+LIBDIR=../lib
+INCDIR=../include
+
+INCS=-I${INCDIR}
+LIBS=-L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat
+
+MESSAGE_FLAGS=-DMESSAGE_WARNING -DMESSAGE_INFO
+CFLAGS=-g -O3 -Wall ${MESSAGE_FLAGS}
 
 UNAME = $(shell uname)
-
-CC      = gcc
-HOSTCC  = gcc
-
 ifeq ($(UNAME), Linux)
-CFLAGS  = -g -O3 -I. -g -Wall -D_GNU_SOURCE -fPIC -DTCDEBUG -DMESSAGE_WARNING -DMESSAGE_INFO
-
-DEFINES = -DRESOLVE_HOSTNAMES
-LDFLAGS = -L.
-LDLIBS  = -lexpat -lnetlink -ltc -lwireconf -lm -ldl -L../libs -ltimer -ldeltaQ /usr/lib/x86_64-linux-gnu/libexpat.a
-TARGETS = libnetlink.a libtc.a libwireconf.a do_wireconf 
+CFLAGS+=-D_GNU_SOURCE -fPIC -DTCDEBUG 
+LIBS+=-lnetlink -ltc -ldl
+LIB_TARGET=libnetlink.a libtc.a libwireconf.a 
+BIN_TARGET=do_wireconf 
+TARGETS = ${LIB_TARGET} ${BIN_TARGET}
 TOBJ=libnetlink.o 
-ALLOBJ=$(TOBJ) $(RTMONOBJ)
 NLOBJ=iproute.o libnetlink.o ll_map.o utils.o rt_names.o
 TCOBJ=libtc.o tc.o tc_qdisc.o tc_util.o tc_core.o iplink.o filter.o htb.o netem.o tbf.o m_action.o u32.o ingress.o
 WCOBJ=q_prio.o q_pfifo.o m_action.o m_mirred.o
-TESTOBJ=test.o
-endif
-
-ifeq ($(UNAME), FreeBSD)
-CFLAGS  = -I. -g -Wall -Werror -DMESSAGE_WARNING -DMESSAGE_INFO
+ALLOBJ=${TOBJ} ${TCOBJ} ${NLOBJ} ${WCOBJ}
+else ifeq ($(UNAME), FreeBSD)
 LDFLAGS = -L.
-LDLIBS  = -lwireconf -ltimer -lm
 TARGETS = libwireconf.a do_wireconf
 endif
+
+.SUFFIXES:  .c .o
+.c.o:
+	${CC} ${CFLAGS} -c -o $@ $< ${INCS}
+.o:
+	${CC} -o $@ $< ${INCS}
 
 all: $(TARGETS)
 
 ifeq ($(UNAME), Linux)
-libnetlink.a: $(NLOBJ)
-	$(AR) rcs $@ $(NLOBJ) && ranlib $@
+libnetlink.a: ${NLOBJ}
+	${AR} rcs ${LIBDIR}/$@ ${NLOBJ} && ranlib ${LIBDIR}/$@
 
-libtc.a: $(TCOBJ)
-	$(AR) rcs $@ $(TCOBJ) && ranlib $@
+libtc.a: ${TCOBJ}
+	${AR} rcs ${LIBDIR}/$@ ${TCOBJ} && ranlib ${LIBDIR}/$@
 
 #ip: $(IPOBJ) $(LIBNETLINK) $(LIBUTIL)
 endif
 
-libwireconf.a: wireconf.h wireconf.c wireconf.o global.h message.h statistics.o
-	ar rcs libwireconf.a wireconf.o statistics.o $(TCOBJ) $(NLOBJ) && ranlib libwireconf.a
+libwireconf.a: wireconf.c wireconf.o statistics.o
+	ar rcs ${LIBDIR}/$@ wireconf.o statistics.o ${TCOBJ} ${NLOBJ} && ranlib ${LIBDIR}/$@
 
-statistics.o: statistics.c statistics.h
+statistics.o: statistics.c
 
 ifeq ($(UNAME), Linux)
-do_wireconf: do_wireconf.o routing_info.o libwireconf.a libtc.a libnetlink.a $(WCOBJ)
-	$(CC) $(CFLAGS) -g -export-dynamic -o $@ do_wireconf.o routing_info.o $(WCOBJ) $(LDFLAGS) $(LDLIBS)
+do_wireconf: do_wireconf.o routing_info.o ${WCOBJ} ${TCOBJ} ${NLOBJ}
+	${CC} ${CFLAGS} -g -export-dynamic -o ${BINDIR}/$@ do_wireconf.o routing_info.o ${WCOBJ} $(LDFLAGS) ${INCS} ${LIBS}
 endif
 ifeq ($(UNAME), FreeBSD)
-do_wireconf: do_wireconf.c routing_info.o libwireconf.a  
-	$(CC) $(CFLAGS) -o $@ do_wireconf.c routing_info.o $(LDFLAGS) $(LDLIBS)
+do_wireconf: do_wireconf.c routing_info.o 
+	${CC} ${CFLAGS} -o $@ do_wireconf.c routing_info.o ${INCS} ${LIBS}
 endif
 
 do_wireconf.o: do_wireconf.c
-routing_info.o: routing_info.c routing_info.h
+routing_info.o: routing_info.c
 
 ifeq ($(UNAME), Linux)
-test: libnetlink.a libtc.a $(TOBJ) $(LIBNETLINK) $(TESTOBJ)
+test: $(TCOBJ) $(LIBNETLINK) $(TESTOBJ)
 	gcc -export-dynamic -o $@ test.o $(LDFLAGS) $(LDLIBS)
 endif
 
 clean:
-	rm -f $(ALLOBJ) $(TARGETS) $(NLOBJ) *.o
+	rm -f ${ALLOBJ} ${TARGETS} *.o
+	cd ${LIBDIR}; rm -f ${LIB_TARGET}
+	cd ${BINDIR}; rm -f ${BIN_TARGET}

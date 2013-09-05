@@ -59,22 +59,10 @@
 
 
 ///////////////////////////////////////////////////////////
-// Version management constants
-///////////////////////////////////////////////////////////
-
-#define MAJOR_VERSION              1
-#define MINOR_VERSION              5
-#define SUBMINOR_VERSION           0
-#define IS_BETA                    TRUE
-
-
-///////////////////////////////////////////////////////////
 // Various constants
 ///////////////////////////////////////////////////////////
 
 // a small value used when comparing doubles for equality
-#define EPSILON         1e-6
-
 #define MOTION_OUTPUT_NAM         0
 #define MOTION_OUTPUT_NS2         1
 

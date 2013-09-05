@@ -15,41 +15,38 @@ endif
 
 #MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_DEBUG -DMESSAGE_INFO
 MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO
-GENERAL_FLAGS = -Wall -Werror ${MESSAGE_FLAGS}
 
-# release-specific compile flags
 ifeq (${COMPILE_TYPE}, debug)
-# generate debugging info
-GCC_FLAGS = -g ${GENERAL_FLAGS}
+GCC_FLAGS= -g
+else ifeq (${COMPILE_TYPE}, profile)
+GCC_FLAGS=-pg 
+else ifeq (${COMPILE_TYPE}, release)
 endif
-ifeq (${COMPILE_TYPE}, profile)
-# generate profiling info
-GCC_FLAGS = -pg ${GENERAL_FLAGS}
-endif
-ifeq (${COMPILE_TYPE}, release)
-# no additional info
-GCC_FLAGS = ${GENERAL_FLAGS}
-endif
+CFLAGS+=-Wall ${MESSAGE_FLAGS}
 
-LIBS = -lrt -lm -L. -ltimer
+BINDIR=../bin
+LIBDIR=../lib
+INCDIR=../include
+
+INCS=-I${INCDIR}
+LIBS=-L${LIBDIR} -ltimer -lrt -lm
 
 TARGETS = libtimer.a test_timer
 
 all: ${TARGETS}
 
 libtimer.a: timer.o
-	ar rc libtimer.a timer.o && ranlib libtimer.a	
-	cp libtimer.a ../libs
+	${AR} rc ${LIBDIR}/$@ $< && ranlib ${LIBDIR}/$@
 
-timer.o: timer.c timer.h timer_global.h timer_message.h
-	$(CC) ${GCC_FLAGS} -c timer.c
+timer.o: timer.c
+	${CC} ${CFLAGS} -c $< ${INCS}
 
-test_timer: test_timer.o libtimer.a
-	$(CC) ${GCC_FLAGS} -o test_timer test_timer.o ${LIBS}
+test_timer: test_timer.o 
+	${CC} ${CFLAGS} -o $@ $< ${INCS} ${LIBS}
 
-test_timer.o: test_timer.c timer.h timer_global.h timer_message.h
-	$(CC) ${GCC_FLAGS} -c test_timer.c
+test_timer.o: test_timer.c 
+	${CC} ${CFLAGS} -c $< ${INCS}
 
 clean:
-	rm -f ${TARGETS} *.o *.a core ../libs/libtimer.a
-
+	rm -f ${TARGETS} *.o *.a core 
+	cd ${LIBDIR}; rm -f libtimer.a

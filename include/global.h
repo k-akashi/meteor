@@ -53,6 +53,8 @@
 #define ETH_SIZE                        6
 #endif
 
+#define IP_ADDR_SIZE                    16
+#define FIRST_NODE_ID                   0
 
 /////////////////////////////////////////////
 // Definitions of the main structures

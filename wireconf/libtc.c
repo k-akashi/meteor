@@ -16,7 +16,7 @@
 #include "tc_common.h"
 #include "tc_util.h"
 
-#define TC_H_UNSPEC	(0U)
+#define TC_H_UNSPEC (0U)
 #define TC_H_ROOT   (0xFFFFFFFFU)
 
 #define TC_HANDLE(maj, min) (maj << 16 | min)
@@ -132,8 +132,8 @@ char *type;
         memset(&qp, 0, sizeof(struct qdisc_parameter));
         // lookup device table and set device 
         //if(set_ifb(ifb_device_name, "up") < 0) {
-        //	printf("cannot create ifb device\n");
-        //	return 1;
+        //  printf("cannot create ifb device\n");
+        //  return 1;
         //}
         if(cmd == RTM_DELQDISC) {
             strncpy(k, type, sizeof(k) - 1);

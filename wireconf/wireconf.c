@@ -113,7 +113,7 @@ struct if_list iflist;
 #define MAX_DEV 16
 int dev_no = 0;
 struct DEVICE_LIST {
-    char dst_address[15];
+    char dst_address[16];
     char device[16];
 } device_list[MAX_DEV];
 #endif // INGRESS 
@@ -510,12 +510,19 @@ int direction;
         device_name =  (char* )get_route_info("dev", dst);
         device_name = "eth5";
     }
+    else {
+        device_name = "ifb0";
+    }
+
     memset(&qp, 0, sizeof(struct qdisc_parameter));
     memset(&ufp, 0, sizeof(struct u32_parameter));
 
+/*
+    dprintf(("[add_rule] device_name : %s\n", device_name));
     strcpy(device_list[dev_no].dst_address, dst);
     strcpy(device_list[dev_no].device, device_name);
     dev_no++;
+*/
 
     dprintf(("[add_rule] rulenum = %d\n", handle_nr));
     qp.limit = 100000;
