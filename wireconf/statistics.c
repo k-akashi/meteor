@@ -389,7 +389,7 @@ channel_utilization=\t%f RECEIVED from %s:%d\t => incoming_id=%d", get_elapsed_t
 }
 
 float
-compute_channel_utilization (struct binary_record_class *binary_record,
+compute_channel_utilization (struct bin_rec_cls *binary_record,
                  long long unsigned int delta_pkt_counter,
                  long long unsigned int delta_byte_counter,
                  float time_interval)
@@ -482,7 +482,7 @@ compute_channel_utilization (struct binary_record_class *binary_record,
 
 
 float
-compute_transmission_probability (struct binary_record_class *binary_record,
+compute_transmission_probability (struct bin_rec_cls *binary_record,
                   long long unsigned int delta_pkt_counter,
                   long long unsigned int delta_byte_counter,
                   float time_interval,
@@ -570,8 +570,8 @@ compute_transmission_probability (struct binary_record_class *binary_record,
 
 int
 adjust_deltaQ (struct wireconf_class *wireconf,
-           struct binary_record_class **binary_records_ucast,
-           struct binary_record_class *adjusted_binary_records_ucast,
+           struct bin_rec_cls **binary_records_ucast,
+           struct bin_rec_cls *adjusted_binary_records_ucast,
            int *binary_records_ucast_changed, float *avg_frame_sizes)
 {
   int i;
@@ -950,7 +950,7 @@ adjust_loss_rate(float loss_rate, float channel_utilization_others)
 // compute collision probability
 float
 compute_collision_probability (struct wireconf_class *wireconf, int rcv_id,
-                   struct binary_record_class
+                   struct bin_rec_cls
                    **binary_records_ucast)
 {
   int i;
@@ -1027,8 +1027,7 @@ compute_collision_probability (struct wireconf_class *wireconf, int rcv_id,
 //Lan: function to compute channel utilization for cwb
 float
 compute_cwb_channel_utilization (struct wireconf_class *wireconf,
-                 struct binary_record_class
-                 *adjusted_records_ucast)
+                 struct bin_rec_cls *adjusted_records_ucast)
 {
   int node_i, pipe_i;
   float cwb_channel_utilization;

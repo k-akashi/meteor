@@ -130,7 +130,7 @@ char* dev;
 uint32_t id[4];
 char* protocolid;
 char* type;
-struct u32_parameter* up;
+struct u32_params* up;
 {
 	uint16_t protocol_id;
 	uint32_t prio = 16;

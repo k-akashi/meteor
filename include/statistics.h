@@ -89,21 +89,21 @@ void *stats_send_thread (void *arg);
 // traffic statistics sent by other wireconf instances
 void *stats_listen_thread (void *arg);
 
-float compute_channel_utilization (struct binary_record_class *binary_record,
+float compute_channel_utilization (struct bin_rec_cls *binary_record,
                    long long unsigned int delta_pkt_counter,
                    long long unsigned int delta_byte_counter,
                    float time_interval);
 
 float compute_transmission_probability
-  (struct binary_record_class *binary_record,
+  (struct bin_rec_cls *binary_record,
    long long unsigned int delta_pkt_counter,
    long long unsigned int delta_byte_counter, float time_interval,
    float *adjusted_float_delta_pkt_counter1);
 
 
 int adjust_deltaQ (struct wireconf_class *wireconf,
-           struct binary_record_class **binary_records_ucast,
-           struct binary_record_class *adjusted_binary_records_ucast,
+           struct bin_rec_cls **binary_records_ucast,
+           struct bin_rec_cls *adjusted_binary_records_ucast,
            int *binary_records_ucast_changed, float *avg_frame_sizes);
 
 float adjust_delay (float delay, float channel_utilization_others);
@@ -116,12 +116,10 @@ float adjust_loss_rate (float loss_rate, float channel_utilization_others);
 // compute collision probability
 float compute_collision_probability (struct wireconf_class *wireconf,
                      int rcv_i,
-                     struct binary_record_class
+                     struct bin_rec_cls
                      **binary_records_ucast);
 
 // Lan added on Oct. 01 for computing cwb channel utilization
-float compute_cwb_channel_utilization (struct wireconf_class *wireconf,
-                       struct binary_record_class
-                       *adjusted_records_ucast);
+float compute_cwb_channel_utilization (struct wireconf_class *wireconf, struct bin_rec_cls *adjusted_records_ucast);
 
 #endif /* !__STATISTICS_H */

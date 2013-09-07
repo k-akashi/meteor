@@ -88,7 +88,7 @@ main (int argc, char *argv[])
   struct binary_time_record_class binary_time_record;
 
   // binary file record data structure and max count
-  struct binary_record_class *binary_records = NULL;
+  struct bin_rec_cls *binary_records = NULL;
   int binary_records_max_count;
 
   // counters for time and binary records
@@ -130,7 +130,7 @@ main (int argc, char *argv[])
 
   printf ("Data structure [bytes]: ");
   printf ("binary_header_class=%zu  binary_time_record_class=%zu  \
-binary_record_class=%zu\n", sizeof (struct binary_header_class), sizeof (struct binary_time_record_class), sizeof (struct binary_record_class));
+bin_rec_cls=%zu\n", sizeof (struct binary_header_class), sizeof (struct binary_time_record_class), sizeof (struct bin_rec_cls));
   printf
     ("------------------------------------------------------------------------\n");
 
@@ -171,9 +171,9 @@ binary_record_class=%zu\n", sizeof (struct binary_header_class), sizeof (struct 
   binary_records_max_count = binary_header.interface_number
     * (binary_header.interface_number - 1);
   binary_records =
-    (struct binary_record_class *) calloc (binary_records_max_count,
+    (struct bin_rec_cls *) calloc (binary_records_max_count,
 					   sizeof (struct
-						   binary_record_class));
+						   bin_rec_cls));
   if (binary_records == NULL)
     {
       WARNING ("Cannot allocate memory for records");

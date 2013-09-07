@@ -14,7 +14,7 @@
 
 static int
 tbf_opt(qp, n)
-struct qdisc_parameter* qp;
+struct qdisc_params* qp;
 struct nlmsghdr *n;
 {
 	struct tc_tbf_qopt opt;
@@ -155,7 +155,7 @@ int
 add_tbf_qdisc(dev, id, qp)
 char* dev;
 uint32_t id[4];
-struct qdisc_parameter qp;
+struct qdisc_params qp;
 {
 	char device[16];
 	char qdisc_kind[16] = "tbf";
@@ -211,7 +211,7 @@ int
 change_tbf_qdisc(dev, id, qp)
 char* dev;
 uint32_t id[4];
-struct qdisc_parameter qp;
+struct qdisc_params qp;
 {
 	char device[16];
 	char qdisc_kind[16] = "tbf";

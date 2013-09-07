@@ -600,7 +600,7 @@ io_binary_print_time_record (struct binary_time_record_class
 
 // print binary record
 void
-io_binary_print_record (struct binary_record_class *binary_record)
+io_binary_print_record (struct bin_rec_cls *binary_record)
 {
   /*
      printf ("-- Record: from_node=%d to_node=%d FER=%.4f num_retr=%.4f \
@@ -615,8 +615,8 @@ standard=%d op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_rec
 
 // copy binary record
 void
-io_binary_copy_record (struct binary_record_class *binary_record_dst,
-		       struct binary_record_class *binary_record_src)
+io_binary_copy_record (struct bin_rec_cls *binary_record_dst,
+		       struct bin_rec_cls *binary_record_src)
 {
   binary_record_dst->from_id = binary_record_src->from_id;
   binary_record_dst->to_id = binary_record_src->to_id;
@@ -632,7 +632,7 @@ io_binary_copy_record (struct binary_record_class *binary_record_dst,
 
 // build binary record
 void
-io_binary_build_record (struct binary_record_class *binary_record,
+io_binary_build_record (struct bin_rec_cls *binary_record,
 			struct connection_class *connection,
 			struct scenario_class *scenario)
 {
@@ -651,7 +651,7 @@ io_binary_build_record (struct binary_record_class *binary_record,
 // return TRUE if data is same with the one in the record,
 // FALSE otherwise
 int
-io_binary_compare_record (struct binary_record_class *binary_record,
+io_binary_compare_record (struct bin_rec_cls *binary_record,
 			  struct connection_class *connection,
 			  struct scenario_class *scenario)
 {
@@ -840,11 +840,11 @@ io_binary_write_time_record_to_file2 (struct binary_time_record_class
 // read a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int
-io_binary_read_record_from_file (struct binary_record_class *binary_record,
+io_binary_read_record_from_file (struct bin_rec_cls *binary_record,
 				 FILE * binary_input_file)
 {
   // record from file
-  if (fread (binary_record, sizeof (struct binary_record_class),
+  if (fread (binary_record, sizeof (struct bin_rec_cls),
 	     1, binary_input_file) != 1)
     {
       WARNING ("Error reading binary record from file");
@@ -858,7 +858,7 @@ io_binary_read_record_from_file (struct binary_record_class *binary_record,
 // read 'number_records' records from a QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int
-io_binary_read_records_from_file (struct binary_record_class *binary_records,
+io_binary_read_records_from_file (struct bin_rec_cls *binary_records,
 				  int number_records,
 				  FILE * binary_input_file)
 {
@@ -866,7 +866,7 @@ io_binary_read_records_from_file (struct binary_record_class *binary_records,
   //printf("Reading %d records from file\n", number_records);
   //fflush(stdout);
 
-  if (fread (binary_records, sizeof (struct binary_record_class),
+  if (fread (binary_records, sizeof (struct bin_rec_cls),
 	     number_records, binary_input_file) != number_records)
     {
       WARNING ("Error reading binary records from file");
@@ -884,7 +884,7 @@ int
 io_write_binary_record_to_file (struct connection_class * connection,
 				struct scenario_class * scenario, FILE * binary_file)
 {
-  binary_record_class binary_record;
+  bin_rec_cls binary_record;
 
   binary_record.from_node = (scenario->nodes[connection->from_node_index]).id;
   binary_record.to_node = (scenario->nodes[connection->to_node_index]).id;
@@ -900,7 +900,7 @@ io_write_binary_record_to_file (struct connection_class * connection,
   //////////////////////////////////////////////////////////////////
 
   // write record to file
-  if (fwrite (&binary_record, sizeof (binary_record_class),
+  if (fwrite (&binary_record, sizeof (bin_rec_cls),
 	      1, binary_file) != 1)
     {
       WARNING ("Error writing binary output record to file");
@@ -915,7 +915,7 @@ io_write_binary_record_to_file (struct connection_class * connection,
 // directly write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int
-io_binary_write_record_to_file2 (struct binary_record_class *binary_record,
+io_binary_write_record_to_file2 (struct bin_rec_cls *binary_record,
 				 FILE * binary_file)
 {
   //////////////////////////////////////////////////////////////////
@@ -924,7 +924,7 @@ io_binary_write_record_to_file2 (struct binary_record_class *binary_record,
   //////////////////////////////////////////////////////////////////
 
   // write record to file
-  if (fwrite (binary_record, sizeof (struct binary_record_class),
+  if (fwrite (binary_record, sizeof (struct bin_rec_cls),
 	      1, binary_file) != 1)
     {
       WARNING ("Error writing binary output record to file");

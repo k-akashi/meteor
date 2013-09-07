@@ -64,7 +64,7 @@ struct binary_time_record_class
 // binary file record holding most important fields
 // NOTE: update 'io_binary_print_record', 'io_binary_build_record', 
 // 'io_copy_record' and 'io_binary_compare_record' when making changes
-struct binary_record_class
+struct bin_rec_cls
 {
   int from_id;
   int to_id;
@@ -82,7 +82,7 @@ struct binary_record_class
 struct io_connection_state_class
 {
   struct binary_time_record_class binary_time_record;
-  struct binary_record_class binary_records[MAX_CONNECTIONS];
+  struct bin_rec_cls binary_records[MAX_CONNECTIONS];
   int state_changed[MAX_CONNECTIONS];
 };
 
@@ -162,21 +162,21 @@ void io_binary_print_time_record (struct binary_time_record_class
 				  *binary_time_record);
 
 // print binary record
-void io_binary_print_record (struct binary_record_class *binary_record);
+void io_binary_print_record (struct bin_rec_cls *binary_record);
 
 // copy binary record
-void io_binary_copy_record (struct binary_record_class *binary_record_dst,
-			    struct binary_record_class *binary_record_src);
+void io_binary_copy_record (struct bin_rec_cls *binary_record_dst,
+			    struct bin_rec_cls *binary_record_src);
 
 // build binary record
-void io_binary_build_record (struct binary_record_class *binary_record,
+void io_binary_build_record (struct bin_rec_cls *binary_record,
 			     struct connection_class *connection,
 			     struct scenario_class *scenario);
 
 // compare with binary record;
 // return TRUE if data is same with the one in the record,
 // FALSE otherwise
-int io_binary_compare_record (struct binary_record_class *binary_record,
+int io_binary_compare_record (struct bin_rec_cls *binary_record,
 			      struct connection_class *connection,
 			      struct scenario_class *scenario);
 
@@ -214,13 +214,13 @@ int io_binary_write_time_record_to_file2 (struct binary_time_record_class
 
 // read a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_record_from_file (struct binary_record_class
+int io_binary_read_record_from_file (struct bin_rec_cls
 				     *binary_record,
 				     FILE * binary_input_file);
 
 // read 'number_records' records from a QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_records_from_file (struct binary_record_class
+int io_binary_read_records_from_file (struct bin_rec_cls
 				      *binary_records, int number_records,
 				      FILE * binary_input_file);
 
@@ -232,7 +232,6 @@ int io_binary_write_record_to_file (struct connection_class *connection,
 
 // directly write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_write_record_to_file2 (struct binary_record_class
-				     *binary_record, FILE * binary_file);
+int io_binary_write_record_to_file2 (struct bin_rec_cls *binary_record, FILE * binary_file);
 
 #endif

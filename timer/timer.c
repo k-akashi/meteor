@@ -75,8 +75,8 @@ timer_reset(struct timer_handle *handle, double zero_time)
   DEBUG ("Resetting timer...");
 
   // use current time as the "zero" reference
-  clock_gettime (TIMER_TYPE, &(handle->zero_tp));
-  DEBUG_print_timespec (&(handle->zero_tp));
+  clock_gettime(TIMER_TYPE, &(handle->zero_tp));
+  DEBUG_print_timespec(&(handle->zero_tp));
 
   // set the logical "zero" time
   handle->zero_time = zero_time;

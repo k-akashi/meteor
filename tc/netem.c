@@ -45,7 +45,7 @@ const char* str;
 
 static int
 netem_opt(qp, n)
-struct qdisc_parameter* qp;
+struct qdisc_params* qp;
 struct nlmsghdr *n;
 {
     uint32_t latency;
@@ -144,7 +144,7 @@ int
 add_netem_qdisc(dev, id, qp)
 char* dev;
 uint32_t id[4];
-struct qdisc_parameter qp;
+struct qdisc_params qp;
 {
     char device[16];
     char qdisc_kind[16] = "netem";
@@ -202,7 +202,7 @@ int
 change_netem_qdisc(dev, id, qp)
 char* dev;
 uint32_t id[4];
-struct qdisc_parameter qp;
+struct qdisc_params qp;
 {
     uint32_t flags;
     char device[16];

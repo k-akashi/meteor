@@ -41,94 +41,53 @@
 
 #include <sys/queue.h>
 #include <sys/socket.h>
-
 #include <net/if.h>
 #include <netinet/in.h>
+#include <ctype.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "global.h"
+#include "wireconf.h"
 
 #ifdef __FreeBSD__
 #include <netinet/ip_fw.h>
 #include <netinet/ip_dummynet.h>
 #endif
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include "global.h"
-#include "wireconf.h"
 #ifdef __linux
 #include "utils.h"
-#include <net/if.h>
 #include "ip_common.h"
 #include "tc_common.h"
 #include "tc_util.h"
 #endif
 
 #define FRAME_LENGTH 1522
-
-#ifdef __linux
+#define INGRESS 1 // 1 : ingress mode, 0 : egress mode
+#define MAX_DEV 4096
 #define DEV_NAME 256
 #define OFFSET_RULE 32767
-#endif
 
-#ifdef MESSAGE_WARNING
-#define WARNING(message...) do {                                             \
-  fprintf(stdout, "libwireconf WARNING: %s, line %d: ", __FILE__, __LINE__); \
-  fprintf(stdout, message); fprintf(stdout,"\n");                            \
-} while(0)
-#else
-#define WARNING(message...) /* message */
-#endif
-
-#ifdef MESSAGE_DEBUG
-#define DEBUG(message...) do {                                             \
-  fprintf(stdout, "libwireconf DEBUG: %s, line %d: ", __FILE__, __LINE__); \
-  fprintf(stdout, message); fprintf(stdout,"\n");                          \
-} while(0)
-#else
-#define DEBUG(message...) /* message */
-#endif
-
-#ifdef MESSAGE_INFO
-#define INFO(message...) do {                                             \
-  fprintf(stdout, "libwireconf INFO: %s, line %d: ", __FILE__, __LINE__); \
-  fprintf(stdout, message); fprintf(stdout,"\n");                         \
-} while(0)
-#else
-#define INFO(message...) /* message */
-#endif
-
-#ifdef __linux
-#ifndef TBF
-#define TBF 0
-#endif 
-
-#define INGRESS 0 // 1 : ingress mode, 0 : egress mode
 #ifdef INGRESS
-char* ifb_device_name = "ifb0";
+char ifb_devname[DEV_NAME] = "ifb0";
+int32_t dev_no = 0;
 struct if_list iflist;
-
-#define MAX_DEV 16
-int dev_no = 0;
-struct DEVICE_LIST {
+struct device_list {
     char dst_address[16];
-    char device[16];
-} device_list[MAX_DEV];
-#endif // INGRESS 
-#endif // __linux
+    char dev[DEV_NAME];
+} dev_list[MAX_DEV];
+#endif 
 
 typedef union {
     uint8_t octet[4];
     uint32_t word;
 } in4_addr;
 
-#ifdef __linux
-int priv_delay = 0;
+float priv_delay = 0;
 double priv_loss = 0;
-int priv_rate = 0;
-#endif
+float priv_rate = 0;
 
 #ifdef __FreeBSD__
 static int 
@@ -201,7 +160,7 @@ close_socket(socket_id)
 int socket_id;
 {
 #ifdef __FreeBSD__
-  close(socket_id);
+    close(socket_id);
 #elif __linux
     rtnl_close(&rth);
 #endif
@@ -305,8 +264,8 @@ int16_t rulenum;
 
 #ifdef __FreeBSD__
 int
-add_rule(s, rulenum, pipe_nr, src, dst, direction)
-int s;
+add_rule_ipfw(dsock, rulenum, pipe_nr, src, dst, direction)
+int dsock;
 uint16_t rulenum;
 int pipe_nr;
 char *src;
@@ -379,7 +338,6 @@ int direction;
         if(direction == DIRECTION_OUT) {
             cmd[clen].len |= F_NOT;
         }
-        //printf("len=0x%x len&F_NOT=0x%x flen=%d\n", cmd[clen].len, cmd[clen].len & F_NOT, F_LEN(cmd+clen));
         clen += 1;
     }
 
@@ -398,43 +356,43 @@ int direction;
     p->rulenum = rulenum;
     bcopy(cmd, &p->cmd, clen * 4);
 
-    if(apply_socket_options(s, IP_FW_ADD, p, sizeof(struct ip_fw) + clen * 4) < 0) {
+    if(apply_socket_options(dsock, IP_FW_ADD, p, sizeof(struct ip_fw) + clen * 4) < 0) {
         WARNING("Adding rule operation failed");
         return ERROR;
     }
     return 0;
 }
+#endif
 
-#elif __linux
 int
 init_rule(dst)
 char *dst;
 {
-    char *device_name;
+#ifdef __linux
+    char *devname;
     uint32_t htb_qdisc_id[4];
-    //struct qdisc_parameter qp;
-    //struct u32_parameter ufp;
+    //struct qdisc_params qp;
+    //struct u32_params ufp;
 
     if(!INGRESS) {
-        device_name = malloc(DEV_NAME);
-        device_name =  (char* )get_route_info("dev", dst);
-        device_name = "eth5";
+        devname =  get_route_info("dev", dst);
+        devname = "eth5";
     }
     if(INGRESS) {
-        set_ifb(ifb_device_name, IF_UP);
+        set_ifb(ifb_devname, IF_UP);
 /*
-        device_name = "eth4";
+        devname = "eth4";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
-        delete_netem_qdisc(device_name, 0);
-        add_ingress_qdisc(device_name);
-        add_ingress_filter(device_name, ifb_device_name);
+        delete_netem_qdisc(devname, 0);
+        add_ingress_qdisc(devname);
+        add_ingress_filter(devname, ifb_devname);
 */
 
-        device_name = "eth5";
+        devname = "eth5";
         dprintf(("\n\n[init_rule] add ingress qdisc\n"));
-        delete_netem_qdisc(device_name, 0);
-//        add_ingress_qdisc(device_name);
-//        add_ingress_filter(device_name, ifb_device_name);
+        delete_netem_qdisc(devname, 0);
+//        add_ingress_qdisc(devname);
+//        add_ingress_filter(devname, ifb_devname);
 
 /*
         int i;
@@ -455,16 +413,16 @@ char *dst;
         nifaces =  ifconf.ifc_len / sizeof(struct ifreq);
         dprintf(("Interfaces (count = %d)\n", nifaces));
         for(i = 0; i < nifaces; i++) {
-            device_name = ifreqs[i].ifr_name;
-            dprintf(("[init_rule] add ingress device %s\n", device_name));
+            devname = ifreqs[i].ifr_name;
+            dprintf(("[init_rule] add ingress device %s\n", devname));
 
             dprintf(("\n\n[init_rule] add ingress qdisc\n"));
-            delete_netem_qdisc(device_name, 0);
-            add_ingress_qdisc(device_name);
-            add_ingress_filter(device_name, ifb_device_name);
+            delete_netem_qdisc(devname, 0);
+            add_ingress_qdisc(devname);
+            add_ingress_filter(devname, ifb_devname);
         }
 */
-        device_name = ifb_device_name;
+        devname = ifb_devname;
     }
     dprintf(("\n\n[init_rule] add htb qdisc\n"));
  
@@ -473,54 +431,55 @@ char *dst;
     htb_qdisc_id[2] = 1;
     htb_qdisc_id[3] = 0;
  
-    delete_netem_qdisc(device_name, 0);
+    delete_netem_qdisc(devname, 0);
     dprintf(("\n\n[init_rule] add htb qdisc\n"));
-    add_htb_qdisc(device_name, htb_qdisc_id);
+    add_htb_qdisc(devname, htb_qdisc_id);
 
 /* XXX
         ufp.match.type = "u32";
         ufp.classid[0] = 1;
         ufp.classid[1] = 1;
         ufp.action = "mirred";
-        ufp.rdev = ifb_device_name;
-        //tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
+        ufp.rdev = ifb_devname;
+        //tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, devname, parent_filterid, "NULL", "ip", "u32", &ufp);
 */
 
+#endif
     return 0;
 }
 
+#ifdef __linux
 int
-add_rule(s, rulenum, handle_nr, src, dst, direction)
-int s;
+add_rule_netem(rulenum, handle_nr, src, dst, direction)
 uint16_t rulenum;
 int handle_nr;
 char *src;
 char *dst;
 int direction;
 {
-    char *device_name;
+    char *devname;
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
     uint32_t filter_id[4];
-    struct qdisc_parameter qp;
-    struct u32_parameter ufp;
+    struct qdisc_params qp;
+    struct u32_params ufp;
 
     if(!INGRESS) {
-        device_name = malloc(DEV_NAME);
-        device_name =  (char* )get_route_info("dev", dst);
-        device_name = "eth5";
+        devname = malloc(DEV_NAME);
+        devname =  (char* )get_route_info("dev", dst);
+        devname = "eth5";
     }
     else {
-        device_name = "ifb0";
+        devname = "ifb0";
     }
 
-    memset(&qp, 0, sizeof(struct qdisc_parameter));
-    memset(&ufp, 0, sizeof(struct u32_parameter));
+    memset(&qp, 0, sizeof(struct qdisc_params));
+    memset(&ufp, 0, sizeof(struct u32_params));
 
 /*
-    dprintf(("[add_rule] device_name : %s\n", device_name));
+    dprintf(("[add_rule] devname : %s\n", devname));
     strcpy(device_list[dev_no].dst_address, dst);
-    strcpy(device_list[dev_no].device, device_name);
+    strcpy(device_list[dev_no].device, devname);
     dev_no++;
 */
 
@@ -529,11 +488,6 @@ int direction;
     qp.delay = 0.001;
     qp.rate = Gigabit;
     qp.buffer = Gigabit / 1000;
-
-#ifdef PFIFO
-    char pfifo_handle_id[10];
-    char pfifo_parent_id[10];
-#endif
 
     char srcaddr[20];
     char dstaddr[20];
@@ -553,74 +507,72 @@ int direction;
     filter_id[2] = 1;
     filter_id[3] = handle_nr;
 
-    sprintf(srcaddr, "%s/32", src);
-    sprintf(dstaddr, "%s/32", dst);
-    dprintf(("[add_rule] filter source address : %s\n", srcaddr));
-    dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
-
-
+    if(src != NULL) {
+        dprintf(("[add_rule] filter source address : %s\n", src));
+        sprintf(srcaddr, "%s/32", src);
+        dprintf(("[add_rule] filter source address : %s\n", srcaddr));
+    }
+    else {
+        dprintf(("[add_rule] source address is NULL\n"));
+    }
+    if(dst != NULL) {
+        sprintf(dstaddr, "%s/32", dst);
+        dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
+    }
+    else {
+        dprintf(("[add_rule] destination address is NULL\n"));
+    }
 
     if(INGRESS) {
-        device_name = ifb_device_name;
+        devname = ifb_devname;
     }
     ufp.match[IP_SRC].type = "u32";
-    ufp.match[IP_SRC].protocol = "ip";
+    ufp.match[IP_SRC].proto = "ip";
     ufp.match[IP_SRC].filter = "src";
     ufp.match[IP_SRC].arg = srcaddr;
     ufp.match[IP_DST].type = "u32";
-    ufp.match[IP_DST].protocol = "ip";
+    ufp.match[IP_DST].proto = "ip";
     ufp.match[IP_DST].filter = "dst";
     ufp.match[IP_DST].arg = dstaddr;
     ufp.classid[0] = filter_id[2];
     ufp.classid[1] = filter_id[3];
 
     dprintf(("\n\n[add_rule] add htb class\n"));
-    add_htb_class(device_name, htb_class_id, 10000000);
+    add_htb_class(devname, htb_class_id, 10000000);
 
     dprintf(("\n\n[add_rule] add netem qdisc\n"));
-    add_netem_qdisc(device_name, netem_qdisc_id, qp);
+    add_netem_qdisc(devname, netem_qdisc_id, qp);
 
     dprintf(("\n\n[add_rule] add tc filter\n"));
-    add_tc_filter(device_name, filter_id, "ip", "u32", &ufp);
+    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
     ufp.match[IP_SRC].arg = dstaddr;
     ufp.match[IP_DST].arg = srcaddr;
-    add_tc_filter(device_name, filter_id, "ip", "u32", &ufp);
-    //tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, filter_id, "ip", "u32", &ufp);
-/*
-        char *fcmd = NULL;
-        fcmd = malloc(1024);
-        sprintf(fcmd, "tc filter add dev %s protocol ip parent %d: prio 1 u32 match ip dst %s/32 flowid 1:c8", 
-            device_name, filter_id[0], dst);
-        dprintf(("[add_rule] filter command : %s\n", fcmd));
-        if(system(fcmd)) {
-            dprintf(("[add_rule] Failed add tc filter\n"));
-            exit(1);
-        }
-*/
-/*
-        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, device_name, "1", "ingress", qp, "ingress");
-        ufp.match.type = "u32";
-        ufp.classid[0] = 1;
-        ufp.classid[1] = 1;
-        ufp.action = "mirred";
-        ufp.rdev = ifb_device_name;
-*/
-//        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, "ffff:", NULL, "ip", "u32", up);
-//        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, handleid, "root", qp, "netem");
-//        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, bwid, parent_netemid, qp, "tbf");
-//        tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, ifb_device_name, pfifoid, parent_bwid, qp, "pfifo");
-//        tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, device_name, parent_filterid, "NULL", "ip", "u32", &ufp);
+    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
     return 0;
 }
 #endif
 
-// delete an ipfw rule;
-// return SUCCESS on succes, ERROR on error
-#ifdef __FreeBSD__
+int 
+add_rule(s, rulenum, pipe_nr, src, dst, direction)
+int s;
+uint16_t rulenum;
+int pipe_nr;
+char *src;
+char *dst;
+int direction;
+{
+#ifdef __FreeBSD
+    return add_rule_ipfw(s, rulenum, pipe_nr, src, dst, direction);
+#elif __linux
+    return add_rule_netem(rulenum, pipe_nr, src, dst, direction);
+#endif
+}
+
+#ifdef __FreeBSD
 int
-delete_rule(s, rule_number)
+delete_ipfw(s, rule_number)
 uint32_t s;
 uint32_t rule_number;
 {
@@ -639,35 +591,34 @@ uint32_t s;
 char* dst;
 uint32_t rule_number;
 {
-    struct qdisc_parameter qp; 
-    char* device_name;
+    struct qdisc_params qp; 
+    char* devname;
 
     memset(&qp, 0, sizeof(qp));
-    device_name = malloc(DEV_NAME);
+    devname = malloc(DEV_NAME);
 
 
     if(!INGRESS) {
-        device_name = (char*)get_route_info("dev", dst);
-        //delete_netem_qdisc(device_name, 0);
+        devname = (char*)get_route_info("dev", dst);
+        //delete_netem_qdisc(devname, 0);
         delete_netem_qdisc("eth5", INGRESS);
     }
     if(INGRESS) {
-        device_name = "eth0";
 /*
         int ret;
         int cmd_len = 1024;
         char *cmd;
 
         cmd = malloc(cmd_len);
-        tc_cmd(RTM_DELQDISC, 0, ifb_device_name, "1", "root", qp, "pfifo");
-        sprintf(cmd, "tc qdisc del dev %s root", device_name);
+        tc_cmd(RTM_DELQDISC, 0, ifb_devname, "1", "root", qp, "pfifo");
+        sprintf(cmd, "tc qdisc del dev %s root", devname);
         ret = system(cmd);
         if(ret != 0) {
             exit(1);
         }
 */
-        //delete_netem_qdisc(device_name, 0);
-        //delete_netem_qdisc(ifb_device_name, 1);
+        //delete_netem_qdisc(devname, 0);
+        //delete_netem_qdisc(ifb_devname, 1);
         delete_netem_qdisc("eth5", INGRESS);
     }
 
@@ -675,7 +626,20 @@ uint32_t rule_number;
 }
 #endif
 
-#ifdef __FreeBSD__
+int
+delete_rule(s, dst, rule_number)
+uint32_t s;
+char* dst;
+uint32_t rule_number;
+{
+#ifdef __FreeBSD
+    return delete_ipfw(s, rule_number);
+#elif __linux
+    return delete_netem(s, dst, rule_number);
+#endif
+}
+
+#ifdef __FreeBSD
 void
 print_rule(rule)
 struct ip_fw *rule;
@@ -683,13 +647,10 @@ struct ip_fw *rule;
     printf("Rule #%d (size=%d):\n", rule->rulenum, sizeof(*rule));
     printf("\tnext=%p next_rule=%p\n", rule->next, rule->next_rule);
     printf("\tact_ofs=%u cmd_len=%u rulenum=%u set=%u _pad=%u\n", 
-            rule->act_ofs, rule->cmd_len, rule->rulenum, rule->set, rule->_pad);
-    printf("\tpcnt=%llu bcnt=%llu timestamp=%u\n", rule->pcnt, rule->bcnt, 
-            rule->timestamp);
+        rule->act_ofs, rule->cmd_len, rule->rulenum, rule->set, rule->_pad);
+    printf("\tpcnt=%llu bcnt=%llu timestamp=%u\n", rule->pcnt, rule->bcnt, rule->timestamp);
 }
-#endif
 
-#ifdef __FreeBSD__
 void
 print_pipe(pipe)
 struct dn_pipe *pipe;
@@ -708,7 +669,7 @@ struct dn_pipe *pipe;
 }
 #endif
 
-#ifdef __FreeBSD__
+#ifdef __FreeBSD
 int
 configure_pipe(s, pipe_nr, bandwidth, delay, lossrate)
 int s;
@@ -736,18 +697,17 @@ int lossrate;
 
 #elif __linux
 int
-configure_qdisc(s, dst, handle, bandwidth, delay, lossrate)
-int s;
+configure_qdisc(dst, handle, bandwidth, delay, lossrate)
 char* dst;
 int32_t handle;
 int32_t bandwidth;
 float delay;
 double lossrate;
 {
-    struct qdisc_parameter qp;
-    char *device_name;
+    struct qdisc_params qp;
+    char *devname;
     int config_netem = 0;
-    int config_tbf = 0;
+    int config_bw = 0;
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
     char delaystr[20];
@@ -755,16 +715,19 @@ double lossrate;
     char buffer[20];
 
     memset(&qp, 0, sizeof(qp));
-    device_name = malloc(DEV_NAME);
+    devname = malloc(DEV_NAME);
 
+#ifndef INGRESS
     int i;
     for(i = 0; i <= dev_no; i++) {
-        if(strcmp(device_list[i].dst_address, dst) == 0) {
-            strcpy(device_name, device_list[i].device);
+        if(strcmp(dev_list[i].dst_address, dst) == 0) {
+            strcpy(devname, dev_list[i].dev);
             break;
         }
     }
-    device_name = "eth5";
+#else
+    devname = "eth5";
+#endif
 
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
@@ -794,28 +757,44 @@ double lossrate;
             sprintf(buffer, "%d", bandwidth / 1024);
         }
         priv_rate = bandwidth;
-        config_tbf = 1;
+        config_bw = 1;
     }
 
     if(INGRESS) {
-        device_name = ifb_device_name;
+        devname = ifb_devname;
     }
 
     if(config_netem) {
         qp.limit = 100000;
-        change_netem_qdisc(device_name, netem_qdisc_id, qp);
+        change_netem_qdisc(devname, netem_qdisc_id, qp);
     }
 
     if(INGRESS) {
-            device_name = ifb_device_name;
+            devname = ifb_devname;
     }
-    if(config_tbf) {
+    if(config_bw) {
         qp.rate = rate;
         qp.buffer = buffer;
-        change_htb_class(device_name, htb_class_id, 1 * 1000 * 1000 * 1000);
-//        change_htb_class(device_name, htb_class_id, rate);
+        change_htb_class(devname, htb_class_id, 1 * 1000 * 1000 * 1000);
+//        change_htb_class(devname, htb_class_id, rate);
     }
 
     return SUCCESS;
 }
 #endif
+
+int
+configure_rule(dsock, dst, pipe_nr, bandwidth, delay, lossrate)
+int dsock;
+char* dst;
+int32_t pipe_nr;
+int32_t bandwidth;
+float delay;
+double lossrate;
+{
+#ifdef __FreeBSD
+    return configure_pipe(dsock, pipe_nr, bandwidth, delay, lossrate);
+#elif __linux
+    return configure_qdisc(dst, pipe_nr, bandwidth, delay, lossrate);
+#endif
+}

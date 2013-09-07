@@ -35,6 +35,7 @@
  * Function: Header file of wired-network emulator configuration
  *
  * Authors: Junya Nakata, Razvan Beuran
+ * Changes: Kunio AKASHI
  *
  ***********************************************************************/
 
@@ -56,57 +57,26 @@
 #include <netinet/in.h>
 
 
-/////////////////////////////////////////////
-// Basic constants
-/////////////////////////////////////////////
-
-// traffic directions to which dummynet configuration
-// is to be applied
 #define DIRECTION_BOTH                  0
 #define DIRECTION_IN                    1
 #define DIRECTION_OUT                   2
 
 #define MAX_NODES                       500
 
-/////////////////////////////////////////////
-// Socket manipulation functions
-/////////////////////////////////////////////
-
-// get socket identifier;
-// return socket identifier on succes, ERROR on error
 int get_socket(void);
-
-// close socket specified by socket_id
 void close_socket(int socket_id);
 
 
-////////////////////////////////////////////////
-// Functions implemented by the wireconf library
-////////////////////////////////////////////////
-
-// get a rule
-// NOT WORKING PROPERLY YET!!!!!!!!!!!!!
 #ifdef __FreeBSD__
 int get_rule(uint s, int16_t rulenum);
 #elif __linux
 int get_rule_linux(void);
 #endif
 
-#ifdef __linux
 int init_rule(char *dst);
-#endif
-
-// add an ipfw rule containing a dummynet pipe to the firewall
-// return SUCCESS on succes, ERROR on error
 int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, int direction);
-
-// delete an ipfw rule;
-// return SUCCESS on succes, ERROR on error
-#ifdef __FreeBSD__
-int delete_rule(uint s, u_int32_t rule_number);
-#elif __linux
-int delete_netem(uint s, char* dst, u_int32_t rule_number);
-#endif
+int configure_rule(int s, char* dst, int handle, int bandwidth, float delay, double lossrate);
+int delete_rule(uint s, char *dst, u_int32_t rule_number);
 
 // print a rule structure
 #ifdef __FreeBSD__
@@ -118,13 +88,6 @@ void print_rule(struct ip_fw *rule);
 void print_pipe(struct dn_pipe *pipe);
 #endif
 
-// configure a dummynet pipe;
-// return SUCCESS on succes, ERROR on error
-#ifdef __FreeBSD__
-int configure_pipe(int s, int pipe_nr, int bandwidth, int delay, int lossrate);
-#elif __linux
-int configure_qdisc(int s, char* dst, int handle, int bandwidth, float delay, double lossrate);
-#endif
 
 struct wireconf_class {
     struct timespec start_time;

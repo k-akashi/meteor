@@ -50,7 +50,7 @@ static int print_noqopt(struct qdisc_util *qu, FILE *f,
 	return 0;
 }
 
-static int parse_noqopt(struct qdisc_util *qu, struct qdisc_parameter* qp, struct nlmsghdr* n)
+static int parse_noqopt(struct qdisc_util *qu, struct qdisc_params* qp, struct nlmsghdr* n)
 {
 	if(qp) {
 		fprintf(stderr, "Unknown qdisc \"%s\", hence option is unparsable\n", qu->id);
@@ -69,7 +69,7 @@ static int print_nofopt(struct filter_util *qu, FILE *f, struct rtattr *opt, __u
 	return 0;
 }
 
-static int parse_nofopt(struct filter_util *qu, char *fhandle, struct u32_parameter up, struct nlmsghdr *n, char* dev)
+static int parse_nofopt(struct filter_util *qu, char *fhandle, struct u32_params up, struct nlmsghdr *n, char* dev)
 {
 	__u32 handle;
 

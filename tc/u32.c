@@ -564,24 +564,24 @@ struct nlmsghdr *n;
 {
 	int res = -1;
 
-    dprintf(("[parse_selector] match.protocol : %s\n", match.protocol));
-	if(matches(match.protocol, "u32") == 0) {
+    dprintf(("[parse_selector] match.proto : %s\n", match.proto));
+	if(matches(match.proto, "u32") == 0) {
 		res = parse_u32(sel, 0, 0);
 	    return res;
 	}
-	if(matches(match.protocol, "u16") == 0) {
+	if(matches(match.proto, "u16") == 0) {
 		res = parse_u16(match, sel, 0, 0);
 	    return res;
 	}
-	if(matches(match.protocol, "u8") == 0) {
+	if(matches(match.proto, "u8") == 0) {
 		res = parse_u8(match, sel, 0, 0);
 	    return res;
 	}
-	if(matches(match.protocol, "ip") == 0) {
+	if(matches(match.proto, "ip") == 0) {
 		res = parse_ip(match, sel);
 	    return res;
 	}
-	if(matches(match.protocol, "ip6") == 0) {
+	if(matches(match.proto, "ip6") == 0) {
 		res = parse_ip6(match, sel);
 	    return res;
 	}
@@ -688,7 +688,7 @@ struct tc_u32_sel *sel;
 int
 u32_filter_parse(handle, up, n, dev)
 uint32_t handle;
-struct u32_parameter up;
+struct u32_params up;
 struct nlmsghdr *n;
 char* dev;
 {

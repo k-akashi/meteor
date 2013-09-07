@@ -191,16 +191,13 @@ char *next_hop;
     if(1) {
         int rtf_gateway;;
 #ifdef __FreeBSD__
-//        if((sa = rti_info[RTAX_GATEWAY]) != NULL) {
         rtf_gateway = RTAX_GATEWAY;
 #elif __linux
-//        if((sa = rti_info[RTF_GATEWAY]) != NULL) {
         rtf_gateway = RTF_GATEWAY;
 #endif
         if((sa = rti_info[rtf_gateway]) != NULL) {
 	        gw = (char *) sock_ntop_host(sa, sa->sa_family);
 	
-	        // if gw contains AF_LINK then dst can be reached in 1 hop
 	        if (strncmp(gw, "AF_LINK", 7)) {
                 strncpy(next_hop, gw, 20);
 	            close(sockfd);

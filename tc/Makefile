@@ -1,10 +1,13 @@
-CC=gcc
-CFLAGS=-g -O3 -Wall
+CC = gcc
+CFLAGS := -g -O3 -Wall
+
+DEBUG := -DTCDEBUG
 
 LIBDIR=../lib
 INCDIR=../include
 INCS=-I${INCDIR}
 
+CFLAGS += ${DEBUG}
 
 TARGET=libnetlink.a libtc.a
 

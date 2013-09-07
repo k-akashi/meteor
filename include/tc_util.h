@@ -30,7 +30,7 @@
 
 struct rtnl_handle rth;
 
-struct qdisc_parameter
+struct qdisc_params
 {
 	uint32_t limit;
 	double delay;
@@ -46,14 +46,14 @@ struct qdisc_parameter
 
 struct filter_match {
 	char* type;
-	char* protocol;
+	char* proto;
 	char* filter;
     uint16_t at;
 	char* arg;
 };
 
 
-struct u32_parameter {
+struct u32_params {
 	struct filter_match match[FILTER_MAX];
 	char* offset;
 	char* hashkey;
@@ -72,7 +72,7 @@ struct qdisc_util
 {
 	struct  qdisc_util* next;
 	const char* id;
-	int	(*parse_qopt)(struct qdisc_util* qu, struct qdisc_parameter* qp, struct nlmsghdr* n);
+	int	(*parse_qopt)(struct qdisc_util* qu, struct qdisc_params* qp, struct nlmsghdr* n);
 	int	(*print_qopt)(struct qdisc_util* qu, FILE* f, struct rtattr* opt);
 	int (*print_xstats)(struct qdisc_util* qu, FILE* f, struct rtattr* xstats);
 
@@ -83,8 +83,8 @@ struct qdisc_util
 struct filter_util
 {
 	struct filter_util *next;
-	char	id[16];
-	int	(*parse_fopt)(struct filter_util* qu, char* fhandle, struct u32_parameter, struct nlmsghdr* n, char* dev);
+	char id[16];
+	int	(*parse_fopt)(struct filter_util* qu, char* fhandle, struct u32_params, struct nlmsghdr* n, char* dev);
 	int	(*print_fopt)(struct filter_util* qu, FILE* f, struct rtattr* opt, __u32 fhandle);
 };
 
@@ -112,22 +112,22 @@ extern int get_tc_classid(__u32 *h, const char *str);
 
 extern int parse_action(char *, int, struct nlmsghdr *, char* dev);
 
-extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_parameter qp, char* type);
+extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, struct qdisc_params qp, char* type);
 
-extern int add_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
-extern int change_netem_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
+extern int add_netem_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);
+extern int change_netem_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);
 extern int delete_netem_qdisc(char* device, int ingress);
 extern int add_htb_qdisc(char* device, uint32_t id[4]);
 extern int add_htb_class(char* device, uint32_t id[4], uint32_t bnadwidth);
 extern int change_htb_class(char* device, uint32_t id[4], uint32_t bnadwidth);
-extern int add_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
-extern int change_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_parameter qp);
+extern int add_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);
+extern int change_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);
 
 extern char* get_route_info(char *info, char *addr);
 
-extern int tc_filter_modify(int cmd, unsigned int flags, char* dev, uint32_t id[4], char* protocolid, char* type, struct u32_parameter* up);
-extern int add_tc_filter(char* dev, uint32_t id[4], char* protocolid, char* type, struct u32_parameter* up);
-extern int u32_filter_parse(uint32_t handle, struct u32_parameter up, struct nlmsghdr *n, char* dev);
+extern int tc_filter_modify(int cmd, uint32_t flags, char* dev, uint32_t id[4], char* proto_id, char* type, struct u32_params* up);
+extern int add_tc_filter(char* dev, uint32_t id[4], char* proto_id, char* type, struct u32_params* up);
+extern int u32_filter_parse(uint32_t handle, struct u32_params up, struct nlmsghdr *n, char* dev);
 extern int add_ingress_qdisc(char *dev);
 extern int add_ingress_filter(char *dev, char *ifb_dev);
 

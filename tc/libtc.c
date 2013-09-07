@@ -92,7 +92,7 @@ int flags;
 char *dev;
 char *handleid;
 char *root;
-struct qdisc_parameter qp;
+struct qdisc_params qp;
 char *type;
 {
     struct qdisc_util *q = NULL;
@@ -129,7 +129,7 @@ char *type;
         req.t.tcm_parent = TC_H_ROOT;
     else if(strcmp(root, "ingress") == 0) {
         req.t.tcm_parent = TC_H_INGRESS;
-        memset(&qp, 0, sizeof(struct qdisc_parameter));
+        memset(&qp, 0, sizeof(struct qdisc_params));
         // lookup device table and set device 
         //if(set_ifb(ifb_device_name, "up") < 0) {
         //  printf("cannot create ifb device\n");

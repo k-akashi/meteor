@@ -10,7 +10,7 @@ LIBDIR = ../lib
 INCDIR = ../include
 
 INCS = -I${INCDIR}
-LIBS = -L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat
+LIBS = -L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat -lrt
 
 MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO
 CFLAGS = -g -O3 -Wall ${MESSAGE_FLAGS}
