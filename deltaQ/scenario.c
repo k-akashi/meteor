@@ -46,7 +46,7 @@ scenario_init (struct scenario_class *scenario)
   scenario->environment_number = 0;
   scenario->motion_number = 0;
   scenario->connection_number = 0;
-  scenario->interface_number = 0;
+  scenario->if_num = 0;
 
   scenario->current_time = 0.0;
 }
@@ -55,8 +55,8 @@ scenario_init (struct scenario_class *scenario)
 void
 scenario_print (struct scenario_class *scenario)
 {
-  printf ("Scenario: node_number=%d interface_number=%d object_number=%d \
-environment_number=%d motion_number=%d connection_number=%d\n", scenario->node_number, scenario->interface_number, scenario->object_number, scenario->environment_number, scenario->motion_number, scenario->connection_number);
+  printf ("Scenario: node_number=%d if_num=%d object_number=%d \
+environment_number=%d motion_number=%d connection_number=%d\n", scenario->node_number, scenario->if_num, scenario->object_number, scenario->environment_number, scenario->motion_number, scenario->connection_number);
 }
 
 // add a node to the scenario structure;
@@ -887,7 +887,7 @@ scenario_reset_node_interference_flag (struct scenario_class *scenario)
   for (node_i = 0; node_i < scenario->node_number; node_i++)
     {
       node = &(scenario->nodes[node_i]);
-      for (interf_j = 0; interf_j < node->interface_number; interf_j++)
+      for (interf_j = 0; interf_j < node->if_num; interf_j++)
 	node->interfaces[interf_j].interference_accounted = FALSE;
     }
 }

@@ -251,8 +251,9 @@ struct qdisc_params qp;
         dprintf(("[change_netem_qdisc] netem ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
+    }
 
     return 0;
 }

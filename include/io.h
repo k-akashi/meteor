@@ -41,16 +41,16 @@
 //////////////////////////////////
 
 // binary file header
-struct binary_header_class
+struct bin_hdr_cls
 {
   char signature[4];
-  int major_version;
-  int minor_version;
-  int subminor_version;
-  int svn_revision;
+  int32_t major_version;
+  int32_t minor_version;
+  int32_t subminor_version;
+  int32_t svn_revision;
   //char reserved[4];
-  int interface_number;
-  int time_record_number;
+  int32_t if_num;
+  int32_t time_rec_num;
 
 };
 
@@ -66,11 +66,11 @@ struct binary_time_record_class
 // 'io_copy_record' and 'io_binary_compare_record' when making changes
 struct bin_rec_cls
 {
-  int from_id;
-  int to_id;
+  int32_t from_id;
+  int32_t to_id;
   float frame_error_rate;
   float num_retransmissions;
-  int standard;
+  int32_t standard;
   float operating_rate;
   float bandwidth;
   float loss_rate;
@@ -155,7 +155,7 @@ int io_read_settings_file_mac (char *settings_filename,
 ////////////////////////////////////////////////
 
 // print binary header
-void io_binary_print_header (struct binary_header_class *binary_header);
+void io_binary_print_header (struct bin_hdr_cls *bin_hdr);
 
 // print binary time record
 void io_binary_print_time_record (struct binary_time_record_class
@@ -182,14 +182,12 @@ int io_binary_compare_record (struct bin_rec_cls *binary_record,
 
 // read header of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_header_from_file (struct binary_header_class
-				     *binary_header,
-				     FILE * binary_input_file);
+int io_binary_read_header_from_file (struct bin_hdr_cls *bin_hdr, FILE * bin_in_file);
 
 // write header of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_write_header_to_file (int interface_number,
-				    long int time_record_number,
+int io_binary_write_header_to_file (int if_num,
+				    long int time_rec_num,
 				    int major_version,
 				    int minor_version,
 				    int subminor_version,
@@ -199,7 +197,7 @@ int io_binary_write_header_to_file (int interface_number,
 // return SUCCESS on succes, ERROR on error
 int io_binary_read_time_record_from_file (struct binary_time_record_class
 					  *binary_time_record,
-					  FILE * binary_input_file);
+					  FILE * bin_in_file);
 
 // write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
@@ -216,13 +214,13 @@ int io_binary_write_time_record_to_file2 (struct binary_time_record_class
 // return SUCCESS on succes, ERROR on error
 int io_binary_read_record_from_file (struct bin_rec_cls
 				     *binary_record,
-				     FILE * binary_input_file);
+				     FILE * bin_in_file);
 
 // read 'number_records' records from a QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int io_binary_read_records_from_file (struct bin_rec_cls
 				      *binary_records, int number_records,
-				      FILE * binary_input_file);
+				      FILE * bin_in_file);
 
 // write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error

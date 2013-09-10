@@ -51,11 +51,10 @@ compute_next_time (struct timer_handle *handle, double seconds)
   result.tv_nsec = handle->zero_tp.tv_nsec + (long) tv_nsec;
 
   // check for overflow in the nanosecond component
-  if (result.tv_nsec >= 1e9)
-    {
+  if (result.tv_nsec >= 1e9) {
       result.tv_sec++;
       result.tv_nsec -= 1e9;
-    }
+  }
 
   return result;
 }
@@ -84,13 +83,13 @@ timer_reset(struct timer_handle *handle, double zero_time)
 
 // wait for a time to occur (specified in seconds)
 void
-timer_wait (struct timer_handle *handle, float time_in_s)
+timer_wait(struct timer_handle *handle, float time_in_s)
 {
   struct timespec next_tp;
 
   // compute time for next event
-  next_tp = compute_next_time (handle, time_in_s);
-  DEBUG_print_timespec (&next_tp);
+  next_tp = compute_next_time(handle, time_in_s);
+  DEBUG_print_timespec(&next_tp);
 
   DEBUG ("Waiting for timer...");
 

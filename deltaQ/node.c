@@ -60,7 +60,7 @@ node_init (struct node_class *node, char *name, int type, int id, char *ssid,
   strncpy (node->ssid, ssid, MAX_STRING - 1);
   node->connection = connection;
   node->internal_delay = internal_delay;
-  node->interface_number = 0;
+  node->if_num = 0;
 
   node->position.c[0] = position_x;
   node->position.c[1] = position_y;
@@ -77,10 +77,10 @@ node_print (struct node_class *node)
   printf ("  Node '%s': type='%s' id=%d ssid='%s' connection='%s'\n",
 	  node->name, node_types[node->type],
 	  node->id, node->ssid, node_connections[node->connection]);
-  printf ("\tposition=(%.2f, %.2f, %.2f) interface_number=%d\n",
+  printf ("\tposition=(%.2f, %.2f, %.2f) if_num=%d\n",
 	  node->position.c[0], node->position.c[1], node->position.c[2],
-	  node->interface_number);
-  for (i = 0; i < node->interface_number; i++)
+	  node->if_num);
+  for (i = 0; i < node->if_num; i++)
     interface_print (&(node->interfaces[i]));
 }
 
@@ -100,9 +100,9 @@ node_copy (struct node_class *node_dst, struct node_class *node_src)
   node_dst->internal_delay = node_src->internal_delay;
 
   // copy interface properties
-  for (i = 0; i < node_src->interface_number; i++)
+  for (i = 0; i < node_src->if_num; i++)
     interface_copy (&(node_dst->interfaces[i]), &(node_src->interfaces[i]));
-  node_dst->interface_number = node_src->interface_number;
+  node_dst->if_num = node_src->if_num;
 
   node_dst->motion_index = node_src->motion_index;
 }
@@ -415,15 +415,15 @@ int
 node_add_interface (struct node_class *node,
 		    struct interface_class *interface)
 {
-  if (node->interface_number >= MAX_INTERFACES)
+  if (node->if_num >= MAX_INTERFACES)
     {
       WARNING ("Maximum number of interfaces (%d) exceeded.", MAX_INTERFACES);
       return ERROR;
     }
   else
     {
-      interface_copy (&(node->interfaces[node->interface_number]), interface);
-      node->interface_number++;
+      interface_copy (&(node->interfaces[node->if_num]), interface);
+      node->if_num++;
     }
 
   return SUCCESS;
@@ -437,14 +437,14 @@ node_init_interface_index (struct node_class *node,
 {
   int i;
 
-  for (i = 0; i < node->interface_number; i++)
+  for (i = 0; i < node->if_num; i++)
     {
-      node->interfaces[i].id = scenario->interface_number;
-      scenario->interface_number++;
+      node->interfaces[i].id = scenario->if_num;
+      scenario->if_num++;
     }
   DEBUG
     ("Initialized %d interface(s) for node %d (global interface number=%d)",
-     node->interface_number, node->id, scenario->interface_number);
+     node->if_num, node->id, scenario->if_num);
 
   return SUCCESS;
 }

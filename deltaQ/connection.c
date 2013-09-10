@@ -262,7 +262,7 @@ connection_init_indexes (struct connection_class *connection,
 		}
 	      else		// try to find from_interface among those of the node
 		{
-		  for (j = 0; j < node->interface_number; j++)
+		  for (j = 0; j < node->if_num; j++)
 		    if (strcmp (node->interfaces[j].name,
 				connection->from_interface) == 0)
 		      {
@@ -271,9 +271,9 @@ connection_init_indexes (struct connection_class *connection,
 			break;
 		      }
 
-		  // if j equals node->interface_number, then the from_interface 
+		  // if j equals node->if_num, then the from_interface 
 		  // could not be found => return ERROR
-		  if (j >= node->interface_number)
+		  if (j >= node->if_num)
 		    {
 		      WARNING
 			("Connection attribute '%s' with value '%s' does not exist for node '%s'.",
@@ -299,7 +299,7 @@ connection_init_indexes (struct connection_class *connection,
 		}
 	      else		// try to find to_interface among those of the node
 		{
-		  for (j = 0; j < node->interface_number; j++)
+		  for (j = 0; j < node->if_num; j++)
 		    if (strcmp (node->interfaces[j].name,
 				connection->to_interface) == 0)
 		      {
@@ -308,9 +308,9 @@ connection_init_indexes (struct connection_class *connection,
 			break;
 		      }
 
-		  // if j equals node->interface_number, then the to_interface 
+		  // if j equals node->if_num, then the to_interface 
 		  // could not be found => return ERROR
-		  if (j >= node->interface_number)
+		  if (j >= node->if_num)
 		    {
 		      WARNING
 			("Connection attribute '%s' with value '%s' does not exist for node '%s'.",

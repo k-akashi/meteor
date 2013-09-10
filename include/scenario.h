@@ -98,7 +98,7 @@ struct scenario_class
   int connection_number;
 
   // global number of interfaces for all nodes
-  int interface_number;
+  int if_num;
 
   // current execution time of the scenario
   double current_time;

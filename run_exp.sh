@@ -88,7 +88,7 @@ echo ----------------------------
 # Start the QOMET emulation
 echo "* Starting QOMET emulation..." 
 echo "sudo time ./bin/do_wireconf -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out"
-sudo time ./bin/do_wireconf -c 4 -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out
+sudo time ./bin/do_wireconf -q $test_name -f $from_node -F $client_address -t $to_node -T $server_address -r $rule_number -p $pipe_number -d out
 
 echo "finish!!"
 echo ----------------------------

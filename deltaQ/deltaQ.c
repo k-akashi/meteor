@@ -277,7 +277,7 @@ main (int argc, char *argv[])
 
   // current time during scenario
   double current_time;
-  long int time_record_number = 0;
+  long int time_rec_num = 0;
 
   // various indexes for scenario elements
 #ifdef MESSAGE_DEBUG
@@ -670,7 +670,7 @@ filename '%s' exceeds %d characters!", output_filename_base, MAX_STRING - 5);
 	}
 
       // start writing binary output
-      io_binary_write_header_to_file (scenario->interface_number, 0,
+      io_binary_write_header_to_file (scenario->if_num, 0,
 				      MAJOR_VERSION, MINOR_VERSION,
 				      SUBMINOR_VERSION, svn_revision,
 				      binary_output_file);
@@ -964,7 +964,7 @@ filename '%s' exceeds %d characters!", output_filename_base, MAX_STRING - 5);
 	  if (io_connection_state.binary_time_record.record_number > 0)
 	    {
 #endif
-	      time_record_number++;
+	      time_rec_num++;
 
 	      io_binary_write_time_record_to_file2
 		(&(io_connection_state.binary_time_record),
@@ -1065,7 +1065,7 @@ motion %d             \r", motion_i);
       // rewrite binary header now that all information is available
       rewind (binary_output_file);
       io_binary_write_header_to_file
-	(scenario->interface_number, time_record_number,
+	(scenario->if_num, time_rec_num,
 	 MAJOR_VERSION, MINOR_VERSION, SUBMINOR_VERSION,
 	 svn_revision, binary_output_file);
     }

@@ -100,7 +100,7 @@ struct node_class
    */
 
   struct interface_class interfaces[MAX_INTERFACES];
-  int interface_number;
+  int if_num;
 
   // motion index in 'scenario' structure;
   // default value is INVALID_INDEX for nodes which have no motion

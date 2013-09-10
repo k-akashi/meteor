@@ -82,7 +82,7 @@ main (int argc, char *argv[])
   FILE *bin_file;
 
   // binary file header data structure
-  struct binary_header_class binary_header;
+  struct bin_hdr_cls bin_hdr;
 
   // binary file time record data structure
   struct binary_time_record_class binary_time_record;
@@ -129,8 +129,8 @@ main (int argc, char *argv[])
 	  sizeof (float), sizeof (double));
 
   printf ("Data structure [bytes]: ");
-  printf ("binary_header_class=%zu  binary_time_record_class=%zu  \
-bin_rec_cls=%zu\n", sizeof (struct binary_header_class), sizeof (struct binary_time_record_class), sizeof (struct bin_rec_cls));
+  printf ("bin_hdr_cls=%zu  binary_time_record_class=%zu  \
+bin_rec_cls=%zu\n", sizeof (struct bin_hdr_cls), sizeof (struct binary_time_record_class), sizeof (struct bin_rec_cls));
   printf
     ("------------------------------------------------------------------------\n");
 
@@ -156,7 +156,7 @@ bin_rec_cls=%zu\n", sizeof (struct binary_header_class), sizeof (struct binary_t
     }
 
   // read and check binary header
-  if (io_binary_read_header_from_file (&binary_header, bin_file) == ERROR)
+  if (io_binary_read_header_from_file (&bin_hdr, bin_file) == ERROR)
     {
       WARNING ("Aborting on input error (binary header)");
       // close binary file
@@ -165,11 +165,11 @@ bin_rec_cls=%zu\n", sizeof (struct binary_header_class), sizeof (struct binary_t
       exit (1);
     }
   printf ("* HEADER INFORMATION:\n");
-  io_binary_print_header (&binary_header);
+  io_binary_print_header (&bin_hdr);
 
   // allocate memory for binary records
-  binary_records_max_count = binary_header.interface_number
-    * (binary_header.interface_number - 1);
+  binary_records_max_count = bin_hdr.if_num
+    * (bin_hdr.if_num - 1);
   binary_records =
     (struct bin_rec_cls *) calloc (binary_records_max_count,
 					   sizeof (struct
@@ -185,7 +185,7 @@ bin_rec_cls=%zu\n", sizeof (struct binary_header_class), sizeof (struct binary_t
 
   printf ("* RECORD CONTENT:\n");
   // read all records
-  for (time_i = 0; time_i < binary_header.time_record_number; time_i++)
+  for (time_i = 0; time_i < bin_hdr.time_rec_num; time_i++)
     {
       // read time record
       if (io_binary_read_time_record_from_file (&binary_time_record,

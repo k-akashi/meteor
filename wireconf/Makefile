@@ -12,12 +12,12 @@ INCDIR = ../include
 INCS = -I${INCDIR}
 LIBS = -L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat -lrt
 
-MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO
+MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG 
 CFLAGS = -g -O3 -Wall ${MESSAGE_FLAGS}
 
 UNAME = $(shell uname)
 ifeq ($(UNAME), Linux)
-CFLAGS += -D_GNU_SOURCE -fPIC -DTCDEBUG 
+CFLAGS += -D_GNU_SOURCE -fPIC 
 LIBS += -ltc -lnetlink -ldl
 LIB_TARGET = libwireconf.a 
 BIN_TARGET = do_wireconf 

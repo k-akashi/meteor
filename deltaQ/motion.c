@@ -450,7 +450,7 @@ motion_rotation (struct motion_class *motion, struct node_class *node,
 	   motion->rotation_angle_vertical);
 
   // move all interfaces in the same time
-  for (interf_j = 0; interf_j < node->interface_number; interf_j++)
+  for (interf_j = 0; interf_j < node->if_num; interf_j++)
     {
       // update azimuth orientation and bring the result in 
       // the interval [0,360)

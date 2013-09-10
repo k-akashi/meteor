@@ -32,6 +32,7 @@ char* dev;
     memset(&req, 0, sizeof(req));
 
     flags = NLM_F_EXCL|NLM_F_CREATE;
+    dprintf(("[add_htb_qdisc] Ingress Interface : %s\n", dev));
     strncpy(device, dev, sizeof(device) - 1);
 
     tc_core_init();

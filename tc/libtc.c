@@ -24,7 +24,6 @@
 
 int preferred_family = AF_UNSPEC;
 int oneline = 0;
-char * _SL_ = NULL;
 int open_flag = 1;
 
 char* 
@@ -36,7 +35,6 @@ char *addr;
     struct rtattr* tb[RTA_MAX+1];
     inet_prefix dst;
     char abuf[256];
-    _SL_ = oneline ? "\\" : "\n" ;
 
     if(open_flag) {
         if(rtnl_open(&rth, 0) < 0)
@@ -64,18 +62,13 @@ char *addr;
     if(strcmp(info, "dev") == 0) {
         return (char* )ll_index_to_name(*(int* )RTA_DATA(tb[RTA_OIF]));
     } else if(strcmp(info, "next") == 0){
-        if((char* )inet_ntop(r->rtm_family,
-                    RTA_DATA(tb[RTA_GATEWAY]),
-                    abuf, sizeof(abuf)) == NULL) {
+        if((char* )inet_ntop(r->rtm_family, RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof(abuf)) == NULL) {
             return addr;
         }
         else {
             dprintf(("[get_route_info] %s\n",  (char* )inet_ntop(r->rtm_family,
-                            RTA_DATA(tb[RTA_GATEWAY]),
-                            abuf, sizeof(abuf))));
-            return (char* )inet_ntop(r->rtm_family,
-                    RTA_DATA(tb[RTA_GATEWAY]),
-                    abuf, sizeof(abuf));
+                            RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof(abuf))));
+            return (char* )inet_ntop(r->rtm_family, RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof(abuf));
         }
     }
     else {

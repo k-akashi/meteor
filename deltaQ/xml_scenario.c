@@ -151,7 +151,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_ADAPTER_STRING) == 0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	if (strcmp (attributes[i + 1], INTERFACE_ADAPTER_ORINOCO_STRING) == 0)
 	  node->interfaces[0].adapter_type = ORINOCO;
@@ -200,7 +200,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_ANTENNA_GAIN_STRING) == 0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -211,7 +211,7 @@ purposes.");
     else if (strcmp (attributes[i], INTERFACE_AZIMUTH_ORIENTATION_STRING) ==
 	     0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -221,7 +221,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_AZIMUTH_BEAMWIDTH_STRING) == 0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -232,7 +232,7 @@ purposes.");
     else if (strcmp (attributes[i], INTERFACE_ELEVATION_ORIENTATION_STRING) ==
 	     0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -243,7 +243,7 @@ purposes.");
     else if (strcmp (attributes[i], INTERFACE_ELEVATION_BEAMWIDTH_STRING) ==
 	     0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -253,7 +253,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_ANTENNA_COUNT_STRING) == 0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	long_int_result = long_int_value (attributes[i + 1]);
 	if (long_int_result == LONG_MIN)
@@ -303,7 +303,7 @@ Ignored incorrect value ('%s')", INTERFACE_ANTENNA_COUNT_STRING, 1, MAX_ANTENNA_
       }
     else if (strcmp (attributes[i], INTERFACE_PT_STRING) == 0)
       {
-	node->interface_number = 1;	// interface attribute was set => define interface
+	node->if_num = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -363,7 +363,7 @@ Ignored negative value ('%s')", NODE_INTERNAL_DELAY_STRING, attributes[i + 1]);
     }
 
   // initialize locally defined interface (always with index 0)
-  if (node->interface_number == 1)
+  if (node->if_num == 1)
     {
       // update the Pr0 field of the interface
       wlan_interface_update_Pr0 (&(node->interfaces[0]));
@@ -2213,7 +2213,7 @@ is not of 'QOMET definition' type!", XML_SCENARIO_STRING);
 		(struct node_class *) stack_top_element->element;
 
 	      DEBUG ("Adding interface #%d for node '%s'",
-		     node->interface_number, node->name);
+		     node->if_num, node->name);
 	      node_add_interface (node, &interface);
 	    }
 
@@ -2399,9 +2399,9 @@ end_element (void *data, const char *element)
 	// check whether any interfaces were explicitly defined;
 	// otherwise, set the number of interfaces to 1 and
 	// initialize the interface
-	if (node->interface_number == 0)
+	if (node->if_num == 0)
 	  {
-	    node->interface_number = 1;
+	    node->if_num = 1;
 	  }
 
 	INFO ("Node element ended");

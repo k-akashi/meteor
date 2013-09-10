@@ -352,7 +352,7 @@ char **argv;
     uint32_t from, to;
     uint32_t pipe_nr;
     int64_t time_i;
-    struct binary_header_class bin_hdr;
+    struct bin_hdr_cls bin_hdr;
     struct wireconf_class wireconf;
 
     float crt_record_time = 0.0;
@@ -523,8 +523,8 @@ char **argv;
                 break;
             case 's':
                 strncpy(settings_file_name, optarg, MAX_STRING - 1);
-            /*
                 usage_type = 2;
+
                 if((node_number = read_settings(optarg, ipaddrs, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
                     exit(1);
@@ -537,7 +537,6 @@ char **argv;
                             *(((uint8_t *)&ipaddrs[i]) + 2),
                             *(((uint8_t *)&ipaddrs[i]) + 3));
                 }
-            */
                 break;
             case 'm':
                 if((time_period = strtod(optarg, NULL)) == 0) {
@@ -635,7 +634,10 @@ char **argv;
         }
     }
     else {
+        dprintf(("my_id : %d\n", my_id));
+        dprintf(("node_number : %d\n", node_number));
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+            dprintf(("j : %d\n", j));
             if(j == my_id) {
                 continue;
             }
@@ -652,6 +654,7 @@ char **argv;
                         ipaddrs_c + (j-FIRST_NODE_ID) * IP_ADDR_SIZE);
                 exit(1);
             }
+            usleep(10);
         }
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
             if(j == my_id) {
@@ -689,16 +692,16 @@ char **argv;
             WARNING("Aborting on input error (binary header)");
             exit(1);
         }
-        io_binary_print_header (&bin_hdr);
+        io_binary_print_header(&bin_hdr);
 
-        if(node_cnt != bin_hdr.interface_number) {
+        if(node_cnt != bin_hdr.if_num) {
             WARNING("Number of nodes according to the settings file (%d) and \
                 number of nodes according to QOMET scenario (%d) differ", 
-                node_cnt, bin_hdr.interface_number);
+                node_cnt, bin_hdr.if_num);
             exit(1);
         }
 
-        bin_recs_max_cnt = bin_hdr.interface_number * (bin_hdr.interface_number - 1);
+        bin_recs_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
 
         bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof(struct bin_rec_cls));
         if(bin_recs == NULL) {
@@ -706,138 +709,133 @@ char **argv;
             exit(1);
         }
 
-        next_hop_ids = (int*)calloc(bin_hdr.interface_number, sizeof(int));
+        next_hop_ids = (int32_t *)calloc(bin_hdr.if_num, sizeof(int));
         if(next_hop_ids == NULL) {
             WARNING("Cannot allocate memory for next_hop_ids");
             exit(1);
         }
 
-        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.interface_number, sizeof(struct bin_rec_cls*));
+        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls*));
         if(my_recs_ucast == NULL) {
             WARNING("Cannot allocate memory for my_recs_ucast");
             exit(1);
         }
 
-        for(node_i = 0; node_i < bin_hdr.interface_number; node_i++) {
+        for(node_i = 0; node_i < bin_hdr.if_num; node_i++) {
             int j;
 
-            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.interface_number, sizeof(struct bin_rec_cls));
+            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
             if(my_recs_ucast[node_i] == NULL) {
                 WARNING("Cannot allocate memory for my_recs_ucast[%d]", node_i);
                 exit(1);
             }
-            for(j = 0; j < bin_hdr.interface_number; j++) {
+            for(j = 0; j < bin_hdr.if_num; j++) {
                 my_recs_ucast[node_i][j].bandwidth = UNDEFINED_BANDWIDTH;
             }
         }
 
-        adjusted_records_ucast = (struct bin_rec_cls *)calloc(bin_hdr.interface_number, sizeof(struct bin_rec_cls));
+        adjusted_records_ucast = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
         if(adjusted_records_ucast == NULL) {
             WARNING("Cannot allocate memory for adjusted_records_ucast");
             exit(1);
         }
 
-        my_recs_ucast_changed = (int*)calloc(bin_hdr.interface_number, sizeof(int));
+        my_recs_ucast_changed = (int32_t *)calloc(bin_hdr.if_num, sizeof(int32_t));
         if(my_recs_ucast_changed == NULL) {
             WARNING("Cannot allocate memory for my_recs_ucast_changed");
             exit(1);
         }
 
-        my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr.interface_number, sizeof(struct bin_rec_cls));
+        my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
         if(my_recs_bcast == NULL) {
             WARNING("Cannot allocate memory for my_recs_bcast");
             exit(1);
         }
-        for(node_i = 0; node_i < bin_hdr.interface_number; node_i++) {
+        for(node_i = 0; node_i < bin_hdr.if_num; node_i++) {
             my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
         }
 
-        my_recs_bcast_changed = (int*) calloc (bin_hdr.interface_number, sizeof(int));
+        my_recs_bcast_changed = (int32_t *)calloc(bin_hdr.if_num, sizeof(int32_t));
         if(my_recs_bcast_changed == NULL) {
             WARNING("Cannot allocate memory for my_recs_bcast_changed");
             exit(1);
         }
         
-        last_byte_cnt = (uint32_t*)calloc(bin_hdr.interface_number, sizeof(uint32_t));
+        last_byte_cnt = (uint32_t *)calloc(bin_hdr.if_num, sizeof(uint32_t));
         if(last_byte_cnt == NULL) {
             WARNING("Cannot allocate memory for last_byte_cnt");
             exit(1);
         }
         
-        last_pkt_cnt = (uint32_t*)calloc(bin_hdr.interface_number, sizeof(uint32_t));
+        last_pkt_cnt = (uint32_t *)calloc(bin_hdr.if_num, sizeof(uint32_t));
         if(last_pkt_cnt == NULL) {
             WARNING("Cannot allocate memory for last_pkt_cnt");
             exit(1);
         }
         
-        avg_frame_sizes = (float*)calloc(bin_hdr.interface_number, sizeof(float));
+        avg_frame_sizes = (float *)calloc(bin_hdr.if_num, sizeof(float));
         if(avg_frame_sizes == NULL) {
             WARNING("Cannot allocate memory for avg_frame_sizes");
             exit(1);
         }
-        for(pkt_i = 0; pkt_i < bin_hdr.interface_number; pkt_i++) {
+        for(pkt_i = 0; pkt_i < bin_hdr.if_num; pkt_i++) {
             //last_pkt_cnt[pkt_i] = 0; // calloc inits to 0 => not needed!
             //last_byte_cnt[pkt_i] = 0;
             avg_frame_sizes[pkt_i] = DEFAULT_FRAME_SIZE;
         }
-        gettimeofday (&tp_begin, NULL);
+        gettimeofday(&tp_begin, NULL);
 
-        for(time_i = 0; time_i < bin_hdr.time_record_number; time_i++) {
+        for(time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
             int rec_i;
             DEBUG("Reading QOMET data from file...");
 
-            if(io_binary_read_time_record_from_file (&bin_time_rec, qomet_fd) == ERROR) {
+            if(io_binary_read_time_record_from_file(&bin_time_rec, qomet_fd) == ERROR) {
                 WARNING("Aborting on input error (time record)");
                 exit (1);
             }
-            io_binary_print_time_record (&bin_time_rec);
+            io_binary_print_time_record(&bin_time_rec);
             crt_record_time = bin_time_rec.time;
 
             if(bin_time_rec.record_number > bin_recs_max_cnt) {
-                WARNING("The number of records to be read exceeds allocated size (%d)",
-                    bin_recs_max_cnt);
+                WARNING("The number of records to be read exceeds allocated size (%d)", bin_recs_max_cnt);
                 exit (1);
             }
 
-            if(io_binary_read_records_from_file (bin_recs, bin_time_rec.record_number, qomet_fd) == ERROR) {
+            if(io_binary_read_records_from_file(bin_recs, bin_time_rec.record_number, qomet_fd) == ERROR) {
                 WARNING("Aborting on input error (records)");
                 exit (1);
             }
 
             for(rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
                 if(bin_recs[rec_i].from_id < FIRST_NODE_ID || 
-                    (bin_recs[rec_i].from_id > bin_hdr.interface_number + FIRST_NODE_ID - 1)) {
+                    (bin_recs[rec_i].from_id > bin_hdr.if_num + FIRST_NODE_ID - 1)) {
                     INFO ("Source with id = %d is out of the valid range [%d, %d]", 
                         bin_recs[rec_i].from_id, FIRST_NODE_ID, 
-                        bin_hdr.interface_number + FIRST_NODE_ID - 1);
+                        bin_hdr.if_num + FIRST_NODE_ID - 1);
                     exit (1);
                 }
 
                 if(bin_recs[rec_i].to_id < FIRST_NODE_ID || 
-                    (bin_recs[rec_i].to_id > bin_hdr.interface_number + FIRST_NODE_ID - 1)) {
+                    (bin_recs[rec_i].to_id > bin_hdr.if_num + FIRST_NODE_ID - 1)) {
                     INFO ("Destination with id = %d is out of the valid range [%d, %d]", 
                         bin_recs[rec_i].to_id,
-                         FIRST_NODE_ID, bin_hdr.interface_number + FIRST_NODE_ID - 1);
+                         FIRST_NODE_ID, bin_hdr.if_num + FIRST_NODE_ID - 1);
                     exit (1);
                 }
 
                 if(bin_recs[rec_i].from_id == my_id) {
-                    io_binary_copy_record(&(my_recs_ucast
-                        [bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]), 
-                        &bin_recs[rec_i]);
+                    io_binary_copy_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]), 
+                      &bin_recs[rec_i]);
                     my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
 
-                    DEBUG("Copied bin_recs to my_recs_ucast (index is bin_recs[rec_i].to_id=%d).",
-                        bin_recs[rec_i].to_id);
+                    DEBUG("Copied bin_recs to my_recs_ucast(index: bin_recs[rec_i].to_id=%d).", bin_recs[rec_i].to_id);
                     //io_binary_print_record (&(my_recs_ucast[bin_recs[rec_i].from_node][bin_recs[rec_i].to_node]));
                 }
 
                 if(bin_recs[rec_i].to_id == my_id) {
-                    io_binary_copy_record(&(my_recs_bcast[bin_recs[rec_i].from_id]),
-                        &bin_recs[rec_i]);
+                    io_binary_copy_record(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                     my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
-                    DEBUG("Copied bin_recs to my_recs_bcast (index is bin_recs[rec_i].from_node=%d).", 
-                        bin_recs[rec_i].from_id);
+                    DEBUG("Copied bin_recs to my_recs_bcast(index: bin_recs[rec_i].from_node=%d).", bin_recs[rec_i].from_id);
                     //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
                 }
             }
@@ -850,8 +848,7 @@ char **argv;
                 for(rec_i = 0; rec_i < node_cnt; rec_i++) {
                     // do not consider the node itself
                     if(rec_i != my_id) {
-                        io_binary_copy_record (&(adjusted_records_ucast[rec_i]),
-                            &(my_recs_ucast[my_id][rec_i]));
+                        io_binary_copy_record(&(adjusted_records_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
                         DEBUG("Copied my_recs_ucast to adjusted_records_ucast (index is rec_i=%d).", rec_i);
                         //io_binary_print_record (&(adjusted_records_ucast[rec_i]));
                     }
@@ -879,18 +876,20 @@ char **argv;
             }
 
             if (time_i == 0) {
-                //timer_reset(timer, crt_record_time);
+                timer_reset(timer, crt_record_time);
                 dprintf(("timer_reset\n"));
             }
             else {
                 if(SCALING_FACTOR == 1.0) {
                     INFO("Waiting to reach time %.2f s...", crt_record_time);
+                    sleep(1);
                 }
                 else {
                     INFO("Waiting to reach real time %.2f s (scenario time %.2f)...", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
                     timer_wait(timer, crt_record_time * SCALING_FACTOR);
+                    sleep(1);
                 }
 
                 for(node_i = FIRST_NODE_ID; node_i < (node_cnt + FIRST_NODE_ID); node_i++) {
@@ -913,9 +912,9 @@ char **argv;
                     }
                     DEBUG("Next_hop=%i for destination=%i", next_hop_id, node_i);
 
-                    if(next_hop_id < 0 || (next_hop_id > bin_hdr.interface_number - 1)) {
+                    if(next_hop_id < 0 || (next_hop_id > bin_hdr.if_num - 1)) {
                         WARNING("Next hop with id = %d is out of the valid range [%d, %d]", 
-                            bin_recs[rec_i].to_id, 0, bin_hdr.interface_number - 1);
+                            bin_recs[rec_i].to_id, 0, bin_hdr.if_num - 1);
                         exit(1);
                     }
 
@@ -1005,7 +1004,7 @@ char **argv;
 
                     for(i = 0; i < rule_cnt; i++) {
                         if(rules[i]->rulenum >= MIN_PIPE_ID_OUT && 
-                            rules[i]->rulenum < (MIN_PIPE_ID_OUT + bin_hdr.interface_number)) {
+                            rules[i]->rulenum < (MIN_PIPE_ID_OUT + bin_hdr.if_num)) {
                             if(node_i == my_id) {
                                 wireconf.self_channel_utilizations[node_i] = 0;
                                 wireconf.self_transmission_probabilities[node_i] = 0;
@@ -1086,7 +1085,7 @@ char **argv;
                         time, bandwidth, lossrate, delay);
     
                     if(time == 0.0) {
-                        timer_reset(timer, crt_record_time);
+                        //timer_reset(timer, crt_record_time);
                     }
                     else {
                         uint64_t time_usec = time * 1000000;
@@ -1096,9 +1095,9 @@ char **argv;
                     }
 
                     bandwidth = (int)round(bandwidth);
-                    //delay = (int)round(delay);
+                    delay = (int)round(delay);
                     lossrate = (int)rint(lossrate * 0x7fffffff);
-                    lossrate = 0;
+                    //lossrate = 0;
     
     				//TCHK_START(time);
                     configure_rule(dsock, taddr, pipe_nr, bandwidth, delay, lossrate);
