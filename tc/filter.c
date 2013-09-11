@@ -169,11 +169,8 @@ struct u32_params* up;
     }
 	protocol = protocol_id;
     dprintf(("[add_tc_filter] protocol = %d\n", protocol));
-
     dprintf(("[ad_tc_filter] kind = %s\n", type));
-
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
-
     addattr_l(&req.n, sizeof(req), TCA_KIND, type, strlen(type) + 1);
 
 	if(up->rdev) {

@@ -654,7 +654,15 @@ char **argv;
                         ipaddrs_c + (j-FIRST_NODE_ID) * IP_ADDR_SIZE);
                 exit(1);
             }
-            usleep(10);
+            if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num + 1, MIN_PIPE_ID_OUT + offset_num + 1,
+                        "any", ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                        DIRECTION_OUT) < 0) {
+                WARNING("Node %d: Could not add rule #%d with pipe #%d to \
+                        destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
+                        MIN_PIPE_ID_OUT + offset_num, 
+                        ipaddrs_c + (j-FIRST_NODE_ID) * IP_ADDR_SIZE);
+                exit(1);
+            }
         }
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
             if(j == my_id) {
@@ -667,6 +675,17 @@ char **argv;
                     MIN_PIPE_ID_IN_BCAST + offset_num, baddr);
             if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num, 
                         MIN_PIPE_ID_IN_BCAST + offset_num, 
+                        ipaddrs_c+(j-FIRST_NODE_ID)*IP_ADDR_SIZE,
+                        baddr, DIRECTION_IN) < 0)
+            {
+                WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
+                        destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
+                        MIN_PIPE_ID_IN_BCAST + offset_num, 
+                        ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, baddr);
+                exit(1);
+            }
+            if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num + 0, 
+                        MIN_PIPE_ID_IN_BCAST + offset_num + 1, 
                         ipaddrs_c+(j-FIRST_NODE_ID)*IP_ADDR_SIZE,
                         baddr, DIRECTION_IN) < 0)
             {
@@ -880,16 +899,14 @@ char **argv;
                 dprintf(("timer_reset\n"));
             }
             else {
-                if(SCALING_FACTOR == 1.0) {
+                if(SCALING_FACTOR == 10.0) {
                     INFO("Waiting to reach time %.2f s...", crt_record_time);
-                    sleep(1);
                 }
                 else {
                     INFO("Waiting to reach real time %.2f s (scenario time %.2f)...", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
                     timer_wait(timer, crt_record_time * SCALING_FACTOR);
-                    sleep(1);
                 }
 
                 for(node_i = FIRST_NODE_ID; node_i < (node_cnt + FIRST_NODE_ID); node_i++) {
@@ -942,8 +959,7 @@ char **argv;
                             lossrate = 0.0;
                     }
 
-                    if(configure_rule(dsock, taddr, MIN_PIPE_ID_OUT + node_i,
-                        bandwidth, delay, lossrate) == ERROR) {
+                    if(configure_rule(dsock, taddr, MIN_PIPE_ID_OUT + node_i, bandwidth, delay, lossrate) == ERROR) {
                         WARNING("Error configuring UCAST pipe %d.", MIN_PIPE_ID_OUT + node_i);
                         exit (1);
                     }
@@ -1289,7 +1305,7 @@ char **argv;
     DEBUG("Closing socket...");
 
     close_socket(dsock);
-    fclose(qomet_fd);
+//    fclose(qomet_fd);
 
     return 0;
 }

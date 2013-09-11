@@ -713,6 +713,9 @@ char* dev;
 	addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
     for(i = 0; i < FILTER_MAX; i++) {
+        if(!up.match[i].type) {
+            continue;
+        }
     	if(up.match[i].type) {
     		if(parse_selector(up.match[i], &sel.sel, n)) {
     			fprintf(stderr, "Illegal \"match\"\n");

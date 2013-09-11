@@ -237,7 +237,6 @@ struct qdisc_params qp;
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
     netem_opt(&qp, &req.n);
-	dprintf(("[change_netem_qdisc] req.n.nlmsglen : %d\n", req.n.nlmsg_len));
 
     if(device[0]) {
         int idx;

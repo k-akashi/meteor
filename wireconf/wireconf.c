@@ -383,13 +383,11 @@ char *dst;
         set_ifb(ifb_devname, IF_UP);
 
         devname = "eth4";
-        dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         delete_netem_qdisc(devname, 0);
         add_ingress_qdisc(devname);
         add_ingress_filter(devname, ifb_devname);
 
         devname = "eth5";
-        dprintf(("\n\n[init_rule] add ingress qdisc\n"));
         delete_netem_qdisc(devname, 0);
         add_ingress_qdisc(devname);
         add_ingress_filter(devname, ifb_devname);
@@ -404,19 +402,15 @@ char *dst;
         ifconf.ifc_buf = (char*) (ifreqs);
         ifconf.ifc_len = sizeof(ifreqs);
 
-        dprintf(("[init_rule] add ingress device \n"));
         if(get_iface_list(&ifconf) < 0) {
             return -1;
         }
-        dprintf(("[init_rule] ifconf.ifc_len : %d\n", ifconf.ifc_len));
-        dprintf(("[init_rule] struct ifreq len : %d\n", sizeof(struct ifreq)));
         nifaces =  ifconf.ifc_len / sizeof(struct ifreq);
         dprintf(("Interfaces (count = %d)\n", nifaces));
         for(i = 0; i < nifaces; i++) {
             devname = ifreqs[i].ifr_name;
             dprintf(("[init_rule] add ingress device %s\n", devname));
 
-            dprintf(("\n\n[init_rule] add ingress qdisc\n"));
             delete_netem_qdisc(devname, 0);
             add_ingress_qdisc(devname);
             add_ingress_filter(devname, ifb_devname);
@@ -424,7 +418,6 @@ char *dst;
 */
         devname = ifb_devname;
     }
-    dprintf(("\n\n[init_rule] add htb qdisc\n"));
  
     htb_qdisc_id[0] = TC_H_ROOT;
     htb_qdisc_id[1] = 0;
@@ -432,7 +425,6 @@ char *dst;
     htb_qdisc_id[3] = 0;
  
     delete_netem_qdisc(devname, 0);
-    dprintf(("\n\n[init_rule] add htb qdisc\n"));
     add_htb_qdisc(devname, htb_qdisc_id);
 
 /* XXX
@@ -508,7 +500,6 @@ int direction;
     filter_id[3] = handle_nr;
 
     if(src != NULL) {
-        dprintf(("[add_rule] filter source address : %s\n", src));
         sprintf(srcaddr, "%s/32", src);
         dprintf(("[add_rule] filter source address : %s\n", srcaddr));
     }
@@ -523,38 +514,51 @@ int direction;
         dprintf(("[add_rule] destination address is NULL\n"));
     }
 
-    if(strcmp(src, "any") == 0) {
-        strcpy(srcaddr, "0.0.0.0/0");
-    }
-    if(strcmp(dst, "any") == 0) {
-        strcpy(dstaddr, "0.0.0.0/0");
-    }
-
-
     if(INGRESS) {
         devname = ifb_devname;
     }
-    ufp.match[IP_SRC].type = "u32";
+
+    if(strcmp(src, "any") == 0) {
+        strcpy(srcaddr, "0.0.0.0/0");
+        ufp.match[IP_SRC].type = NULL;
+    }
+    else {
+        ufp.match[IP_SRC].type = "u32";
+    }
     ufp.match[IP_SRC].proto = "ip";
     ufp.match[IP_SRC].filter = "src";
     ufp.match[IP_SRC].arg = srcaddr;
-    ufp.match[IP_DST].type = "u32";
+
+    if(strcmp(dst, "any") == 0) {
+        strcpy(dstaddr, "0.0.0.0/0");
+        ufp.match[IP_DST].type = NULL;
+    }
+    else {
+        ufp.match[IP_DST].type = "u32";
+    }
     ufp.match[IP_DST].proto = "ip";
     ufp.match[IP_DST].filter = "dst";
     ufp.match[IP_DST].arg = dstaddr;
     ufp.classid[0] = filter_id[2];
     ufp.classid[1] = filter_id[3];
 
-    dprintf(("\n\n[add_rule] add htb class\n"));
-    add_htb_class(devname, htb_class_id, 10000000);
-
-    dprintf(("\n\n[add_rule] add netem qdisc\n"));
+    add_htb_class(devname, htb_class_id, 1000000000);
     add_netem_qdisc(devname, netem_qdisc_id, qp);
-
-    dprintf(("\n\n[add_rule] add tc filter\n"));
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
+    if(strcmp(dst, "any") == 0) {
+        ufp.match[IP_SRC].type = NULL;
+    }
+    else {
+        ufp.match[IP_SRC].type = "u32";
+    }
     ufp.match[IP_SRC].arg = dstaddr;
+    if(strcmp(src, "any") == 0) {
+        ufp.match[IP_DST].type = NULL;
+    }
+    else {
+        ufp.match[IP_DST].type = "u32";
+    }
     ufp.match[IP_DST].arg = srcaddr;
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
@@ -737,10 +741,8 @@ double lossrate;
     devname = "eth5";
 #endif
 
-    dprintf(("[configure_qdisc] handle : %d\n", handle));
-    dprintf(("[configure_qdisc] delay : %.6f\n", delay));
-    dprintf(("[configure_qdisc] bandwidth : %d\n", bandwidth));
-    dprintf(("[configure_qdisc] lossrate : %.6f\n", lossrate));
+    dprintf(("[configure_qdisc] handle : %d, delay : %.6f, bandwidth %d, lossrate %.6f\n", 
+        handle, delay, bandwidth, lossrate));
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
     htb_class_id[2] = 1;
@@ -752,12 +754,10 @@ double lossrate;
     netem_qdisc_id[3] = 0;
 
     if(priv_delay != delay || priv_loss != lossrate) {
-        dprintf(("[configure_qdisc] configure delay\n"));
         config_netem = 1;
         qp.delay = delay;
         priv_delay = delay;
         if(lossrate > 1 || lossrate < 0) {
-            dprintf(("[configure_qdisc] invalid lossrate. lossrate set 0\n"));
             qp.loss = lossrate;
         }
         else {
@@ -767,7 +767,6 @@ double lossrate;
     }
 
     if(priv_rate != bandwidth) {
-        dprintf(("[configure_qdisc] configure bandwidth\n"));
         if((bandwidth / 1024) < FRAME_LENGTH) {
             sprintf(buffer, "%d", FRAME_LENGTH);
         }
@@ -787,7 +786,6 @@ double lossrate;
     dprintf(("[configure_qdisc] change rule interface name : %s\n", devname));
     if(config_netem) {
         qp.limit = 100000;
-        dprintf(("[configure_qdisc] change_netem_qdisc\n"));
         change_netem_qdisc(devname, netem_qdisc_id, qp);
     }
 
@@ -797,7 +795,6 @@ double lossrate;
     if(config_bw) {
         qp.rate = bandwidth;
         qp.buffer = buffer;
-        dprintf(("[configure_qdisc] change_htb_class\n"));
         change_htb_class(devname, htb_class_id, 1 * 1000 * 1000 * 1000);
 //        change_htb_class(devname, htb_class_id, rate);
     }
