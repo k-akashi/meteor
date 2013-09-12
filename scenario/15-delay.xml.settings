@@ -1,0 +1,2 @@
+node_ap interface0 0 aaa.bbb.ccc.ddd
+node_r interface0 1 aaa.bbb.ccc.ddd
