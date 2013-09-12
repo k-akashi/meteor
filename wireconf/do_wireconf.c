@@ -52,6 +52,7 @@
 #include "message.h"
 #include "routing_info.h"
 #include "statistics.h"
+#include "timer.h"
 
 #ifdef __linux
 #include "tc_util.h"
@@ -464,7 +465,6 @@ char **argv;
                     exit(1);
                 }
                 sc_type = TXT_SC;
-                printf("sc_type : %d\n", sc_type);
                 if((qomet_fd = fopen(optarg, "r")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
                     exit(1);
@@ -814,7 +814,6 @@ char **argv;
             }
             io_binary_print_time_record(&bin_time_rec);
             crt_record_time = bin_time_rec.time;
-            printf("crt_record_time : %.6f\n", crt_record_time);
 
             if(bin_time_rec.record_number > bin_recs_max_cnt) {
                 WARNING("The number of records to be read exceeds allocated size (%d)", bin_recs_max_cnt);
@@ -904,7 +903,7 @@ char **argv;
                     INFO("Waiting to reach time %.2f s...", crt_record_time);
                 }
                 else {
-                    printf("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
+                    INFO ("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
                     timer_wait(timer, crt_record_time * SCALING_FACTOR);

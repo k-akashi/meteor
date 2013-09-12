@@ -2,8 +2,8 @@
 # Makefile for qomet library wireconf
 ###########################################
 
-CC = gcc
-HOSTCC = gcc
+CC = clang
+HOSTCC = clang
 
 BINDIR = ../bin
 LIBDIR = ../lib

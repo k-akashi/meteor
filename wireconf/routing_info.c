@@ -80,9 +80,11 @@ int direction;
     }
 
     // get the next hop IP address for a destination IP address
+#ifdef __FreeBSD
     if(get_next_hop_ip(dst_ip, next_hop_ip)==ERROR) {
         return ERROR;
     }
+#endif
 
     // get the next hop id from the next hop IP address
     if((next_hop_id = get_id_from_ip(IP_addresses, next_hop_ip)) != ERROR) {
