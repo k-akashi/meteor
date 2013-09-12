@@ -87,14 +87,14 @@ timer_wait(struct timer_handle *handle, float time_in_s)
 {
   struct timespec next_tp;
 
-  // compute time for next event
+  printf("[time_wait] rec_time : %6f\n", time_in_s);
   next_tp = compute_next_time(handle, time_in_s);
   DEBUG_print_timespec(&next_tp);
 
   DEBUG ("Waiting for timer...");
 
   // wait for next event
-  clock_nanosleep (TIMER_TYPE, TIMER_ABSTIME, &next_tp, NULL);
+  clock_nanosleep(TIMER_TYPE, TIMER_ABSTIME, &next_tp, NULL);
 }
 
 // convert a "struct timespec" time value to seconds

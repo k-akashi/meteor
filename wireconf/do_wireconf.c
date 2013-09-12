@@ -814,6 +814,7 @@ char **argv;
             }
             io_binary_print_time_record(&bin_time_rec);
             crt_record_time = bin_time_rec.time;
+            printf("crt_record_time : %.6f\n", crt_record_time);
 
             if(bin_time_rec.record_number > bin_recs_max_cnt) {
                 WARNING("The number of records to be read exceeds allocated size (%d)", bin_recs_max_cnt);
@@ -903,7 +904,7 @@ char **argv;
                     INFO("Waiting to reach time %.2f s...", crt_record_time);
                 }
                 else {
-                    INFO("Waiting to reach real time %.2f s (scenario time %.2f)...", 
+                    printf("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
                     timer_wait(timer, crt_record_time * SCALING_FACTOR);

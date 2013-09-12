@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS := -g -O3 -Wall
 
-DEBUG := -DTCDEBUG
+#DEBUG := -DTCDEBUG
 
 LIBDIR=../lib
 INCDIR=../include
