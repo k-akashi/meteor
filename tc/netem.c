@@ -233,6 +233,7 @@ struct qdisc_params qp;
     req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
     dprintf(("[change_netem_qdisc] parent id = %d\n", req.t.tcm_parent));
     dprintf(("[change_netem_qdisc] handle id = %d\n", req.t.tcm_handle));
+    dprintf(("[change_netem_qdisc] delay = %f\n", qp.delay));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 

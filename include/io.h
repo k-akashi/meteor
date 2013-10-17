@@ -55,7 +55,7 @@ struct bin_hdr_cls
 };
 
 // binary file time record
-struct binary_time_record_class
+struct bin_time_rec_cls
 {
   float time;
   int record_number;
@@ -81,7 +81,7 @@ struct bin_rec_cls
 
 struct io_connection_state_class
 {
-  struct binary_time_record_class binary_time_record;
+  struct bin_time_rec_cls binary_time_record;
   struct bin_rec_cls binary_records[MAX_CONNECTIONS];
   int state_changed[MAX_CONNECTIONS];
 };
@@ -158,7 +158,7 @@ int io_read_settings_file_mac (char *settings_filename,
 void io_binary_print_header (struct bin_hdr_cls *bin_hdr);
 
 // print binary time record
-void io_binary_print_time_record (struct binary_time_record_class
+void io_binary_print_time_record (struct bin_time_rec_cls
 				  *binary_time_record);
 
 // print binary record
@@ -195,7 +195,7 @@ int io_binary_write_header_to_file (int if_num,
 
 // read a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_time_record_from_file (struct binary_time_record_class
+int io_binary_read_time_record_from_file (struct bin_time_rec_cls
 					  *binary_time_record,
 					  FILE * bin_in_file);
 
@@ -206,7 +206,7 @@ int io_binary_write_time_record_to_file (float time, int record_number,
 
 // directly write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_write_time_record_to_file2 (struct binary_time_record_class
+int io_binary_write_time_record_to_file2 (struct bin_time_rec_cls
 					  *binary_time_record,
 					  FILE * binary_file);
 

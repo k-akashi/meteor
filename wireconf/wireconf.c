@@ -756,6 +756,7 @@ double lossrate;
     if(priv_delay != delay || priv_loss != lossrate) {
         config_netem = 1;
         qp.delay = delay;
+        dprintf(("[configure_qdisc] delay : %.6f\n", qp.delay));
         priv_delay = delay;
         if(lossrate > 1 || lossrate < 0) {
             qp.loss = lossrate;
@@ -778,7 +779,10 @@ double lossrate;
     }
 
     config_netem = 1;
+    qp.delay = delay;
+    qp.loss = lossrate;
     config_bw = 1;
+    qp.rate = bandwidth;
     if(INGRESS) {
         devname = ifb_devname;
     }

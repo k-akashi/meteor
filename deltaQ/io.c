@@ -591,7 +591,7 @@ io_binary_print_header (struct bin_hdr_cls *bin_hdr)
 
 // print binary time record
 void
-io_binary_print_time_record (struct binary_time_record_class
+io_binary_print_time_record (struct bin_time_rec_cls
 			     *binary_time_record)
 {
   INFO ("- Time: %.2f s (%d records)\n", binary_time_record->time,
@@ -775,11 +775,11 @@ io_binary_write_header_to_file (int if_num,
 // read a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int
-io_binary_read_time_record_from_file (struct binary_time_record_class
+io_binary_read_time_record_from_file (struct bin_time_rec_cls
 				      *binary_time_record,
 				      FILE * bin_in_file)
 {
-  if(fread(binary_time_record, sizeof (struct binary_time_record_class),
+  if(fread(binary_time_record, sizeof (struct bin_time_rec_cls),
 	     1, bin_in_file) != 1)
     {
       WARNING ("Error reading binary time record from file");
@@ -797,14 +797,14 @@ int
 io_write_binary_time_record_to_file (float time, int record_number,
 				     FILE * binary_file)
 {
-  binary_time_record_class binary_time_record;
+  bin_time_rec_cls binary_time_record;
 
   binary_time_record.time = time;
   binary_time_record.record_number = record_number;
 
   // write time record to file
   if (fwrite (&binary_time_record,
-	      sizeof (binary_time_record_class), 1, binary_file) != 1)
+	      sizeof (bin_time_rec_cls), 1, binary_file) != 1)
     {
       WARNING ("Error writing binary output time record to file");
       return ERROR;
@@ -817,12 +817,11 @@ io_write_binary_time_record_to_file (float time, int record_number,
 // directly write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int
-io_binary_write_time_record_to_file2 (struct binary_time_record_class
+io_binary_write_time_record_to_file2 (struct bin_time_rec_cls
 				      *binary_time_record, FILE * binary_file)
 {
   // write time record to file
-  if (fwrite (binary_time_record,
-	      sizeof (struct binary_time_record_class), 1, binary_file) != 1)
+  if (fwrite (binary_time_record, sizeof(struct bin_time_rec_cls), 1, binary_file) != 1)
     {
       WARNING ("Error writing binary output time record to file");
       perror ("fwrite");

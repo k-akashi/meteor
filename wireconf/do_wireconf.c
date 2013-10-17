@@ -357,7 +357,7 @@ char **argv;
     struct wireconf_class wireconf;
 
     float crt_record_time = 0.0;
-    struct binary_time_record_class bin_time_rec;
+    struct bin_time_rec_cls bin_time_rec;
     struct bin_rec_cls *bin_recs = NULL;
     int32_t bin_recs_max_cnt;
 
@@ -988,7 +988,6 @@ char **argv;
                             ipaddrs_c + (node_i - FIRST_NODE_ID) * IP_ADDR_SIZE, 
                             crt_record_time, bandwidth, lossrate, delay);
                     }
-
                     bandwidth = 0.0;
                     delay = 0.0;
                     lossrate = 0.0;

@@ -81,7 +81,7 @@ int direction;
 
     // get the next hop IP address for a destination IP address
 #ifdef __FreeBSD
-    if(get_next_hop_ip(dst_ip, next_hop_ip)==ERROR) {
+    if(get_next_hop_ip(dst_ip, next_hop_ip) == ERROR) {
         return ERROR;
     }
 #endif
