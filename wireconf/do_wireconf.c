@@ -1154,7 +1154,7 @@ char **argv;
                         }
                     }
     
-                    for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
+                    for(i = FIRST_NODE_ID; i < (node_number + FIRST_NODE_ID); i++) {
                         if(i == my_id) {
                             continue;
                         }
