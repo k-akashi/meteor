@@ -72,12 +72,6 @@
 
 #ifdef INGRESS
 char ifb_devname[DEV_NAME] = "ifb0";
-int32_t dev_no = 0;
-struct if_list iflist;
-struct device_list {
-    char dst_address[16];
-    char dev[DEV_NAME];
-} dev_list[MAX_DEV];
 #endif 
 
 typedef union {
@@ -364,14 +358,15 @@ int direction;
 }
 #endif
 
-int
+int32_t
 init_rule(dst)
 char *dst;
 {
 #ifdef __linux
+    int32_t i;
     char *devname;
     uint32_t htb_qdisc_id[4];
-    uint32_t htb_class_id[4];
+    //uint32_t htb_class_id[4];
     //struct qdisc_params qp;
     //struct u32_params ufp;
 
@@ -382,6 +377,15 @@ char *dst;
     if(INGRESS) {
         set_ifb(ifb_devname, IF_UP);
 
+        for(i = 0; i < if_num; i++) {
+            if(!device_list[i].dev_name) {
+                break;
+            }
+            delete_netem_qdisc(device_list[i].dev_name, 0);
+            add_ingress_qdisc(device_list[i].dev_name);
+            add_ingress_filter(device_list[i].dev_name, ifb_devname);
+        }
+/*
         devname = "eth4";
         delete_netem_qdisc(devname, 0);
         add_ingress_qdisc(devname);
@@ -391,6 +395,7 @@ char *dst;
         delete_netem_qdisc(devname, 0);
         add_ingress_qdisc(devname);
         add_ingress_filter(devname, ifb_devname);
+*/
 
 /*
         int i;
@@ -441,7 +446,7 @@ char *dst;
 }
 
 #ifdef __linux
-int
+int32_t
 add_rule_netem(rulenum, handle_nr, src, dst, direction)
 uint16_t rulenum;
 int handle_nr;
@@ -566,10 +571,10 @@ int direction;
 }
 #endif
 
-int 
+int32_t 
 add_rule(s, rulenum, pipe_nr, src, dst, direction)
 int s;
-uint16_t rulenum;
+uint32_t rulenum;
 int pipe_nr;
 char *src;
 char *dst;
@@ -631,8 +636,16 @@ uint32_t rule_number;
 */
         //delete_netem_qdisc(devname, 0);
         //delete_netem_qdisc(ifb_devname, 1);
-        delete_netem_qdisc("eth4", INGRESS);
-        delete_netem_qdisc("eth5", INGRESS);
+        int32_t i;
+        for(i = 0; i < if_num; i++) {
+            if(!device_list[i].dev_name) {
+                break;
+            }
+            delete_netem_qdisc(device_list[i].dev_name, INGRESS);
+            
+        }
+//        delete_netem_qdisc("eth4", INGRESS);
+//        delete_netem_qdisc("eth5", INGRESS);
         delete_netem_qdisc("ifb0", 0);
     }
 
@@ -724,7 +737,6 @@ double lossrate;
     int config_bw = 0;
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
-    char buffer[20];
 
     memset(&qp, 0, sizeof(qp));
     devname = malloc(DEV_NAME);
@@ -768,12 +780,6 @@ double lossrate;
     }
 
     if(priv_rate != bandwidth) {
-        if((bandwidth / 1024) < FRAME_LENGTH) {
-            sprintf(buffer, "%d", FRAME_LENGTH);
-        }
-        else {
-            sprintf(buffer, "%d", bandwidth / 1024);
-        }
         priv_rate = bandwidth;
         config_bw = 1;
     }
@@ -781,8 +787,10 @@ double lossrate;
     config_netem = 1;
     qp.delay = delay;
     qp.loss = lossrate;
+
     config_bw = 1;
     qp.rate = bandwidth;
+
     if(INGRESS) {
         devname = ifb_devname;
     }
@@ -798,7 +806,14 @@ double lossrate;
     }
     if(config_bw) {
         qp.rate = bandwidth;
-        qp.buffer = buffer;
+        if((bandwidth / 1024) < FRAME_LENGTH) {
+            qp.buffer = FRAME_LENGTH;
+            //sprintf(buffer, "%d", FRAME_LENGTH);
+        }
+        else {
+            qp.buffer = FRAME_LENGTH / 1024;
+            //sprintf(buffer, "%d", bandwidth / 1024);
+        }
         change_htb_class(devname, htb_class_id, 1 * 1000 * 1000 * 1000);
 //        change_htb_class(devname, htb_class_id, rate);
     }
@@ -807,13 +822,13 @@ double lossrate;
 }
 #endif
 
-int
+int32_t
 configure_rule(dsock, dst, pipe_nr, bandwidth, delay, lossrate)
 int dsock;
 char* dst;
 int32_t pipe_nr;
 int32_t bandwidth;
-float delay;
+double delay;
 double lossrate;
 {
 #ifdef __FreeBSD

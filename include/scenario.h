@@ -30,13 +30,6 @@
 // Scenario data-structure constants
 ////////////////////////////////////////////////
 
-// maximum data sizes constants
-#define MAX_NODES                       100
-#define MAX_OBJECTS                     10000	// 500
-#define MAX_ENVIRONMENTS                10000	// MAX_NODES*MAX_NODES
-#define MAX_MOTIONS                     500
-#define MAX_CONNECTIONS                 10000	// MAX_NODES*MAX_NODES
-
 // NOT USED ANY LONGER
 // minimum length of a segment in meters;
 // if smaller, segment is ignored

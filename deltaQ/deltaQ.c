@@ -251,8 +251,8 @@ parse_svn_revision (char *svn_revision_str)
 	  else
 	    DEBUG ("Function strtol() returned %ld", return_value);
 
-	  if (*end_ptr != '\0')	// not necessarily an error...
-	    ;
+//	  if (*end_ptr != '\0')	// not necessarily an error...
+//	    ;
 	}
     }
 

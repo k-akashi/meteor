@@ -194,7 +194,6 @@ get_cpu_frequency(void)
     unsigned int s = sizeof(hz);
     sysctlbyname("machdep.tsc_freq", &hz, &s, NULL, 0);
 #elif __linux
-//  hz = sysconf(_SC_CLK_TCK);
     FILE *cpuinfo;
     double tmp_hz;
     char str[256];
@@ -346,6 +345,7 @@ char **argv;
     char *faddr, *taddr;
     char buf[BUFSIZ];
     char settings_file_name[BUFSIZ];
+    int32_t loop;
     int32_t dsock;
     int32_t node_cnt = 0;
     uint16_t rulenum;
@@ -396,7 +396,11 @@ char **argv;
     timer_handle *timer;
     int32_t loop_cnt = 0;
 
+#ifdef __linux
+    int32_t direction = DIRECTION_BR;
+#else
     int32_t direction = DIRECTION_BOTH;
+#endif
 
     struct timeval tp_begin, tp_end;
 
@@ -419,6 +423,9 @@ char **argv;
 
     memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
     memset(&param_over_read, 0, sizeof(qomet_param));
+
+    memset(&device_list, 0, sizeof(struct DEVICE_LIST) * MAX_IFS);
+    if_num = 0;
     over_read = 0;
     rule_cnt = 0;
     next_time = 0.0;
@@ -443,10 +450,11 @@ char **argv;
         exit(1);
     }
 
-    while((ch = getopt(argc, argv, "hc:q:a:f:F:t:T:r:p:d:i:s:m:b:")) != -1) {
+    i = 0;
+    while((ch = getopt(argc, argv, "hc:q:a:f:F:t:T:r:p:d:i:z:s:m:b:l")) != -1) {
         switch(ch) {
             case 'h':
-                usage();
+                usage("sample");
                 exit(0);
             case 'a':
                 if(sc_type == TXT_SC) {
@@ -513,6 +521,14 @@ char **argv;
                 else if(strcmp(optarg, "out") == 0) {
                     direction = DIRECTION_OUT;
                 }
+                else if(strcmp(optarg, "bridge") == 0) {
+#ifdef __linux
+                    direction = DIRECTION_BR;
+#elif __FreeBSD
+                    WARNING("Invalid direction '%s'", optarg);
+                    exit(1);
+#endif
+                }
                 else {
                     WARNING("Invalid direction '%s'", optarg);
                     exit(1);
@@ -520,6 +536,16 @@ char **argv;
                 break;
             case 'i':
                 my_id = strtol(optarg, NULL, 10);
+                break;
+            case 'z':
+#ifdef __linux
+                strcpy(device_list[if_num].dev_name, optarg);
+                printf("dev no%d: %s\n", if_num, device_list[if_num].dev_name);
+                if_num++;
+
+#elif __FreeBSD
+                fprintf(stderr, "support only linux\n");
+#endif
                 break;
             case 's':
                 strncpy(settings_file_name, optarg, MAX_STRING - 1);
@@ -531,7 +557,7 @@ char **argv;
                 }
                 for(i = 0; i < node_number; i++) {
                     snprintf(ipaddrs_c + i * IP_ADDR_SIZE, IP_ADDR_SIZE, 
-                            "%hu.%hu.%hu.%hu",
+                            "%d.%d.%d.%d",
                             *(((uint8_t *)&ipaddrs[i]) + 0),
                             *(((uint8_t *)&ipaddrs[i]) + 1),
                             *(((uint8_t *)&ipaddrs[i]) + 2),
@@ -547,18 +573,19 @@ char **argv;
             case 'b':
                 strncpy(baddr, optarg, IP_ADDR_SIZE);
                 break;
+            case 'l':
+                loop = TRUE;
+                break;
             default:
                 usage(argv0);
                 exit(1);
         }
     }
 
-/*
-    if((my_id < FIRST_NODE_ID) || (my_id >= node_number + FIRST_NODE_ID)) {
-        WARNING("Invalid ID '%d'. Valid range is [%d, %d]", my_id, FIRST_NODE_ID, node_number+FIRST_NODE_ID - 1);
-        exit(1);
+    for(i = 0; i < if_num; i++) {
+        printf("emulation device : %p\n", &device_list[i]);
+        printf("emulation device No%d: %s\n", i, device_list[i].dev_name);
     }
-*/
 
     argc -= optind;
     argv += optind;
@@ -568,21 +595,6 @@ char **argv;
         usage(argv0);
         exit(1);
     }
-
-/*
-    if((usage_type == 1) && ((fid == -1) || (faddr == NULL) || (tid == -1) || (taddr == NULL) || (pipe_nr == -1) || (rulenum == 65535))) {
-        WARNING("Insufficient arguments were provided for usage (1)");
-        usage(argv0);
-        fclose(qomet_fd);
-        exit(1);
-    }
-    else if ((my_id == -1) || (node_number == -1) || (time_period == -1)) {
-        WARNING("Insufficient arguments were provided for usage (2)");
-        usage(argv0);
-        fclose(qomet_fd);
-        exit(1);
-    }
-*/
 
     if(sc_type == BIN_SC) {
         if(use_mac_addr == TRUE) {
@@ -634,10 +646,7 @@ char **argv;
         }
     }
     else {
-        dprintf(("my_id : %d\n", my_id));
-        dprintf(("node_number : %d\n", node_number));
         for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
-            dprintf(("j : %d\n", j));
             if(j == my_id) {
                 continue;
             }
@@ -706,6 +715,7 @@ char **argv;
     INFO("Reading QOMET data from file...");
     next_time = 0;
 
+    emulation_start:
     if(sc_type == BIN_SC) {
         if(io_binary_read_header_from_file(&bin_hdr, qomet_fd) == ERROR) {
             WARNING("Aborting on input error (binary header)");
@@ -834,11 +844,7 @@ char **argv;
                     exit (1);
                 }
 
-                if(bin_recs[rec_i].to_id < FIRST_NODE_ID || 
-                    (bin_recs[rec_i].to_id > bin_hdr.if_num + FIRST_NODE_ID - 1)) {
-                    INFO ("Destination with id = %d is out of the valid range [%d, %d]", 
-                        bin_recs[rec_i].to_id,
-                         FIRST_NODE_ID, bin_hdr.if_num + FIRST_NODE_ID - 1);
+                if(bin_recs[rec_i].to_id < FIRST_NODE_ID || (bin_recs[rec_i].to_id > bin_hdr.if_num + FIRST_NODE_ID - 1)) {
                     exit (1);
                 }
 
@@ -847,14 +853,12 @@ char **argv;
                       &bin_recs[rec_i]);
                     my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
 
-                    DEBUG("Copied bin_recs to my_recs_ucast(index: bin_recs[rec_i].to_id=%d).", bin_recs[rec_i].to_id);
                     //io_binary_print_record (&(my_recs_ucast[bin_recs[rec_i].from_node][bin_recs[rec_i].to_node]));
                 }
 
                 if(bin_recs[rec_i].to_id == my_id) {
                     io_binary_copy_record(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                     my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
-                    DEBUG("Copied bin_recs to my_recs_bcast(index: bin_recs[rec_i].from_node=%d).", bin_recs[rec_i].from_id);
                     //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
                 }
             }
@@ -879,8 +883,7 @@ char **argv;
 
                     for(rec_i = 0; rec_i < node_cnt; rec_i++) {
                         if(rec_i != my_id) {
-                            io_binary_copy_record(&(adjusted_records_ucast[rec_i]),
-                                 &(my_recs_ucast[my_id][rec_i]));
+                            io_binary_copy_record(&(adjusted_records_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
                             DEBUG("Copied my_recs_ucast to adjusted_records_ucast (index is rec_i=%d).", rec_i);
                             //io_binary_print_record (&(adjusted_records_ucast[rec_i]));
                         }
@@ -896,7 +899,6 @@ char **argv;
 
             if (time_i == 0) {
                 timer_reset(timer, crt_record_time);
-                dprintf(("timer_reset\n"));
             }
             else {
                 if(SCALING_FACTOR == 10.0) {
@@ -1082,6 +1084,10 @@ char **argv;
 #endif
             loop_cnt++;
         }
+        if(loop == TRUE) {
+            fseek(qomet_fd, 0L, SEEK_SET);
+            goto emulation_start;
+        }
     }
     else if(sc_type == TXT_SC) {
         while(fgets(buf, BUFSIZ, qomet_fd) != NULL) {
@@ -1161,7 +1167,8 @@ char **argv;
     
                         if((next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, i, DIRECTION_OUT)) == ERROR) {
                             WARNING("Could not locate the next hop for destination node %i", i);
-                            exit(1);
+                            next_hop_id = 1;
+                            //exit(1);
                         }
     
                         offset_num = i;
@@ -1195,7 +1202,7 @@ char **argv;
                         loop_cnt++;
                     }
     
-                    for(i = FIRST_NODE_ID; i < (node_number+FIRST_NODE_ID); i++) {
+                    for(i = FIRST_NODE_ID; i < (node_number + FIRST_NODE_ID); i++) {
                         if(i == my_id)
                             continue;
     
@@ -1247,6 +1254,10 @@ char **argv;
                 }
             }
         } 
+    }
+    if(loop == TRUE) {
+        fseek(qomet_fd, 0L, SEEK_SET);
+        goto emulation_start;
     }
 
     if(loop_cnt == 0) {

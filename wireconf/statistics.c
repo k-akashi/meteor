@@ -338,15 +338,14 @@ stats_listen_thread (void *arg)
       else          // succesfull reception
     {
       // print received statistics (unless execution must end)
-      if (stats.channel_utilization != STATISTICS_END_EXEC)
-        {
+      if (stats.channel_utilization != STATISTICS_END_EXEC) {
           //incoming_id = get_id_from_ip_in_addr_t (wireconf->IP_addresses, ((struct sockaddr_in *)(&incoming_address))-> sin_addr.s_addr);
           incoming_id = 1;
 
           // CHECK range!!!!!!!!!!!!!!!!!!!!!!!!!!11111
 
           if (incoming_id < 0 || incoming_id > wireconf->node_count - 1) {
-        //WARNING ("Id %d is out of range [%d, %d]. Ignoring...", incoming_id, 0, wireconf->node_count - 1);
+            //WARNING ("Id %d is out of range [%d, %d]. Ignoring...", incoming_id, 0, wireconf->node_count - 1);
             printf("");
             }
           else
@@ -368,8 +367,6 @@ stats_listen_thread (void *arg)
            */
         }
 
-          //INFO ("Statistics listen thread (time=%.2f s): \
-channel_utilization=\t%f RECEIVED from %s:%d\t => incoming_id=%d", get_elapsed_time (wireconf), stats.channel_utilization, inet_ntoa (((struct sockaddr_in *) (&incoming_address))->sin_addr), ntohs (((struct sockaddr_in *) (&incoming_address))->sin_port), incoming_id);
         }
     }
 
@@ -1067,8 +1064,6 @@ compute_cwb_channel_utilization (struct wireconf_class *wireconf,
             if (wireconf->channel_utilization_per_source[node_i]
             [pipe_i] > 0.05)
               {
-            //INFO ("CWB_channel_utilization: node=%i, source=%i, \
-value=%f", node_i, pipe_i, wireconf->channel_utilization_per_source[node_i][pipe_i]);
             cwb_channel_utilization +=
               wireconf->channel_utilization_per_source[node_i]
               [pipe_i];

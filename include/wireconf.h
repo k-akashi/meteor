@@ -60,8 +60,8 @@
 #define DIRECTION_BOTH                  0
 #define DIRECTION_IN                    1
 #define DIRECTION_OUT                   2
+#define DIRECTION_BR                    3
 
-#define MAX_NODES                       500
 
 int get_socket(void);
 void close_socket(int socket_id);
@@ -73,10 +73,10 @@ int get_rule(uint s, int16_t rulenum);
 int get_rule_linux(void);
 #endif
 
-int init_rule(char *dst);
-int add_rule(int s, uint16_t rulenum, int pipe_nr, char *src, char *dst, int direction);
-int configure_rule(int s, char* dst, int handle, int bandwidth, float delay, double lossrate);
-int delete_rule(uint s, char *dst, u_int32_t rule_number);
+int32_t init_rule(char *dst);
+int32_t add_rule(int s, uint32_t rulenum, int pipe_nr, char *src, char *dst, int direction);
+int32_t configure_rule(int s, char* dst, int handle, int bandwidth, double delay, double lossrate);
+int32_t delete_rule(uint s, char *dst, u_int32_t rule_number);
 
 // print a rule structure
 #ifdef __FreeBSD__
@@ -88,6 +88,14 @@ void print_rule(struct ip_fw *rule);
 void print_pipe(struct dn_pipe *pipe);
 #endif
 
+#ifdef __linux
+#define MAX_IFS 100
+#define IFNAME_LEN 16
+struct DEVICE_LIST {
+    char dev_name[IFNAME_LEN];
+} device_list[MAX_IFS];
+int32_t if_num;
+#endif
 
 struct wireconf_class {
     struct timespec start_time;

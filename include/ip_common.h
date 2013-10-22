@@ -1,10 +1,12 @@
 #define IF_UP 0
 #define IF_DOWN 1
 
+/*
 typedef struct if_list {
     struct nlmsghdr n;
     ssize_t len;
 };
+*/
 
 extern struct rtnl_handle rth;
 extern int print_linkinfo(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg);

@@ -56,6 +56,13 @@
 #define IP_ADDR_SIZE                    16
 #define FIRST_NODE_ID                   0
 
+// maximum data sizes constants
+#define MAX_NODES                       500
+#define MAX_OBJECTS                     10000   // 500
+#define MAX_ENVIRONMENTS                10000   // MAX_NODES*MAX_NODES
+#define MAX_MOTIONS                     500
+#define MAX_CONNECTIONS                 10000   // MAX_NODES*MAX_NODES
+
 /////////////////////////////////////////////
 // Definitions of the main structures
 // (used to avoid circular references)
