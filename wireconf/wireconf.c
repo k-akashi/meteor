@@ -366,13 +366,13 @@ char *dst;
     int32_t i;
     char *devname;
     uint32_t htb_qdisc_id[4];
-    //uint32_t htb_class_id[4];
-    //struct qdisc_params qp;
+    uint32_t htb_class_id[4];
+    uint32_t netem_qdisc_id[4];
+    struct qdisc_params qp;
     //struct u32_params ufp;
 
     if(!INGRESS) {
         devname =  get_route_info("dev", dst);
-        devname = "eth5";
     }
     if(INGRESS) {
         set_ifb(ifb_devname, IF_UP);
@@ -385,19 +385,7 @@ char *dst;
             add_ingress_qdisc(device_list[i].dev_name);
             add_ingress_filter(device_list[i].dev_name, ifb_devname);
         }
-/*
-        devname = "eth4";
-        delete_netem_qdisc(devname, 0);
-        add_ingress_qdisc(devname);
-        add_ingress_filter(devname, ifb_devname);
-
-        devname = "eth5";
-        delete_netem_qdisc(devname, 0);
-        add_ingress_qdisc(devname);
-        add_ingress_filter(devname, ifb_devname);
-*/
-
-/*
+/* debug now...
         int i;
         int nifaces;
         struct ifconf ifconf;
@@ -424,13 +412,27 @@ char *dst;
         devname = ifb_devname;
     }
  
+    delete_netem_qdisc(devname, 0);
+
     htb_qdisc_id[0] = TC_H_ROOT;
     htb_qdisc_id[1] = 0;
     htb_qdisc_id[2] = 1;
     htb_qdisc_id[3] = 0;
- 
-    delete_netem_qdisc(devname, 0);
     add_htb_qdisc(devname, htb_qdisc_id);
+
+    htb_class_id[0] = 1;
+    htb_class_id[1] = 0;
+    htb_class_id[2] = 1;
+    htb_class_id[3] = 65535;
+    add_htb_class(devname, htb_class_id, 1000000000);
+
+    netem_qdisc_id[0] = 1;
+    netem_qdisc_id[1] = 65535;
+    netem_qdisc_id[2] = 65535;
+    netem_qdisc_id[3] = 0;
+    qp.loss = ~0;
+    qp.limit = 100000;
+    add_netem_qdisc(devname, netem_qdisc_id, qp);
 
 /* XXX
         ufp.match.type = "u32";
@@ -462,23 +464,15 @@ int direction;
     struct u32_params ufp;
 
     if(!INGRESS) {
-        devname = malloc(DEV_NAME);
+        devname = (char* )malloc(DEV_NAME);
         devname =  (char* )get_route_info("dev", dst);
-        devname = "eth5";
     }
     else if(INGRESS) {
-        devname = "ifb0";
+        devname = ifb_devname;
     }
 
     memset(&qp, 0, sizeof(struct qdisc_params));
     memset(&ufp, 0, sizeof(struct u32_params));
-
-/*
-    dprintf(("[add_rule] devname : %s\n", devname));
-    strcpy(device_list[dev_no].dst_address, dst);
-    strcpy(device_list[dev_no].device, devname);
-    dev_no++;
-*/
 
     dprintf(("[add_rule] rulenum = %d\n", handle_nr));
     qp.limit = 100000;
@@ -608,35 +602,18 @@ uint32_t s;
 char* dst;
 uint32_t rule_number;
 {
-    struct qdisc_params qp; 
     char* devname;
+    int32_t i;
+    struct qdisc_params qp; 
 
     memset(&qp, 0, sizeof(qp));
     devname = malloc(DEV_NAME);
 
-
     if(!INGRESS) {
         devname = (char*)get_route_info("dev", dst);
-        //delete_netem_qdisc(devname, 0);
-        delete_netem_qdisc("eth5", INGRESS);
+        delete_netem_qdisc(devname, 0);
     }
     if(INGRESS) {
-/*
-        int ret;
-        int cmd_len = 1024;
-        char *cmd;
-
-        cmd = malloc(cmd_len);
-        tc_cmd(RTM_DELQDISC, 0, ifb_devname, "1", "root", qp, "pfifo");
-        sprintf(cmd, "tc qdisc del dev %s root", devname);
-        ret = system(cmd);
-        if(ret != 0) {
-            exit(1);
-        }
-*/
-        //delete_netem_qdisc(devname, 0);
-        //delete_netem_qdisc(ifb_devname, 1);
-        int32_t i;
         for(i = 0; i < if_num; i++) {
             if(!device_list[i].dev_name) {
                 break;
@@ -644,9 +621,7 @@ uint32_t rule_number;
             delete_netem_qdisc(device_list[i].dev_name, INGRESS);
             
         }
-//        delete_netem_qdisc("eth4", INGRESS);
-//        delete_netem_qdisc("eth5", INGRESS);
-        delete_netem_qdisc("ifb0", 0);
+        delete_netem_qdisc(ifb_devname, 0);
     }
 
     return SUCCESS;
@@ -770,13 +745,16 @@ double lossrate;
         qp.delay = delay;
         dprintf(("[configure_qdisc] delay : %.6f\n", qp.delay));
         priv_delay = delay;
-        if(lossrate > 1 || lossrate < 0) {
-            qp.loss = lossrate;
+        if(lossrate == 1) {
+            qp.loss = ~0;
+        }
+        else if(lossrate < 1 || lossrate > 0) {
+            qp.loss = lossrate * max_percent_value;
         }
         else {
             qp.loss = 0;
         }
-        priv_loss = lossrate;
+        priv_loss = qp.loss;
     }
 
     if(priv_rate != bandwidth) {
@@ -786,7 +764,7 @@ double lossrate;
 
     config_netem = 1;
     qp.delay = delay;
-    qp.loss = lossrate;
+    qp.loss = lossrate * max_percent_value;
 
     config_bw = 1;
     qp.rate = bandwidth;
@@ -808,14 +786,11 @@ double lossrate;
         qp.rate = bandwidth;
         if((bandwidth / 1024) < FRAME_LENGTH) {
             qp.buffer = FRAME_LENGTH;
-            //sprintf(buffer, "%d", FRAME_LENGTH);
         }
         else {
             qp.buffer = FRAME_LENGTH / 1024;
-            //sprintf(buffer, "%d", bandwidth / 1024);
         }
-        change_htb_class(devname, htb_class_id, 1 * 1000 * 1000 * 1000);
-//        change_htb_class(devname, htb_class_id, rate);
+        change_htb_class(devname, htb_class_id, qp.rate);
     }
 
     return SUCCESS;

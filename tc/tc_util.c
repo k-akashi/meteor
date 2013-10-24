@@ -269,8 +269,6 @@ char* str;
 	return 0;
 }
 
-static const double max_percent_value = 0xffffffff;
-
 int get_percent(__u32 *percent, const char *str)
 {
 	char *p;

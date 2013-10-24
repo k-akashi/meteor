@@ -50,12 +50,15 @@
 // structure for the timer handle
 struct timer_handle
 {
-  uint32_t cpu_frequency;
-  // the relative "zero" of the timer
-  struct timespec zero_tp;
+    uint32_t cpu_frequency;
+    // the relative "zero" of the timer
+    struct timespec zero_tp;
 
-  // the logical time equivalent to "zero"
-  double zero_time;
+    // the logical time equivalent to "zero"
+    double zero_time;
+
+    uint64_t zero;
+    uint64_t next_event;
 };
 
 

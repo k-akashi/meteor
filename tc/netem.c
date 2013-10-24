@@ -73,16 +73,19 @@ struct nlmsghdr *n;
         opt.latency = tc_core_time2tick(latency);
     }
     if(qp->jitter) {
+        qp->jitter = 0;
+/*
         if(get_ticks(&opt.jitter, qp->jitter)) {
             return -1;
         }
+*/
     }
     if(qp->delay_corr) {
         ++present[TCA_NETEM_CORR];
         cor.delay_corr = qp->delay_corr;
     }
     if(qp->loss) {
-        opt.loss, qp->loss;
+        opt.loss = qp->loss;
     }
     if(qp->loss_corr) {
         ++present[TCA_NETEM_CORR];
@@ -176,6 +179,8 @@ struct qdisc_params qp;
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
     dprintf(("[add_netem_qdisc] parent id = %d\n", req.t.tcm_parent));
     dprintf(("[add_netem_qdisc] handle id = %d\n", req.t.tcm_handle));
+    dprintf(("[add_netem_qdisc] delay = %d\n", qp.delay));
+    dprintf(("[add_netem_qdisc] loss = %d\n", qp.loss));
 
     netem_opt(&qp, &req.n);
 
@@ -234,6 +239,7 @@ struct qdisc_params qp;
     dprintf(("[change_netem_qdisc] parent id = %d\n", req.t.tcm_parent));
     dprintf(("[change_netem_qdisc] handle id = %d\n", req.t.tcm_handle));
     dprintf(("[change_netem_qdisc] delay = %f\n", qp.delay));
+    dprintf(("[change_netem_qdisc] loss = %f\n", qp.loss));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 

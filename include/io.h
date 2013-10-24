@@ -66,16 +66,16 @@ struct bin_time_rec_cls
 // 'io_copy_record' and 'io_binary_compare_record' when making changes
 struct bin_rec_cls
 {
-  int32_t from_id;
-  int32_t to_id;
-  float frame_error_rate;
-  float num_retransmissions;
-  int32_t standard;
-  float operating_rate;
-  float bandwidth;
-  float loss_rate;
-  float delay;
-  //float jitter; // not needed yet
+    int32_t from_id;
+    int32_t to_id;
+    float frame_error_rate;
+    float num_retransmissions;
+    int32_t standard;
+    float operating_rate;
+    float bandwidth;
+    float loss_rate;
+    float delay;
+    //float jitter; // not needed yet
 };
 
 

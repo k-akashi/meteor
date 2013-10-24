@@ -94,7 +94,7 @@ float compute_channel_utilization (struct bin_rec_cls *binary_record,
                    long long unsigned int delta_byte_counter,
                    float time_interval);
 
-float compute_transmission_probability
+float compute_tx_prob
   (struct bin_rec_cls *binary_record,
    long long unsigned int delta_pkt_counter,
    long long unsigned int delta_byte_counter, float time_interval,

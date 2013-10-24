@@ -479,7 +479,7 @@ compute_channel_utilization (struct bin_rec_cls *binary_record,
 
 
 float
-compute_transmission_probability (struct bin_rec_cls *binary_record,
+compute_tx_prob(struct bin_rec_cls *binary_record,
                   long long unsigned int delta_pkt_counter,
                   long long unsigned int delta_byte_counter,
                   float time_interval,

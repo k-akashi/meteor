@@ -70,7 +70,7 @@ int direction;
     int next_hop_id;
 
     // for incoming routes, the route is the destination itself
-    if(direction == DIRECTION_IN) {
+    if(direction == DIRECTION_IN || direction == DIRECTION_BR) {
         return dst_id;
     }
 

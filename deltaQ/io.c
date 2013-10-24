@@ -615,18 +615,19 @@ standard=%d op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_rec
 
 // copy binary record
 void
-io_binary_copy_record (struct bin_rec_cls *binary_record_dst,
-		       struct bin_rec_cls *binary_record_src)
+io_binary_copy_record(bin_rec_dst, bin_rec_src)
+struct bin_rec_cls *bin_rec_dst;
+struct bin_rec_cls *bin_rec_src;
 {
-  binary_record_dst->from_id = binary_record_src->from_id;
-  binary_record_dst->to_id = binary_record_src->to_id;
-  binary_record_dst->frame_error_rate = binary_record_src->frame_error_rate;
-  binary_record_dst->num_retransmissions = binary_record_src->num_retransmissions;
-  binary_record_dst->standard = binary_record_src->standard;
-  binary_record_dst->operating_rate = binary_record_src->operating_rate;
-  binary_record_dst->bandwidth = binary_record_src->bandwidth;
-  binary_record_dst->loss_rate = binary_record_src->loss_rate;
-  binary_record_dst->delay = binary_record_src->delay;
+    bin_rec_dst->from_id             = bin_rec_src->from_id;
+    bin_rec_dst->to_id               = bin_rec_src->to_id;
+    bin_rec_dst->frame_error_rate    = bin_rec_src->frame_error_rate;
+    bin_rec_dst->num_retransmissions = bin_rec_src->num_retransmissions;
+    bin_rec_dst->standard            = bin_rec_src->standard;
+    bin_rec_dst->operating_rate      = bin_rec_src->operating_rate;
+    bin_rec_dst->bandwidth           = bin_rec_src->bandwidth;
+    bin_rec_dst->loss_rate           = bin_rec_src->loss_rate;
+    bin_rec_dst->delay               = bin_rec_src->delay;
 }
 
 // build binary record

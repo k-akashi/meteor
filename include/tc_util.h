@@ -28,6 +28,7 @@
 #define Megabit  1000000
 #define Gigabit  1000000000
 
+static const double max_percent_value = 0xffffffff;
 struct rtnl_handle rth;
 
 struct qdisc_params
