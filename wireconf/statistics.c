@@ -693,7 +693,7 @@ adjust_deltaQ (struct wireconf_class *wireconf,
      */
 
     //copy first all fields of the record
-    io_binary_copy_record (&(adjusted_binary_records_ucast[i]),
+    io_bin_cp_rec(&(adjusted_binary_records_ucast[i]),
                    &(binary_records_ucast[wireconf->my_id][i]));
 
     // restore state ?????????????

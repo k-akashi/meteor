@@ -177,10 +177,10 @@ struct qdisc_params qp;
     req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
-    dprintf(("[add_netem_qdisc] parent id = %d\n", req.t.tcm_parent));
-    dprintf(("[add_netem_qdisc] handle id = %d\n", req.t.tcm_handle));
-    dprintf(("[add_netem_qdisc] delay = %d\n", qp.delay));
-    dprintf(("[add_netem_qdisc] loss = %d\n", qp.loss));
+    dprintf(("[add_netem_qdisc] parent id = %u\n", req.t.tcm_parent));
+    dprintf(("[add_netem_qdisc] handle id = %u\n", req.t.tcm_handle));
+    dprintf(("[add_netem_qdisc] delay = %f\n", qp.delay));
+    dprintf(("[add_netem_qdisc] loss = %f\n", qp.loss));
 
     netem_opt(&qp, &req.n);
 

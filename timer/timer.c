@@ -82,7 +82,7 @@ timer_reset(struct timer_handle *handle, double zero_time)
 }
 
 // wait for a time to occur (specified in seconds)
-void
+int
 timer_wait(struct timer_handle *handle, float time_in_s)
 {
   struct timespec next_tp;
@@ -93,7 +93,7 @@ timer_wait(struct timer_handle *handle, float time_in_s)
   DEBUG ("Waiting for timer...");
 
   // wait for next event
-  clock_nanosleep(TIMER_TYPE, TIMER_ABSTIME, &next_tp, NULL);
+  return clock_nanosleep(TIMER_TYPE, TIMER_ABSTIME, &next_tp, NULL);
 }
 
 // convert a "struct timespec" time value to seconds

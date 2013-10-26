@@ -615,7 +615,7 @@ standard=%d op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_rec
 
 // copy binary record
 void
-io_binary_copy_record(bin_rec_dst, bin_rec_src)
+io_bin_cp_rec(bin_rec_dst, bin_rec_src)
 struct bin_rec_cls *bin_rec_dst;
 struct bin_rec_cls *bin_rec_src;
 {

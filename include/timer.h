@@ -78,7 +78,7 @@ void DEBUG_print_timespec (struct timespec *time);
 void timer_reset (struct timer_handle *handle, double zero_time);
 
 // wait for a time to occur (specified in seconds)
-void timer_wait (struct timer_handle *handle, float time_in_s);
+int timer_wait(struct timer_handle *handle, float time_in_s);
 
 // return the elapsed time since timer was last reset
 // NOTE: the function used internally, clock_gettime, seems to be 

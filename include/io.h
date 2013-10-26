@@ -165,8 +165,7 @@ void io_binary_print_time_record (struct bin_time_rec_cls
 void io_binary_print_record (struct bin_rec_cls *binary_record);
 
 // copy binary record
-void io_binary_copy_record (struct bin_rec_cls *binary_record_dst,
-			    struct bin_rec_cls *binary_record_src);
+void io_bin_cp_rec(struct bin_rec_cls *binary_record_dst, struct bin_rec_cls *binary_record_src);
 
 // build binary record
 void io_binary_build_record (struct bin_rec_cls *binary_record,

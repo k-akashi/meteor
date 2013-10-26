@@ -706,30 +706,19 @@ int32_t bandwidth;
 float delay;
 double lossrate;
 {
-    struct qdisc_params qp;
     char *devname;
-    int config_netem = 0;
-    int config_bw = 0;
+    int32_t ret;
+    int32_t config_netem = 0;
+    int32_t config_bw = 0;
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
+    struct qdisc_params qp;
 
     memset(&qp, 0, sizeof(qp));
     devname = malloc(DEV_NAME);
 
-#ifndef INGRESS
-    int i;
-    for(i = 0; i <= dev_no; i++) {
-        if(strcmp(dev_list[i].dst_address, dst) == 0) {
-            strcpy(devname, dev_list[i].dev);
-            break;
-        }
-    }
-#else
     devname = "eth5";
-#endif
 
-    dprintf(("[configure_qdisc] handle : %d, delay : %.6f, bandwidth %d, lossrate %.6f\n", 
-        handle, delay, bandwidth, lossrate));
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
     htb_class_id[2] = 1;
@@ -743,7 +732,6 @@ double lossrate;
     if(priv_delay != delay || priv_loss != lossrate) {
         config_netem = 1;
         qp.delay = delay;
-        dprintf(("[configure_qdisc] delay : %.6f\n", qp.delay));
         priv_delay = delay;
         if(lossrate == 1) {
             qp.loss = ~0;
@@ -773,10 +761,13 @@ double lossrate;
         devname = ifb_devname;
     }
 
-    dprintf(("[configure_qdisc] change rule interface name : %s\n", devname));
     if(config_netem) {
         qp.limit = 100000;
-        change_netem_qdisc(devname, netem_qdisc_id, qp);
+        ret = change_netem_qdisc(devname, netem_qdisc_id, qp);
+        if(ret != 0) {
+            fprintf(stderr, "Cannot chenge netem disc\n");
+            return ret;
+        }
     }
 
     if(INGRESS) {
@@ -790,7 +781,10 @@ double lossrate;
         else {
             qp.buffer = FRAME_LENGTH / 1024;
         }
-        change_htb_class(devname, htb_class_id, qp.rate);
+        ret = change_htb_class(devname, htb_class_id, qp.rate);
+        if(ret != 0) {
+            return ret;
+        }
     }
 
     return SUCCESS;

@@ -133,8 +133,9 @@ uint32_t bandwidth;
 		dprintf(("[add_htb_class] HTB ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return 2;
+    }
 
 	return 0;
 }
@@ -191,9 +192,9 @@ uint32_t bandwidth;
 		dprintf(("[change_htb_class] HTB ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
-        return 2;
-
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+        return -1;
+    }
 
 	return 0;
 }

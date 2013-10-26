@@ -117,26 +117,25 @@ typedef struct {
 } qomet_param;
 
 void
-usage(argv0)
-char *argv0;
+usage()
 {
     fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET  data.\n\n");
     fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> in two different ways:\n");
     fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address <from_node_addr>)\n");
     fprintf(stderr, "    <to_node_id> (IP address <to_node_addr>) using the dummynet rule\n");
     fprintf(stderr, "    <rule_number> and pipe <pipe_number>, optionally in direction 'in' or 'out'.\n");
-    fprintf(stderr, "    Usage: %s -q <qomet_output_file>\n"
+    fprintf(stderr, "    Usage: do_wireconf -q <qomet_output_file>\n"
             "\t\t\t-f <from_node_id> \t-F <from_node_addr>\n"
             "\t\t\t-t <to_node_id> \t-T <to_node_addr>\n"
             "\t\t\t-r <rule_number> \t-p <pipe_number>\n"
-            "\t\t\t[-d {in|out}]\n", argv0);
+            "\t\t\t[-d {in|out}]\n");
     fprintf(stderr, "(2) Configure all connections from the current node <current_id> given the\n");
     fprintf(stderr, "    IP settings in <settings_file> and the OPTIONAL broadcast address\n");
     fprintf(stderr, "    <baddr>; Interval between configurations is <time_period>.\n");
     fprintf(stderr, "    The settings file contains on each line pairs of ids and IP addresses.\n");
-    fprintf(stderr, "    Usage: %s -q <qomet_output_file>\n"
+    fprintf(stderr, "    Usage: do_wireconf -q <qomet_output_file>\n"
             "\t\t\t-i <current_id> \t-s <settings_file>\n"
-            "\t\t\t-m <time_period> \t[-b <baddr>]\n", argv0);
+            "\t\t\t-m <time_period> \t[-b <baddr>]\n");
     fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, otherwise usage (1) is assumed.\n");
 }
 
@@ -199,7 +198,7 @@ get_cpu_frequency(void)
     char str[256];
     char buff[256];
 
-    if((cpuinfo = fopen("/proc/cpuinfo", "rb")) == NULL) {
+    if((cpuinfo = fopen("/proc/cpuinfo", "r")) == NULL) {
         printf("/proc/cpuinfo file cannot open\n");
         exit(EXIT_FAILURE);
     }
@@ -341,17 +340,18 @@ char **argv;
 {
     char ch;
     char *p;
-    char *argv0;
-    char *faddr, *taddr;
+    char *saddr, *daddr;
     char buf[BUFSIZ];
     char settings_file_name[BUFSIZ];
     int32_t loop = FALSE;
     int32_t dsock;
     int32_t node_cnt = 0;
+    int32_t all_node_cnt;
     uint16_t rulenum;
     uint32_t fid, tid;
     uint32_t from, to;
     uint32_t pipe_nr;
+    uint32_t bin_hdr_if_num;
     int64_t time_i;
     struct bin_hdr_cls bin_hdr;
     struct wireconf_class wireconf;
@@ -391,7 +391,7 @@ char **argv;
     uint32_t sc_type;
     uint32_t usage_type;
 
-    float time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
+    double time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
     FILE *qomet_fd;
     struct timer_handle *timer;
     int32_t loop_cnt = 0;
@@ -406,9 +406,10 @@ char **argv;
 
     int32_t i, j;
     int32_t my_id;
+    int32_t first_node_id = FIRST_NODE_ID;
+    int32_t end_node_id = 1;
     in_addr_t ipaddrs[MAX_NODES];
     char ipaddrs_c[MAX_NODES*IP_ADDR_SIZE];
-    int32_t node_number;
 
     int32_t offset_num;
     int32_t rule_cnt;
@@ -425,6 +426,10 @@ char **argv;
     memset(&param_over_read, 0, sizeof(qomet_param));
 
     memset(&device_list, 0, sizeof(struct DEVICE_LIST) * MAX_IFS);
+
+
+    saddr = (char*)calloc(1, IP_ADDR_SIZE);
+    daddr = (char*)calloc(1, IP_ADDR_SIZE);
     if_num = 0;
     over_read = 0;
     rule_cnt = 0;
@@ -432,29 +437,28 @@ char **argv;
     next_hop_id = 0;
     rule_num = -1;
 
-    argv0 = argv[0];
     qomet_fd = NULL;
 
-    faddr = taddr = NULL;
+    saddr = daddr = NULL;
     fid = tid = pipe_nr = -1;
     rulenum = 65535;
 
     my_id = -1;
-    node_number = -1;
+    all_node_cnt = -1;
     time_period = -1;
     strncpy(baddr, "255.255.255.255", IP_ADDR_SIZE);
 
     if(argc < 2) {
         WARNING("No arguments provided");
-        usage(argv0);
+        usage();
         exit(1);
     }
 
     i = 0;
-    while((ch = getopt(argc, argv, "hc:q:a:f:F:t:T:r:p:d:i:z:s:m:b:l")) != -1) {
+    while((ch = getopt(argc, argv, "hc:q:a:f:F:t:T:r:p:d:i:z:s:m:b:lx:y:")) != -1) {
         switch(ch) {
             case 'h':
-                usage("sample");
+                usage();
                 exit(0);
             case 'a':
                 if(sc_type == TXT_SC) {
@@ -485,10 +489,9 @@ char **argv;
                     exit(1);
                 }
                 my_id = fid;
-                node_number = 2; // add node_number tmp Fix me
                 break;
             case 'F':
-                faddr = optarg;
+                saddr = optarg;
                 break;
             case 't':
                 tid = strtol(optarg, &p, 10);
@@ -498,7 +501,7 @@ char **argv;
                 }
                 break;
             case 'T':
-                taddr = optarg;
+                daddr = optarg;
                 break;
             case 'r':
                 rulenum = strtol(optarg, &p, 10);
@@ -550,11 +553,11 @@ char **argv;
                 strncpy(settings_file_name, optarg, MAX_STRING - 1);
                 usage_type = 2;
 
-                if((node_number = read_settings(optarg, ipaddrs, MAX_NODES)) < 1) {
+                if((all_node_cnt = read_settings(optarg, ipaddrs, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
                     exit(1);
                 }
-                for(i = 0; i < node_number; i++) {
+                for(i = 0; i < all_node_cnt; i++) {
                     snprintf(ipaddrs_c + i * IP_ADDR_SIZE, IP_ADDR_SIZE, 
                             "%d.%d.%d.%d",
                             *(((uint8_t *)&ipaddrs[i]) + 0),
@@ -575,8 +578,14 @@ char **argv;
             case 'l':
                 loop = TRUE;
                 break;
+            case 'x':
+                first_node_id = strtol(optarg, &p, 10);
+                break;
+            case 'y':
+                end_node_id = strtol(optarg, &p, 10);
+                break;
             default:
-                usage(argv0);
+                usage();
                 exit(1);
         }
     }
@@ -586,7 +595,7 @@ char **argv;
 
     if(qomet_fd == NULL) {
         WARNING("No QOMET data file was provided");
-        usage(argv0);
+        usage();
         exit(1);
     }
 
@@ -617,6 +626,9 @@ char **argv;
         }
     }
 
+    if(end_node_id > 1) {
+        node_cnt = end_node_id - first_node_id + 1;
+    }
     DEBUG("Initialize timer...");
     if((timer = timer_init_rdtsc()) == NULL) {
         WARNING("Could not initialize timer");
@@ -628,72 +640,78 @@ char **argv;
         exit(1);
     }
 
-    init_rule(taddr);
+    init_rule(daddr);
 
     if(usage_type == 1) {
-        INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, faddr, taddr);
+        INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);
 
-        if(add_rule(dsock, rulenum, pipe_nr, faddr, taddr, direction) < 0) {
+        if(add_rule(dsock, rulenum, pipe_nr, saddr, daddr, direction) < 0) {
             WARNING("Could not add rule #%d with pipe #%d from %s to %s", 
-                    rulenum, pipe_nr, faddr, taddr);
+                    rulenum, pipe_nr, saddr, daddr);
             exit(1);
         }
     }
     else {
-        for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+        int32_t ret;
+        uint32_t src_id;
+        uint32_t dst_id;
+        for(src_id = first_node_id; src_id < node_cnt + first_node_id; src_id++) {
             if(direction == DIRECTION_BR) {
-                int k;
-                uint32_t add_rule_num;
-                char *add_filter_saddr = (char*)calloc(1, IP_ADDR_SIZE);
-                char *add_filter_daddr = (char*)calloc(1, IP_ADDR_SIZE);
+                saddr = (char*)calloc(1, IP_ADDR_SIZE);
+                daddr = (char*)calloc(1, IP_ADDR_SIZE);
 
-                for(k = 0; k < node_number + FIRST_NODE_ID; k++) {
-                    if(j <= k) {
+                for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                    if(src_id <= dst_id && node_cnt == all_node_cnt) {
                         continue;
                     }
-                    offset_num = j + (k * (node_number + 1));
-                    add_rule_num = MIN_PIPE_ID_OUT + offset_num;
-                    strcpy(add_filter_saddr, ipaddrs_c + k * IP_ADDR_SIZE);
-                    strcpy(add_filter_daddr, ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE);
+                    if(src_id <= dst_id) {
+                        continue;
+                    }
 
-                    if(add_rule(dsock, add_rule_num, add_rule_num, add_filter_saddr, add_filter_daddr, DIRECTION_OUT) < 0) {
-                        printf("Node %d: Could not add rule #%d", j, add_rule_num);
-                        printf("\tSource Address %s", add_filter_saddr);
-                        printf("\tDestination Address %s", add_filter_daddr);
+                    offset_num = (src_id - first_node_id) * all_node_cnt + dst_id;
+                    rule_num = MIN_PIPE_ID_OUT + offset_num;
+                    strcpy(saddr, ipaddrs_c + src_id  * IP_ADDR_SIZE);
+                    strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
+
+                    ret = add_rule(dsock, rule_num, rule_num, saddr, daddr, DIRECTION_OUT);
+                    if(ret != SUCCESS) {
+                        fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
+                        fprintf(stderr, "\tSource Address %s", saddr);
+                        fprintf(stderr, "\tDestination Address %s", daddr);
                         exit(1);
                     }
                 }
             }
             else {
-                if(j == my_id) {
+                if(src_id == my_id) {
                     continue;
                 }
-                offset_num = j;
+                offset_num = src_id;
                 INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
                         my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, 
-                        ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE);
+                        ipaddrs_c + (src_id - first_node_id) * IP_ADDR_SIZE);
                 if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num,
-                            "any", ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                            "any", ipaddrs_c + (src_id - first_node_id) * IP_ADDR_SIZE, 
                             DIRECTION_OUT) < 0) {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d to \
                             destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
                             MIN_PIPE_ID_OUT + offset_num, 
-                            ipaddrs_c + (j-FIRST_NODE_ID) * IP_ADDR_SIZE);
+                            ipaddrs_c + (src_id - first_node_id) * IP_ADDR_SIZE);
                     exit(1);
                 }
                 if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num + 1, MIN_PIPE_ID_OUT + offset_num + 1,
-                            "any", ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                            "any", ipaddrs_c + (src_id - first_node_id) * IP_ADDR_SIZE, 
                             DIRECTION_OUT) < 0) {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d to \
                             destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
                             MIN_PIPE_ID_OUT + offset_num, 
-                            ipaddrs_c + (j-FIRST_NODE_ID) * IP_ADDR_SIZE);
+                            ipaddrs_c + (src_id - first_node_id) * IP_ADDR_SIZE);
                     exit(1);
                 }
             }
         }
         if(direction != DIRECTION_BR) {
-            for(j = FIRST_NODE_ID; j < node_number + FIRST_NODE_ID; j++) {
+            for(j = first_node_id; j < node_cnt + first_node_id; j++) {
                 if(j == my_id || direction != DIRECTION_BR) {
                     continue;
                 }
@@ -704,24 +722,24 @@ char **argv;
                         MIN_PIPE_ID_IN_BCAST + offset_num, baddr);
                 if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num, 
                             MIN_PIPE_ID_IN_BCAST + offset_num, 
-                            ipaddrs_c+(j-FIRST_NODE_ID)*IP_ADDR_SIZE,
+                            ipaddrs_c+(j-first_node_id)*IP_ADDR_SIZE,
                             baddr, DIRECTION_IN) < 0)
                 {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
                             destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
                             MIN_PIPE_ID_IN_BCAST + offset_num, 
-                            ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, baddr);
+                            ipaddrs_c + (j - first_node_id) * IP_ADDR_SIZE, baddr);
                     exit(1);
                 }
                 if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num + 0, 
                             MIN_PIPE_ID_IN_BCAST + offset_num + 1, 
-                            ipaddrs_c+(j-FIRST_NODE_ID)*IP_ADDR_SIZE,
+                            ipaddrs_c+(j-first_node_id)*IP_ADDR_SIZE,
                             baddr, DIRECTION_IN) < 0)
                 {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
                             destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
                             MIN_PIPE_ID_IN_BCAST + offset_num, 
-                            ipaddrs_c + (j - FIRST_NODE_ID) * IP_ADDR_SIZE, baddr);
+                            ipaddrs_c + (j - first_node_id) * IP_ADDR_SIZE, baddr);
                     exit(1);
                 }
             }
@@ -744,28 +762,34 @@ char **argv;
         }
         io_binary_print_header(&bin_hdr);
 
-        if(node_cnt != bin_hdr.if_num) {
+        if(all_node_cnt != bin_hdr.if_num) {
             WARNING("Number of nodes according to the settings file (%d) and \
                 number of nodes according to QOMET scenario (%d) differ", 
-                node_cnt, bin_hdr.if_num);
+                all_node_cnt, bin_hdr.if_num);
             exit(1);
         }
 
         bin_recs_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
 
-        bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof(struct bin_rec_cls));
+        if(bin_recs == NULL) {
+            bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof(struct bin_rec_cls));
+        }
         if(bin_recs == NULL) {
             WARNING("Cannot allocate memory for binary records");
             exit(1);
         }
 
-        next_hop_ids = (int32_t *)calloc(bin_hdr.if_num, sizeof(int));
+        if(next_hop_ids == NULL) {
+            next_hop_ids = (int32_t *)calloc(bin_hdr.if_num, sizeof(int));
+        }
         if(next_hop_ids == NULL) {
             WARNING("Cannot allocate memory for next_hop_ids");
             exit(1);
         }
 
-        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls*));
+        if(my_recs_ucast == NULL) {
+            my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls*));
+        }
         if(my_recs_ucast == NULL) {
             WARNING("Cannot allocate memory for my_recs_ucast");
             exit(1);
@@ -774,7 +798,9 @@ char **argv;
         for(node_i = 0; node_i < bin_hdr.if_num; node_i++) {
             int j;
 
-            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
+            if(my_recs_ucast[node_i] == NULL) {
+                my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
+            }
             if(my_recs_ucast[node_i] == NULL) {
                 WARNING("Cannot allocate memory for my_recs_ucast[%d]", node_i);
                 exit(1);
@@ -784,24 +810,31 @@ char **argv;
             }
         }
 
-        if(direction == DIRECTION_BR) {
-            adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr.if_num * bin_hdr.if_num, sizeof(struct bin_rec_cls));
+        if(direction == DIRECTION_BR || adjusted_recs_ucast) {
+            bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
         }
         else {
-            adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
+            bin_hdr_if_num = bin_hdr.if_num;
+        }
+        if(adjusted_recs_ucast == NULL) {
+            adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof(struct bin_rec_cls));
         }
         if(adjusted_recs_ucast == NULL) {
             WARNING("Cannot allocate memory for adjusted_recs_ucast");
             exit(1);
         }
 
-        my_recs_ucast_changed = (int32_t *)calloc(bin_hdr.if_num, sizeof(int32_t));
+        if(my_recs_ucast_changed == NULL) {
+            my_recs_ucast_changed = (int32_t *)calloc(bin_hdr.if_num, sizeof(int32_t));
+        }
         if(my_recs_ucast_changed == NULL) {
             WARNING("Cannot allocate memory for my_recs_ucast_changed");
             exit(1);
         }
 
-        my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
+        if(my_recs_bcast == NULL) {
+            my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
+        }
         if(my_recs_bcast == NULL) {
             WARNING("Cannot allocate memory for my_recs_bcast");
             exit(1);
@@ -822,17 +855,22 @@ char **argv;
             exit(1);
         }
         
-        last_pkt_cnt = (uint32_t *)calloc(bin_hdr.if_num, sizeof(uint32_t));
+        if(last_pkt_cnt == NULL) {
+            last_pkt_cnt = (uint32_t *)calloc(bin_hdr.if_num, sizeof(uint32_t));
+        }
         if(last_pkt_cnt == NULL) {
             WARNING("Cannot allocate memory for last_pkt_cnt");
             exit(1);
         }
         
-        avg_frame_sizes = (float *)calloc(bin_hdr.if_num, sizeof(float));
+        if(avg_frame_sizes == NULL) {
+            avg_frame_sizes = (float *)calloc(bin_hdr.if_num, sizeof(float));
+        }
         if(avg_frame_sizes == NULL) {
             WARNING("Cannot allocate memory for avg_frame_sizes");
             exit(1);
         }
+
         for(pkt_i = 0; pkt_i < bin_hdr.if_num; pkt_i++) {
             //last_pkt_cnt[pkt_i] = 0; // calloc inits to 0 => not needed!
             //last_byte_cnt[pkt_i] = 0;
@@ -841,6 +879,7 @@ char **argv;
         gettimeofday(&tp_begin, NULL);
 
         for(time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
+            //TCHK_START(time);
             int rec_i;
             DEBUG("Reading QOMET data from file...");
 
@@ -861,29 +900,32 @@ char **argv;
                 exit (1);
             }
 
-            for(rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
-                if(bin_recs[rec_i].from_id < FIRST_NODE_ID || 
-                    (bin_recs[rec_i].from_id > bin_hdr.if_num + FIRST_NODE_ID - 1)) {
-                    INFO ("Source with id = %d is out of the valid range [%d, %d]", 
-                        bin_recs[rec_i].from_id, FIRST_NODE_ID, 
-                        bin_hdr.if_num + FIRST_NODE_ID - 1);
-                    exit (1);
+            for(rec_i = first_node_id * all_node_cnt; rec_i < bin_time_rec.record_number; rec_i++) {
+                if(bin_recs[rec_i].from_id < first_node_id) {
+                    INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, first_node_id);
+                    exit(1);
                 }
-
-                if(bin_recs[rec_i].to_id < FIRST_NODE_ID || (bin_recs[rec_i].to_id > bin_hdr.if_num + FIRST_NODE_ID - 1)) {
-                    exit (1);
+                if(bin_recs[rec_i].from_id > bin_hdr.if_num + first_node_id - 1) {
+                    INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
+                        bin_recs[rec_i].from_id, first_node_id, 
+                        bin_hdr.if_num + first_node_id - 1, rec_i);
+                    exit(1);
                 }
 
                 if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_BR) {
-                    io_binary_copy_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]), 
-                      &bin_recs[rec_i]);
+                    int32_t src_id;
+                    int32_t dst_id;
+
+                    src_id = bin_recs[rec_i].from_id;
+                    dst_id = bin_recs[rec_i].to_id;
+                    io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                     my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
 
                     //io_binary_print_record (&(my_recs_ucast[bin_recs[rec_i].from_node][bin_recs[rec_i].to_node]));
                 }
 
                 if(bin_recs[rec_i].to_id == my_id || direction == DIRECTION_BR) {
-                    io_binary_copy_record(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
+                    io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                     my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
                     //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
                 }
@@ -895,40 +937,63 @@ char **argv;
 
             if(time_i == 0) {
                 uint32_t rec_index;
-                for(rec_i = 0; rec_i < node_cnt; rec_i++) {
+                for(rec_i = first_node_id; rec_i < node_cnt + first_node_id; rec_i++) {
                     // do not consider the node itself
                     if(direction == DIRECTION_BR) {
-                        int rec_j;
-                        for(rec_j = 0; rec_j < node_cnt; rec_j++) {
-                            rec_index = rec_i * (node_cnt + 1) + rec_j;
-                            io_binary_copy_record(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[rec_j][rec_i]));
-                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
+                        int32_t src_id;
+                        int32_t dst_id;
+                        src_id = rec_i;
+                        for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                            rec_index = src_id * all_node_cnt + dst_id;
+                            io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
                         }
                     }
-                    else if(rec_i != my_id && direction != DIRECTION_BR) {
-                        io_binary_copy_record(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
+                    else if(rec_i != my_id) {
+                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
                         //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
                     }
                 }
             }
             else {
-                if(do_adjust_deltaQ == FALSE) {
+                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_BR) {
+                    uint32_t rec_index;
                     WARNING("Adjustment of deltaQ is disabled.");
-
-                    for(rec_i = 0; rec_i < node_cnt; rec_i++) {
-                        if(rec_i != my_id) {
-                            io_binary_copy_record(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
-                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
-                            //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
+                    for(rec_i = first_node_id; rec_i < node_cnt + first_node_id; rec_i++) {
+                        if(direction == DIRECTION_BR) {
+                            int32_t src_id;
+                            int32_t dst_id;
+                            src_id = rec_i;
+                            for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                                rec_index = src_id * all_node_cnt + dst_id;
+                                io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                                DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
+                            }
+                        }
+                        else {
+                            if(rec_i != my_id) {
+                                io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
+                                DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
+                                //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
+                            }
                         }
                     }
                 }
                 else {
                     DEBUG("Adjustment of deltaQ is enabled.");
+                    if(direction == DIRECTION_BR) {
+                        for(wireconf.my_id = 0; wireconf.my_id < node_cnt; wireconf.my_id++) {
+                            adjust_deltaQ(&wireconf, my_recs_ucast,
+                               adjusted_recs_ucast, my_recs_ucast_changed,
+                               avg_frame_sizes);
+                        }
+                    }
+                    else {
                     adjust_deltaQ(&wireconf, my_recs_ucast,
                        adjusted_recs_ucast, my_recs_ucast_changed,
                        avg_frame_sizes);
+                    }
                 }
             }
 
@@ -940,29 +1005,34 @@ char **argv;
                     INFO("Waiting to reach time %.2f s...", crt_record_time);
                 }
                 else {
-                    INFO ("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
+                    INFO("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
-                    timer_wait(timer, crt_record_time * SCALING_FACTOR);
+                    if(timer_wait(timer, crt_record_time * SCALING_FACTOR) != 0) {
+                        fprintf(stderr, "Timer deadline missed at time=%.2f s\n", crt_record_time);
+                    }
                 }
 
-                for(node_i = FIRST_NODE_ID; node_i < (node_cnt + FIRST_NODE_ID); node_i++) {
+                int32_t src_id;
+                int32_t dst_id;
+                int32_t conf_rule_num;
+                int32_t ret;
+                for(src_id = first_node_id; src_id < node_cnt + first_node_id - 1; src_id++) {
                     if(direction == DIRECTION_BR) {
-                        int i;
-                        int k;
-                        i = node_i - FIRST_NODE_ID;
-                        for(k = 0; k < node_cnt; k++) {
-                            if(i <= k) {
+                        for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                            if(src_id <= dst_id) {
                                 continue;
                             }
-                            next_hop_id = i * (k + 1) + k;
+                            next_hop_id = src_id * all_node_cnt + dst_id;
+                            conf_rule_num = (src_id - first_node_id) * all_node_cnt + dst_id + MIN_PIPE_ID_OUT;
+
                             bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
                             delay = adjusted_recs_ucast[next_hop_id].delay;
                             lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
-                            if(configure_rule(dsock, taddr, MIN_PIPE_ID_OUT + node_i, 
-                                    bandwidth, delay, lossrate) == ERROR) {
-                                fprintf(stderr, "Error configuring UCAST rule %d.", MIN_PIPE_ID_OUT + node_i);
+                            ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
+                            if(ret != SUCCESS) {
+                                fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                                 exit(1);
                             }
                         }
@@ -970,7 +1040,7 @@ char **argv;
                     else {
                         int next_hop_id;
     
-                        if(node_i == my_id && direction != DIRECTION_BR) {
+                        if(node_i == my_id) {
                             continue;
                         }
     
@@ -978,14 +1048,7 @@ char **argv;
                             next_hop_id = node_i;
                         }
                         else {
-                            if(direction == DIRECTION_BR) {
-                                next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, node_i, DIRECTION_BR);
-                                printf("node_i : %d\n", node_i);
-                                printf("next_hop_id : %d\n", next_hop_id);
-                            }
-                            else {
-                                next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, node_i, DIRECTION_OUT);
-                            }
+                            next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, node_i, DIRECTION_OUT);
                         }
     
                         if(next_hop_id == ERROR) {
@@ -1010,21 +1073,17 @@ char **argv;
                             INFO ("-- Wireconf pipe=%d: #%d UCAST to #%d (next_hop_id=%d) \
                                 [%s] (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms",
                                 MIN_PIPE_ID_OUT + node_i, my_id, node_i, next_hop_id,
-                                ipaddrs_c + (node_i - FIRST_NODE_ID) * IP_ADDR_SIZE,
+                                ipaddrs_c + (node_i - first_node_id) * IP_ADDR_SIZE,
                                 crt_record_time, bandwidth, lossrate, delay);
                         }
                         else {
                             INFO ("-- Wireconf pipe=%d: #%d UCAST to #%d (next_hop_id=%d) \
                                 [%s] (time=%.2f s): no valid record could be found => configure with no degradation", 
                                 MIN_PIPE_ID_OUT + node_i, my_id, node_i, next_hop_id, 
-                                ipaddrs_c + (node_i - FIRST_NODE_ID) * IP_ADDR_SIZE, crt_record_time);
-    
-                                //bandwidth = 0.0;
-                                //delay = 0.0;
-                                //lossrate = 0.0;
+                                ipaddrs_c + (node_i - first_node_id) * IP_ADDR_SIZE, crt_record_time);
                         }
     
-                        if(configure_rule(dsock, taddr, MIN_PIPE_ID_OUT + node_i, 
+                        if(configure_rule(dsock, daddr, MIN_PIPE_ID_OUT + node_i, 
                                 bandwidth, delay, lossrate) == ERROR) {
                             WARNING("Error configuring UCAST pipe %d.", MIN_PIPE_ID_OUT + node_i);
                             exit (1);
@@ -1033,7 +1092,7 @@ char **argv;
                 }
 
                 if(direction != DIRECTION_BR) {
-                    for (node_i = FIRST_NODE_ID; node_i < (node_cnt + FIRST_NODE_ID); node_i++) {
+                    for (node_i = first_node_id; node_i < (node_cnt + first_node_id); node_i++) {
                         if(node_i == my_id) {
                             continue;
                         }
@@ -1053,15 +1112,12 @@ char **argv;
                             INFO ("-- Wireconf pipe=%d: #%d BCAST from #%d [%s] \
                                 (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms", 
                                 MIN_PIPE_ID_IN_BCAST + node_i, my_id, node_i, 
-                                ipaddrs_c + (node_i - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                                ipaddrs_c + (node_i - first_node_id) * IP_ADDR_SIZE, 
                                 crt_record_time, bandwidth, lossrate, delay);
                         }
-                        //bandwidth = 0.0;
-                        //delay = 0.0;
-                        //lossrate = 0.0;
                     }
     
-                    if(configure_rule(dsock, taddr, MIN_PIPE_ID_IN_BCAST + node_i,
+                    if(configure_rule(dsock, daddr, MIN_PIPE_ID_IN_BCAST + node_i,
                         bandwidth, delay, lossrate) == ERROR) {
                         WARNING("Error configuring BCAST pipe %d.", MIN_PIPE_ID_IN_BCAST + node_i);
                         exit (1);
@@ -1150,6 +1206,7 @@ char **argv;
 //}
 #endif
             loop_cnt++;
+            //TCHK_END(time);
         }
         if(loop == TRUE) {
             fseek(qomet_fd, 0L, SEEK_SET);
@@ -1185,11 +1242,8 @@ char **argv;
                     bandwidth = (int)round(bandwidth);
                     delay = (int)round(delay);
                     lossrate = (int)rint(lossrate * 0x7fffffff);
-                    //lossrate = 0;
     
-    				//TCHK_START(time);
-                    configure_rule(dsock, taddr, pipe_nr, bandwidth, delay, lossrate);
-    				//TCHK_END(time);
+                    configure_rule(dsock, daddr, pipe_nr, bandwidth, delay, lossrate);
                     loop_cnt++;
                 }
             }
@@ -1227,7 +1281,7 @@ char **argv;
                         }
                     }
     
-                    for(i = FIRST_NODE_ID; i < (node_number + FIRST_NODE_ID); i++) {
+                    for(i = first_node_id; i < (node_cnt + first_node_id); i++) {
                         if(i == my_id || direction != DIRECTION_BR) {
                             continue;
                         }
@@ -1253,7 +1307,7 @@ char **argv;
     
                         INFO("* Wireconf: #%d UCAST to #%d [%s] (time=%.2f s): bandwidth=%.2fbit/s \
                                 lossrate=%.4f delay=%.4f ms, offset=%d", \
-                                my_id, i, ipaddrs_c + (i - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                                my_id, i, ipaddrs_c + (i - first_node_id) * IP_ADDR_SIZE, 
                                 time, bandwidth, lossrate, delay, offset_num);
     
 #ifdef __FreeBSD__
@@ -1265,11 +1319,11 @@ char **argv;
                         delay = (int) rint(delay);//(delay / 2);
                         lossrate = (int)rint(lossrate * 0x7fffffff);
 #endif
-                        configure_rule(dsock, taddr, MIN_PIPE_ID_OUT + offset_num, bandwidth, delay, lossrate);
+                        configure_rule(dsock, daddr, MIN_PIPE_ID_OUT + offset_num, bandwidth, delay, lossrate);
                         loop_cnt++;
                     }
     
-                    for(i = FIRST_NODE_ID; i < (node_number + FIRST_NODE_ID); i++) {
+                    for(i = first_node_id; i < (node_cnt + first_node_id); i++) {
                         if(i == my_id || direction != DIRECTION_BR) {
                             continue;
                         }
@@ -1289,7 +1343,7 @@ char **argv;
     
                         INFO("* Wireconf: #%d BCAST from #%d [%s] (time=%.2f s): bandwidth=%.2fbit/s \
                                 lossrate=%.4f delay=%.4f ms, offset=%d", my_id, i, \
-                                ipaddrs_c + (i - FIRST_NODE_ID) * IP_ADDR_SIZE, 
+                                ipaddrs_c + (i - first_node_id) * IP_ADDR_SIZE, 
                                 time, bandwidth, lossrate, delay, offset_num);
 #ifdef __FreeBSD__
                         bandwidth = (int)round(bandwidth);// * 2.56);
@@ -1300,7 +1354,7 @@ char **argv;
                         delay = (int)rint(delay);//(delay / 2);
                         lossrate = (int)rint(lossrate * 0x7fffffff);
 #endif
-                        configure_rule(dsock, taddr, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
+                        configure_rule(dsock, daddr, MIN_PIPE_ID_IN_BCAST + offset_num, bandwidth, delay, lossrate);
                         loop_cnt++;
                     }
     
@@ -1338,7 +1392,7 @@ char **argv;
     }
 //    timer_free(timer);
 
-    delete_rule(dsock, taddr, rule_num);
+    delete_rule(dsock, daddr, rule_num);
 
     gettimeofday(&tp_end, NULL);
     INFO("Experiment execution time=%.4f s", 
