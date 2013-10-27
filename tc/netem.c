@@ -20,7 +20,7 @@
 
 static int
 get_ticks(ticks, str)
-__u32 *ticks;
+uint32_t *ticks;
 const char* str;
 {
     unsigned t;
@@ -197,8 +197,9 @@ struct qdisc_params qp;
         dprintf(("[add_netem_qdisc] netem ifindex = %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
+    }
 
     return 0;
 }

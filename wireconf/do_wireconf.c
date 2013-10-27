@@ -161,6 +161,7 @@ uint64_t time_in_us;
 {
     uint64_t crt_time;
 
+
     dprintf(("[timer_wait] handle->zero \t\t: %lu\n", handle->zero));
     dprintf(("[timer_wait] handle->cpu_frequency \t: %u\n", handle->cpu_frequency));
     dprintf(("[timer_wait] time_in_us \t\t: %lu\n", time_in_us));
@@ -627,7 +628,7 @@ char **argv;
     }
 
     if(end_node_id > 1) {
-        node_cnt = end_node_id - first_node_id + 1;
+        node_cnt = end_node_id - first_node_id;
     }
     DEBUG("Initialize timer...");
     if((timer = timer_init_rdtsc()) == NULL) {
@@ -937,6 +938,8 @@ char **argv;
 
             if(time_i == 0) {
                 uint32_t rec_index;
+                uint32_t max_src_id;
+                max_src_id = node_cnt + first_node_id;
                 for(rec_i = first_node_id; rec_i < node_cnt + first_node_id; rec_i++) {
                     // do not consider the node itself
                     if(direction == DIRECTION_BR) {
@@ -1008,16 +1011,25 @@ char **argv;
                     INFO("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
+                    if(timer_wait_rdtsc(timer, crt_record_time * 1000000) < 0) {
+                        WARNING("Timer deadline missed at time=%.2f s", time);
+                        WARNING("This rule is skip.\n");
+                        printf("おっそーい ");
+                        printf("time_in_us \t\t: %f\n", crt_record_time);
+                        continue;
+                    }
+/*
                     if(timer_wait(timer, crt_record_time * SCALING_FACTOR) != 0) {
                         fprintf(stderr, "Timer deadline missed at time=%.2f s\n", crt_record_time);
                     }
+*/
                 }
 
                 int32_t src_id;
                 int32_t dst_id;
                 int32_t conf_rule_num;
                 int32_t ret;
-                for(src_id = first_node_id; src_id < node_cnt + first_node_id - 1; src_id++) {
+                for(src_id = first_node_id; src_id < node_cnt + first_node_id; src_id++) {
                     if(direction == DIRECTION_BR) {
                         for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
                             if(src_id <= dst_id) {
@@ -1210,6 +1222,10 @@ char **argv;
         }
         if(loop == TRUE) {
             fseek(qomet_fd, 0L, SEEK_SET);
+            if((timer = timer_init_rdtsc()) == NULL) {
+                WARNING("Could not initialize timer");
+                exit(1);
+            }
             goto emulation_start;
         }
     }
