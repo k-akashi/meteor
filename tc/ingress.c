@@ -16,9 +16,11 @@
 #include "tc_util.h"
 #include "tc_common.h"
 
+#define DEFAULT_PRIO 10
+
 int
 add_ingress_qdisc(dev)
-char* dev;
+char *dev;
 {
     char device[16];
     char qdisc_kind[16] = "ingress";
@@ -35,7 +37,9 @@ char* dev;
     dprintf(("[add_htb_qdisc] Ingress Interface : %s\n", dev));
     strncpy(device, dev, sizeof(device) - 1);
 
-    tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
     req.n.nlmsg_len   = NLMSG_LENGTH(sizeof(struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
@@ -52,7 +56,6 @@ char* dev;
         int idx;
 
         ll_init_map(&rth);
-
         if((idx = ll_name_to_index(dev)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", dev);
             return 1;
@@ -81,7 +84,6 @@ int offmask;
     int hwm = sel->nkeys;
 
     key &= mask;
-
     for(i = 0; i < hwm; i++) {
         if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
             uint32_t intersect = mask&sel->keys[i].mask;
@@ -201,6 +203,7 @@ char *dev;
 char *ifb;
 {
     char filter_kind[16] = "u32";
+    int32_t ret;
     uint16_t protocol_id;
     uint32_t protocol;
     uint32_t prio;
@@ -211,7 +214,6 @@ char *ifb;
         char            buf[MAX_MSG];
     } req;
 
-    dprintf(("[add_ingress_filter] initialize\n"));
     memset(&req, 0, sizeof(req));
     est = malloc(sizeof(struct tc_estimator));
     memset(est, 0, sizeof(struct tc_estimator));
@@ -219,31 +221,30 @@ char *ifb;
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE;
     req.n.nlmsg_type = RTM_NEWTFILTER;
-    req.t.tcm_family = AF_UNSPEC;
-
-    req.t.tcm_parent = 0xffff0000;
-
-    dprintf(("[add_ingress_filter] parent id = %d\n", req.t.tcm_parent));
 
     protocol = htons(ETH_P_ALL);
     ll_proto_a2n(&protocol_id, "all");
     protocol = protocol_id;
+    prio = DEFAULT_PRIO;
 
-    prio = 10;
+    req.t.tcm_family = AF_UNSPEC;
+    req.t.tcm_parent = 0xffff0000;
     req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
-    dprintf(("[add_ingress_filter] prio = %d\n", prio));
-    dprintf(("[add_ingress_filter] protocol = %d\n", protocol));
-    dprintf(("[add_ingress_filter] tcm_info = %d\n", req.t.tcm_info));
 
     addattr_l(&req.n, sizeof(req), TCA_KIND, filter_kind, strlen(filter_kind) + 1);
 
-    u32_ingress_filter(&req.n, ifb);
+    ret = u32_ingress_filter(&req.n, ifb);
+    if(ret != 0) {
+        return ret;
+    }
 
     ll_init_map(&rth);
     req.t.tcm_ifindex = ll_name_to_index(dev);
-    dprintf(("[add_ingress_filter] filter ifindex = %d\n", req.t.tcm_ifindex));
 
-    rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL);
+    ret = rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL);
+    if(ret != 0) {
+        return ret;
+    }
 
     return 0;
 }

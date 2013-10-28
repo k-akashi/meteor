@@ -96,8 +96,9 @@ int len;
 	id = ntohs(id);
 
 	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(llproto_names[i].id == id)
+		if(llproto_names[i].id == id) {
 			return llproto_names[i].name;
+        }
 	}
 	snprintf(buf, len, "[%d]", id);
 	return buf;
@@ -106,7 +107,7 @@ int len;
 int
 ll_proto_a2n(id, buf)
 unsigned short *id;
-char* buf;
+char *buf;
 {
 	int i;
 
@@ -117,10 +118,11 @@ char* buf;
 		}
 	}
 
-	if(get_u16(id, buf, 0))
+	if(get_u16(id, buf, 0)) {
 		return -1;
-
+    }
 	*id = htons(*id);
+
 	return 0;
 }
 

@@ -128,10 +128,11 @@ tc_core_init()
     uint32_t t2us;
     uint32_t us2t;
 
-    if (fp == NULL)
+    if(fp == NULL) {
         return -1;
+    }
 
-    if (fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
+    if(fscanf(fp, "%08x%08x%08x", &t2us, &us2t, &clock_res) != 3) {
         fclose(fp);
         return -1;
     }

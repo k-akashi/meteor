@@ -160,7 +160,9 @@ struct qdisc_params qp;
     memset(&req, 0, sizeof(req));
     strncpy(device, dev, sizeof(device) - 1);
 
-    tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
     flags = NLM_F_EXCL|NLM_F_CREATE;
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
@@ -221,7 +223,9 @@ struct qdisc_params qp;
     memset(&req, 0, sizeof(req));
     strncpy(device, dev, sizeof(device) - 1);
 
-    tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
     flags = 0;
 
@@ -270,25 +274,26 @@ delete_netem_qdisc(dev, ingress)
 char* dev;
 int ingress;
 {
+    char device[16];
+    uint32_t flags;
 	struct {
 		struct nlmsghdr n;
 		struct tcmsg t;
 		char buf[TCA_BUF_MAX];
 	} req;
 
+    flags = 0;
     memset(&req, 0, sizeof(req));
 
-    tc_core_init();
-
-    uint32_t flags;
-    flags = 0;
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type = RTM_DELQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    char device[16];
     strncpy(device, dev, sizeof(device) - 1);
 
     if(ingress == 1) {
@@ -310,8 +315,9 @@ int ingress;
         dprintf(("[delete_netem_qdisc] netem ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
+    }
 
 	return 0;
 }

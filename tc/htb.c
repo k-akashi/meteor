@@ -95,10 +95,11 @@ uint32_t bandwidth;
 	} req;
 	memset(&req, 0, sizeof(req));
 	strncpy(device, dev, sizeof(device) - 1);
-
-
 	flags = NLM_F_EXCL|NLM_F_CREATE;
-	tc_core_init();
+
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
@@ -157,7 +158,9 @@ uint32_t bandwidth;
 	memset(&req, 0, sizeof(req));
 	strncpy(device, dev, sizeof(device) - 1);
 
-	tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
     req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
@@ -240,7 +243,9 @@ uint32_t id[4];
 	flags = NLM_F_EXCL|NLM_F_CREATE;
 	strncpy(device, dev, sizeof(device) - 1);
 
-	tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
 	req.n.nlmsg_len   = NLMSG_LENGTH(sizeof(struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
@@ -274,8 +279,9 @@ uint32_t id[4];
 		dprintf(("[add_htb_qdisc] HTB ifindex : %d\n", idx));
     }   
             
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return 2;
+    }
 
 	return 0;
 }

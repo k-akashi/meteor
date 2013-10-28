@@ -169,7 +169,9 @@ struct qdisc_params qp;
 	flags = NLM_F_EXCL|NLM_F_CREATE;
 	strncpy(device, dev, sizeof(device) - 1);
 
-	tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
 	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
@@ -224,7 +226,9 @@ struct qdisc_params qp;
 	memset(&req, 0, sizeof(req));
 	strncpy(device, dev, sizeof(device) - 1);
 
-	tc_core_init();
+    if(tc_core_init() < 0) {
+        fprintf(stderr, "Missing tc core init\n");
+    }
 
 	flags = 0;
 

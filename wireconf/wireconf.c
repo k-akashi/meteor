@@ -381,9 +381,11 @@ char *dst;
             if(!device_list[i].dev_name) {
                 break;
             }
-            delete_netem_qdisc(device_list[i].dev_name, 0);
+            delete_netem_qdisc(device_list[i].dev_name, 1);
             add_ingress_qdisc(device_list[i].dev_name);
-            add_ingress_filter(device_list[i].dev_name, ifb_devname);
+            if(add_ingress_filter(device_list[i].dev_name, ifb_devname) != 0) {
+                printf("Cannot add ingress filter from %s to %s\n", device_list[i].dev_name, ifb_devname);
+            }
         }
 /* debug now...
         int i;
