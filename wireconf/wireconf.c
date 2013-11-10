@@ -427,6 +427,7 @@ char *dst;
     htb_qdisc_id[3] = 0;
     add_htb_qdisc(devname, htb_qdisc_id);
 
+/* XXX
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
     htb_class_id[2] = 1;
@@ -461,17 +462,8 @@ char *dst;
     ufp.classid[0] = filter_id[2];
     ufp.classid[1] = filter_id[3];
 
-    //add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
-
-/* XXX
-        ufp.match.type = "u32";
-        ufp.classid[0] = 1;
-        ufp.classid[1] = 1;
-        ufp.action = "mirred";
-        ufp.rdev = ifb_devname;
-        //tc_filter_modify(RTM_NEWTFILTER, NLM_F_EXCL|NLM_F_CREATE, devname, parent_filterid, "NULL", "ip", "u32", &ufp);
+    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 */
-
 #endif
     return 0;
 }
