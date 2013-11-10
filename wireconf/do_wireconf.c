@@ -117,7 +117,7 @@ typedef struct {
     double lossrate;
 } qomet_param;
 int32_t assign_id = FIRST_NODE_ID;
-int32_t division = 0;
+int32_t division = 1;
 
 void
 usage()
@@ -646,7 +646,7 @@ char **argv;
         uint32_t src_id;
         uint32_t dst_id;
 //        for(src_id = assign_id; src_id < node_cnt + assign_id; src_id++) {
-        for(src_id = assign_id; src_id < all_node_cnt; src_id++) {
+        for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
             if(direction == DIRECTION_BR) {
                 saddr = (char*)calloc(1, IP_ADDR_SIZE);
                 daddr = (char*)calloc(1, IP_ADDR_SIZE);
@@ -954,7 +954,7 @@ char **argv;
                 if(do_adjust_deltaQ == FALSE || direction == DIRECTION_BR) {
                     uint32_t rec_index;
                     WARNING("Adjustment of deltaQ is disabled.");
-                    for(rec_i = assign_id; rec_i < node_cnt + assign_id; rec_i++) {
+                    for(rec_i = assign_id; rec_i < node_cnt + assign_id; rec_i += division) {
                         if(direction == DIRECTION_BR) {
                             int32_t src_id;
                             int32_t dst_id;
@@ -1018,8 +1018,8 @@ char **argv;
                 int32_t dst_id;
                 int32_t conf_rule_num;
                 int32_t ret;
-                //TCHK_START(time);
-                for(src_id = assign_id; src_id < all_node_cnt; src_id++) {
+//                TCHK_START(time);
+                for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                     if(direction == DIRECTION_BR) {
                         if(assign_id != src_id % division) {
                             continue;
@@ -1096,7 +1096,7 @@ char **argv;
                         }
                     }
                 }
-                //TCHK_END(time);
+//                TCHK_END(time);
 
                 if(direction != DIRECTION_BR) {
                     for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {

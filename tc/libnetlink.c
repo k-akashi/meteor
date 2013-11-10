@@ -272,7 +272,7 @@ void *jarg;
     struct nlmsghdr* h;
     struct sockaddr_nl nladdr;
     struct iovec iov = {
-        .iov_base = (void*) n,
+        .iov_base = (void*)n,
         .iov_len = n->nlmsg_len
     };
     struct msghdr msg = {
@@ -306,14 +306,15 @@ void *jarg;
     memset(buf, 0,sizeof(buf));
     iov.iov_base = buf;
 
-    while(1){
+    while(1) {
         iov.iov_len = sizeof(buf);
         status = recvmsg(rtnl->fd, &msg, 0);
         dprintf_l255(("[rtnl_talk] status recvmsg = %d\n", status));
 
         if(status < 0) {
-            if(errno == EINTR)
+            if(errno == EINTR) {
                 continue;
+            }
             perror("OVERRUN");
             continue;
         }
@@ -339,7 +340,7 @@ void *jarg;
             dprintf_l255(("[rtnl_talk] Payload len = %d\n", l));
 
             if(l < 0 || len > status){
-                if(msg.msg_flags & MSG_TRUNC){
+                if(msg.msg_flags & MSG_TRUNC) {
                     fprintf(stderr, "Truncated message\n");
                     return -1;
                 }
@@ -347,8 +348,8 @@ void *jarg;
                 exit(1);
             }
 
-            if(nladdr.nl_pid != peer || h->nlmsg_pid != rtnl->local.nl_pid || h->nlmsg_seq != seq){
-                if(junk){
+            if(nladdr.nl_pid != peer || h->nlmsg_pid != rtnl->local.nl_pid || h->nlmsg_seq != seq) {
+                if(junk) {
                     err = junk(&nladdr, h, jarg);
                     if(err < 0) {
                         return err;
@@ -360,10 +361,10 @@ void *jarg;
                 continue;
             }
 
-            if(h->nlmsg_type == NLMSG_ERROR){
-                struct nlmsgerr* err = (struct nlmsgerr*)NLMSG_DATA(h);
+            if(h->nlmsg_type == NLMSG_ERROR) {
+                struct nlmsgerr *err = (struct nlmsgerr*)NLMSG_DATA(h);
                 dprintf_l255(("[rtnl_talk] error no = %d\n", err->error));
-                if(l < sizeof(struct nlmsgerr)){
+                if(l < sizeof(struct nlmsgerr)) {
                     fprintf(stderr, "ERROR truncated\n");
                 } 
                 else {
@@ -379,7 +380,7 @@ void *jarg;
                 }
                 return -1;
             }
-            if(answer){
+            if(answer) {
                 memcpy(answer, h, h->nlmsg_len);
                 return 0;
             }

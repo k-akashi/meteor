@@ -364,12 +364,17 @@ char *dst;
 {
 #ifdef __linux
     int32_t i;
+    char srcaddr[20];
+    char dstaddr[20];
     char *devname;
     uint32_t htb_qdisc_id[4];
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
+    uint32_t filter_id[4];
     struct qdisc_params qp;
-    //struct u32_params ufp;
+    struct u32_params ufp;
+
+    memset(&ufp, 0, sizeof(struct u32_params));
 
     if(!INGRESS) {
         devname =  get_route_info("dev", dst);
@@ -435,6 +440,28 @@ char *dst;
     qp.loss = ~0;
     qp.limit = 100000;
     add_netem_qdisc(devname, netem_qdisc_id, qp);
+
+    filter_id[0] = 1;
+    filter_id[1] = 0;
+    filter_id[2] = 1;
+    filter_id[3] = 65535;
+
+    strcpy(srcaddr, "0.0.0.0/0");
+    ufp.match[IP_SRC].proto = "ip";
+    ufp.match[IP_SRC].filter = "src";
+    ufp.match[IP_SRC].type = "u32";
+    ufp.match[IP_SRC].arg = srcaddr;
+
+    strcpy(dstaddr, "0.0.0.0/0");
+    ufp.match[IP_DST].proto = "ip";
+    ufp.match[IP_DST].filter = "dst";
+    ufp.match[IP_DST].type = "u32";
+    ufp.match[IP_DST].arg = dstaddr;
+
+    ufp.classid[0] = filter_id[2];
+    ufp.classid[1] = filter_id[3];
+
+    //add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
 /* XXX
         ufp.match.type = "u32";
