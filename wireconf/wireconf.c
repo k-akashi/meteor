@@ -364,17 +364,9 @@ char *dst;
 {
 #ifdef __linux
     int32_t i;
-    char srcaddr[20];
-    char dstaddr[20];
     char *devname;
     uint32_t htb_qdisc_id[4];
-    uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
-    uint32_t filter_id[4];
-    struct qdisc_params qp;
-    struct u32_params ufp;
-
-    memset(&ufp, 0, sizeof(struct u32_params));
 
     if(!INGRESS) {
         devname =  get_route_info("dev", dst);
@@ -428,6 +420,15 @@ char *dst;
     add_htb_qdisc(devname, htb_qdisc_id);
 
 /* XXX
+    char srcaddr[20];
+    char dstaddr[20];
+    uint32_t htb_class_id[4];
+    uint32_t filter_id[4];
+    struct qdisc_params qp;
+    struct u32_params ufp;
+
+    memset(&ufp, 0, sizeof(struct u32_params));
+
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
     htb_class_id[2] = 1;
