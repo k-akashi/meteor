@@ -612,6 +612,16 @@ io_binary_print_record (struct bin_rec_cls *binary_record)
 standard=%d op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_record->from_id, binary_record->to_id, binary_record->frame_error_rate, binary_record->num_retransmissions, binary_record->standard, binary_record->operating_rate, binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
 }
 
+// print binary record for gnuplot
+void
+io_bin_rec2gnuplot(bin_rec, time)
+struct bin_rec_cls *bin_rec;
+int32_t time;
+{
+    printf("%d %d %d %.6f %.6f %.6f\n", 
+        time, bin_rec->from_id, bin_rec->to_id, bin_rec->delay, bin_rec->loss_rate, bin_rec->bandwidth);
+}
+
 // copy binary record
 void
 io_bin_cp_rec(bin_rec_dst, bin_rec_src)

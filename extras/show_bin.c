@@ -23,6 +23,7 @@
  ***********************************************************************/
 
 
+#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -63,15 +64,18 @@
 #define INFO(message...)	/* message */
 #endif
 
+
+#define PRINT_SC        0
+#define PRINT_GNUPLOT   1
+
 // print usage info
 static void
-usage(FILE * f)
+usage()
 {
-    fprintf(f, "\nshow_bin. Display binary QOMET output as text.\n\n");
-    fprintf(f, "Usage: show_bin <scenario_file.xml.bin>\n");
-    fprintf(f, "\n");
-    fprintf(f, "See documentation for more details.\n");
-    fprintf(f, "Please send comments and bug reports to 'info@starbed.org'.\n\n");
+    fprintf(stderr, "\nshow_bin. Display binary QOMET output as text.\n\n");
+    fprintf(stderr, "Usage: show_bin -b <scenario_file.xml.bin> [-t gnuplot] [-s src_id] [-d dst_id]\n");
+    fprintf(stderr, "** gnuplot types output format is follow.\n");
+    fprintf(stderr, "     time, from_id, to_id delay, lossrate, bandwidth\n");
 }
 
 void
@@ -121,6 +125,7 @@ int
 main(int argc, char *argv[])
 {
     // binary file name and descriptor
+    char c;
     char bin_filename[MAX_STRING];
     FILE *bin_file;
 
@@ -131,14 +136,18 @@ main(int argc, char *argv[])
     struct bin_time_rec_cls binary_time_record;
 
     // binary file record data structure and max count
-    struct bin_rec_cls *binary_records = NULL;
+    struct bin_rec_cls *bin_recs = NULL;
     uint32_t bin_rec_max_cnt;
 
     // counters for time and binary records
     uint64_t time_i;
     uint32_t rec_i;
+    int32_t type = PRINT_SC;
+    int32_t src_id, dst_id;
 
-    print_systeminfo();
+
+    src_id = -1;
+    dst_id = -1;
 
     if(argc <= 1) {
         WARNING("No binary QOMET output file was provided");
@@ -146,10 +155,42 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    strncpy(bin_filename, argv[1], MAX_STRING - 1);
+    while((c = getopt(argc, argv, "b:d:hs:t:")) != -1) {
+        switch(c) {
+            case 'b':
+                strncpy(bin_filename, optarg, MAX_STRING - 1);
+                bin_file = fopen(optarg, "r");
+                break;
+            case 'd':
+                dst_id = atoi(optarg);
+                break;
+            case 'h':
+                usage();
+                exit(0);
+                break;
+            case 's':
+                src_id = atoi(optarg);
+                break;
+            case 't':
+                if(strcmp(optarg, "gnuplot") == 0) {
+                    type = PRINT_GNUPLOT;
+                }
+                else {
+                    fprintf(stderr, "set type : gnuplot\n");
+                    usage();
+                    exit(1);
+                }
+                break;
+            default:
+                usage();
+                exit(1);
+        }
+    }
+
+    print_systeminfo();
+
     INFO("\nShowing file '%s'...\n", bin_filename);
 
-    bin_file = fopen (argv[1], "r");
     if(bin_file == NULL) {
         WARNING("Cannot open binary file '%s'", bin_filename);
         exit(1);
@@ -165,8 +206,8 @@ main(int argc, char *argv[])
     io_binary_print_header(&bin_hdr);
 
     bin_rec_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
-    binary_records = (struct bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(struct bin_rec_cls));
-    if(binary_records == NULL) {
+    bin_recs = (struct bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(struct bin_rec_cls));
+    if(bin_recs == NULL) {
         WARNING ("Cannot allocate memory for records");
         fclose(bin_file);
         exit(1);
@@ -187,18 +228,27 @@ main(int argc, char *argv[])
             exit(1);
         }
 
-        if(io_binary_read_records_from_file(binary_records, binary_time_record.record_number, bin_file) == ERROR) {
+        if(io_binary_read_records_from_file(bin_recs, binary_time_record.record_number, bin_file) == ERROR) {
             WARNING("Aborting on input error (records)");
             fclose(bin_file);
             exit(1);
         }
 
         for(rec_i = 0; rec_i < binary_time_record.record_number; rec_i++) {
-            io_binary_print_record(&binary_records[rec_i]);
+            if(src_id == -1 || src_id == bin_recs[rec_i].from_id) {
+                if(dst_id == -1 || dst_id == bin_recs[rec_i].to_id) {
+                    if(type == PRINT_SC) {
+                        io_binary_print_record(&bin_recs[rec_i]);
+                    }
+                    else if(type == PRINT_GNUPLOT) {
+                        io_bin_rec2gnuplot(&bin_recs[rec_i], time_i);
+                    }
+                }
+            }
         }
     }
 
-    free(binary_records);
+    free(bin_recs);
     fclose(bin_file);
 
     return 0;

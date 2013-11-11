@@ -13,7 +13,7 @@ INCDIR=../include
 
 LIBS=-L${LIBDIR} -ldeltaQ -lm -lexpat
 INCS=-I${INCDIR}
-CFLAGS=-Wall
+CFLAGS=-g -Wall
 
 ifeq ($(COMPILE_TYPE), debug)
 GCC_FLAGS = $(GENERAL_FLAGS) -g -O0
