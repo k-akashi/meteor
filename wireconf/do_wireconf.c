@@ -597,18 +597,15 @@ char **argv;
                 exit(1);
             }
         */
-            /*
-               for (node_i=0; node_i<MAX_NODES_W; node_i++)
-               {
-               ipaddrs[node_i]=node_i;
-               sprintf(ipaddrs_c + (node_i*IP_ADDR_SIZE), 
-               "0.0.0.%d", node_i);
-               }
-            */
+        /*
+            for(node_i=0; node_i<MAX_NODES_W; node_i++) {
+                ipaddrs[node_i] = node_i;
+                sprintf(ipaddrs_c + (node_i * IP_ADDR_SIZE), "0.0.0.%d", node_i);
+            }
+        */
         }
         else {
-            if((node_cnt = io_read_settings_file (settings_file_name, ipaddrs,
-                ipaddrs_c, MAX_NODES)) < 1) {
+            if((node_cnt = io_read_settings_file (settings_file_name, ipaddrs, ipaddrs_c, MAX_NODES)) < 1) {
                 WARNING("Invalid IP address settings file: '%s'", settings_file_name);
                 exit(1);
             }
@@ -646,10 +643,10 @@ char **argv;
         uint32_t src_id;
         uint32_t dst_id;
 //        for(src_id = assign_id; src_id < node_cnt + assign_id; src_id++) {
-        for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
-            if(direction == DIRECTION_BR) {
-                saddr = (char*)calloc(1, IP_ADDR_SIZE);
-                daddr = (char*)calloc(1, IP_ADDR_SIZE);
+        if(direction == DIRECTION_BR) {
+            saddr = (char*)calloc(1, IP_ADDR_SIZE);
+            daddr = (char*)calloc(1, IP_ADDR_SIZE);
+            for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                 if(assign_id != src_id % division) {
                     continue;
                 }
@@ -669,13 +666,15 @@ char **argv;
                     ret = add_rule(dsock, rule_num, rule_num, saddr, daddr, DIRECTION_OUT);
                     if(ret != SUCCESS) {
                         fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
-                        fprintf(stderr, "\tSource Address %s", saddr);
-                        fprintf(stderr, "\tDestination Address %s", daddr);
                         exit(1);
                     }
                 }
             }
-            else {
+            free(saddr);
+            free(daddr);
+        }
+        else {
+            for(src_id = FIRST_NODE_ID; src_id < all_node_cnt; src_id++) {
                 if(src_id == my_id) {
                     continue;
                 }
@@ -912,7 +911,6 @@ char **argv;
                     dst_id = bin_recs[rec_i].to_id;
                     io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                     my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
-
                     //io_binary_print_record (&(my_recs_ucast[bin_recs[rec_i].from_node][bin_recs[rec_i].to_node]));
                 }
 
@@ -929,24 +927,24 @@ char **argv;
 
             if(time_i == 0) {
                 uint32_t rec_index;
-                uint32_t max_src_id;
-                max_src_id = node_cnt + assign_id;
-                for(rec_i = assign_id; rec_i < all_node_cnt; rec_i++) {
-                    // do not consider the node itself
-                    if(direction == DIRECTION_BR) {
-                        int32_t src_id;
-                        int32_t dst_id;
-                        src_id = rec_i;
+                if(direction == DIRECTION_BR) {
+                    int32_t src_id, dst_id;
+                    for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                         for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
                             rec_index = src_id * all_node_cnt + dst_id;
                             io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                             DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
                         }
                     }
-                    else if(rec_i != my_id) {
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
-                        //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
+                }
+                else {
+                    for(rec_i = FIRST_NODE_ID; rec_i < all_node_cnt; rec_i++) {
+                        // do not consider the node itself
+                        if(rec_i != my_id) {
+                            io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
+                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
+                            //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
+                        }
                     }
                 }
             }
@@ -954,23 +952,23 @@ char **argv;
                 if(do_adjust_deltaQ == FALSE || direction == DIRECTION_BR) {
                     uint32_t rec_index;
                     WARNING("Adjustment of deltaQ is disabled.");
-                    for(rec_i = assign_id; rec_i < node_cnt + assign_id; rec_i += division) {
-                        if(direction == DIRECTION_BR) {
-                            int32_t src_id;
-                            int32_t dst_id;
-                            src_id = rec_i;
+                    if(direction == DIRECTION_BR) {
+                        int32_t src_id, dst_id;
+                        for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                             for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                                if(src_id <= dst_id) {
+                                    break;
+                                }
                                 rec_index = src_id * all_node_cnt + dst_id;
                                 io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                                 DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
                             }
                         }
-                        else {
-                            if(rec_i != my_id) {
-                                io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
-                                DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
-                                //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
-                            }
+                    }
+                    else {
+                        if(rec_i != my_id) {
+                            io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
+                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
                         }
                     }
                 }
@@ -978,15 +976,13 @@ char **argv;
                     DEBUG("Adjustment of deltaQ is enabled.");
                     if(direction == DIRECTION_BR) {
                         for(wireconf.my_id = 0; wireconf.my_id < node_cnt; wireconf.my_id++) {
-                            adjust_deltaQ(&wireconf, my_recs_ucast,
-                               adjusted_recs_ucast, my_recs_ucast_changed,
+                            adjust_deltaQ(&wireconf, my_recs_ucast, adjusted_recs_ucast, my_recs_ucast_changed,
                                avg_frame_sizes);
                         }
                     }
                     else {
-                    adjust_deltaQ(&wireconf, my_recs_ucast,
-                       adjusted_recs_ucast, my_recs_ucast_changed,
-                       avg_frame_sizes);
+                        adjust_deltaQ(&wireconf, my_recs_ucast, adjusted_recs_ucast, my_recs_ucast_changed,
+                            avg_frame_sizes);
                     }
                 }
             }
@@ -1014,17 +1010,12 @@ char **argv;
 */
                 }
 
-                int32_t src_id;
-                int32_t dst_id;
+                int32_t src_id, dst_id;
                 int32_t conf_rule_num;
                 int32_t ret;
 //                TCHK_START(time);
-                for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
-                    if(direction == DIRECTION_BR) {
-                        if(assign_id != src_id % division) {
-                            continue;
-                        }
-
+                if(direction == DIRECTION_BR) {
+                    for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                         for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
                             if(src_id <= dst_id) {
                                 break;
@@ -1043,7 +1034,9 @@ char **argv;
                             }
                         }
                     }
-                    else {
+                }
+                else {
+                    for(src_id = FIRST_NODE_ID; src_id < all_node_cnt; src_id++) {
                         int next_hop_id;
     
                         if(node_i == my_id) {
@@ -1214,6 +1207,7 @@ char **argv;
 #endif
             loop_cnt++;
         }
+
         if(loop == TRUE) {
             fseek(qomet_fd, 0L, SEEK_SET);
             if((timer = timer_init_rdtsc()) == NULL) {
