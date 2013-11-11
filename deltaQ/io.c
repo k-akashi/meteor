@@ -591,11 +591,10 @@ io_binary_print_header (struct bin_hdr_cls *bin_hdr)
 
 // print binary time record
 void
-io_binary_print_time_record (struct bin_time_rec_cls
-			     *binary_time_record)
+io_binary_print_time_record(binary_time_record)
+struct bin_time_rec_cls *binary_time_record;
 {
-  INFO ("- Time: %.2f s (%d records)\n", binary_time_record->time,
-	  binary_time_record->record_number);
+  INFO("- Time: %.2f s (%d records)\n", binary_time_record->time, binary_time_record->record_number);
 }
 
 // print binary record
@@ -776,17 +775,15 @@ io_binary_write_header_to_file (int if_num,
 // read a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
 int
-io_binary_read_time_record_from_file (struct bin_time_rec_cls
-				      *binary_time_record,
-				      FILE * bin_in_file)
+io_binary_read_time_record_from_file(binary_time_record, bin_in_file)
+struct bin_time_rec_cls *binary_time_record;
+FILE * bin_in_file;
 {
-  if(fread(binary_time_record, sizeof (struct bin_time_rec_cls),
-	     1, bin_in_file) != 1)
-    {
+  if(fread(binary_time_record, sizeof(struct bin_time_rec_cls), 1, bin_in_file) != 1) {
       WARNING ("Error reading binary time record from file");
       perror ("fread");
       return ERROR;
-    }
+  }
 
   return SUCCESS;
 }
