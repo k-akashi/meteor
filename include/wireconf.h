@@ -62,6 +62,7 @@
 #define DIRECTION_OUT                   2
 #define DIRECTION_BR                    3
 
+#define QLEN                            100000
 
 int get_socket(void);
 void close_socket(int socket_id);

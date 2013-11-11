@@ -64,52 +64,87 @@ get_ctl_fd(void)
 }
 
 int
+change_ifqueuelen(dev, qlen)
+char *dev;
+uint32_t qlen;
+{
+    int fd;
+    int err;
+    struct ifreq ifr;
+	
+    memset(&ifr, 0, sizeof(struct ifreq));
+    strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+
+    if(qlen < 0) {
+        fprintf(stderr, "Invalid txqueue size : %u\n", qlen);
+        return -2;
+    }
+    ifr.ifr_qlen = qlen;
+
+
+    fd = get_ctl_fd();
+    if(fd < 0) {
+        return -1;
+    }
+
+    err = ioctl(fd, SIOCSIFTXQLEN, &ifr);
+    if(err) {
+        perror("SIOCGIFFLAGS");
+        close(fd);
+        return -1;
+    }
+    close(fd);
+
+    return 0;
+}
+
+int
 set_ifb(dev, cmd)
 char* dev;
 int cmd;
 {
-	int fd;
-	int err;
-	uint32_t mask;
-	uint32_t flags;
-	struct ifreq ifr;
+    int fd;
+    int err;
+    uint32_t mask;
+    uint32_t flags;
+    struct ifreq ifr;
 	
-	mask = 0;
-	flags = 0;
+    mask = 0;
+    flags = 0;
     memset(&ifr, 0, sizeof(struct ifreq));
 
-	if(cmd == IF_UP) {
-		mask |= IFF_UP;
-		flags |= IFF_UP;
-	}
-	else if(cmd  == IF_DOWN) {
-		mask |= IFF_UP;
-		flags &= ~IFF_UP;
-	}
-
-	strncpy(ifr.ifr_name, dev, IFNAMSIZ);
-	fd = get_ctl_fd();
-	if(fd < 0) {
-		return -1;
+    if(cmd == IF_UP) {
+        mask |= IFF_UP;
+        flags |= IFF_UP;
+    }
+    else if(cmd  == IF_DOWN) {
+        mask |= IFF_UP;
+        flags &= ~IFF_UP;
     }
 
-	err = ioctl(fd, SIOCGIFFLAGS, &ifr);
-	if(err) {
-		perror("SIOCGIFFLAGS");
-		close(fd);
-		return -1;
-	}
-	if((ifr.ifr_flags ^ flags) & mask) {
-		ifr.ifr_flags &= ~mask;
-		ifr.ifr_flags |= mask&flags;
-		err = ioctl(fd, SIOCSIFFLAGS, &ifr);
-		if(err) {
-			perror("SIOCSIFFLAGS");
-        }
-	}
-	close(fd);
+    strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+    fd = get_ctl_fd();
+    if(fd < 0) {
+        return -1;
+    }
 
-	return 0;
+    err = ioctl(fd, SIOCGIFFLAGS, &ifr);
+    if(err) {
+        perror("SIOCGIFFLAGS");
+        close(fd);
+        return -1;
+    }
+    if((ifr.ifr_flags ^ flags) & mask) {
+        ifr.ifr_flags &= ~mask;
+        ifr.ifr_flags |= mask&flags;
+        err = ioctl(fd, SIOCSIFFLAGS, &ifr);
+        if(err) {
+            perror("SIOCSIFFLAGS");
+        }
+    }
+    close(fd);
+
+    return 0;
 }
 
 /* test code

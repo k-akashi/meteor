@@ -366,13 +366,13 @@ char *dst;
     int32_t i;
     char *devname;
     uint32_t htb_qdisc_id[4];
-    uint32_t netem_qdisc_id[4];
 
     if(!INGRESS) {
         devname =  get_route_info("dev", dst);
     }
     if(INGRESS) {
         set_ifb(ifb_devname, IF_UP);
+        change_ifqueuelen(ifb_devname, QLEN);
 
         for(i = 0; i < if_num; i++) {
             if(!device_list[i].dev_name) {
@@ -384,6 +384,7 @@ char *dst;
                 printf("Cannot add ingress filter from %s to %s\n", device_list[i].dev_name, ifb_devname);
             }
         }
+
 /* debug now...
         int i;
         int nifaces;
@@ -423,6 +424,7 @@ char *dst;
     char srcaddr[20];
     char dstaddr[20];
     uint32_t htb_class_id[4];
+    uint32_t netem_qdisc_id[4];
     uint32_t filter_id[4];
     struct qdisc_params qp;
     struct u32_params ufp;

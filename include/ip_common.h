@@ -25,3 +25,4 @@ extern int print_route(const struct sockaddr_nl *who, struct nlmsghdr *n, void *
 extern int print_prefix(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg);
 extern int set_ifb(char* devname, int cmd); 
 extern int get_iface_list(struct ifconf *ifc);
+extern int change_ifqueuelen(char *dev, uint32_t qlen);
