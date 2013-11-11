@@ -81,7 +81,6 @@ uint32_t qlen;
     }
     ifr.ifr_qlen = qlen;
 
-
     fd = get_ctl_fd();
     if(fd < 0) {
         return -1;
