@@ -30,7 +30,7 @@
  *
  * QOMET Emulator Implementation
  *
- * File name: do_wireconf.c
+ * File name: meteor.c
  * Function: Main source file of the real-time wired-network emulator 
  *           configuration program. At the moment it can be used to 
  *           drive the netwrok emulator dummynet on FreeBSD 
@@ -122,12 +122,12 @@ int32_t division = 1;
 void
 usage()
 {
-    fprintf(stderr, "\ndo_wireconf. Drive network emulation using QOMET  data.\n\n");
-    fprintf(stderr, "do_wireconf can use the QOMET data in <qomet_output_file> in two different ways:\n");
+    fprintf(stderr, "\nMeteor. Drive network emulation using QOMET  data.\n\n");
+    fprintf(stderr, "Meteor can use the QOMET data in <qomet_output_file> in two different ways:\n");
     fprintf(stderr, "(1) Configure a specified pair <from_node_id> (IP address <from_node_addr>)\n");
     fprintf(stderr, "    <to_node_id> (IP address <to_node_addr>) using the dummynet rule\n");
     fprintf(stderr, "    <rule_number> and pipe <pipe_number>, optionally in direction 'in' or 'out'.\n");
-    fprintf(stderr, "    Usage: do_wireconf -q <qomet_output_file>\n"
+    fprintf(stderr, "    Usage: meteor -q <deltaQ_output_text_file> or -Q <deltaQ_output_binary_file>\n"
             "\t\t\t-f <from_node_id> \t-F <from_node_addr>\n"
             "\t\t\t-t <to_node_id> \t-T <to_node_addr>\n"
             "\t\t\t-r <rule_number> \t-p <pipe_number>\n"
@@ -136,9 +136,10 @@ usage()
     fprintf(stderr, "    IP settings in <settings_file> and the OPTIONAL broadcast address\n");
     fprintf(stderr, "    <baddr>; Interval between configurations is <time_period>.\n");
     fprintf(stderr, "    The settings file contains on each line pairs of ids and IP addresses.\n");
-    fprintf(stderr, "    Usage: do_wireconf -q <qomet_output_file>\n"
+    fprintf(stderr, "    Usage: meteor -q <deltaQ_output_text_file> or -Q <deltaQ_output_binary_file>\n"
             "\t\t\t-i <current_id> \t-s <settings_file>\n"
-            "\t\t\t-m <time_period> \t[-b <baddr>]\n");
+            "\t\t\t-m <time_period> \t[-b <baddr>] [-I Interface Name]\n"
+            "\t\t\t[-a assign_id] [-d division] [-l] [-d {in|out|bridge}]\n");
     fprintf(stderr, "NOTE: If option '-s' is used, usage (2) is inferred, otherwise usage (1) is assumed.\n");
 }
 

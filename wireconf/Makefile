@@ -20,13 +20,13 @@ ifeq ($(UNAME), Linux)
 CFLAGS += -D_GNU_SOURCE -fPIC 
 LIBS += -ltc -lnetlink -ldl
 LIB_TARGET = libwireconf.a 
-BIN_TARGET = do_wireconf 
+BIN_TARGET = meteor 
 TARGETS = ${LIB_TARGET} ${BIN_TARGET}
 TOBJ = libnetlink.o 
 ALLOBJ=${TOBJ} ${TCOBJ} ${NLOBJ} ${WCOBJ}
 else ifeq ($(UNAME), FreeBSD)
 LDFLAGS = -L.
-TARGETS = libwireconf.a do_wireconf
+TARGETS = libwireconf.a meteor
 endif
 
 .SUFFIXES:  .c .o
@@ -53,15 +53,15 @@ libwireconf.a: wireconf.c wireconf.o statistics.o
 statistics.o: statistics.c
 
 ifeq ($(UNAME), Linux)
-do_wireconf: do_wireconf.o routing_info.o ${WCOBJ} ${TCOBJ} ${NLOBJ}
-	${CC} ${CFLAGS} -g -export-dynamic -o ${BINDIR}/$@ do_wireconf.o routing_info.o ${WCOBJ} $(LDFLAGS) ${INCS} ${LIBS}
+meteor: meteor.o routing_info.o ${WCOBJ} ${TCOBJ} ${NLOBJ}
+	${CC} ${CFLAGS} -g -export-dynamic -o ${BINDIR}/$@ meteor.o routing_info.o ${WCOBJ} $(LDFLAGS) ${INCS} ${LIBS}
 endif
 ifeq ($(UNAME), FreeBSD)
-do_wireconf: do_wireconf.c routing_info.o 
-	${CC} ${CFLAGS} -o $@ do_wireconf.c routing_info.o ${INCS} ${LIBS}
+meteor: meteor.c routing_info.o 
+	${CC} ${CFLAGS} -o $@ meteor.c routing_info.o ${INCS} ${LIBS}
 endif
 
-do_wireconf.o: do_wireconf.c
+meteor.o: meteor.c
 routing_info.o: routing_info.c
 
 ifeq ($(UNAME), Linux)
