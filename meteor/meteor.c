@@ -1028,10 +1028,6 @@ char **argv;
                             delay = adjusted_recs_ucast[next_hop_id].delay;
                             lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
-                            if(src_id == 52 && dst_id == 7) {
-                                printf("rule:%d\n", conf_rule_num);
-                            }
-
                             ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
                             if(ret != SUCCESS) {
                                 fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);

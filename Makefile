@@ -15,7 +15,7 @@ EXTRAS_PATH=./extras
 #STATION_PATH=./station
 TIMER_PATH=./timer
 TC_PATH=./tc
-WIRECONF_PATH=./wireconf
+WIRECONF_PATH=./meteor
 
 all :
 	make -C ${DELTAQ_PATH} all && make -C ${EXTRAS_PATH} all && make -C ${TIMER_PATH} all && make -C ${TC_PATH} all && make -C ${WIRECONF_PATH} all
