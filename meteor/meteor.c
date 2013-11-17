@@ -606,7 +606,7 @@ char **argv;
         */
         }
         else {
-            if((node_cnt = io_read_settings_file (settings_file_name, ipaddrs, ipaddrs_c, MAX_NODES)) < 1) {
+            if((node_cnt = io_read_settings_file(settings_file_name, ipaddrs, ipaddrs_c, MAX_NODES)) < 1) {
                 WARNING("Invalid IP address settings file: '%s'", settings_file_name);
                 exit(1);
             }
@@ -634,8 +634,7 @@ char **argv;
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);
 
         if(add_rule(dsock, rulenum, pipe_nr, saddr, daddr, direction) < 0) {
-            WARNING("Could not add rule #%d with pipe #%d from %s to %s", 
-                    rulenum, pipe_nr, saddr, daddr);
+            WARNING("Could not add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);
             exit(1);
         }
     }
@@ -643,7 +642,7 @@ char **argv;
         int32_t ret;
         uint32_t src_id;
         uint32_t dst_id;
-//        for(src_id = assign_id; src_id < node_cnt + assign_id; src_id++) {
+//        for(src_id = assign_id; src_id < node_cnt + assign_id; src_id++) {}
         if(direction == DIRECTION_BR) {
             saddr = (char*)calloc(1, IP_ADDR_SIZE);
             daddr = (char*)calloc(1, IP_ADDR_SIZE);
@@ -892,7 +891,7 @@ char **argv;
                 exit (1);
             }
 
-            //for(rec_i = assign_id * all_node_cnt; rec_i < bin_time_rec.record_number; rec_i++) {
+            //for(rec_i = assign_id * all_node_cnt; rec_i < bin_time_rec.record_number; rec_i++) {}
             for(rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
                 if(bin_recs[rec_i].from_id < FIRST_NODE_ID) {
                     INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
@@ -1233,14 +1232,14 @@ char **argv;
                 if((from == fid) && (to == next_hop_id)) {
                     INFO("* Wireconf configuration (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms", \
                         time, bandwidth, lossrate, delay);
-    
+
                     if(time == 0.0) {
-                        //timer_reset(timer, crt_record_time);
+                        timer_reset(timer, crt_record_time);
                     }
                     else {
                         uint64_t time_usec = time * 1000000;
                         if(timer_wait_rdtsc(timer, time_usec) < 0) {
-                            fprintf(stderr, "Timer deadline missed at time=%.2f s", time);
+                            fprintf(stderr, "Timer deadline missed at time=%.2f s\n", time);
                         }
                     }
 

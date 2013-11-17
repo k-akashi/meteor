@@ -163,7 +163,7 @@ void io_binary_print_time_record (struct bin_time_rec_cls
 
 // print binary record
 void io_binary_print_record (struct bin_rec_cls *binary_record);
-void io_bin_rec2gnuplot(struct bin_rec_cls *bin_rec, int32_t time);
+void io_bin_rec2gnuplot(struct bin_rec_cls *bin_rec, double time);
 
 // copy binary record
 void io_bin_cp_rec(struct bin_rec_cls *binary_record_dst, struct bin_rec_cls *binary_record_src);

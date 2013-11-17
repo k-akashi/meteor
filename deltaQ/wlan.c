@@ -516,7 +516,7 @@ compute_channel_interference (struct connection_class *connection,
     // add the (negative) attenuation to the received power
     virtual_connection.Pr += attenuation;
 
-    INFO ("Power after attenuation: Pr=%f (inter channel distance=%d)",
+    INFO("Power after attenuation: Pr=%f (inter channel distance=%d)",
             virtual_connection.Pr, channel_distance);
 
     adapter = wlan_get_interface_adapter(connection,
@@ -525,7 +525,7 @@ compute_channel_interference (struct connection_class *connection,
 
     // check whether a suitable adapter was found
     if(adapter == NULL) {
-        WARNING ("No suitable adapter found for connection");
+        WARNING("No suitable adapter found for connection");
         return ERROR;
     }
 
@@ -554,7 +554,7 @@ compute_channel_interference (struct connection_class *connection,
         INFO("Interference from transmission of other stations (noise type)");
 
         // add Pr to interference noise
-        connection->interference_noise = add_powers (connection->interference_noise, virtual_connection.Pr,
+        connection->interference_noise = add_powers(connection->interference_noise, virtual_connection.Pr,
                     MINIMUM_NOISE_POWER);
 
         printf("Channel noise=%f (inter channel distance=%d)\n", connection->interference_noise, channel_distance);
@@ -586,7 +586,7 @@ compute_channel_interference (struct connection_class *connection,
 // through either concurrent transmission or through noise;
 // return SUCCESS on succes, ERROR on error
 int
-wlan_interference (struct connection_class *connection, struct scenario_class *scenario)
+wlan_interference(struct connection_class *connection, struct scenario_class *scenario)
 {
     int connection_i;
     //float distance;
@@ -597,7 +597,7 @@ wlan_interference (struct connection_class *connection, struct scenario_class *s
     connection->interference_noise = MINIMUM_NOISE_POWER;
 
     // reset interference flags
-    scenario_reset_node_interference_flag (scenario);
+    scenario_reset_node_interference_flag(scenario);
 
     // search connections in scenario that operate on same band
     // and are closely located to the current connection
@@ -635,7 +635,7 @@ wlan_interference (struct connection_class *connection, struct scenario_class *s
                 INFO("------------------------------------------------");
                 // interference b-b, g-g, b-g, g-b
                 if(connection->standard == WLAN_802_11B || connection->standard == WLAN_802_11G) {
-                    INFO ("Interference 'b'/'g' <-> 'b'/'g' detected => determine effects");
+                    INFO("Interference 'b'/'g' <-> 'b'/'g' detected => determine effects");
                 }
                 else {
                     // interference a-a
@@ -705,7 +705,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
         // this FER corresponds to the standard value PSDU_DSSS,
         // therefore needs to be adjusted for different packet sizes
         //fer1 = (fer1 * (connection->packet_size + header)) / PSDU_DSSS; INCORRECT
-        fer1 = 1 - pow (1 - fer1, (connection->packet_size + header) / PSDU_DSSS);
+        fer1 = 1 - pow(1 - fer1, (connection->packet_size + header) / PSDU_DSSS);
 
         // limit error rate for numerical reasons
         if(fer1 > MAXIMUM_ERROR_RATE) {
@@ -718,7 +718,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
             // use direct formula for the case of 1 segment
             if(environment->num_segments == 1) {
                 connection->SNR = connection->Pr -
-                    wlan_add_powers (environment->noise_power[0], connection->interference_noise);
+                    wlan_add_powers(environment->noise_power[0], connection->interference_noise);
             }
             else {
                 // we consider that noise in intermediary environments
@@ -789,12 +789,12 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
         // use model 1 (Pr-threshold based) with noise included
 
         // compute SNR
-        if (environment->num_segments > 0) {
+        if(environment->num_segments > 0) {
             double combined_noise;
 
             // compute noise resulting from environment noise plus
             // interference noise
-            combined_noise = add_powers (environment->noise_power[environment->num_segments - 1],
+            combined_noise = add_powers(environment->noise_power[environment->num_segments - 1],
                     connection->interference_noise, MINIMUM_NOISE_POWER);
             // limit combined_noise to a minimum standard value;
             // this is equivalent with making sure performance cannot
@@ -820,7 +820,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
             // this FER corresponds to the standard value PSDU_DSSS,
             // therefore needs to be adjusted for different packet sizes
             //fer1 = (fer1 * (connection->packet_size + header)) / PSDU_DSSS; INCORRECT
-            fer1 = 1 - pow (1 - fer1, (connection->packet_size + header) / PSDU_DSSS);
+            fer1 = 1 - pow(1 - fer1, (connection->packet_size + header) / PSDU_DSSS);
         }
         else {
             fer1 = 0;
@@ -836,7 +836,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
 #endif //#ifndef MODEL1_W_NOISE
 
     }
-    else if (connection->standard == WLAN_802_11G) {
+    else if(connection->standard == WLAN_802_11G) {
         struct parameters_802_11g *adapter_802_11g = (struct parameters_802_11g *) adapter;
 
 #ifndef MODEL1_W_NOISE
@@ -867,7 +867,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
                 // this FER corresponds to the standard value PSDU_OFDM,
                 // therefore needs to be adjusted for different packet sizes
                 //fer1 = (fer1 * (connection->packet_size + header)) / PSDU_OFDM; INCORRECT
-                fer1 = 1 - pow (1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
+                fer1 = 1 - pow(1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
             }
         }
         else {
@@ -934,7 +934,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
                 double relative_velocity = motion_relative_velocity(scenario, 
                         &(scenario->nodes[connection->from_node_index]),
                         &(scenario->nodes[connection->to_node_index]));
-                double doppler_snr_value = doppler_snr (FREQUENCY_BG,
+                double doppler_snr_value = doppler_snr(FREQUENCY_BG,
                         WIFI_SUBCARRIER_SPACING * 1e3, relative_velocity, connection->SNR);
                 /*
                    printf("freq=%.2f GHz  subcarrier_spacing=%.1f Hz  \
@@ -956,7 +956,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
                 // this FER corresponds to the standard value PSDU_OFDM,
                 // therefore needs to be adjusted for different packet sizes
                 //fer1 = (fer1 * (connection->packet_size + header)) / PSDU_OFDM; INCORRECT
-                fer1 = 1 - pow (1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
+                fer1 = 1 - pow(1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
             }
         }
         else {
@@ -989,7 +989,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
             // this FER corresponds to the standard value PSDU_OFDM,
             // therefore needs to be adjusted for different packet sizes
             //fer1 = (fer1 * (connection->packet_size + header)) / PSDU_OFDM; INCORRECT
-            fer1 = 1 - pow (1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
+            fer1 = 1 - pow(1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
         }
         else {
             fer1 = 0; 
@@ -1063,7 +1063,7 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
             // this FER corresponds to the standard value PSDU_OFDM,
             // therefore needs to be adjusted for different packet sizes
             //fer1 = (fer1 * (connection->packet_size + header)) / PSDU_OFDM; INCORRECT
-            fer1 = 1 - pow (1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
+            fer1 = 1 - pow(1 - fer1, (connection->packet_size + header) / PSDU_OFDM);
         }
         else {
             fer1 = 0;
@@ -1104,9 +1104,10 @@ wlan_fer(struct connection_class *connection, struct scenario_class *scenario, i
 // to the current conditions for ALL frames (including errored ones);
 // return SUCCESS on succes, ERROR on error
 int
-wlan_retransmissions (struct connection_class *connection,
-        struct scenario_class *scenario,
-        double *num_retransmissions)
+wlan_retransmissions(connection, scenario, num_retransmissions)
+struct connection_class *connection;
+struct scenario_class *scenario;
+double *num_retransmissions;
 {
     double FER = connection->frame_error_rate;
     int i, r;
@@ -1115,40 +1116,39 @@ wlan_retransmissions (struct connection_class *connection,
     // hence the total number of transmission can go up to r+1
 
     // check if RTS_CTS is "enabled"
-    if (connection->packet_size > connection->RTS_CTS_threshold)
+    if(connection->packet_size > connection->RTS_CTS_threshold) {
         r = MAX_TRANSMISSIONS_RTS_CTS - 1;
-    else
+    }
+    else {
         r = MAX_TRANSMISSIONS - 1;
+    }
 
     // compute the number of retransmissions as a weighted mean
     (*num_retransmissions) = 0;
-    for (i = 1; i <= (r - 1); i++)
-    {
-        (*num_retransmissions) += i * pow (FER, i);
-        DEBUG ("num_retransm[%d]=%f", i, i * pow (FER, i));
+    for(i = 1; i <= (r - 1); i++) {
+        (*num_retransmissions) += i * pow(FER, i);
+        DEBUG("num_retransm[%d]=%f", i, i * pow(FER, i));
     }
-    (*num_retransmissions) =
-        (1 - FER) * (*num_retransmissions) + r * pow (FER, r);
+    (*num_retransmissions) = (1 - FER) * (*num_retransmissions) + r * pow(FER, r);
 
     return SUCCESS;
 }
 
 // compute loss rate based on FER;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_loss_rate (struct connection_class *connection,
-        struct scenario_class *scenario, double *loss_rate)
+int
+wlan_loss_rate(connection, scenario, loss_rate)
+struct connection_class *connection;
+struct scenario_class *scenario;
+double *loss_rate;
 {
-    if (wlan_fer (connection, scenario, connection->operating_rate,
-                &(connection->frame_error_rate)) == ERROR)
-    {
-        WARNING ("Error while computing frame error rate");
+    if(wlan_fer(connection, scenario, connection->operating_rate, &(connection->frame_error_rate)) == ERROR) {
+        WARNING("Error while computing frame error rate");
         return ERROR;
     }
 
-    if (wlan_do_compute_loss_rate (connection, loss_rate) == ERROR)
-    {
-        WARNING ("Error while computing loss rate");
+    if(wlan_do_compute_loss_rate(connection, loss_rate) == ERROR) {
+        WARNING("Error while computing loss rate");
         return ERROR;
     }
 
@@ -1158,112 +1158,98 @@ wlan_loss_rate (struct connection_class *connection,
 // compute loss rate based on FER (we assume FER was
 // already calculated);
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_do_compute_loss_rate (struct connection_class *connection,
-        double *loss_rate)
+int
+wlan_do_compute_loss_rate(connection, loss_rate)
+struct connection_class *connection;
+double *loss_rate;
 {
     // check whether RTS/CTS is enabled
-    if (connection->packet_size > connection->RTS_CTS_threshold)
-        (*loss_rate) =
-            pow (connection->frame_error_rate, MAX_TRANSMISSIONS_RTS_CTS);
-    else
-        (*loss_rate) = pow (connection->frame_error_rate, MAX_TRANSMISSIONS);
+    if(connection->packet_size > connection->RTS_CTS_threshold) {
+        (*loss_rate) = pow(connection->frame_error_rate, MAX_TRANSMISSIONS_RTS_CTS);
+    }
+    else {
+        (*loss_rate) = pow(connection->frame_error_rate, MAX_TRANSMISSIONS);
+    }
 
     return SUCCESS;
 }
 
 // compute operating rate based on FER and a model of the ARF mechanism;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_operating_rate (struct connection_class *connection,
-        struct scenario_class *scenario, int *operating_rate)
+int
+wlan_operating_rate(connection, scenario, operating_rate)
+struct connection_class *connection;
+struct scenario_class *scenario;
+int *operating_rate;
 {
     // ARF model: in function of the current conditions trigger rate changes
     // at the next iteration
 
     // rate changes downwards if the probability of losing two consecutive frames
     // exceeds a predefined threshold
-    if (connection->frame_error_rate * connection->frame_error_rate >
-            ARF_FER_DOWN_THRESHOLD)
-    {
-        if ((connection->standard == WLAN_802_11B) ||
-                (connection->standard == WLAN_802_11G) ||
-                (connection->standard == WLAN_802_11A))
-        {
+    if(connection->frame_error_rate * connection->frame_error_rate > ARF_FER_DOWN_THRESHOLD) {
+        if((connection->standard == WLAN_802_11B) || (connection->standard == WLAN_802_11G) ||
+                (connection->standard == WLAN_802_11A)) {
             (*operating_rate) = connection->operating_rate;
 
             // use this loop for fast adaptation to network conditions
             // when they vary suddenly
-            while (1)
-            {
+            while(1) {
                 double fer_lower_rate;
 
                 // check if we are not already operating at the minimum rate
-                if ((connection->standard == WLAN_802_11B &&
-                            (*operating_rate) > B_RATE_1MBPS) ||
-                        (connection->standard == WLAN_802_11G &&
-                         (*operating_rate) > G_RATE_1MBPS) ||
-                        (connection->standard == WLAN_802_11A &&
-                         (*operating_rate) > A_RATE_6MBPS))
-                {
+                if((connection->standard == WLAN_802_11B && (*operating_rate) > B_RATE_1MBPS) ||
+                        (connection->standard == WLAN_802_11G && (*operating_rate) > G_RATE_1MBPS) ||
+                        (connection->standard == WLAN_802_11A && (*operating_rate) > A_RATE_6MBPS)) {
                     (*operating_rate)--;
 
                     // compute fer at lower rate
-                    if (wlan_fer (connection, scenario, (*operating_rate),
-                                &fer_lower_rate) == ERROR)
+                    if(wlan_fer (connection, scenario, (*operating_rate), &fer_lower_rate) == ERROR) {
                         return ERROR;
+                    }
 
                     // we stop the iterations when we reach an operating rate
                     // that ensures proper operation
-                    if (fer_lower_rate * fer_lower_rate <
-                            ARF_FER_DOWN_THRESHOLD)
+                    if(fer_lower_rate * fer_lower_rate < ARF_FER_DOWN_THRESHOLD) {
                         break;
+                    }
                 }
-                else
+                else {
                     // end loop when reaching minimum operating rate
                     break;
+                }
             }
         }
-        else
-        {
-            WARNING ("Connection standard '%d' undefined",
-                    connection->standard);
+        else {
+            WARNING("Connection standard '%d' undefined", connection->standard);
             return ERROR;
         }
     }
     // rate changes upwards if the probability of successfully sending 10
     // consecutive frames exceeds a predefined threshold
-    else if (pow (1 - connection->frame_error_rate, 10) > ARF_FER_UP_THRESHOLD)
-    {
-        if ((connection->standard == WLAN_802_11B) ||
-                (connection->standard == WLAN_802_11G) ||
-                (connection->standard == WLAN_802_11A))
-        {
+    else if(pow(1 - connection->frame_error_rate, 10) > ARF_FER_UP_THRESHOLD) {
+        if((connection->standard == WLAN_802_11B) || (connection->standard == WLAN_802_11G) ||
+                (connection->standard == WLAN_802_11A)) {
             // check if we are not already operating at the maximum rate
             // of the connection standard
-            if ((connection->standard == WLAN_802_11B &&
-                        connection->operating_rate < B_RATE_11MBPS) ||
-                    (connection->standard == WLAN_802_11G &&
-                     connection->operating_rate < G_RATE_54MBPS) ||
-                    (connection->standard == WLAN_802_11A &&
-                     connection->operating_rate < A_RATE_54MBPS))
-            {
+            if((connection->standard == WLAN_802_11B && connection->operating_rate < B_RATE_11MBPS) ||
+                    (connection->standard == WLAN_802_11G && connection->operating_rate < G_RATE_54MBPS) ||
+                    (connection->standard == WLAN_802_11A && connection->operating_rate < A_RATE_54MBPS)) {
                 double fer_higher_rate;
 
                 // according to ARF, the rate is increased only if
                 // the first frame (probe) is not lost
-                if (wlan_fer
-                        (connection, scenario, connection->operating_rate + 1,
-                         &fer_higher_rate) == ERROR)
+                if(wlan_fer(connection, scenario, connection->operating_rate + 1, &fer_higher_rate) == ERROR) {
                     return ERROR;
-                if (fer_higher_rate < ARF_FER_KEEP_THRESHOLD)
+                }
+                if(fer_higher_rate < ARF_FER_KEEP_THRESHOLD) {
                     (*operating_rate) = connection->operating_rate + 1;
+                }
             }
         }
-        else
-        {
-            WARNING ("Connection standard '%d' undefined",
-                    connection->standard);
+        else {
+            WARNING("Connection standard '%d' undefined", connection->standard);
+
             return ERROR;
         }
     }
@@ -1274,9 +1260,11 @@ wlan_operating_rate (struct connection_class *connection,
 // calculate PPDU duration in us for 802.11 WLAN specified by 'connection';
 // the results will be rounded up using ceil function;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_ppdu_duration (struct connection_class *connection,
-        double *ppdu_duration, int *slot_time)
+int
+wlan_ppdu_duration(connection, ppdu_duration, slot_time)
+struct connection_class *connection;
+double *ppdu_duration;
+int *slot_time;
 {
     int MAC_Overhead = 224; // MAC ovearhed in bits (header + FCS)
     int OFDM_Overhead = 22; // OFDM ovearhed in bits (service field + tail bits)
@@ -1316,8 +1304,7 @@ wlan_ppdu_duration (struct connection_class *connection,
     // optimize execution time by precomputing some values
 
 
-    if (connection->standard == WLAN_802_11A)
-    {
+    if(connection->standard == WLAN_802_11A) {
         // NOTE: The results obained with the code below were checked
         // using the Excel file "80211_TransmissionTime.xls"
 
@@ -1330,29 +1317,26 @@ wlan_ppdu_duration (struct connection_class *connection,
 
         PHY_Overhead = 20;
 
-        data_symbols =
-            (int) ceil ((double) (OFDM_Overhead + MAC_Overhead + Frame_Body) /
-                    a_OFDM_data[connection->operating_rate]);
-        ACK_symbols =
-            (int) ceil ((double) (OFDM_Overhead + ACK_Size) /
-                    a_OFDM_data[connection->operating_rate]);
+        data_symbols = (int)ceil((double)(OFDM_Overhead + MAC_Overhead + Frame_Body) / 
+            a_OFDM_data[connection->operating_rate]);
+
+        ACK_symbols = (int)ceil((double)(OFDM_Overhead + ACK_Size) / a_OFDM_data[connection->operating_rate]);
 
         (*ppdu_duration) = DIFS + PHY_Overhead +
             data_symbols * Symbol_Duration +
             SIFS + PHY_Overhead + ACK_symbols * Symbol_Duration;
 
-        DEBUG ("Results: D%d P%d ds%d SE%d S%d P%d As%d SE%d",
+        DEBUG("Results: D%d P%d ds%d SE%d S%d P%d As%d SE%d",
                 DIFS, PHY_Overhead, data_symbols, Signal_Extension,
                 SIFS, PHY_Overhead, ACK_symbols, Signal_Extension);
 
         // if RTS_CTS is enabled, RTS, CTS and 2 SIFS must be added
-        if (connection->packet_size > connection->RTS_CTS_threshold)
+        if(connection->packet_size > connection->RTS_CTS_threshold) {
             (*ppdu_duration) += ((RTS_Size + PHY_Overhead) * 1e6 / basic_rate_a +
-                    (CTS_Size + PHY_Overhead) * 1e6 / basic_rate_a +
-                    2 * SIFS);
+                    (CTS_Size + PHY_Overhead) * 1e6 / basic_rate_a + 2 * SIFS);
+        }
     }
-    else if (connection->standard == WLAN_802_11B)
-    {
+    else if(connection->standard == WLAN_802_11B) {
         // NOTE: The results obained with the code below were checked
         // using the Excel file "80211_TransmissionTime.xls"
         // 1 us differences at 5.5 and 11 Mb/s are caused by our
@@ -1366,41 +1350,35 @@ wlan_ppdu_duration (struct connection_class *connection,
         DIFS = SIFS + 2 * (*slot_time);
 
 #ifdef USE_SHORT_PREAMBLE
-        if (connection->operating_rate == B_RATE_1MBPS)
+        if(connection->operating_rate == B_RATE_1MBPS) {
             PHY_Overhead = PHY_OVERHEAD_802_11BG_LONG;
-        else
+        }
+        else {
             PHY_Overhead = PHY_OVERHEAD_802_11BG_SHORT;
+        }
 #else
         PHY_Overhead = PHY_OVERHEAD_802_11BG_LONG;
 #endif
 
-        (*ppdu_duration) = DIFS + PHY_Overhead +
-            ceil ((MAC_Overhead + Frame_Body) *
+        (*ppdu_duration) = DIFS + PHY_Overhead + ceil((MAC_Overhead + Frame_Body) *
                     1e6 / b_operating_rates[connection->operating_rate]) + SIFS
             // apparently ACK is sent at the same rate with data!!!!!
             + PHY_Overhead
             //+ ceil((PHY_Overhead + ACK_Size)*1e6/basic_rate_bg);
-            + ceil ((ACK_Size) *
-                    1e6 / b_operating_rates[connection->operating_rate]);
+            + ceil ((ACK_Size) * 1e6 / b_operating_rates[connection->operating_rate]);
 
-        DEBUG
-            ("DIFS=%d PHY_Overhead=%d PHY_frame=%f SIFS=%d PHY_Overhead=%d ACK_frame=%f",
-             DIFS, PHY_Overhead,
-             ceil ((MAC_Overhead +
-                     Frame_Body) * 1e6 /
-                 b_operating_rates[connection->operating_rate]), SIFS,
-             PHY_Overhead,
-             ceil ((ACK_Size) * 1e6 /
-                 b_operating_rates[connection->operating_rate]));
+        DEBUG("DIFS=%d PHY_Overhead=%d PHY_frame=%f SIFS=%d PHY_Overhead=%d ACK_frame=%f",
+             DIFS, PHY_Overhead, 
+             ceil((MAC_Overhead + Frame_Body) * 1e6 / b_operating_rates[connection->operating_rate]), SIFS,
+             PHY_Overhead, ceil((ACK_Size) * 1e6 / b_operating_rates[connection->operating_rate]));
 
         // if RTS_CTS is enabled, RTS, CTS and 2 SIFS must be added
-        if (connection->packet_size > connection->RTS_CTS_threshold)
-            (*ppdu_duration) += ((RTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg +
-                    (CTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg +
-                    2 * SIFS);
+        if(connection->packet_size > connection->RTS_CTS_threshold) {
+            (*ppdu_duration) +=((RTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg +
+                    (CTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg + 2 * SIFS);
+        }
     }
-    else if (connection->standard == WLAN_802_11G)
-    {
+    else if(connection->standard == WLAN_802_11G) {
         // NOTE: The results obained with the code below were checked 
         // using the Excel file "80211_TransmissionTime.xls"
         // 1 us differences at some rates are caused by our 
@@ -1411,70 +1389,63 @@ wlan_ppdu_duration (struct connection_class *connection,
 
         // if g station is not in compatibility mode, use short slot,
         // otherwise use long slot
-        if (connection->compatibility_mode == FALSE)
+        if(connection->compatibility_mode == FALSE) {
             (*slot_time) = SLOT_802_11G_SHORT;
-        else
+        }
+        else {
             (*slot_time) = SLOT_802_11G_LONG;
+        }
 
         // compute DIFS
         DIFS = SIFS + 2 * (*slot_time);
 
         // the code below can be used for ERP-DSSS operating rates
         // (1, 2, 5.5 and 11 Mb/s)
-        if (connection->operating_rate == 0 || connection->operating_rate == 1
-                || connection->operating_rate == 2
-                || connection->operating_rate == 5)
-        {
+        if(connection->operating_rate == 0 || connection->operating_rate == 1
+                || connection->operating_rate == 2 || connection->operating_rate == 5) {
 #ifdef USE_SHORT_PREAMBLE
-            if (connection->operating_rate == G_RATE_1MBPS)
+            if(connection->operating_rate == G_RATE_1MBPS) {
                 PHY_Overhead = PHY_OVERHEAD_802_11BG_LONG;
-            else
+            }
+            else {
                 PHY_Overhead = PHY_OVERHEAD_802_11BG_SHORT;
+            }
 #else
             PHY_Overhead = PHY_OVERHEAD_802_11BG_LONG;
 #endif
 
-            (*ppdu_duration) = DIFS + PHY_Overhead +
-                ceil ((MAC_Overhead + Frame_Body) *
+            (*ppdu_duration) = DIFS + PHY_Overhead + ceil((MAC_Overhead + Frame_Body) *
                         1e6 / g_operating_rates[connection->operating_rate]) + SIFS
                 // apparently ACK is sent at the same rate with data!!!!!
                 + PHY_Overhead
                 //+ ceil((PHY_Overhead + ACK_Size)*1e6/basic_rate_bg);
-                + ceil ((ACK_Size) *
-                        1e6 / g_operating_rates[connection->operating_rate]);
+                + ceil ((ACK_Size) * 1e6 / g_operating_rates[connection->operating_rate]);
         }
-        else            // ERP-OFDM rates: 6, 9, 12, 18, 24, 36, 48, 54 Mb/s
-        {
+        else {          // ERP-OFDM rates: 6, 9, 12, 18, 24, 36, 48, 54 Mb/s
             int data_symbols, ACK_symbols;
             PHY_Overhead = 20;
 
-            data_symbols =
-                (int) ceil ((double) (OFDM_Overhead + MAC_Overhead + Frame_Body) /
+            data_symbols = (int)ceil((double)(OFDM_Overhead + MAC_Overhead + Frame_Body) /
                         g_OFDM_data[connection->operating_rate]);
-            ACK_symbols =
-                (int) ceil ((double) (OFDM_Overhead + ACK_Size) /
-                        g_OFDM_data[connection->operating_rate]);
+            ACK_symbols = (int)ceil((double)(OFDM_Overhead + ACK_Size) / g_OFDM_data[connection->operating_rate]);
 
-            (*ppdu_duration) = DIFS + PHY_Overhead +
-                data_symbols * Symbol_Duration + Signal_Extension +
-                SIFS + PHY_Overhead +
-                ACK_symbols * Symbol_Duration + Signal_Extension;
+            (*ppdu_duration) = DIFS + PHY_Overhead + data_symbols * Symbol_Duration + Signal_Extension +
+                SIFS + PHY_Overhead + ACK_symbols * Symbol_Duration + Signal_Extension;
         }
 
         // if RTS_CTS is enabled, RTS, CTS and 2 SIFS must be added
-        if (connection->packet_size > connection->RTS_CTS_threshold)
+        if(connection->packet_size > connection->RTS_CTS_threshold) {
             (*ppdu_duration) += ((RTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg +
-                    (CTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg +
-                    2 * SIFS);
+                    (CTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg + 2 * SIFS);
+        }
         // if RTS_CTS is not enabled and the g connection operates 
         // in compatibility mode, we need to send CTS-to-self (CTS + SIFS)
-        else if (connection->compatibility_mode == TRUE)
-            (*ppdu_duration) += ((CTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg +
-                    SIFS);
+        else if(connection->compatibility_mode == TRUE) {
+            (*ppdu_duration) += ((CTS_Size + PHY_Overhead) * 1e6 / basic_rate_bg + SIFS);
+        }
     }
-    else
-    {
-        WARNING ("Undefined connection type (%d)", connection->standard);
+    else {
+        WARNING("Undefined connection type (%d)", connection->standard);
         return ERROR;
     }
 
@@ -1486,56 +1457,52 @@ wlan_ppdu_duration (struct connection_class *connection,
 // must follow the call to "wlan_loss_rate()" since it 
 // uses the field "frame_error_rate" internally;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_delay_jitter (struct connection_class *connection,
-        struct scenario_class *scenario, double *variable_delay,
-        double *delay, double *jitter)
+int
+wlan_delay_jitter(connection, scenario, variable_delay, delay, jitter)
+struct connection_class *connection;
+struct scenario_class *scenario;
+double *variable_delay;
+double *delay;
+double *jitter;
 {
     struct node_class *node_rx = &(scenario->nodes[connection->to_node_index]);
-    struct node_class *node_tx =
-        &(scenario->nodes[connection->from_node_index]);
+    struct node_class *node_tx = &(scenario->nodes[connection->from_node_index]);
 
     // mean weighted delay and jitter (in us)
     double D_avg, J_avg;
 
     // we assume in here that total channel utilization by others is 0.0
-    wlan_do_compute_delay_jitter (connection, &D_avg, &J_avg, 0.0);
+    wlan_do_compute_delay_jitter(connection, &D_avg, &J_avg, 0.0);
 
     // compute & store the final values of delay & jitter
-    if (connection->delay_defined == FALSE)
-    {
+    if(connection->delay_defined == FALSE) {
         (*variable_delay) = D_avg;
 
         // in case more nodes influence the connection, the delay 
         // must be further increased (and the bandwidth will decrease)
         // as these nodes compete with each other; we use the model of Gupta
         // the number of influences is compute for each connections
-        if (connection->consider_interference == TRUE &&
-                connection->concurrent_stations > 0)
-        {
+        if(connection->consider_interference == TRUE &&
+                connection->concurrent_stations > 0) {
             double n = connection->concurrent_stations + 1;
-            (*variable_delay) *= sqrt (n * log2 (n));
+            (*variable_delay) *= sqrt(n * log2 (n));
 
-            DEBUG ("Delay interference for node with id=%d (\
-                concurrent_stations=%d)", node_rx->id, (int) (connection->concurrent_stations));
+            DEBUG("Delay interference for node with id=%d (concurrent_stations=%d)", 
+                node_rx->id, (int)(connection->concurrent_stations));
         }
 
-        (*delay) = node_rx->internal_delay + node_tx->internal_delay +
-            (*variable_delay);
+        (*delay) = node_rx->internal_delay + node_tx->internal_delay + (*variable_delay);
     }
 
-    if (connection->jitter_defined == FALSE)
-    {
+    if(connection->jitter_defined == FALSE) {
         (*jitter) = J_avg;
 
-        if (connection->consider_interference == TRUE &&
-                connection->concurrent_stations > 0)
-        {
+        if(connection->consider_interference == TRUE && connection->concurrent_stations > 0) {
             double n = connection->concurrent_stations + 1;
-            (*jitter) *= sqrt (n * log2 (n));
+            (*jitter) *= sqrt(n * log2 (n));
 
-            DEBUG ("Jitter interference for node with id=%d (\
-                concurrent_stations=%d)", node_rx->id, (int) (connection->concurrent_stations));
+            DEBUG("Jitter interference for node with id=%d (concurrent_stations=%d)", 
+                node_rx->id, (int)(connection->concurrent_stations));
         }
     }
 
@@ -1547,10 +1514,12 @@ wlan_delay_jitter (struct connection_class *connection,
 // must follow the call to "wlan_loss_rate()" since it 
 // uses the field "frame_error_rate" internally;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_do_compute_delay_jitter (struct connection_class *connection,
-        double *avg_delay, double *avg_jitter,
-        float total_channel_utilization_others)
+int
+wlan_do_compute_delay_jitter(connection, avg_delay, avg_jitter, total_channel_utilization_others)
+struct connection_class *connection;
+double *avg_delay;
+double *avg_jitter;
+float total_channel_utilization_others;
 {
     // duration of a contention slot in us
     int slot_time;
@@ -1592,25 +1561,22 @@ wlan_do_compute_delay_jitter (struct connection_class *connection,
 
     // for b connections, or g connections is compatibility mode
     // use b-type congestion window
-    if (connection->standard == WLAN_802_11B ||
-            (connection->standard == WLAN_802_11G &&
-             connection->compatibility_mode == TRUE))
-    {
-        for (i = 0; i < MAX_TRANSMISSIONS; i++)
+    if(connection->standard == WLAN_802_11B || (connection->standard == WLAN_802_11G &&
+             connection->compatibility_mode == TRUE)) {
+        for(i = 0; i < MAX_TRANSMISSIONS; i++) {
             CW[i] = CW_b[i];
+        }
     }
     // for a connections, or g connections not in compatibility mode
     // use a/g-type congestion window
-    else if (connection->standard == WLAN_802_11A ||
-            (connection->standard == WLAN_802_11G &&
-             connection->compatibility_mode == FALSE))
-    {
-        for (i = 0; i < MAX_TRANSMISSIONS; i++)
+    else if(connection->standard == WLAN_802_11A || (connection->standard == WLAN_802_11G &&
+             connection->compatibility_mode == FALSE)) {
+        for(i = 0; i < MAX_TRANSMISSIONS; i++) {
             CW[i] = CW_ag[i];
+        }
     }
-    else
-    {
-        WARNING ("Connection standard '%d' undefined", connection->standard);
+    else {
+        WARNING("Connection standard '%d' undefined", connection->standard);
         return ERROR;
     }
 
@@ -1618,18 +1584,19 @@ wlan_do_compute_delay_jitter (struct connection_class *connection,
     // hence the total number of transmission can go up to r+1
 
     // check if RTS_CTS is used (depending on packet size and threshold)
-    if (connection->packet_size > connection->RTS_CTS_threshold)
+    if(connection->packet_size > connection->RTS_CTS_threshold) {
         r = MAX_TRANSMISSIONS_RTS_CTS - 1;
-    else
+    }
+    else {
         r = MAX_TRANSMISSIONS - 1;
+    }
 
-    if (wlan_ppdu_duration (connection, &constant_time, &slot_time) == ERROR)
-    {
-        WARNING ("Error calculating PPDU duration");
+    if(wlan_ppdu_duration(connection, &constant_time, &slot_time) == ERROR) {
+        WARNING("Error calculating PPDU duration");
         return ERROR;
     }
 
-    DEBUG ("FRAME DURATION:   %f us", constant_time);
+    DEBUG("FRAME DURATION:   %f us", constant_time);
 
     // compute the average delays for the number of retransmissions "i"
     /*  STANDARD
@@ -1638,34 +1605,31 @@ wlan_do_compute_delay_jitter (struct connection_class *connection,
         D[i] = D[i - 1] + constant_time + CW[i] * slot_time / 2.0;
      */
     /*  WRONG MODEL
-        D[0] = constant_time + (CW[0] * slot_time / 2.0) 
-        / (1 - total_channel_utilization_others);
-        for (i = 1; i <= r; i++)
-        D[i] = D[i - 1] + constant_time + (CW[i] * slot_time / 2.0)
-        / (1 - total_channel_utilization_others);
+        D[0] = constant_time + (CW[0] * slot_time / 2.0) / (1 - total_channel_utilization_others);
+        for (i = 1; i <= r; i++) {
+            D[i] = D[i - 1] + constant_time + (CW[i] * slot_time / 2.0) / (1 - total_channel_utilization_others);
+        }
      */
     //  GOOD MODEL
-    D[0] = (constant_time + (CW[0] * slot_time / 2.0))
-        / (1 - total_channel_utilization_others);
-    for (i = 1; i <= r; i++)
-        D[i] = D[i - 1] + (constant_time + (CW[i] * slot_time / 2.0))
-            / (1 - total_channel_utilization_others);
+    D[0] = (constant_time + (CW[0] * slot_time / 2.0)) / (1 - total_channel_utilization_others);
+    for(i = 1; i <= r; i++) {
+        D[i] = D[i - 1] + (constant_time + (CW[i] * slot_time / 2.0)) / (1 - total_channel_utilization_others);
+    }
 
-    DEBUG ("__D: %f %f %f %f %f %f %f", D[0], D[1], D[2], D[3],
-            D[4], D[5], D[6]);
+    DEBUG("__D: %f %f %f %f %f %f %f", D[0], D[1], D[2], D[3], D[4], D[5], D[6]);
 
     // compute the weighted mean delay
     D_avg = D[0];
-    for (i = 1; i <= r; i++)
-        D_avg += D[i] * pow (FER, i);
-    D_avg = (1 - FER) / (1 - pow (FER, r + 1)) * D_avg;
+    for(i = 1; i <= r; i++) {
+        D_avg += D[i] * pow(FER, i);
+    }
+    D_avg = (1 - FER) / (1 - pow(FER, r + 1)) * D_avg;
 
 
-    DEBUG ("__D_avg=%f", D_avg);
+    DEBUG("__D_avg=%f", D_avg);
 
     // compute the average jitter for the number of retransmissions "i"
-    for (i = 0; i <= r; i++)
-    {
+    for(i = 0; i <= r; i++) {
         J[i] = fabs (D[i] - D_avg);
     }
 
@@ -1673,39 +1637,33 @@ wlan_do_compute_delay_jitter (struct connection_class *connection,
     // after 0 retransmissions (maximum error is 160 us)
     J[0] = J[0] + slot_time * (CW[0] + 1) / 4;
 
-    DEBUG ("__J: %f %f %f %f %f %f %f", J[0], J[1], J[2], J[3],
-            J[4], J[5], J[6]);
+    DEBUG("__J: %f %f %f %f %f %f %f", J[0], J[1], J[2], J[3], J[4], J[5], J[6]);
 
     // compute the weighted mean jitter
     J_avg = J[0];
-    for (i = 1; i <= r; i++)
-    {
-        J_avg += J[i] * pow (FER, i);
+    for(i = 1; i <= r; i++) {
+        J_avg += J[i] * pow(FER, i);
     }
-    J_avg = (1 - FER) / (1 - pow (FER, r + 1)) * J_avg;
+    J_avg = (1 - FER) / (1 - pow(FER, r + 1)) * J_avg;
 
-    DEBUG ("J_avg=%f", J_avg);
+    DEBUG("J_avg=%f", J_avg);
 
     /*
     // METHOD 2 (more accurate) is sketched below
     // compute the average jitter for the number of retransmissions "i"
-    for(i=0; i<7; i++)
-    {
-    int k;
+    for(i=0; i<7; i++) {
+        int k;
 
-    if((D[i]-CW[i]*slot_time/2.0)>D_avg || 
-    (D[i]+CW[i]*slot_time/2.0<D_avg)) 
-    J[i]=fabs(D[i]-D_avg);
-    else
-    {
-    k = floor((D_avg-D[i]+CW[i]*slot_time/2.0)/slot_time);
-    printf("k=%d\n", k);
-    J[i]=((2*k+1-CW[i])*(D_avg-D[i]) + slot_time*(k+1)*(CW[i]-k))
-    /(CW[i]+1);
+        if((D[i]-CW[i]*slot_time/2.0)>D_avg || (D[i]+CW[i]*slot_time/2.0<D_avg)) {
+            J[i]=fabs(D[i]-D_avg);
+        }
+        else {
+            k = floor((D_avg - D[i] + CW[i] * slot_time / 2.0) / slot_time);
+            printf("k=%d\n", k);
+            J[i] = ((2 * k + 1 - CW[i]) * (D_avg - D[i]) + slot_time * (k + 1) * (CW[i] - k)) / (CW[i] + 1);
+        }
     }
-    }
-    printf("J: %f %f %f %f %f %f %f\n", 
-    J[0], J[1], J[2], J[3], J[4], J[5], J[6]);
+    printf("J: %f %f %f %f %f %f %f\n", J[0], J[1], J[2], J[3], J[4], J[5], J[6]);
      */
 
     // convert values from us to ms
@@ -1717,55 +1675,64 @@ wlan_do_compute_delay_jitter (struct connection_class *connection,
 
 // compute bandwidth based on operating rate, delay and packet size;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_bandwidth (struct connection_class *connection,
-        struct scenario_class *scenario, double *bandwidth)
+int
+wlan_bandwidth(connection, scenario, bandwidth)
+struct connection_class *connection;
+struct scenario_class *scenario;
+double *bandwidth;
 {
-    return wlan_do_compute_bandwidth (connection, bandwidth);
+    return wlan_do_compute_bandwidth(connection, bandwidth);
 }
 
 // do compute bandwidth based on  delay and packet size;
 // return SUCCESS on succes, ERROR on error
-    int
-wlan_do_compute_bandwidth (struct connection_class *connection,
-        double *bandwidth)
+int
+wlan_do_compute_bandwidth(connection, bandwidth)
+struct connection_class *connection;
+double *bandwidth;
 {
     // multiply by 1e3 since variable_delay is expressed in ms
-    (*bandwidth) =
-        (connection->packet_size * 8 * 1e3) / connection->variable_delay;
+    (*bandwidth) = (connection->packet_size * 8 * 1e3) / connection->variable_delay;
 
     return SUCCESS;
 }
 
 // used in wireconf/statistics.c
-    int
-wlan_operating_rate_index (struct connection_class *connection, float op_rate)
+int
+wlan_operating_rate_index(connection, op_rate)
+struct connection_class *connection;
+float op_rate;
 {
     int i;
 
-    if (connection->standard == WLAN_802_11A)
-    {
-        for (i = A_RATE_6MBPS; i <= A_RATE_54MBPS; i++)
-            if (a_operating_rates[i] == op_rate)
+    if(connection->standard == WLAN_802_11A) {
+        for(i = A_RATE_6MBPS; i <= A_RATE_54MBPS; i++) {
+            if(a_operating_rates[i] == op_rate) {
                 return i;
+            }
+        }
     }
-    else if (connection->standard == WLAN_802_11B)
-    {
-        for (i = B_RATE_1MBPS; i <= B_RATE_11MBPS; i++)
-            if (b_operating_rates[i] == op_rate)
+    else if(connection->standard == WLAN_802_11B) {
+        for(i = B_RATE_1MBPS; i <= B_RATE_11MBPS; i++) {
+            if(b_operating_rates[i] == op_rate) {
                 return i;
+            }
+        }
     }
-    else if (connection->standard == WLAN_802_11G)
-    {
-        for (i = G_RATE_1MBPS; i <= G_RATE_54MBPS; i++)
-            if (g_operating_rates[i] == op_rate)
+    else if(connection->standard == WLAN_802_11G) {
+        for(i = G_RATE_1MBPS; i <= G_RATE_54MBPS; i++) {
+            if(g_operating_rates[i] == op_rate) {
                 return i;
+            }
+        }
     }
-    else
-        DEBUG ("Unknown WLAN connections standard: %d", connection->standard);
+    else {
+        DEBUG("Unknown WLAN connections standard: %d", connection->standard);
+    }
 
     // if successful, this function wil return above,
     // hence here only error outcome is possible
-    DEBUG ("Unable to determine operating rate index");
+    DEBUG("Unable to determine operating rate index");
+
     return -1;
 }

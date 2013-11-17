@@ -1,3 +1,3 @@
-node_ap interface0 0 aaa.bbb.ccc.ddd
-node_r interface0 1 aaa.bbb.ccc.ddd
-node_s interface0 2 aaa.bbb.ccc.ddd
+node_ap interface0 0 172.16.255.1
+node_r interface0 1 172.16.255.2
+node_s interface0 2 172.16.255.3

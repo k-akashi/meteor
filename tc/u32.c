@@ -733,9 +733,7 @@ char* dev;
 	}
 	if(up.divisor) {
 		unsigned divisor;
-		if(get_unsigned(&divisor, up.divisor, 0) || 
-		    divisor == 0 ||
-		    divisor > 0x100 || ((divisor - 1) & divisor)) {
+		if(get_unsigned(&divisor, up.divisor, 0) || divisor == 0 || divisor > 0x100 || ((divisor - 1) & divisor)) {
 			fprintf(stderr, "Illegal \"divisor\"\n");
 			return -1;
 		}

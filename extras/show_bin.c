@@ -196,7 +196,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    if(io_binary_read_header_from_file (&bin_hdr, bin_file) == ERROR) {
+    if(io_binary_read_header_from_file(&bin_hdr, bin_file) == ERROR) {
         WARNING("Aborting on input error (binary header)");
         fclose(bin_file);
         exit(1);
@@ -208,12 +208,13 @@ main(int argc, char *argv[])
     bin_rec_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
     bin_recs = (struct bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(struct bin_rec_cls));
     if(bin_recs == NULL) {
-        WARNING ("Cannot allocate memory for records");
+        WARNING("Cannot allocate memory for records");
         fclose(bin_file);
         exit(1);
     }
 
     printf("* RECORD CONTENT:\n");
+    printf("bin_hdr.time_rec_num: %d\n", bin_hdr.time_rec_num);
     for(time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
         // read time record
         if(io_binary_read_time_record_from_file(&binary_time_record, bin_file) == ERROR) {
@@ -223,7 +224,7 @@ main(int argc, char *argv[])
         }
         io_binary_print_time_record(&binary_time_record);
         if(binary_time_record.record_number > bin_rec_max_cnt) {
-            WARNING("Number of records exceeds maximum (%d)", bin_rec_max_cnt);
+            WARNING("Number of records exceeds maximum (%d > %d)", binary_time_record.record_number, bin_rec_max_cnt);
             fclose(bin_file);
             exit(1);
         }
@@ -241,7 +242,7 @@ main(int argc, char *argv[])
                         io_binary_print_record(&bin_recs[rec_i]);
                     }
                     else if(type == PRINT_GNUPLOT) {
-                        io_bin_rec2gnuplot(&bin_recs[rec_i], time_i);
+                        io_bin_rec2gnuplot(&bin_recs[rec_i], binary_time_record.time);
                     }
                 }
             }
