@@ -265,6 +265,11 @@ char **argv;
     int32_t ifile_type = TEXT;
     int32_t ofile_type = BINARY;
 
+    if(argc < 2) {
+        usage();
+        exit(1);
+    }
+
     while((c = getopt(argc, argv, "hi:I:o:O:")) != -1) {
         switch(c) {
         case 'h':
@@ -300,12 +305,8 @@ char **argv;
         }
     }
 
-    if(ifile_fd == NULL) {
-        fprintf(stderr, "Cannot open scenario file\n");
-        exit(1);
-    }
-    if(ofile_fd == NULL) {
-        fprintf(stderr, "Cannot open file: %s\n", optarg);
+    if(ifile_fd == NULL || ofile_fd == NULL) {
+        usage();
         exit(1);
     }
     
