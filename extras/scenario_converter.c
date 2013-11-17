@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define ERROR   -1
+#define SUCCESS  0
 #define PARAMS_TOTAL        19
 #define PROG_NAME           "scenario_converter"
 
@@ -237,7 +239,7 @@ FILE *ofile_fd;
     free(recs);
     //free(priv_rec);
 
-    return 0;
+    return SUCCESS;
 }
 
 int32_t
@@ -251,7 +253,7 @@ char *type;
         return TEXT;
     }
 
-    return -1;
+    return ERROR;
 }
 
 int
