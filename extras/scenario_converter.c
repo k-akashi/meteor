@@ -14,6 +14,14 @@
 
 int32_t time_recs;
 
+void
+usage()
+{
+    fprintf(stderr, "scnerio_converter -i input_file -o output_file [-I input_type] [-O output_type]\n");
+    fprintf(stderr, "\t -I : input type, text or biuary(Default: text)\n");
+    fprintf(stderr, "\t -O : output type, text or biuary(Default: binary)\n");
+}
+
 int32_t
 bin2txt(ifile_fd, ofile_fd)
 FILE *ifile_fd;
@@ -257,9 +265,11 @@ char **argv;
     int32_t ifile_type = TEXT;
     int32_t ofile_type = BINARY;
 
-
-    while((c = getopt(argc, argv, "i:I:o:O:")) != -1) {
+    while((c = getopt(argc, argv, "hi:I:o:O:")) != -1) {
         switch(c) {
+        case 'h':
+            usage();
+            exit(0);
         case 'i':
             ifile_fd = fopen(optarg, "r");
             break;
@@ -285,6 +295,7 @@ char **argv;
             }
             break;
         default: /* '?' */
+            usage();
             exit(1);
         }
     }
