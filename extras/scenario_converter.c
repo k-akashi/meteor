@@ -18,8 +18,8 @@ void
 usage()
 {
     fprintf(stderr, "scnerio_converter -i input_file -o output_file [-I input_type] [-O output_type]\n");
-    fprintf(stderr, "\t -I : input type, text or biuary(Default: text)\n");
-    fprintf(stderr, "\t -O : output type, text or biuary(Default: binary)\n");
+    fprintf(stderr, "\t -I : input type, text or binary(Default: text)\n");
+    fprintf(stderr, "\t -O : output type, text or binary(Default: binary)\n");
 }
 
 int32_t
