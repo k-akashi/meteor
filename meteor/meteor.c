@@ -47,6 +47,7 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <signal.h>
 
 #include "global.h"
 #include "wireconf.h"
@@ -118,6 +119,7 @@ typedef struct {
 } qomet_param;
 int32_t assign_id = FIRST_NODE_ID;
 int32_t division = 1;
+int32_t re_flag = 0;
 
 void
 usage()
@@ -158,6 +160,12 @@ usage()
 //    uint64_t next_event;
 //} timer_handle;
 
+void
+restart_scenario()
+{
+    re_flag = 1;
+}
+
 int
 timer_wait_rdtsc(handle, time_in_us)
 struct timer_handle* handle;
@@ -173,6 +181,9 @@ uint64_t time_in_us;
     }
 
     do {
+        if(re_flag == 1) {
+            return 2;
+        }
         usleep(1);
         rdtsc(crt_time);
     } while(handle->next_event >= crt_time);
@@ -337,6 +348,7 @@ char **argv;
     char *saddr, *daddr;
     char buf[BUFSIZ];
     char settings_file_name[BUFSIZ];
+    int32_t ret;
     int32_t loop = FALSE;
     int32_t dsock;
     int32_t node_cnt = 0;
@@ -412,12 +424,22 @@ char **argv;
     qomet_param param_over_read;
     char baddr[IP_ADDR_SIZE];
 
+    struct sigaction sa;
+
     usage_type = 1;
 
     memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
     memset(&param_over_read, 0, sizeof(qomet_param));
     memset(&device_list, 0, sizeof(struct DEVICE_LIST) * MAX_IFS);
 
+    memset(&sa, 0, sizeof(struct sigaction));
+    sa.sa_handler = &restart_scenario;
+    sa.sa_flags |= SA_RESTART;
+
+    if(sigaction(SIGUSR1, &sa, NULL) != 0) {
+        fprintf(stderr, "Signal Set Error\n");
+        exit(1);
+    }
 
     saddr = (char*)calloc(1, IP_ADDR_SIZE);
     daddr = (char*)calloc(1, IP_ADDR_SIZE);
@@ -998,10 +1020,19 @@ char **argv;
                     INFO("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
-                    if(timer_wait_rdtsc(timer, crt_record_time * 1000000) < 0) {
+                    if((ret = timer_wait_rdtsc(timer, crt_record_time * 1000000)) < 0) {
                         WARNING("Timer deadline missed at time=%.2f s", time);
                         WARNING("This rule is skip.\n");
                         continue;
+                    }
+                    if(ret == 2) {
+                        fseek(qomet_fd, 0L, SEEK_SET);
+                        if((timer = timer_init_rdtsc()) == NULL) {
+                            WARNING("Could not initialize timer");
+                            exit(1);
+                        }
+                        re_flag = 0;
+                        goto emulation_start;
                     }
 /*
                     if(timer_wait(timer, crt_record_time * SCALING_FACTOR) != 0) {
@@ -1031,6 +1062,15 @@ char **argv;
                             if(ret != SUCCESS) {
                                 fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                                 exit(1);
+                            }
+                            if(re_flag == 1) {
+                                fseek(qomet_fd, 0L, SEEK_SET);
+                                if((timer = timer_init_rdtsc()) == NULL) {
+                                    WARNING("Could not initialize timer");
+                                    exit(1);
+                                }
+                                re_flag = 0;
+                                goto emulation_start;
                             }
                         }
                     }
