@@ -594,7 +594,7 @@ void
 io_binary_print_time_record(binary_time_record)
 struct bin_time_rec_cls *binary_time_record;
 {
-    INFO("- Time: %.2f s (%d records)\n", binary_time_record->time, binary_time_record->record_number);
+    printf("- Time: %.2f s (%d records)\n", binary_time_record->time, binary_time_record->record_number);
 }
 
 // print binary record
@@ -909,9 +909,10 @@ return SUCCESS;
 
 // directly write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-    int
-io_binary_write_record_to_file2 (struct bin_rec_cls *binary_record,
-        FILE * binary_file)
+int
+io_binary_write_record_to_file2 (binary_record, binary_file)
+struct bin_rec_cls *binary_record;
+FILE *binary_file;
 {
     //////////////////////////////////////////////////////////////////
     // NOTE: WHEN MORE FIELDS WILL BE ADDED, TAKE CARE TO CONVERT

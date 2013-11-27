@@ -255,8 +255,7 @@ wlan_connection_update (struct connection_class *connection, struct scenario_cla
                 return ERROR;
             }
 
-            // add the other terms that are independent on standard
-            connection->Pr += ((node_tx->interfaces[connection->from_interface_index].antenna_gain - 
+             connection->Pr += ((node_tx->interfaces[connection->from_interface_index].antenna_gain - 
                         antenna_dir_attenuation_tx) - 
                         10 * environment->alpha[0] * log10(distance) - 
                         environment->W[0] + randn (0, environment->sigma[0]) +

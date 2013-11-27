@@ -220,12 +220,27 @@ FILE *ofile_fd;
             bin_time_rec.record_number = rec_i;
             io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
 
-            for(i = 0; i < rec_i; i++) {
-                io_binary_write_record_to_file2(&recs[i], ofile_fd);
+            if(rec_i != 0) {
+                for(i = 0; i < rec_i; i++) {
+                    io_binary_write_record_to_file2(&recs[i], ofile_fd);
+                }
+            }
+            else {
+                    io_binary_write_record_to_file2(&recs[0], ofile_fd);
             }
             rec_i = 0;
             priv_time = time;
-        }
+
+            recs[rec_i].from_id = src;
+            recs[rec_i].to_id = dst;
+            recs[rec_i].standard = 0;
+            recs[rec_i].frame_error_rate = fer;
+            recs[rec_i].num_retransmissions = num_retx;
+            recs[rec_i].operating_rate = op_rate;
+            recs[rec_i].bandwidth = bandwidth;
+            recs[rec_i].delay = delay;
+            recs[rec_i].loss_rate = loss_rate;
+         }
     }
     fprintf(stderr, "Write Scenario...  %d/%u                 \n", rec_num, time_recs);
     bin_time_rec.time = priv_time;
