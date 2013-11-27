@@ -594,7 +594,7 @@ void
 io_binary_print_time_record(binary_time_record)
 struct bin_time_rec_cls *binary_time_record;
 {
-    printf("- Time: %.2f s (%d records)\n", binary_time_record->time, binary_time_record->record_number);
+    INFO("- Time: %.2f s (%d records)\n", binary_time_record->time, binary_time_record->record_number);
 }
 
 // print binary record
