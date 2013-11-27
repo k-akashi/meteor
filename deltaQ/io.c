@@ -859,12 +859,13 @@ io_binary_read_records_from_file (struct bin_rec_cls *binary_records,
         int number_records,
         FILE * bin_in_file)
 {
+    uint32_t ret;
     // records from file
     //printf("Reading %d records from file\n", number_records);
     //fflush(stdout);
 
-    if(fread(binary_records, sizeof(struct bin_rec_cls), number_records, bin_in_file) != number_records) {
-        WARNING ("Error reading binary records from file");
+    if((ret = fread(binary_records, sizeof(struct bin_rec_cls), number_records, bin_in_file)) != number_records) {
+        WARNING ("Error reading binary records from file -> ret: %d, recs: %d", ret, number_records);
         perror ("fread");
         return ERROR;
     }

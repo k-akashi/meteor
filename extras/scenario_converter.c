@@ -220,9 +220,6 @@ FILE *ofile_fd;
                 continue;
             }
             rec_num++;
-            if(priv_time == 0.0) {
-                rec_i++;
-            }
             fprintf(stderr, "Write Scenario...  %d/%u                 \r", rec_num, time_recs);
             bin_time_rec.time = priv_time;
             bin_time_rec.record_number = rec_i;
