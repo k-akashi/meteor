@@ -983,6 +983,7 @@ char **argv;
                                 }
                                 rec_index = src_id * all_node_cnt + dst_id;
                                 io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                                printf("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
                                 DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
                             }
                         }
@@ -1058,6 +1059,8 @@ char **argv;
                             delay = adjusted_recs_ucast[next_hop_id].delay;
                             lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
+                            printf("index: %d src: %d dst: %d ", next_hop_id, src_id, dst_id);
+                            printf("delay: %f rate: %f loss: %f\n", delay, bandwidth, lossrate);
                             ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
                             if(ret != SUCCESS) {
                                 fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);

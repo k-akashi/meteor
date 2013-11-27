@@ -192,7 +192,7 @@ FILE *ofile_fd;
             continue;
         }
 
-        if(priv_time == time) {
+        if(fabs(priv_time - time) < FLT_EPSILON) {
             if(fabs(priv_rec[(src * max_node_num) + dst].delay - delay) < FLT_EPSILON
                     && fabs(priv_rec[(src * max_node_num) + dst].loss_rate - loss_rate) < FLT_EPSILON
                     && fabs(priv_rec[(src * max_node_num) + dst].bandwidth - bandwidth) < FLT_EPSILON) {
@@ -214,7 +214,15 @@ FILE *ofile_fd;
             priv_rec[(src * max_node_num) + dst].bandwidth = bandwidth;
         }
         else {
+            if(fabs(priv_rec[(src * max_node_num) + dst].delay - delay) < FLT_EPSILON
+                    && fabs(priv_rec[(src * max_node_num) + dst].loss_rate - loss_rate) < FLT_EPSILON
+                    && fabs(priv_rec[(src * max_node_num) + dst].bandwidth - bandwidth) < FLT_EPSILON) {
+                continue;
+            }
             rec_num++;
+            if(priv_time == 0.0) {
+                rec_i++;
+            }
             fprintf(stderr, "Write Scenario...  %d/%u                 \r", rec_num, time_recs);
             bin_time_rec.time = priv_time;
             bin_time_rec.record_number = rec_i;
@@ -240,6 +248,7 @@ FILE *ofile_fd;
             recs[rec_i].bandwidth = bandwidth;
             recs[rec_i].delay = delay;
             recs[rec_i].loss_rate = loss_rate;
+            rec_i++;
          }
     }
     fprintf(stderr, "Write Scenario...  %d/%u                 \n", rec_num, time_recs);

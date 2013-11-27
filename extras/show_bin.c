@@ -235,7 +235,7 @@ main(int argc, char *argv[])
             exit(1);
         }
 
-        for(rec_i = 0; rec_i <= binary_time_record.record_number; rec_i++) {
+        for(rec_i = 0; rec_i < binary_time_record.record_number; rec_i++) {
             if(src_id == -1 || src_id == bin_recs[rec_i].from_id) {
                 if(dst_id == -1 || dst_id == bin_recs[rec_i].to_id) {
                     if(type == PRINT_SC) {
