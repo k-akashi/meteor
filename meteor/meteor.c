@@ -666,6 +666,14 @@ char **argv;
                 WARNING("Invalid Parameters");
                 exit(1);
             }
+            if(src_id > all_node_cnt) {
+                fprintf(stderr, "Invalid Source node id: %d > %d\n", src_id, all_node_cnt);
+                exit(1);
+            }
+            if(dst_id > all_node_cnt) {
+                fprintf(stderr, "Invalid Destination node id: %d > %d\n", dst_id, all_node_cnt);
+                exit(1);
+            }
             conn_list = add_conn_list(conn_list, src_id, dst_id);
             if(conn_list_head == NULL) {
                 conn_list_head = conn_list;
@@ -1018,7 +1026,7 @@ char **argv;
                     exit(1);
                 }
 
-                if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV) {
+                if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     int32_t src_id;
                     int32_t dst_id;
 
@@ -1029,7 +1037,7 @@ char **argv;
                     //io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
                 }
 
-                if(bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV) {
+                if(bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                     my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
                     //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
@@ -1077,10 +1085,23 @@ char **argv;
                 }
             }
             else {
-                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_HV) {
+                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     uint32_t rec_index;
                     WARNING("Adjustment of deltaQ is disabled.");
-                    if(direction == DIRECTION_HV) {
+                    if(direction == DIRECTION_BR) {
+                        int32_t src_id, dst_id;
+                        conn_list = conn_list_head;
+                        while(conn_list != NULL) {
+                            src_id = conn_list->src_id;
+                            dst_id = conn_list->dst_id;
+                            rec_index = src_id * all_node_cnt + dst_id;
+                            io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
+
+                            conn_list = conn_list->next_ptr;
+                        }
+                     }
+                    else if(direction == DIRECTION_HV) {
                         int32_t src_id, dst_id;
                         for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                             for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
@@ -1089,7 +1110,7 @@ char **argv;
                                 }
                                 rec_index = src_id * all_node_cnt + dst_id;
                                 io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
-                                printf("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
+                                INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
                                 DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
                             }
                         }
@@ -1153,7 +1174,10 @@ char **argv;
                 int32_t ret;
 //                TCHK_START(time);
                 if(direction == DIRECTION_BR) {
+                    conn_list = conn_list_head;
                     while(conn_list != NULL) {
+                        src_id = conn_list->src_id;
+                        dst_id = conn_list->dst_id;
                         next_hop_id = src_id * all_node_cnt + dst_id;
                         conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
 
@@ -1161,8 +1185,6 @@ char **argv;
                         delay = adjusted_recs_ucast[next_hop_id].delay;
                         lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
-                        printf("index: %d src: %d dst: %d ", next_hop_id, src_id, dst_id);
-                        printf("delay: %f rate: %f loss: %f\n", delay, bandwidth, lossrate);
                         ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
                         if(ret != SUCCESS) {
                             fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
@@ -1177,6 +1199,7 @@ char **argv;
                             re_flag = 0;
                             goto emulation_start;
                         }
+                        conn_list = conn_list->next_ptr;
                     }
                 }
                 else if(direction == DIRECTION_HV) {
@@ -1192,8 +1215,6 @@ char **argv;
                             delay = adjusted_recs_ucast[next_hop_id].delay;
                             lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
-                            printf("index: %d src: %d dst: %d ", next_hop_id, src_id, dst_id);
-                            printf("delay: %f rate: %f loss: %f\n", delay, bandwidth, lossrate);
                             ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
                             if(ret != SUCCESS) {
                                 fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
