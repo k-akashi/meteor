@@ -789,7 +789,7 @@ double lossrate;
         qp.limit = 100000;
         ret = change_netem_qdisc(devname, netem_qdisc_id, qp);
         if(ret != 0) {
-            fprintf(stderr, "Cannot chenge netem disc\n");
+            fprintf(stderr, "Cannot change netem disc\n");
             return ret;
         }
     }

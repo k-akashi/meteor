@@ -60,13 +60,19 @@
 #define DIRECTION_BOTH                  0
 #define DIRECTION_IN                    1
 #define DIRECTION_OUT                   2
-#define DIRECTION_BR                    3
+#define DIRECTION_HV                    3
+#define DIRECTION_BR                    4
 
 #define QLEN                            100000
 
 int get_socket(void);
 void close_socket(int socket_id);
 
+struct connection_list {
+    struct connection_list *next_ptr;
+    int32_t src_id;
+    int32_t dst_id;
+};
 
 #ifdef __FreeBSD__
 int get_rule(uint s, int16_t rulenum);

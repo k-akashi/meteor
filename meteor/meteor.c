@@ -67,6 +67,8 @@
 #define PARAMETERS_TOTAL        19
 #define PARAMETERS_UNUSED       13
 
+#define MIN_PIPE_ID_HV          10
+#define MIN_PIPE_ID_BR          10
 #define MIN_PIPE_ID_IN          10000
 #define MIN_PIPE_ID_IN_BCAST	20000
 #define MIN_PIPE_ID_OUT         30000
@@ -338,6 +340,32 @@ int rule_cnt;
     }
 }
 
+struct connection_list*
+add_conn_list(conn_list, src_id, dst_id)
+struct connection_list *conn_list;
+int32_t src_id;
+int32_t dst_id;
+{
+    if(conn_list == NULL) {
+        if((conn_list = malloc(sizeof(struct connection_list))) == NULL) {
+            perror("malloc");
+            exit(1);
+        }
+    }
+    else {
+        if((conn_list->next_ptr = malloc(sizeof(struct connection_list))) == NULL) {
+            perror("malloc");
+            exit(1);
+        }
+        conn_list = conn_list->next_ptr;
+    }
+    conn_list->next_ptr = NULL;
+    conn_list->src_id = src_id;
+    conn_list->dst_id = dst_id;
+
+    return conn_list;
+}
+
 int
 main(argc, argv)
 int argc;
@@ -399,11 +427,12 @@ char **argv;
 
     double time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
     FILE *qomet_fd;
+    FILE *conn_fd;
     struct timer_handle *timer;
     int32_t loop_cnt = 0;
 
 #ifdef __linux
-    int32_t direction = DIRECTION_BR;
+    int32_t direction = DIRECTION_HV;
 #else
     int32_t direction = DIRECTION_BOTH;
 #endif
@@ -425,6 +454,8 @@ char **argv;
     char baddr[IP_ADDR_SIZE];
 
     struct sigaction sa;
+    struct connection_list *conn_list = NULL;
+    struct connection_list *conn_list_head = NULL;
 
     usage_type = 1;
 
@@ -467,13 +498,16 @@ char **argv;
     }
 
     i = 0;
-    while((ch = getopt(argc, argv, "a:b:d:D:f:F:hi:I:lm:p:q:Q:r:s:t:T:p:")) != -1) {
+    while((ch = getopt(argc, argv, "a:b:c:d:D:f:F:hi:I:lm:p:q:Q:r:s:t:T:p:")) != -1) {
         switch(ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
                 break;
             case 'b':
                 strncpy(baddr, optarg, IP_ADDR_SIZE);
+                break;
+            case 'c':
+                conn_fd = fopen(optarg, "r");
                 break;
             case 'd':
                 if(strcmp(optarg, "in") == 0) {
@@ -482,7 +516,15 @@ char **argv;
                 else if(strcmp(optarg, "out") == 0) {
                     direction = DIRECTION_OUT;
                 }
-                else if(strcmp(optarg, "bridge") == 0) {
+                else if((strcmp(optarg, "hypervisor") == 0) ||(strcmp(optarg, "hv") == 0)) {
+#ifdef __linux
+                    direction = DIRECTION_HV;
+#elif __FreeBSD
+                    WARNING("Invalid direction '%s'", optarg);
+                    exit(1);
+#endif
+                }
+                else if((strcmp(optarg, "bridge") == 0) ||(strcmp(optarg, "br") == 0)) {
 #ifdef __linux
                     direction = DIRECTION_BR;
 #elif __FreeBSD
@@ -611,6 +653,35 @@ char **argv;
         exit(1);
     }
 
+    if(conn_fd != NULL && direction == DIRECTION_BR) {
+        char buf[BUFSIZ];
+        int32_t src_id;
+        int32_t dst_id;
+
+        src_id = -1;
+        dst_id = -1;
+        conn_list_head = NULL;
+        while(fgets(buf, BUFSIZ, conn_fd) != NULL) {
+            if(sscanf(buf, "%d %d", &src_id, &dst_id) != 2) {
+                WARNING("Invalid Parameters");
+                exit(1);
+            }
+            conn_list = add_conn_list(conn_list, src_id, dst_id);
+            if(conn_list_head == NULL) {
+                conn_list_head = conn_list;
+            }
+        }
+
+        conn_list = conn_list_head;
+        while(conn_list != NULL) {
+            conn_list = conn_list->next_ptr;
+        }
+    }
+    else if(conn_fd == NULL && direction == DIRECTION_BR) {
+        fprintf(stderr, "no connection file");
+        exit(1);
+    }
+
     if(sc_type == BIN_SC) {
         if(use_mac_addr == TRUE) {
         /*
@@ -666,6 +737,28 @@ char **argv;
         uint32_t dst_id;
 //        for(src_id = assign_id; src_id < node_cnt + assign_id; src_id++) {}
         if(direction == DIRECTION_BR) {
+            saddr = (char*)calloc(1, IP_ADDR_SIZE);
+            daddr = (char*)calloc(1, IP_ADDR_SIZE);
+            conn_list = conn_list_head;
+            while(conn_list != NULL) {
+                src_id = conn_list->src_id;
+                dst_id = conn_list->dst_id;
+
+                offset_num = (src_id - assign_id) * all_node_cnt + dst_id;
+                rule_num = MIN_PIPE_ID_BR + offset_num;
+                strcpy(saddr, ipaddrs_c + src_id  * IP_ADDR_SIZE);
+                strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
+
+                ret = add_rule(dsock, rule_num, rule_num, saddr, daddr, DIRECTION_OUT);
+                if(ret != SUCCESS) {
+                    fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
+                    exit(1);
+                }
+
+                conn_list = conn_list->next_ptr;
+            }
+        }
+        else if(direction == DIRECTION_HV) {
             saddr = (char*)calloc(1, IP_ADDR_SIZE);
             daddr = (char*)calloc(1, IP_ADDR_SIZE);
             for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
@@ -724,9 +817,9 @@ char **argv;
                 }
             }
         }
-        if(direction != DIRECTION_BR) {
+        if(direction != DIRECTION_HV && direction != DIRECTION_BR) {
             for(j = assign_id; j < node_cnt + assign_id; j++) {
-                if(j == my_id || direction != DIRECTION_BR) {
+                if(j == my_id || direction != DIRECTION_HV) {
                     continue;
                 }
                 offset_num = j; 
@@ -824,7 +917,7 @@ char **argv;
             }
         }
 
-        if(direction == DIRECTION_BR || adjusted_recs_ucast) {
+        if(direction == DIRECTION_HV || adjusted_recs_ucast) {
             bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
         }
         else {
@@ -925,7 +1018,7 @@ char **argv;
                     exit(1);
                 }
 
-                if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_BR) {
+                if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV) {
                     int32_t src_id;
                     int32_t dst_id;
 
@@ -936,7 +1029,7 @@ char **argv;
                     //io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
                 }
 
-                if(bin_recs[rec_i].to_id == my_id || direction == DIRECTION_BR) {
+                if(bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV) {
                     io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                     my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
                     //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
@@ -950,6 +1043,19 @@ char **argv;
             if(time_i == 0) {
                 uint32_t rec_index;
                 if(direction == DIRECTION_BR) {
+                    int32_t src_id, dst_id;
+                    conn_list = conn_list_head;
+                    while(conn_list != NULL) {
+                        src_id = conn_list->src_id;
+                        dst_id = conn_list->dst_id;
+                        rec_index = src_id * all_node_cnt + dst_id;
+                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
+
+                        conn_list = conn_list->next_ptr;
+                    }
+                }
+                else if(direction == DIRECTION_HV) {
                     int32_t src_id, dst_id;
                     for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                         for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
@@ -971,10 +1077,10 @@ char **argv;
                 }
             }
             else {
-                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_BR) {
+                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_HV) {
                     uint32_t rec_index;
                     WARNING("Adjustment of deltaQ is disabled.");
-                    if(direction == DIRECTION_BR) {
+                    if(direction == DIRECTION_HV) {
                         int32_t src_id, dst_id;
                         for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                             for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
@@ -997,7 +1103,7 @@ char **argv;
                 }
                 else {
                     DEBUG("Adjustment of deltaQ is enabled.");
-                    if(direction == DIRECTION_BR) {
+                    if(direction == DIRECTION_HV) {
                         for(wireconf.my_id = 0; wireconf.my_id < node_cnt; wireconf.my_id++) {
                             adjust_deltaQ(&wireconf, my_recs_ucast, adjusted_recs_ucast, my_recs_ucast_changed,
                                avg_frame_sizes);
@@ -1047,6 +1153,33 @@ char **argv;
                 int32_t ret;
 //                TCHK_START(time);
                 if(direction == DIRECTION_BR) {
+                    while(conn_list != NULL) {
+                        next_hop_id = src_id * all_node_cnt + dst_id;
+                        conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
+
+                        bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
+                        delay = adjusted_recs_ucast[next_hop_id].delay;
+                        lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
+
+                        printf("index: %d src: %d dst: %d ", next_hop_id, src_id, dst_id);
+                        printf("delay: %f rate: %f loss: %f\n", delay, bandwidth, lossrate);
+                        ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
+                        if(ret != SUCCESS) {
+                            fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
+                            exit(1);
+                        }
+                        if(re_flag == 1) {
+                            fseek(qomet_fd, 0L, SEEK_SET);
+                            if((timer = timer_init_rdtsc()) == NULL) {
+                                WARNING("Could not initialize timer");
+                                exit(1);
+                            }
+                            re_flag = 0;
+                            goto emulation_start;
+                        }
+                    }
+                }
+                else if(direction == DIRECTION_HV) {
                     for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                         for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
                             if(src_id <= dst_id) {
@@ -1134,7 +1267,7 @@ char **argv;
                 }
 //                TCHK_END(time);
 
-                if(direction != DIRECTION_BR) {
+                if(direction != DIRECTION_HV && direction != DIRECTION_BR) {
                     for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {
                         if(node_i == my_id) {
                             continue;
@@ -1296,7 +1429,7 @@ char **argv;
             }
             else { 
                 if(time == next_time) {
-                    if(from == my_id || direction == DIRECTION_BR) {
+                    if(from == my_id || direction == DIRECTION_HV) {
                         param_table[rule_cnt].time = time;
                         param_table[rule_cnt].next_hop_id = to;
                         param_table[rule_cnt].bandwidth = bandwidth;
@@ -1307,7 +1440,7 @@ char **argv;
                     continue;
                 }
                 else {
-                    if(from == my_id || direction == DIRECTION_BR) {
+                    if(from == my_id || direction == DIRECTION_HV) {
                         over_read = 1;
                         param_over_read.time = time;
                         param_over_read.next_hop_id = to;
@@ -1329,7 +1462,7 @@ char **argv;
                     }
     
                     for(i = assign_id; i < (node_cnt + assign_id); i++) {
-                        if(i == my_id || direction != DIRECTION_BR) {
+                        if(i == my_id || direction != DIRECTION_HV) {
                             continue;
                         }
     
@@ -1371,7 +1504,7 @@ char **argv;
                     }
     
                     for(i = assign_id; i < (node_cnt + assign_id); i++) {
-                        if(i == my_id || direction != DIRECTION_BR) {
+                        if(i == my_id || direction != DIRECTION_HV) {
                             continue;
                         }
     
