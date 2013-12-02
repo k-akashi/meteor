@@ -876,6 +876,18 @@ char **argv;
             exit(1);
         }
         io_binary_print_header(&bin_hdr);
+        if(direction == DIRECTION_BR) {
+            fprintf(stdout, "Direction Mode: Bridge\n");
+        }
+        else if(direction == DIRECTION_HV) {
+            fprintf(stdout, "Direction Mode: HyperVisor\n");
+        }
+        else if(direction == DIRECTION_IN) {
+            fprintf(stdout, "Direction Mode: In\n");
+        }
+        else if(direction == DIRECTION_OUT) {
+            fprintf(stdout, "Direction Mode: Out\n");
+        }
 
         if(all_node_cnt != bin_hdr.if_num) {
             WARNING("Number of nodes according to the settings file (%d) and \
@@ -1095,6 +1107,7 @@ char **argv;
                             src_id = conn_list->src_id;
                             dst_id = conn_list->dst_id;
                             rec_index = src_id * all_node_cnt + dst_id;
+                            INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
                             io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                             DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
 
