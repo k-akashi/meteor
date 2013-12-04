@@ -178,27 +178,13 @@ int offmask;
 
 /*
 int
-parse_at()
+parse_at(off, offmask)
 int *off;
 int *offmask;
 {
-	char **argv = *argv_p;
-	char *p = *argv;
-
-	if(strlen(p) > strlen("nexthdr+") && memcmp(p, "nexthdr+", strlen("nexthdr+")) == 0) {
-		*offmask = -1;
-		p += strlen("nexthdr+");
-	}
-    else if(matches(*argv, "nexthdr+") == 0) {
-		NEXT_ARG();
-		*offmask = -1;
-		p = *argv;
-	}
-
-	if(get_integer(off, p, 0)) {
+	if(get_integer(off, offmask, 0)) {
 		return -1;
     }
-
 	return 0;
 }
 */
@@ -364,6 +350,53 @@ int off;
 	res = 0;
 
 	return res;
+}
+
+static int
+parse_ether_addr(match, sel, off)
+struct filter_match match;
+struct tc_u32_sel *sel;
+int off;
+{      
+    int res = -1;
+    uint8_t addr[6];
+    int offmask = 0;
+    int i; 
+           
+    if(sscanf(match.arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+           addr + 0, addr + 1, addr + 2,
+           addr + 3, addr + 4, addr + 5) != 6) {
+        fprintf(stderr, "parse_ether_addr: improperly formed address '%s'\n", match.arg); 
+        return -1;
+    }
+            
+    for (i = 0; i < 6; i++) {
+        res = pack_key8(sel, addr[i], 0xFF, off + i, offmask);
+        if(res < 0) {
+            return -1;
+        }
+    }
+
+    return res;
+}
+
+static int
+parse_ether(match, sel)
+struct filter_match match;
+struct tc_u32_sel *sel;
+{
+    int res = -1;
+
+	if(strcmp(match.filter, "src") == 0) {
+		res = parse_ether_addr(match, sel, -8);
+        return res;
+	}
+	if(strcmp(match.filter, "dst") == 0) {
+		res = parse_ether_addr(match, sel, -14);
+        return res;
+	}
+
+    return res;
 }
 
 static int
@@ -577,6 +610,10 @@ struct nlmsghdr *n;
 		res = parse_u8(match, sel, 0, 0);
 	    return res;
 	}
+    if(matches(match.proto, "ether") == 0) {
+        res = parse_ether(match, sel);
+        return res;
+    }
 	if(matches(match.proto, "ip") == 0) {
 		res = parse_ip(match, sel);
 	    return res;

@@ -442,12 +442,14 @@ io_read_settings_file (char *settings_filename,
 // 'mac_addresses' array;
 // return the number of addresses (=interfaces) successfully read, 
 // or ERROR on error
-    int
-io_read_settings_file_mac (char *settings_filename,
-        in_addr_t * p, char *p_char,
-        unsigned char mac_addresses[][ETH_SIZE],
-        char mac_char_addresses[][MAC_ADDR_SIZE],
-        int array_size)
+int
+io_read_settings_file_mac(settings_filename, p, p_char, mac_addresses, mac_char_addresses, array_size)
+char *settings_filename;
+in_addr_t * p;
+char *p_char;
+unsigned char mac_addresses[][ETH_SIZE];
+char mac_char_addresses[][MAC_ADDR_SIZE];
+int array_size;
 {
     static char buf[BUFSIZ];
     int i = 0;
@@ -459,110 +461,86 @@ io_read_settings_file_mac (char *settings_filename,
     char node_ip[IP_ADDR_SIZE];
 
     // open settings file
-    if ((fd = fopen (settings_filename, "r")) == NULL)
-    {
-        WARNING ("Cannot open MAC settings file '%s' for reading",
-                settings_filename);
+    if((fd = fopen (settings_filename, "r")) == NULL) {
+        WARNING ("Cannot open MAC settings file '%s' for reading", settings_filename);
         return ERROR;
     }
 
     // parse file
-    while (fgets (buf, BUFSIZ, fd) != NULL)
-    {
+    while(fgets(buf, BUFSIZ, fd) != NULL) {
         line_nr++;
 
         // check we didn't exceed maximum size
-        if (i >= array_size)
-        {
-            WARNING ("Exceeded the size of the MAC address array (%d)",
-                    array_size);
-            fclose (fd);
+        if(i >= array_size) {
+            WARNING("Exceeded the size of the MAC address array (%d)", array_size);
+            fclose(fd);
             return ERROR;
         }
-        else
-        {
+        else {
             int scaned_items;
             char node_name[MAX_STRING];
             char interface_name[MAX_STRING];
-            unsigned int mac_address[ETH_SIZE];
+            uint32_t mac_address[ETH_SIZE];
 
             // parse each line for node name, interface name, node id and 
             // MAC address (assume MAX_STRING is 256)
-            scaned_items =
-                sscanf (buf,
-                        "%" MAX_STRING_STR "s %" MAX_STRING_STR "s %d %15s %17s",
+            scaned_items = sscanf (buf, "%" MAX_STRING_STR "s %" MAX_STRING_STR "s %d %15s %17s",
                         node_name, interface_name, &node_id, node_ip, node_mac);
-            if (scaned_items < 4)
-            {
-                WARNING ("Skipped invalid line #%d in settings file '%s'",
-                        line_nr, settings_filename);
+            if(scaned_items < 4) {
+                WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, settings_filename);
                 continue;
             }
-            if (node_id < 0 || node_id >= array_size)
-            {
-                WARNING
-                    ("Id %d is not within the permitted range [%d, %d]",
-                     node_id, 0, array_size);
-                fclose (fd);
+            if(node_id < 0 || node_id >= array_size) {
+                WARNING("Id %d is not within the permitted range [%d, %d]", node_id, 0, array_size);
+                fclose(fd);
                 return ERROR;
             }
 
-            if ((p[node_id] = inet_addr (node_ip)) != INADDR_NONE)
-            {
-                DEBUG ("Valid IP setting: id=%d ip(char)=%s", node_id, node_ip);
-                snprintf (p_char + node_id * IP_ADDR_SIZE, IP_ADDR_SIZE,
-                        "%s", node_ip);
+            if((p[node_id] = inet_addr (node_ip)) != INADDR_NONE) {
+                DEBUG("Valid IP setting: id=%d ip(char)=%s", node_id, node_ip);
+                snprintf (p_char + node_id * IP_ADDR_SIZE, IP_ADDR_SIZE, "%s", node_ip);
             }
-            else
-            {
-                WARNING ("IP address '%s' is not correctly formatted", node_ip);
+            else {
+                WARNING("IP address '%s' is not correctly formatted", node_ip);
                 return ERROR;
             }
 
-            if (sscanf (node_mac, "%x:%x:%x:%x:%x:%x", &(mac_address[0]),
-                        &(mac_address[1]), &(mac_address[2]), &(mac_address[3]),
-                        &(mac_address[4]), &(mac_address[5])) < 6)
-            {
-                WARNING ("MAC address '%s' is not correctly formatted",
-                        node_mac);
-                fclose (fd);
+            if(sscanf (node_mac, "%x:%x:%x:%x:%x:%x", 
+                    &(mac_address[0]), &(mac_address[1]), 
+                    &(mac_address[2]), &(mac_address[3]),
+                    &(mac_address[4]), &(mac_address[5])) < 6) {
+                WARNING("MAC address '%s' is not correctly formatted", node_mac);
+                fclose(fd);
                 return ERROR;
             }
-            else
-            {
+            else {
                 int j;
 
-                for (j = 0; j < ETH_SIZE; j++)
-                    if (mac_address[j] < 256)
-                    {
+                for(j = 0; j < ETH_SIZE; j++) {
+                    if (mac_address[j] < 256) {
                         //printf("mac_address[%d]=0x%02x\n", j, mac_address[j]);
-                        mac_addresses[node_id][j] =
-                            (unsigned char) mac_address[j];
+                        mac_addresses[node_id][j] = (unsigned char) mac_address[j];
                     }
-                    else
-                    {
-                        WARNING
-                            ("MAC address '%s' is not correctly formatted (error at byte #%d='%d')",
+                    else {
+                        WARNING("MAC address '%s' is not correctly formatted (error at byte #%d='%d')",
                              node_mac, j, mac_address[j]);
-                        fclose (fd);
+                        fclose(fd);
                         return ERROR;
                     }
+                }
 
-                strncpy (mac_char_addresses[node_id], node_mac,
-                        MAC_ADDR_SIZE - 1);
+                strncpy(mac_char_addresses[node_id], node_mac, MAC_ADDR_SIZE - 1);
 
-                DEBUG
-                    ("Valid MAC setting: id=%d MAC='%02X:%02X:%02X:%02X:%02X:%02X'",
-                     node_id, mac_addresses[node_id][0],
-                     mac_addresses[node_id][1], mac_addresses[node_id][2],
-                     mac_addresses[node_id][3], mac_addresses[node_id][4],
-                     mac_addresses[node_id][5]);
+                DEBUG("Valid MAC setting: id=%d MAC='%02X:%02X:%02X:%02X:%02X:%02X'", node_id, 
+                        mac_addresses[node_id][0], mac_addresses[node_id][1], 
+                        mac_addresses[node_id][2], mac_addresses[node_id][3], 
+                        mac_addresses[node_id][4], mac_addresses[node_id][5]);
                 i++;
             }
         }
     }
 
-    fclose (fd);
+    fclose(fd);
 
     return i;
 }

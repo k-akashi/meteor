@@ -447,6 +447,7 @@ char **argv;
     int32_t offset_num;
     int32_t rule_cnt;
     int32_t next_hop_id, rule_num;
+    int32_t protocol = IP;
     uint32_t over_read;
     float time_period, next_time;
     qomet_param param_table[MAX_RULE_NUM];
@@ -472,8 +473,6 @@ char **argv;
         exit(1);
     }
 
-    saddr = (char*)calloc(1, IP_ADDR_SIZE);
-    daddr = (char*)calloc(1, IP_ADDR_SIZE);
     if_num = 0;
     over_read = 0;
     rule_cnt = 0;
@@ -498,7 +497,7 @@ char **argv;
     }
 
     i = 0;
-    while((ch = getopt(argc, argv, "a:b:c:d:D:f:F:hi:I:lm:p:q:Q:r:s:t:T:p:")) != -1) {
+    while((ch = getopt(argc, argv, "a:b:c:d:D:f:F:hi:I:lm:Mp:q:Q:r:s:t:T:p:")) != -1) {
         switch(ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -575,6 +574,10 @@ char **argv;
                     exit(1);
                 }
                 break;
+            case 'M':
+                use_mac_addr = TRUE;
+                protocol = ETH;
+                break;
             case 'p':
                 pipe_nr = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
@@ -647,6 +650,15 @@ char **argv;
     argc -= optind;
     argv += optind;
 
+    if(use_mac_addr == TRUE) {
+        saddr = (char*)calloc(1, MAC_ADDR_SIZE);
+        daddr = (char*)calloc(1, MAC_ADDR_SIZE);
+    }
+    else {
+        saddr = (char*)calloc(1, IP_ADDR_SIZE);
+        daddr = (char*)calloc(1, IP_ADDR_SIZE);
+    }
+
     if(qomet_fd == NULL) {
         WARNING("No QOMET data file was provided");
         usage();
@@ -690,21 +702,19 @@ char **argv;
         exit(1);
     }
 
+    unsigned char mac_addresses[MAX_NODES][ETH_SIZE];
+    char mac_char_addresses[MAX_NODES][MAC_ADDR_SIZE];
     if(sc_type == BIN_SC) {
         if(use_mac_addr == TRUE) {
-        /*
-            if((node_cnt = io_read_settings_file_mac (settings_file_name,
-                ipaddrs, ipaddrs_c, MAC_addresses, MAC_char_addresses, MAX_NODES_W)) < 1) {
+            if((node_cnt = io_read_settings_file_mac(settings_file_name,
+                    ipaddrs, ipaddrs_c, mac_addresses, mac_char_addresses, MAX_NODES)) < 1) {
                 WARNING("Invalid MAC address settings file: '%s'", settings_file_name);
                 exit(1);
             }
-        */
-        /*
-            for(node_i=0; node_i<MAX_NODES_W; node_i++) {
+            for(node_i = 0; node_i < MAX_NODES; node_i++) {
                 ipaddrs[node_i] = node_i;
                 sprintf(ipaddrs_c + (node_i * IP_ADDR_SIZE), "0.0.0.%d", node_i);
             }
-        */
         }
         else {
             if((node_cnt = io_read_settings_file(settings_file_name, ipaddrs, ipaddrs_c, MAX_NODES)) < 1) {
@@ -734,7 +744,7 @@ char **argv;
     if(usage_type == 1) {
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);
 
-        if(add_rule(dsock, rulenum, pipe_nr, saddr, daddr, direction) < 0) {
+        if(add_rule(dsock, rulenum, pipe_nr, protocol, saddr, daddr, direction) < 0) {
             WARNING("Could not add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);
             exit(1);
         }
@@ -745,8 +755,14 @@ char **argv;
         uint32_t dst_id;
 //        for(src_id = assign_id; src_id < node_cnt + assign_id; src_id++) {}
         if(direction == DIRECTION_BR) {
-            saddr = (char*)calloc(1, IP_ADDR_SIZE);
-            daddr = (char*)calloc(1, IP_ADDR_SIZE);
+            if(protocol == ETH) {
+                saddr = (char*)calloc(1, MAC_ADDR_SIZE);
+                daddr = (char*)calloc(1, MAC_ADDR_SIZE);
+            }
+            else if(protocol == IP) {
+                saddr = (char*)calloc(1, IP_ADDR_SIZE);
+                daddr = (char*)calloc(1, IP_ADDR_SIZE);
+            }
             conn_list = conn_list_head;
             while(conn_list != NULL) {
                 src_id = conn_list->src_id;
@@ -754,10 +770,16 @@ char **argv;
 
                 offset_num = (src_id - assign_id) * all_node_cnt + dst_id;
                 rule_num = MIN_PIPE_ID_BR + offset_num;
-                strcpy(saddr, ipaddrs_c + src_id  * IP_ADDR_SIZE);
-                strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
+                if(protocol == ETH) {
+                    strcpy(saddr, mac_char_addresses[src_id]);
+                    strcpy(daddr, mac_char_addresses[dst_id]);
+                }
+                else if(protocol == IP) {
+                    strcpy(saddr, ipaddrs_c + src_id * IP_ADDR_SIZE);
+                    strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
+                }
 
-                ret = add_rule(dsock, rule_num, rule_num, saddr, daddr, DIRECTION_OUT);
+                ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, DIRECTION_OUT);
                 if(ret != SUCCESS) {
                     fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
                     exit(1);
@@ -786,7 +808,7 @@ char **argv;
                     strcpy(saddr, ipaddrs_c + src_id  * IP_ADDR_SIZE);
                     strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
 
-                    ret = add_rule(dsock, rule_num, rule_num, saddr, daddr, DIRECTION_OUT);
+                    ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, DIRECTION_OUT);
                     if(ret != SUCCESS) {
                         fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
                         exit(1);
@@ -805,7 +827,7 @@ char **argv;
                 INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
                         my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, 
                         ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
-                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num,
+                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, protocol,
                             "any", ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE, 
                             DIRECTION_OUT) < 0) {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d to \
@@ -814,7 +836,7 @@ char **argv;
                             ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
                     exit(1);
                 }
-                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num + 1, MIN_PIPE_ID_OUT + offset_num + 1,
+                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num + 1, MIN_PIPE_ID_OUT + offset_num + 1, protocol, 
                             "any", ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE, 
                             DIRECTION_OUT) < 0) {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d to \
@@ -836,7 +858,7 @@ char **argv;
                         my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
                         MIN_PIPE_ID_IN_BCAST + offset_num, baddr);
                 if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num, 
-                            MIN_PIPE_ID_IN_BCAST + offset_num, 
+                            MIN_PIPE_ID_IN_BCAST + offset_num, protocol,
                             ipaddrs_c+(j-assign_id)*IP_ADDR_SIZE,
                             baddr, DIRECTION_IN) < 0)
                 {
@@ -847,7 +869,7 @@ char **argv;
                     exit(1);
                 }
                 if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num + 0, 
-                            MIN_PIPE_ID_IN_BCAST + offset_num + 1, 
+                            MIN_PIPE_ID_IN_BCAST + offset_num + 1, protocol,
                             ipaddrs_c+(j-assign_id)*IP_ADDR_SIZE,
                             baddr, DIRECTION_IN) < 0)
                 {

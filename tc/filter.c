@@ -171,13 +171,13 @@ struct u32_params* up;
     }
 	protocol = protocol_id;
     dprintf(("[add_tc_filter] protocol = %d\n", protocol));
-    dprintf(("[ad_tc_filter] kind = %s\n", type));
-	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
+    dprintf(("[add_tc_filter] kind = %s\n", type));
+    req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
     addattr_l(&req.n, sizeof(req), TCA_KIND, type, strlen(type) + 1);
 
-	if(up->rdev) {
-		sprintf(dev, "%s", up->rdev);
-	}
+    if(up->rdev) {
+        sprintf(dev, "%s", up->rdev);
+    }
 
     u32_filter_parse(handle, *up, &req.n, dev);
 
@@ -185,12 +185,12 @@ struct u32_params* up;
     if((req.t.tcm_ifindex = ll_name_to_index(dev)) == 0) {
         fprintf(stderr, "Cannot find device \"%s\"\n", dev);
         return 1;
-	}
+    }
 
- 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
-		fprintf(stderr, "We have an error talking to the kernel\n");
-		return 2;
-	}
+    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+        fprintf(stderr, "We have an error talking to the kernel\n");
+        return 2;
+    }
 
-	return 0;
+    return 0;
 }

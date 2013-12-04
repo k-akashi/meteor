@@ -473,9 +473,10 @@ char *dst;
 
 #ifdef __linux
 int32_t
-add_rule_netem(rulenum, handle_nr, src, dst, direction)
+add_rule_netem(rulenum, handle_nr, protocol, src, dst, direction)
 uint16_t rulenum;
 int handle_nr;
+int32_t protocol;
 char *src;
 char *dst;
 int direction;
@@ -523,14 +524,24 @@ int direction;
     filter_id[3] = handle_nr;
 
     if(src != NULL) {
-        sprintf(srcaddr, "%s/32", src);
+        if(protocol == ETH) {
+            sprintf(srcaddr, "%s", src);
+        }
+        else if(protocol == IP) {
+            sprintf(srcaddr, "%s/32", src);
+        }
         dprintf(("[add_rule] filter source address : %s\n", srcaddr));
     }
     else {
         dprintf(("[add_rule] source address is NULL\n"));
     }
     if(dst != NULL) {
-        sprintf(dstaddr, "%s/32", dst);
+        if(protocol == ETH) {
+            sprintf(dstaddr, "%s", dst);
+        }
+        else if(protocol == IP) {
+            sprintf(dstaddr, "%s/32", dst);
+        }
         dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
     }
     else {
@@ -548,7 +559,13 @@ int direction;
     else {
         ufp.match[IP_SRC].type = "u32";
     }
-    ufp.match[IP_SRC].proto = "ip";
+
+    if(protocol == ETH) {
+        ufp.match[IP_SRC].proto = "ether";
+    }
+    else if(protocol == IP) {
+        ufp.match[IP_SRC].proto = "ip";
+    }
     ufp.match[IP_SRC].filter = "src";
     ufp.match[IP_SRC].arg = srcaddr;
 
@@ -559,7 +576,13 @@ int direction;
     else {
         ufp.match[IP_DST].type = "u32";
     }
-    ufp.match[IP_DST].proto = "ip";
+
+    if(protocol == ETH) {
+        ufp.match[IP_DST].proto = "ether";
+    }
+    else if(protocol == IP) {
+        ufp.match[IP_DST].proto = "ip";
+    }
     ufp.match[IP_DST].filter = "dst";
     ufp.match[IP_DST].arg = dstaddr;
     ufp.classid[0] = filter_id[2];
@@ -590,18 +613,19 @@ int direction;
 #endif
 
 int32_t 
-add_rule(s, rulenum, pipe_nr, src, dst, direction)
+add_rule(s, rulenum, pipe_nr, protocol, src, dst, direction)
 int s;
 uint32_t rulenum;
 int pipe_nr;
+int32_t protocol;
 char *src;
 char *dst;
 int direction;
 {
 #ifdef __FreeBSD
-    return add_rule_ipfw(s, rulenum, pipe_nr, src, dst, direction);
+    return add_rule_ipfw(s, rulenum, pipe_nr, protocol, src, dst, direction);
 #elif __linux
-    return add_rule_netem(rulenum, pipe_nr, src, dst, direction);
+    return add_rule_netem(rulenum, pipe_nr, protocol, src, dst, direction);
 #endif
 }
 
