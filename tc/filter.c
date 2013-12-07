@@ -181,7 +181,7 @@ struct u32_params* up;
 
     u32_filter_parse(handle, *up, &req.n, dev);
 
-    ll_init_map(&rth);
+//    ll_init_map(&rth);
     if((req.t.tcm_ifindex = ll_name_to_index(dev)) == 0) {
         fprintf(stderr, "Cannot find device \"%s\"\n", dev);
         return 1;

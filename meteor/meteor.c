@@ -186,7 +186,7 @@ uint64_t time_in_us;
         if(re_flag == 1) {
             return 2;
         }
-        usleep(1);
+//        usleep(1);
         rdtsc(crt_time);
     } while(handle->next_event >= crt_time);
 
@@ -221,6 +221,8 @@ get_cpu_frequency(void)
             break;
         }
     }
+
+    fclose(cpuinfo);
 #endif
 
     return hz;
@@ -1063,6 +1065,7 @@ char **argv;
                 if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     int32_t src_id;
                     int32_t dst_id;
+                    uint32_t next_hop_id;
 
                     src_id = bin_recs[rec_i].from_id;
                     dst_id = bin_recs[rec_i].to_id;
@@ -1213,6 +1216,13 @@ char **argv;
                     while(conn_list != NULL) {
                         src_id = conn_list->src_id;
                         dst_id = conn_list->dst_id;
+/*
+                        if(my_recs_ucast_changed[bin_recs[src_id].to_id] != TRUE) {
+                            conn_list = conn_list->next_ptr;
+                            continue;
+                        }
+*/
+
                         next_hop_id = src_id * all_node_cnt + dst_id;
                         conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
 
@@ -1235,6 +1245,7 @@ char **argv;
                             goto emulation_start;
                         }
                         conn_list = conn_list->next_ptr;
+                        my_recs_ucast_changed[bin_recs[src_id].to_id] = FALSE;
                     }
                 }
                 else if(direction == DIRECTION_HV) {
@@ -1243,6 +1254,12 @@ char **argv;
                             if(src_id <= dst_id) {
                                 break;
                             }
+/*
+                            if(my_recs_ucast_changed[bin_recs[src_id].to_id] != TRUE) {
+                                continue;
+                            }
+*/
+
                             next_hop_id = src_id * all_node_cnt + dst_id;
                             conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_OUT;
 
@@ -1264,6 +1281,8 @@ char **argv;
                                 re_flag = 0;
                                 goto emulation_start;
                             }
+
+                            my_recs_ucast_changed[bin_recs[src_id].to_id] = FALSE;
                         }
                     }
                 }

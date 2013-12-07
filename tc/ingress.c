@@ -55,7 +55,7 @@ char *dev;
     if(dev) {
         int idx;
 
-        ll_init_map(&rth);
+//        ll_init_map(&rth);
         if((idx = ll_name_to_index(dev)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", dev);
             return 1;
@@ -126,7 +126,7 @@ char *ifb;
     p.eaction = TCA_EGRESS_REDIR;
     p.action = TC_ACT_STOLEN;
 
-    ll_init_map(&rth);
+//    ll_init_map(&rth);
 
     p.ifindex = ll_name_to_index(ifb);
     dprintf(("[add_ingress_filter] redirect interface = %d\n", p.ifindex));
@@ -238,7 +238,7 @@ char *ifb;
         return ret;
     }
 
-    ll_init_map(&rth);
+//    ll_init_map(&rth);
     req.t.tcm_ifindex = ll_name_to_index(dev);
 
     ret = rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL);

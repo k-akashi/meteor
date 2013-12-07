@@ -189,8 +189,7 @@ struct qdisc_params qp;
     if(device[0]) {
         int idx;
 
-        ll_init_map(&rth);
-
+//        ll_init_map(&rth);
         if((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
@@ -253,7 +252,7 @@ struct qdisc_params qp;
     if(device[0]) {
         int idx;
 
-        ll_init_map(&rth);
+//        ll_init_map(&rth);
         if((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
@@ -306,7 +305,7 @@ int ingress;
     if(device[0]) {
         int idx;
 
-        ll_init_map(&rth);
+//       ll_init_map(&rth);
         if((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
