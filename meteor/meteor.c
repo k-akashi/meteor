@@ -1230,6 +1230,7 @@ char **argv;
                         conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
 
                         if(my_recs_ucast_changed[next_hop_id] == FALSE) {
+                            conn_list = conn_list->next_ptr;
                             continue;
                         }
                         bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
