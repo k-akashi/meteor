@@ -976,7 +976,7 @@ char **argv;
         }
 
         if(my_recs_ucast_changed == NULL) {
-            my_recs_ucast_changed = (int32_t *)calloc(bin_hdr.if_num, sizeof(int32_t));
+            my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof(int32_t));
         }
         if(my_recs_ucast_changed == NULL) {
             WARNING("Cannot allocate memory for my_recs_ucast_changed");
@@ -984,7 +984,7 @@ char **argv;
         }
 
         if(my_recs_bcast == NULL) {
-            my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
+            my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof(struct bin_rec_cls));
         }
         if(my_recs_bcast == NULL) {
             WARNING("Cannot allocate memory for my_recs_bcast");
@@ -994,7 +994,7 @@ char **argv;
             my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
         }
 
-        my_recs_bcast_changed = (int32_t *)calloc(bin_hdr.if_num, sizeof(int32_t));
+        my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof(int32_t));
         if(my_recs_bcast_changed == NULL) {
             WARNING("Cannot allocate memory for my_recs_bcast_changed");
             exit(1);
@@ -1065,18 +1065,21 @@ char **argv;
                 if(bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     int32_t src_id;
                     int32_t dst_id;
-                    uint32_t next_hop_id;
+                    int32_t next_hop_id;
 
                     src_id = bin_recs[rec_i].from_id;
                     dst_id = bin_recs[rec_i].to_id;
+                    next_hop_id = src_id * all_node_cnt + dst_id;
                     io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
-                    my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
+                    //my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
+                    my_recs_ucast_changed[next_hop_id] = TRUE;
                     //io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
                 }
 
                 if(bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
-                    my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
+                    //my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
+                    my_recs_ucast_changed[next_hop_id] = TRUE;
                     //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
                 }
             }
@@ -1210,7 +1213,7 @@ char **argv;
                 int32_t src_id, dst_id;
                 int32_t conf_rule_num;
                 int32_t ret;
-//                TCHK_START(time);
+                TCHK_START(time);
                 if(direction == DIRECTION_BR) {
                     conn_list = conn_list_head;
                     while(conn_list != NULL) {
@@ -1226,6 +1229,9 @@ char **argv;
                         next_hop_id = src_id * all_node_cnt + dst_id;
                         conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
 
+                        if(my_recs_ucast_changed[next_hop_id] == FALSE) {
+                            continue;
+                        }
                         bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
                         delay = adjusted_recs_ucast[next_hop_id].delay;
                         lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
@@ -1235,6 +1241,7 @@ char **argv;
                             fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                             exit(1);
                         }
+                        my_recs_ucast_changed[next_hop_id] = FALSE;
                         if(re_flag == 1) {
                             fseek(qomet_fd, 0L, SEEK_SET);
                             if((timer = timer_init_rdtsc()) == NULL) {
@@ -1245,7 +1252,6 @@ char **argv;
                             goto emulation_start;
                         }
                         conn_list = conn_list->next_ptr;
-                        my_recs_ucast_changed[bin_recs[src_id].to_id] = FALSE;
                     }
                 }
                 else if(direction == DIRECTION_HV) {
@@ -1254,14 +1260,12 @@ char **argv;
                             if(src_id <= dst_id) {
                                 break;
                             }
-/*
-                            if(my_recs_ucast_changed[bin_recs[src_id].to_id] != TRUE) {
-                                continue;
-                            }
-*/
-
                             next_hop_id = src_id * all_node_cnt + dst_id;
                             conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_OUT;
+
+                            if(my_recs_ucast_changed[next_hop_id] == FALSE) {
+                                continue;
+                            }
 
                             bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
                             delay = adjusted_recs_ucast[next_hop_id].delay;
@@ -1272,6 +1276,7 @@ char **argv;
                                 fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                                 exit(1);
                             }
+                            my_recs_ucast_changed[next_hop_id] = FALSE;
                             if(re_flag == 1) {
                                 fseek(qomet_fd, 0L, SEEK_SET);
                                 if((timer = timer_init_rdtsc()) == NULL) {
@@ -1282,7 +1287,6 @@ char **argv;
                                 goto emulation_start;
                             }
 
-                            my_recs_ucast_changed[bin_recs[src_id].to_id] = FALSE;
                         }
                     }
                 }
@@ -1340,7 +1344,7 @@ char **argv;
                         }
                     }
                 }
-//                TCHK_END(time);
+                TCHK_END(time);
 
                 if(direction != DIRECTION_HV && direction != DIRECTION_BR) {
                     for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {
