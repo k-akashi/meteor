@@ -121,7 +121,12 @@ typedef struct {
 } qomet_param;
 int32_t assign_id = FIRST_NODE_ID;
 int32_t division = 1;
-int32_t re_flag = 0;
+int32_t re_flag = -1;
+
+#ifdef __linux
+int config_netem = TRUE;
+int config_bw    = TRUE;
+#endif
 
 void
 usage()
@@ -165,7 +170,7 @@ usage()
 void
 restart_scenario()
 {
-    re_flag = 1;
+    re_flag = TRUE;
 }
 
 int
@@ -183,7 +188,7 @@ uint64_t time_in_us;
     }
 
     do {
-        if(re_flag == 1) {
+        if(re_flag == TRUE) {
             return 2;
         }
 //        usleep(1);
@@ -499,7 +504,7 @@ char **argv;
     }
 
     i = 0;
-    while((ch = getopt(argc, argv, "a:b:c:d:D:f:F:hi:I:lm:Mp:q:Q:r:s:t:T:p:")) != -1) {
+    while((ch = getopt(argc, argv, "a:b:c:d:D:f:F:hi:I:lm:MNp:q:Q:r:Rs:t:T:p:")) != -1) {
         switch(ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -580,6 +585,9 @@ char **argv;
                 use_mac_addr = TRUE;
                 protocol = ETH;
                 break;
+            case 'N':
+                config_netem = FALSE;
+                break;
             case 'p':
                 pipe_nr = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
@@ -615,6 +623,9 @@ char **argv;
                     WARNING("Invalid rule_number '%s'", optarg);
                     exit(1);
                 }
+                break;
+            case 'R':
+                config_bw = FALSE;
                 break;
             case 's':
                 strncpy(settings_file_name, optarg, MAX_STRING - 1);
@@ -1088,7 +1099,7 @@ char **argv;
                 // NOT IMPLEMENTED YET
             }
 
-            if(time_i == 0) {
+            if(time_i == 0 && re_flag == -1) {
                 uint32_t rec_index;
                 if(direction == DIRECTION_BR) {
                     int32_t src_id, dst_id;
@@ -1127,7 +1138,7 @@ char **argv;
             else {
                 if(do_adjust_deltaQ == FALSE || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     uint32_t rec_index;
-                    WARNING("Adjustment of deltaQ is disabled.");
+                    INFO("Adjustment of deltaQ is disabled.");
                     if(direction == DIRECTION_BR) {
                         int32_t src_id, dst_id;
                         conn_list = conn_list_head;
@@ -1190,7 +1201,7 @@ char **argv;
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
                     if((ret = timer_wait_rdtsc(timer, crt_record_time * 1000000)) < 0) {
-                        WARNING("Timer deadline missed at time=%.2f s", time);
+                        WARNING("Timer deadline missed at time=%.6f s", crt_record_time);
                         WARNING("This rule is skip.\n");
                         continue;
                     }
@@ -1200,7 +1211,7 @@ char **argv;
                             WARNING("Could not initialize timer");
                             exit(1);
                         }
-                        re_flag = 0;
+                        re_flag = FALSE;
                         goto emulation_start;
                     }
 /*
@@ -1213,7 +1224,7 @@ char **argv;
                 int32_t src_id, dst_id;
                 int32_t conf_rule_num;
                 int32_t ret;
-                TCHK_START(time);
+//                TCHK_START(time);
                 if(direction == DIRECTION_BR) {
                     conn_list = conn_list_head;
                     while(conn_list != NULL) {
@@ -1243,13 +1254,13 @@ char **argv;
                             exit(1);
                         }
                         my_recs_ucast_changed[next_hop_id] = FALSE;
-                        if(re_flag == 1) {
+                        if(re_flag == TRUE) {
                             fseek(qomet_fd, 0L, SEEK_SET);
                             if((timer = timer_init_rdtsc()) == NULL) {
                                 WARNING("Could not initialize timer");
                                 exit(1);
                             }
-                            re_flag = 0;
+                            re_flag = FALSE;
                             goto emulation_start;
                         }
                         conn_list = conn_list->next_ptr;
@@ -1278,13 +1289,13 @@ char **argv;
                                 exit(1);
                             }
                             my_recs_ucast_changed[next_hop_id] = FALSE;
-                            if(re_flag == 1) {
+                            if(re_flag == TRUE) {
                                 fseek(qomet_fd, 0L, SEEK_SET);
                                 if((timer = timer_init_rdtsc()) == NULL) {
                                     WARNING("Could not initialize timer");
                                     exit(1);
                                 }
-                                re_flag = 0;
+                                re_flag = FALSE;
                                 goto emulation_start;
                             }
 
@@ -1345,7 +1356,7 @@ char **argv;
                         }
                     }
                 }
-                TCHK_END(time);
+//                TCHK_END(time);
 
                 if(direction != DIRECTION_HV && direction != DIRECTION_BR) {
                     for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {
@@ -1465,6 +1476,7 @@ char **argv;
         }
 
         if(loop == TRUE) {
+            re_flag = FALSE;
             fseek(qomet_fd, 0L, SEEK_SET);
             if((timer = timer_init_rdtsc()) == NULL) {
                 WARNING("Could not initialize timer");

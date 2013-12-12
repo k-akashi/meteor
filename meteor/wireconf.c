@@ -788,16 +788,12 @@ double lossrate;
 {
     char *devname;
     int32_t ret;
-    int32_t config_netem = 0;
-    int32_t config_bw = 0;
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
     struct qdisc_params qp;
 
     memset(&qp, 0, sizeof(qp));
     devname = malloc(DEV_NAME);
-
-    devname = "eth5";
 
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
@@ -809,62 +805,38 @@ double lossrate;
     netem_qdisc_id[2] = handle;
     netem_qdisc_id[3] = 0;
 
-    if(priv_delay != delay || priv_loss != lossrate) {
-        config_netem = 1;
-        qp.delay = delay;
-        priv_delay = delay;
-        if(lossrate == 1) {
-            qp.loss = ~0;
-        }
-        else if(lossrate < 1 || lossrate > 0) {
-            qp.loss = lossrate * max_percent_value;
-        }
-        else {
-            qp.loss = 0;
-        }
-        priv_loss = qp.loss;
-    }
-
-    if(priv_rate != bandwidth) {
-        priv_rate = bandwidth;
-        config_bw = 1;
-    }
-
-    config_netem = 1;
-    qp.delay = delay;
-    qp.loss = lossrate * max_percent_value;
-
-    config_bw = 1;
-    qp.rate = bandwidth;
-
     if(INGRESS) {
         devname = ifb_devname;
     }
 
-    if(config_netem) {
-        qp.limit = 100000;
-        ret = change_netem_qdisc(devname, netem_qdisc_id, qp);
-        if(ret != 0) {
-            fprintf(stderr, "Cannot change netem disc\n");
-            return ret;
-        }
+    qp.delay = delay;
+    qp.limit = 100000;
+    if(lossrate == 1) {
+        qp.loss = ~0;
+    }
+    else if(lossrate < 1 || lossrate > 0) {
+        qp.loss = lossrate * max_percent_value;
+    }
+    else {
+        qp.loss = 0;
+    }
+    ret = change_netem_qdisc(devname, netem_qdisc_id, qp);
+    if(ret != 0) {
+        fprintf(stderr, "Cannot change netem disc\n");
+        return ret;
     }
 
-    if(INGRESS) {
-            devname = ifb_devname;
+    qp.rate = bandwidth;
+    if((bandwidth / 1024) < FRAME_LENGTH) {
+        qp.buffer = FRAME_LENGTH;
     }
-    if(config_bw) {
-        qp.rate = bandwidth;
-        if((bandwidth / 1024) < FRAME_LENGTH) {
-            qp.buffer = FRAME_LENGTH;
-        }
-        else {
-            qp.buffer = FRAME_LENGTH / 1024;
-        }
-        ret = change_htb_class(devname, htb_class_id, qp.rate);
-        if(ret != 0) {
-            return ret;
-        }
+    else {
+        qp.buffer = FRAME_LENGTH / 1024;
+    }
+    ret = change_htb_class(devname, htb_class_id, qp.rate);
+    if(ret != 0) {
+        fprintf(stderr, "Cannot change HTB class\n");
+        return ret;
     }
 
     return SUCCESS;

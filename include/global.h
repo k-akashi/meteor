@@ -57,7 +57,7 @@
 #define FIRST_NODE_ID                   0
 
 // maximum data sizes constants
-#define MAX_NODES                       500
+#define MAX_NODES                       30000
 #define MAX_OBJECTS                     10000   // 500
 #define MAX_ENVIRONMENTS                10000   // MAX_NODES*MAX_NODES
 #define MAX_MOTIONS                     500

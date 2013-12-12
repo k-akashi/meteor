@@ -23,7 +23,7 @@ echo ----------------------------
 # Start the QOMET emulation
 echo "* Starting QOMET emulation..." 
 echo "sudo time ./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -d bridge"
-sudo time ./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -d bridge
+sudo time meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -d bridge
 
 echo "finish!!"
 echo ----------------------------
