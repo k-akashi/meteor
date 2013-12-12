@@ -353,6 +353,7 @@ struct connection_list *conn_list;
 int32_t src_id;
 int32_t dst_id;
 {
+    uint16_t rec_i = 1;
     if(conn_list == NULL) {
         if((conn_list = malloc(sizeof(struct connection_list))) == NULL) {
             perror("malloc");
@@ -360,6 +361,7 @@ int32_t dst_id;
         }
     }
     else {
+        rec_i = conn_list->rec_i + 1;
         if((conn_list->next_ptr = malloc(sizeof(struct connection_list))) == NULL) {
             perror("malloc");
             exit(1);
@@ -369,6 +371,7 @@ int32_t dst_id;
     conn_list->next_ptr = NULL;
     conn_list->src_id = src_id;
     conn_list->dst_id = dst_id;
+    conn_list->rec_i = rec_i;
 
     return conn_list;
 }
@@ -781,7 +784,8 @@ char **argv;
                 src_id = conn_list->src_id;
                 dst_id = conn_list->dst_id;
 
-                offset_num = (src_id - assign_id) * all_node_cnt + dst_id;
+//                offset_num = (src_id - assign_id) * all_node_cnt + dst_id;
+                offset_num = conn_list->rec_i;
                 rule_num = MIN_PIPE_ID_BR + offset_num;
                 if(protocol == ETH) {
                     strcpy(saddr, mac_char_addresses[src_id]);
@@ -972,7 +976,7 @@ char **argv;
             }
         }
 
-        if(direction == DIRECTION_HV || adjusted_recs_ucast) {
+        if(direction == DIRECTION_HV || direction == DIRECTION_BR || adjusted_recs_ucast) {
             bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
         }
         else {
@@ -1107,7 +1111,8 @@ char **argv;
                     while(conn_list != NULL) {
                         src_id = conn_list->src_id;
                         dst_id = conn_list->dst_id;
-                        rec_index = src_id * all_node_cnt + dst_id;
+//                        rec_index = src_id * all_node_cnt + dst_id;
+                        rec_index = conn_list->rec_i;
                         io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
 
@@ -1145,7 +1150,8 @@ char **argv;
                         while(conn_list != NULL) {
                             src_id = conn_list->src_id;
                             dst_id = conn_list->dst_id;
-                            rec_index = src_id * all_node_cnt + dst_id;
+//                            rec_index = src_id * all_node_cnt + dst_id;
+                            rec_index = conn_list->rec_i;
                             INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
                             io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                             DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
@@ -1237,8 +1243,10 @@ char **argv;
                         }
 */
 
-                        next_hop_id = src_id * all_node_cnt + dst_id;
-                        conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
+//                        next_hop_id = (src_id - assign_id) * all_node_cnt + dst_id;
+//                        conf_rule_num = src_id * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
+                        next_hop_id = conn_list->rec_i;
+                        conf_rule_num = next_hop_id + MIN_PIPE_ID_BR;
 
                         if(my_recs_ucast_changed[next_hop_id] == FALSE) {
                             conn_list = conn_list->next_ptr;

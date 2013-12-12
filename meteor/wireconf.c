@@ -539,6 +539,7 @@ int direction;
 
     char srcaddr[20];
     char dstaddr[20];
+    char bcastaddr[20];
 
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
@@ -554,6 +555,13 @@ int direction;
     filter_id[1] = 0;
     filter_id[2] = 1;
     filter_id[3] = handle_nr;
+
+    if(protocol == ETH) {
+        sprintf(bcastaddr, "%s", "ff:ff:ff:ff:ff:ff");
+    }
+    else if(protocol == IP) {
+        sprintf(bcastaddr, "%s", "255.255.255.255/32");
+    }
 
     if(src != NULL) {
         if(protocol == ETH) {
@@ -638,6 +646,11 @@ int direction;
         ufp.match[IP_DST].type = "u32";
     }
     ufp.match[IP_DST].arg = srcaddr;
+    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+
+    ufp.match[IP_SRC].arg = srcaddr;
+    ufp.match[IP_DST].arg = bcastaddr;
+
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
     return 0;

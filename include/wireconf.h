@@ -76,6 +76,7 @@ struct connection_list {
     struct connection_list *next_ptr;
     int32_t src_id;
     int32_t dst_id;
+    uint16_t rec_i;
 };
 
 #ifdef __FreeBSD__
