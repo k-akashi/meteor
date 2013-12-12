@@ -267,14 +267,17 @@ struct timer_handle
 }
 
 int
-read_settings(path, p, p_size)
+read_settings(path, p, prefix, p_size)
 char *path;
 in_addr_t *p;
+int *prefix;
 int p_size;
 {
     char node_name[20];
     char interface[20];
     char node_ip[IP_ADDR_SIZE];
+    char *slash;
+    char *ptr;
     static char buf[BUFSIZ];
     int32_t i = 0;
     int32_t line_nr = 0;
@@ -307,11 +310,27 @@ int p_size;
                 fclose(fd);
                 return -1;
             }
+
+            slash = strchr(node_ip, '/');
+            if(slash) {
+                *slash = 0;
+            }       
+                
+            prefix[node_id] = 32;
+            if(slash) {
+                slash++;
+                if(!slash || !*slash) {
+                    prefix[node_id] = 32;
+                }
+                prefix[node_id] = strtoul(slash, &ptr, 0);
+                if (!ptr || ptr == slash || *ptr || *prefix > UINT_MAX)
+                    prefix[node_id] = 32;
+                }
+            }
             if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE) {
                 i++;
             }
         }
-    }
 
     fclose(fd);
     return i;
@@ -452,6 +471,7 @@ char **argv;
     int32_t i, j;
     int32_t my_id;
     in_addr_t ipaddrs[MAX_NODES];
+    int ipprefix[MAX_NODES];
     char ipaddrs_c[MAX_NODES * IP_ADDR_SIZE];
 
     int32_t offset_num;
@@ -634,7 +654,7 @@ char **argv;
                 strncpy(settings_file_name, optarg, MAX_STRING - 1);
                 usage_type = 2;
 
-                if((all_node_cnt = read_settings(optarg, ipaddrs, MAX_NODES)) < 1) {
+                if((all_node_cnt = read_settings(optarg, ipaddrs, ipprefix, MAX_NODES)) < 1) {
                     WARNING("Settings file '%s' is invalid", optarg);
                     exit(1);
                 }
@@ -755,7 +775,7 @@ char **argv;
         exit(1);
     }
 
-    init_rule(daddr);
+    init_rule(daddr, protocol);
 
     if(usage_type == 1) {
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);
@@ -793,7 +813,10 @@ char **argv;
                 }
                 else if(protocol == IP) {
                     strcpy(saddr, ipaddrs_c + src_id * IP_ADDR_SIZE);
+                    printf("prefix:%d\n",  ipprefix[src_id]);
+                    sprintf(saddr, "%s/%d", saddr, ipprefix[src_id]);
                     strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
+                    sprintf(daddr, "%s/%d", daddr, ipprefix[dst_id]);
                 }
 
                 ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, DIRECTION_OUT);
@@ -929,9 +952,7 @@ char **argv;
         }
 
         if(all_node_cnt != bin_hdr.if_num) {
-            WARNING("Number of nodes according to the settings file (%d) and \
-                number of nodes according to QOMET scenario (%d) differ", 
-                all_node_cnt, bin_hdr.if_num);
+            WARNING("Number of nodes according to the settings file (%d) and number of nodes according to QOMET scenario (%d) differ", all_node_cnt, bin_hdr.if_num);
             exit(1);
         }
 

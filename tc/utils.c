@@ -208,21 +208,23 @@ get_prefix_1(inet_prefix* dst, char* arg, int family)
 
 	memset(dst, 0, sizeof(*dst));
 
-	if (strcmp(arg, "default") == 0 ||
-	    strcmp(arg, "any") == 0 ||
-	    strcmp(arg, "all") == 0) {
-		if (family == AF_DECnet) {
+	if(strcmp(arg, "default") == 0 ||
+    	    strcmp(arg, "any") == 0 ||
+	        strcmp(arg, "all") == 0) {
+		if(family == AF_DECnet) {
 			return -1;
         }
 		dst->family = family;
 		dst->bytelen = 0;
 		dst->bitlen = 0;
+
 		return 0;
 	}
 
 	slash = strchr(arg, '/');
-	if (slash)
+	if(slash) {
 		*slash = 0;
+    }
 
 	err = get_addr_1(dst, arg, family);
 	if (err == 0) {
@@ -237,8 +239,8 @@ get_prefix_1(inet_prefix* dst, char* arg, int family)
 			case AF_INET:
 				dst->bitlen = 32;
 		}
-		if (slash) {
-			if (get_unsigned(&plen, slash+1, 0) || plen > dst->bitlen) {
+		if(slash) {
+			if(get_unsigned(&plen, slash + 1, 0) || plen > dst->bitlen) {
 				err = -1;
 				goto done;
 			}

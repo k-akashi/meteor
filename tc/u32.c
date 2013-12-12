@@ -360,7 +360,6 @@ int off;
 {      
     int res = -1;
     uint8_t addr[6];
-    int offmask = 0;
     int i; 
            
     if(sscanf(match.arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
@@ -371,7 +370,7 @@ int off;
     }
             
     for (i = 0; i < 6; i++) {
-        res = pack_key8(sel, addr[i], 0xFF, off + i, offmask);
+        res = pack_key8(sel, addr[i], 0xFF, off + i, match.offmask);
         if(res < 0) {
             return -1;
         }

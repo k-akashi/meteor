@@ -50,6 +50,7 @@ struct filter_match {
 	char* proto;
 	char* filter;
     uint16_t at;
+    uint8_t offmask;
 	char* arg;
 };
 

@@ -389,8 +389,9 @@ int direction;
 #endif
 
 int32_t
-init_rule(dst)
+init_rule(dst, protocol)
 char *dst;
+int32_t protocol;
 {
 #ifdef __linux
     int32_t i;
@@ -452,7 +453,6 @@ char *dst;
     htb_qdisc_id[3] = 0;
     add_htb_qdisc(devname, htb_qdisc_id);
 
-/* XXX
     char srcaddr[20];
     char dstaddr[20];
     uint32_t htb_class_id[4];
@@ -498,7 +498,6 @@ char *dst;
     ufp.classid[1] = filter_id[3];
 
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
-*/
 #endif
     return 0;
 }
@@ -568,7 +567,7 @@ int direction;
             sprintf(srcaddr, "%s", src);
         }
         else if(protocol == IP) {
-            sprintf(srcaddr, "%s/32", src);
+            sprintf(srcaddr, "%s", src);
         }
         dprintf(("[add_rule] filter source address : %s\n", srcaddr));
     }
@@ -580,7 +579,8 @@ int direction;
             sprintf(dstaddr, "%s", dst);
         }
         else if(protocol == IP) {
-            sprintf(dstaddr, "%s/32", dst);
+            sprintf(dstaddr, "%s", dst);
+            puts(dstaddr);
         }
         dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
     }
@@ -619,9 +619,11 @@ int direction;
 
     if(protocol == ETH) {
         ufp.match[IP_DST].proto = "ether";
+        ufp.match[IP_DST].offmask = 0;
     }
     else if(protocol == IP) {
         ufp.match[IP_DST].proto = "ip";
+        ufp.match[IP_DST].offmask = 0;
     }
     ufp.match[IP_DST].filter = "dst";
     ufp.match[IP_DST].arg = dstaddr;
