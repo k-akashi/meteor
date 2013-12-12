@@ -580,7 +580,6 @@ int direction;
         }
         else if(protocol == IP) {
             sprintf(dstaddr, "%s", dst);
-            puts(dstaddr);
         }
         dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
     }

@@ -813,7 +813,6 @@ char **argv;
                 }
                 else if(protocol == IP) {
                     strcpy(saddr, ipaddrs_c + src_id * IP_ADDR_SIZE);
-                    printf("prefix:%d\n",  ipprefix[src_id]);
                     sprintf(saddr, "%s/%d", saddr, ipprefix[src_id]);
                     strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
                     sprintf(daddr, "%s/%d", daddr, ipprefix[dst_id]);
