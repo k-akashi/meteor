@@ -79,37 +79,35 @@ io_write_to_file (struct connection_class *connection,
 
     /*
     // for nodes with only one interface, use "classical" output
-    if ( (from_node->if_num == 1) &&
-    (to_node->if_num == 1) )
-    {
-    // write current connection description to file
-    fprintf (file_global, "%.2f %d %.6f %.6f %.6f %d %.6f %.6f %.6f %.4f \
-    %.4f %.4f %.4f %.4f %.2f %.2f %.4f %.4f %.4f\n", time, from_node->id, 
-    from_node->position.c[0], from_node->position.c[1], 
-    from_node->position.c[2], to_node->id, to_node->position.c[0], 
-    to_node->position.c[1], to_node->position.c[2], 
-    connection->distance, connection->Pr, connection->SNR, 
-    connection->frame_error_rate, connection->num_retransmissions, 
-    connection_get_operating_rate (connection), 
-    connection->bandwidth, connection->loss_rate, 
-    connection->delay, connection->jitter);
-    }
+    if ( (from_node->if_num == 1) && (to_node->if_num == 1) ) {
+        // write current connection description to file
+        fprintf (file_global, "%.2f %d %.6f %.6f %.6f %d %.6f %.6f %.6f %.4f \
+                %.4f %.4f %.4f %.4f %.2f %.2f %.4f %.4f %.4f\n", time, from_node->id, 
+                from_node->position.c[0], from_node->position.c[1], 
+                from_node->position.c[2], to_node->id, to_node->position.c[0], 
+                to_node->position.c[1], to_node->position.c[2], 
+                connection->distance, connection->Pr, connection->SNR, 
+                connection->frame_error_rate, connection->num_retransmissions, 
+                connection_get_operating_rate (connection), 
+                connection->bandwidth, connection->loss_rate, 
+                connection->delay, connection->jitter);
+        }
     else // for nodes with multiples interfaces, use "extended" output
     // using node_id.interface_id
     {
-    // write current connection description to file
-    fprintf (file_global, "%.2f %d.%d %.6f %.6f %.6f %d.%d %.6f %.6f %.6f %.4f \
-    %.4f %.4f %.4f %.4f %.2f %.2f %.4f %.4f %.4f\n", time, from_node->id, 
-    connection->from_interface_index,
-    from_node->position.c[0], from_node->position.c[1], 
-    from_node->position.c[2], to_node->id, 
-    connection->to_interface_index, to_node->position.c[0], 
-    to_node->position.c[1], to_node->position.c[2], 
-    connection->distance, connection->Pr, connection->SNR, 
-    connection->frame_error_rate, connection->num_retransmissions, 
-    connection_get_operating_rate (connection), 
-    connection->bandwidth, connection->loss_rate, 
-    connection->delay, connection->jitter);
+        // write current connection description to file
+        fprintf (file_global, "%.2f %d.%d %.6f %.6f %.6f %d.%d %.6f %.6f %.6f %.4f \
+                %.4f %.4f %.4f %.4f %.2f %.2f %.4f %.4f %.4f\n", time, from_node->id, 
+                connection->from_interface_index,
+                from_node->position.c[0], from_node->position.c[1], 
+                from_node->position.c[2], to_node->id, 
+                connection->to_interface_index, to_node->position.c[0], 
+                to_node->position.c[1], to_node->position.c[2], 
+                connection->distance, connection->Pr, connection->SNR, 
+                connection->frame_error_rate, connection->num_retransmissions, 
+                connection_get_operating_rate (connection), 
+                connection->bandwidth, connection->loss_rate, 
+                connection->delay, connection->jitter);
     }
      */
     // workaround to avoind printing "-0.000000"; use always "0.000000" instead
@@ -143,8 +141,14 @@ io_write_to_file (struct connection_class *connection,
 
     // write current connection description to file using 
     // from_id and to_id from connection
-    fprintf (file_global, "%.2f %d %.6f %.6f %.6f %d %.6f %.6f %.6f %.4f \
-            %.4f %.4f %.4f %.4f %.2f %.2f %.4f %.4f %.4f\n", time, connection->from_id, from_c0, from_c1, from_c2, connection->to_id, to_c0, to_c1, to_c2, connection->distance, connection->Pr, connection->SNR, connection->frame_error_rate, connection->num_retransmissions, connection_get_operating_rate (connection), connection->bandwidth, connection->loss_rate, connection->delay, connection->jitter);
+    fprintf(file_global, "%.2f %d %.6f %.6f %.6f %d %.6f %.6f %.6f"
+            "%.4f %.4f %.4f %.4f %.4f %.2f %.2f %.4f %.4f %.4f\n",
+            time, connection->from_id, from_c0, from_c1, from_c2, 
+            connection->to_id, to_c0, to_c1, to_c2, 
+            connection->distance, connection->Pr, connection->SNR, 
+            connection->frame_error_rate, connection->num_retransmissions, 
+            connection_get_operating_rate(connection), 
+            connection->bandwidth, connection->loss_rate, connection->delay, connection->jitter);
 
     // restore coordinates
     if (cartesian_coord_syst == FALSE)
@@ -348,7 +352,7 @@ io_write_settings_file (struct scenario_class *scenario, FILE * settings_file)
             // shortcut to interface structure
             struct interface_class *interface =
                 &((scenario->nodes[node_i]).interfaces[interface_i]);
-            if (fprintf (settings_file, "%s %s %d %s\n",
+            if (fprintf (settings_file, "%s %s %d %s/32 AA:BB:CC:DD:EE:FF\n",
                         (scenario->nodes[node_i]).name,
                         interface->name, interface->id,
                         interface->ip_address) < 0)

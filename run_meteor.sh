@@ -21,21 +21,21 @@ scenario_connection=$3
 echo ----------------------------
 sudo brctl addbr br0;
 sudo brctl stp br0 off;
-sudo brctl addif br0 eth0;
-sudo brctl addif br0 eth1;
+sudo brctl addif br0 eth4;
+sudo brctl addif br0 eth5;
 sudo ip link set up dev br0;
 
 # Start the QOMET emulation
 echo "* Starting QOMET emulation..." 
 echo "sudo time ./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -d bridge -l"
-sudo time ./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -d bridge -l -I eth0 -I eth1
+sudo time ./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -d bridge -l -I eth4 -I eth5
 
 echo "finish!!"
 echo ----------------------------
 date
 sudo ip link set down dev br0;
-sudo brctl delif br0 eth0;
-sudo brctl delif br0 eth1;
+sudo brctl delif br0 eth4;
+sudo brctl delif br0 eth5;
 sudo brctl delbr br0;
 
 echo ----------------------------

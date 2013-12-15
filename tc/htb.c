@@ -99,6 +99,9 @@ uint32_t bandwidth;
 	dprintf(("[htb_class_opt] opt.ceil.rate = %u\n", opt.ceil.rate));
 	dprintf(("[htb_class_opt] opt.cbuffer = %u\n", opt.cbuffer));
 
+    opt.quantum = opt.rate.rate * 8 / 1500;
+    dprintf(("[htb_class_opt] opt.quantum = %u\n", opt.quantum));
+
     tail = NLMSG_TAIL(n);
     addattr_l(n, 1024, TCA_OPTIONS, NULL, 0);
     addattr_l(n, 2024, TCA_HTB_PARMS, &opt, sizeof(opt));
@@ -240,7 +243,7 @@ struct nlmsghdr* n;
 	memset(&opt, 0, sizeof(opt));
 
 	opt.defcls = 1;
-	opt.rate2quantum = 100000;
+	opt.rate2quantum = 8000000000 / 200000;
 	opt.version = 3;
 
 	tail = NLMSG_TAIL(n);

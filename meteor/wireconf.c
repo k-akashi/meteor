@@ -101,7 +101,8 @@ else if(name ##_current.tv_sec != name##_prev.tv_sec) {                         
 printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
 
 #ifdef INGRESS
-char ifb_devname[DEV_NAME] = "ifb0";
+//char ifb_devname[DEV_NAME] = "ifb0";
+char ifb_devname[DEV_NAME] = "eth5";
 #endif 
 
 typedef union {
@@ -404,6 +405,7 @@ int32_t protocol;
         devname =  get_route_info("dev", dst);
     }
     if(INGRESS) {
+/*
         set_ifb(ifb_devname, IF_UP);
         change_ifqueuelen(ifb_devname, QLEN);
 
@@ -417,6 +419,7 @@ int32_t protocol;
                 printf("Cannot add ingress filter from %s to %s\n", device_list[i].dev_name, ifb_devname);
             }
         }
+*/
 
 /* debug now...
         int i;

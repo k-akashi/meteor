@@ -117,7 +117,7 @@ FILE *ofile_fd;
     int i;
     int32_t src, dst;
     int32_t max_node_num;
-    uint32_t rec_i;
+    int32_t rec_i;
     uint32_t rec_num;
     uint32_t rec_size;
     float priv_time = 0.0;
@@ -137,9 +137,10 @@ FILE *ofile_fd;
     max_node_num = 0;
     time_recs = 0;
     rec_num = 0;
+    rec_i = -1;
 
     while(fgets(buf, BUFSIZ, ifile_fd) != NULL) {
-        if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f " "%f %f %f %f %f %f %f", \
+        if(sscanf(buf, "%f %d %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %f %f",
                 &time, 
                 &src, &dummy[0], &dummy[1], &dummy[2], 
                 &dst, &dummy[3], &dummy[4], &dummy[5],  
@@ -198,6 +199,7 @@ FILE *ofile_fd;
                     && fabs(priv_rec[(src * max_node_num) + dst].bandwidth - bandwidth) < FLT_EPSILON) {
                 continue;
             }
+            rec_i++;
             recs[rec_i].from_id = src;
             recs[rec_i].to_id = dst;
             recs[rec_i].standard = 0;
@@ -207,7 +209,6 @@ FILE *ofile_fd;
             recs[rec_i].bandwidth = bandwidth;
             recs[rec_i].delay = delay;
             recs[rec_i].loss_rate = loss_rate;
-            rec_i++;
 
             priv_rec[(src * max_node_num) + dst].delay = delay;
             priv_rec[(src * max_node_num) + dst].loss_rate = loss_rate;
@@ -219,23 +220,21 @@ FILE *ofile_fd;
                     && fabs(priv_rec[(src * max_node_num) + dst].bandwidth - bandwidth) < FLT_EPSILON) {
                 continue;
             }
-            rec_num++;
-            fprintf(stderr, "Write Scenario...  %d/%u                 \r", rec_num, time_recs);
-            bin_time_rec.time = priv_time;
-            bin_time_rec.record_number = rec_i;
-            io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
-
-            if(rec_i != 0) {
+            if(rec_i != -1) {
+                rec_num++;
+                fprintf(stdout, "Write Scenario...  %d/%u                \r", rec_num, time_recs);
+                bin_time_rec.time = priv_time;
+                bin_time_rec.record_number = rec_i;
+                io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
+    
                 for(i = 0; i < rec_i; i++) {
                     io_binary_write_record_to_file2(&recs[i], ofile_fd);
                 }
             }
-            else {
-                    io_binary_write_record_to_file2(&recs[0], ofile_fd);
-            }
-            rec_i = 0;
+            rec_i = -1;
             priv_time = time;
 
+            rec_i++;
             recs[rec_i].from_id = src;
             recs[rec_i].to_id = dst;
             recs[rec_i].standard = 0;
@@ -245,10 +244,9 @@ FILE *ofile_fd;
             recs[rec_i].bandwidth = bandwidth;
             recs[rec_i].delay = delay;
             recs[rec_i].loss_rate = loss_rate;
-            rec_i++;
          }
     }
-    fprintf(stderr, "Write Scenario...  %d/%u                 \n", rec_num, time_recs);
+    fprintf(stdout, "Write Scenario...  %d/%u                 \n", rec_num, time_recs);
     bin_time_rec.time = priv_time;
     bin_time_rec.record_number = rec_i;
     io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
