@@ -239,6 +239,7 @@ struct nlmsghdr* n;
 
 	memset(&opt, 0, sizeof(opt));
 
+	opt.defcls = 1;
 	opt.rate2quantum = 100000;
 	opt.version = 3;
 
