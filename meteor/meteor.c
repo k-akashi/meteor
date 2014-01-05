@@ -191,7 +191,7 @@ uint64_t time_in_us;
         if(re_flag == TRUE) {
             return 2;
         }
-//        usleep(1);
+        usleep(1000);
         rdtsc(crt_time);
     } while(handle->next_event >= crt_time);
 
@@ -306,7 +306,8 @@ int p_size;
                 continue;
             }
             if(node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
-                WARNING("Node id %d is not within the permitted range [%d, %d]", node_id, FIRST_NODE_ID, MAX_NODES);
+                fprintf(stderr, "Node id %d is not within the permitted range [%d, %d]\n",
+                        node_id, FIRST_NODE_ID, MAX_NODES);
                 fclose(fd);
                 return -1;
             }
@@ -572,7 +573,7 @@ char **argv;
             case 'f':
                 fid = strtol(optarg, &p, 10);
                 if((*optarg == '\0') || (*p != '\0')) {
-                    WARNING("Invalid from_node_id '%s'", optarg);
+                    fprintf(stderr, "Invalid from_node_id '%s'\n", optarg);
                     exit(1);
                 }
                 my_id = fid;
@@ -655,7 +656,7 @@ char **argv;
                 usage_type = 2;
 
                 if((all_node_cnt = read_settings(optarg, ipaddrs, ipprefix, MAX_NODES)) < 1) {
-                    WARNING("Settings file '%s' is invalid", optarg);
+                    fprintf(stderr, "Settings file '%s' is invalid", optarg);
                     exit(1);
                 }
                 for(i = 0; i < all_node_cnt; i++) {
@@ -696,7 +697,7 @@ char **argv;
     }
 
     if(qomet_fd == NULL) {
-        WARNING("No QOMET data file was provided");
+        fprintf(stderr, "No QOMET data file was provided\n");
         usage();
         exit(1);
     }
@@ -711,7 +712,7 @@ char **argv;
         conn_list_head = NULL;
         while(fgets(buf, BUFSIZ, conn_fd) != NULL) {
             if(sscanf(buf, "%d %d", &src_id, &dst_id) != 2) {
-                WARNING("Invalid Parameters");
+                fprintf(stderr, "Invalid Parameters");
                 exit(1);
             }
             if(src_id > all_node_cnt) {
@@ -744,7 +745,7 @@ char **argv;
         if(use_mac_addr == TRUE) {
             if((node_cnt = io_read_settings_file_mac(settings_file_name,
                     ipaddrs, ipaddrs_c, mac_addresses, mac_char_addresses, MAX_NODES)) < 1) {
-                WARNING("Invalid MAC address settings file: '%s'", settings_file_name);
+                fprintf(stderr, "Invalid MAC address settings file: '%s'\n", settings_file_name);
                 exit(1);
             }
             for(node_i = 0; node_i < MAX_NODES; node_i++) {
@@ -754,7 +755,7 @@ char **argv;
         }
         else {
             if((node_cnt = io_read_settings_file(settings_file_name, ipaddrs, ipaddrs_c, MAX_NODES)) < 1) {
-                WARNING("Invalid IP address settings file: '%s'", settings_file_name);
+                fprintf(stderr, "Invalid IP address settings file: '%s'\n", settings_file_name);
                 exit(1);
             }
         }
@@ -766,7 +767,7 @@ char **argv;
 
     DEBUG("Initialize timer...");
     if((timer = timer_init_rdtsc()) == NULL) {
-        WARNING("Could not initialize timer");
+        fprintf(stderr, "Could not initialize timer");
         exit(1);
     }
     DEBUG("Open control socket...");
@@ -869,8 +870,8 @@ char **argv;
                 if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, protocol,
                             "any", ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE, 
                             DIRECTION_OUT) < 0) {
-                    WARNING("Node %d: Could not add rule #%d with pipe #%d to \
-                            destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
+                    fprintf(stderr, "Node %d: Could not add rule #%d with pipe #%d to \
+                            destination %s\n", my_id, MIN_PIPE_ID_OUT + offset_num, 
                             MIN_PIPE_ID_OUT + offset_num, 
                             ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
                     exit(1);
@@ -878,8 +879,8 @@ char **argv;
                 if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num + 1, MIN_PIPE_ID_OUT + offset_num + 1, protocol, 
                             "any", ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE, 
                             DIRECTION_OUT) < 0) {
-                    WARNING("Node %d: Could not add rule #%d with pipe #%d to \
-                            destination %s", my_id, MIN_PIPE_ID_OUT + offset_num, 
+                    fprintf(stderr, "Node %d: Could not add rule #%d with pipe #%d to \
+                            destination %s\n", my_id, MIN_PIPE_ID_OUT + offset_num, 
                             MIN_PIPE_ID_OUT + offset_num, 
                             ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
                     exit(1);
@@ -951,7 +952,9 @@ char **argv;
         }
 
         if(all_node_cnt != bin_hdr.if_num) {
-            WARNING("Number of nodes according to the settings file (%d) and number of nodes according to QOMET scenario (%d) differ", all_node_cnt, bin_hdr.if_num);
+            fprintf(stderr, "Number of nodes according to the settings file (%d) "
+                    "and number of nodes according to QOMET scenario (%d) differ", 
+                    all_node_cnt, bin_hdr.if_num);
             exit(1);
         }
 
@@ -969,7 +972,7 @@ char **argv;
             next_hop_ids = (int32_t *)calloc(bin_hdr.if_num, sizeof(int));
         }
         if(next_hop_ids == NULL) {
-            WARNING("Cannot allocate memory for next_hop_ids");
+            fprintf(stderr, "Cannot allocate memory for next_hop_ids\n");
             exit(1);
         }
 
@@ -977,7 +980,7 @@ char **argv;
             my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls*));
         }
         if(my_recs_ucast == NULL) {
-            WARNING("Cannot allocate memory for my_recs_ucast");
+            fprintf(stderr, "Cannot allocate memory for my_recs_ucast\n");
             exit(1);
         }
 
@@ -988,7 +991,7 @@ char **argv;
                 my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof(struct bin_rec_cls));
             }
             if(my_recs_ucast[node_i] == NULL) {
-                WARNING("Cannot allocate memory for my_recs_ucast[%d]", node_i);
+                fprintf(stderr, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
                 exit(1);
             }
             for(j = 0; j < bin_hdr.if_num; j++) {
@@ -1006,7 +1009,7 @@ char **argv;
             adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof(struct bin_rec_cls));
         }
         if(adjusted_recs_ucast == NULL) {
-            WARNING("Cannot allocate memory for adjusted_recs_ucast");
+            fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
             exit(1);
         }
 
@@ -1014,7 +1017,7 @@ char **argv;
             my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof(int32_t));
         }
         if(my_recs_ucast_changed == NULL) {
-            WARNING("Cannot allocate memory for my_recs_ucast_changed");
+            fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
             exit(1);
         }
 
@@ -1022,7 +1025,7 @@ char **argv;
             my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof(struct bin_rec_cls));
         }
         if(my_recs_bcast == NULL) {
-            WARNING("Cannot allocate memory for my_recs_bcast");
+            fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
             exit(1);
         }
         for(node_i = 0; node_i < bin_hdr.if_num; node_i++) {
@@ -1031,13 +1034,13 @@ char **argv;
 
         my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof(int32_t));
         if(my_recs_bcast_changed == NULL) {
-            WARNING("Cannot allocate memory for my_recs_bcast_changed");
+            fprintf(stderr, "Cannot allocate memory for my_recs_bcast_changed\n");
             exit(1);
         }
         
         last_byte_cnt = (uint32_t *)calloc(bin_hdr.if_num, sizeof(uint32_t));
         if(last_byte_cnt == NULL) {
-            WARNING("Cannot allocate memory for last_byte_cnt");
+            fprintf(stderr, "Cannot allocate memory for last_byte_cnt\n");
             exit(1);
         }
         
@@ -1045,7 +1048,7 @@ char **argv;
             last_pkt_cnt = (uint32_t *)calloc(bin_hdr.if_num, sizeof(uint32_t));
         }
         if(last_pkt_cnt == NULL) {
-            WARNING("Cannot allocate memory for last_pkt_cnt");
+            fprintf(stderr, "Cannot allocate memory for last_pkt_cnt\n");
             exit(1);
         }
         
@@ -1053,7 +1056,7 @@ char **argv;
             avg_frame_sizes = (float *)calloc(bin_hdr.if_num, sizeof(float));
         }
         if(avg_frame_sizes == NULL) {
-            WARNING("Cannot allocate memory for avg_frame_sizes");
+            fprintf(stderr, "Cannot allocate memory for avg_frame_sizes\n");
             exit(1);
         }
 
@@ -1069,19 +1072,19 @@ char **argv;
             DEBUG("Reading QOMET data from file... Time : %ld/%d\n", time_i, bin_hdr.time_rec_num);
 
             if(io_binary_read_time_record_from_file(&bin_time_rec, qomet_fd) == ERROR) {
-                WARNING("Aborting on input error (time record)");
+                fprintf(stderr, "Aborting on input error (time record)\n");
                 exit (1);
             }
             io_binary_print_time_record(&bin_time_rec);
             crt_record_time = bin_time_rec.time;
 
             if(bin_time_rec.record_number > bin_recs_max_cnt) {
-                WARNING("The number of records to be read exceeds allocated size (%d)", bin_recs_max_cnt);
+                fprintf(stderr, "The number of records to be read exceeds allocated size (%d)\n", bin_recs_max_cnt);
                 exit (1);
             }
 
             if(io_binary_read_records_from_file(bin_recs, bin_time_rec.record_number, qomet_fd) == ERROR) {
-                WARNING("Aborting on input error (records)");
+                fprintf(stderr, "Aborting on input error (records)\n");
                 exit (1);
             }
 
@@ -1131,7 +1134,6 @@ char **argv;
                     while(conn_list != NULL) {
                         src_id = conn_list->src_id;
                         dst_id = conn_list->dst_id;
-//                        rec_index = src_id * all_node_cnt + dst_id;
                         rec_index = conn_list->rec_i;
                         io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
@@ -1220,10 +1222,10 @@ char **argv;
             }
             else {
                 if(SCALING_FACTOR == 10.0) {
-                    INFO("Waiting to reach time %.2f s...", crt_record_time);
+                    INFO("Waiting to reach time %.6f s...", crt_record_time);
                 }
                 else {
-                    INFO("Waiting to reach real time %.2f s (scenario time %.2f)...\n", 
+                    INFO("Waiting to reach real time %.6f s (scenario time %.6f)...\n", 
                         crt_record_time * SCALING_FACTOR, crt_record_time);
 
                     if((ret = timer_wait_rdtsc(timer, crt_record_time * 1000000)) < 0) {
@@ -1234,7 +1236,7 @@ char **argv;
                     if(ret == 2) {
                         fseek(qomet_fd, 0L, SEEK_SET);
                         if((timer = timer_init_rdtsc()) == NULL) {
-                            WARNING("Could not initialize timer");
+                            fprintf(stderr, "Could not initialize timer\n");
                             exit(1);
                         }
                         re_flag = FALSE;
@@ -1248,6 +1250,7 @@ char **argv;
                 }
 
                 int32_t src_id, dst_id;
+                uint32_t rec_index;
                 int32_t conf_rule_num;
                 int32_t ret;
 //                TCHK_START(time);
@@ -1256,22 +1259,16 @@ char **argv;
                     while(conn_list != NULL) {
                         src_id = conn_list->src_id;
                         dst_id = conn_list->dst_id;
-/*
-                        if(my_recs_ucast_changed[bin_recs[src_id].to_id] != TRUE) {
+                        rec_index = src_id * all_node_cnt + dst_id;
+                        
+                        if(my_recs_ucast_changed[rec_index] == FALSE) {
                             conn_list = conn_list->next_ptr;
                             continue;
                         }
-*/
 
-//                        next_hop_id = (src_id - assign_id) * all_node_cnt + dst_id;
-//                        conf_rule_num = src_id * all_node_cnt + dst_id + MIN_PIPE_ID_BR;
                         next_hop_id = conn_list->rec_i;
                         conf_rule_num = next_hop_id + MIN_PIPE_ID_BR;
 
-                        if(my_recs_ucast_changed[next_hop_id] == FALSE) {
-                            conn_list = conn_list->next_ptr;
-                            continue;
-                        }
                         bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
                         delay = adjusted_recs_ucast[next_hop_id].delay;
                         lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;

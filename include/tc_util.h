@@ -119,7 +119,7 @@ extern int tc_cmd(int cmd, int flags, char* dev, char* handleid, char* root, str
 extern int add_netem_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);
 extern int change_netem_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);
 extern int delete_netem_qdisc(char* device, int ingress);
-extern int add_htb_qdisc(char* device, uint32_t id[4]);
+extern int add_htb_qdisc(char* device, uint32_t id[4], uint32_t version, uint32_t r2q, uint32_t defcls);
 extern int add_htb_class(char* device, uint32_t id[4], uint32_t bnadwidth);
 extern int change_htb_class(char* device, uint32_t id[4], uint32_t bnadwidth);
 extern int add_tbf_qdisc(char* device, uint32_t id[4], struct qdisc_params qp);

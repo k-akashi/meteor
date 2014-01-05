@@ -234,17 +234,20 @@ uint32_t bandwidth;
 }
 
 static int
-htb_qdisc_opt(n)
+htb_qdisc_opt(n, version, r2q, defcls)
 struct nlmsghdr* n;
+uint32_t version;
+uint32_t r2q;
+uint32_t defcls;
 {
 	struct tc_htb_glob opt;
 	struct rtattr*     tail;
 
 	memset(&opt, 0, sizeof(opt));
 
-	opt.defcls = 1;
-	opt.rate2quantum = 8000000000 / 200000;
-	opt.version = 3;
+	opt.version = version;
+	opt.rate2quantum = r2q;
+	opt.defcls = defcls;
 
 	tail = NLMSG_TAIL(n);
 	addattr_l(n, 1024, TCA_OPTIONS, NULL, 0);
@@ -256,9 +259,12 @@ struct nlmsghdr* n;
 }
 
 int
-add_htb_qdisc(dev, id)
+add_htb_qdisc(dev, id, version, r2q, defcls)
 char* dev;
 uint32_t id[4];
+uint32_t version;
+uint32_t r2q;
+uint32_t defcls;
 {
 	char device[16];
 	char qdisc_kind[16] = "htb";
@@ -296,7 +302,7 @@ uint32_t id[4];
 
 	addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
-	htb_qdisc_opt(&req.n);
+	htb_qdisc_opt(&req.n, version, r2q, defcls);
 
     if(device[0]) {
         int idx;

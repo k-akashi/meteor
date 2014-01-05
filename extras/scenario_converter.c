@@ -224,17 +224,17 @@ FILE *ofile_fd;
                 rec_num++;
                 fprintf(stdout, "Write Scenario...  %d/%u                \r", rec_num, time_recs);
                 bin_time_rec.time = priv_time;
-                bin_time_rec.record_number = rec_i;
+                bin_time_rec.record_number = rec_i + 1;
                 io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
     
-                for(i = 0; i < rec_i; i++) {
+                i = 0;
+                for(i = 0; i <= rec_i; i++) {
                     io_binary_write_record_to_file2(&recs[i], ofile_fd);
                 }
             }
-            rec_i = -1;
+            rec_i = 0;
             priv_time = time;
 
-            rec_i++;
             recs[rec_i].from_id = src;
             recs[rec_i].to_id = dst;
             recs[rec_i].standard = 0;
@@ -248,10 +248,12 @@ FILE *ofile_fd;
     }
     fprintf(stdout, "Write Scenario...  %d/%u                 \n", rec_num, time_recs);
     bin_time_rec.time = priv_time;
-    bin_time_rec.record_number = rec_i;
+    bin_time_rec.record_number = rec_i + 1;
     io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
 
-    for(i = 0; i <= rec_i; i++) {
+    printf("time: %.6f\n", priv_time);
+    printf("rec_i: %d\n", rec_i);
+    for(i = 0; i <= rec_i+1; i++) {
         io_binary_write_record_to_file2(&recs[i], ofile_fd);
     }
 

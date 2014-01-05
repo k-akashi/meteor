@@ -1,0 +1,266 @@
+#!/usr/bin/env python
+
+import subprocess
+import socket
+import sys
+import json
+import time
+import re
+
+class Tc():
+	def __init__(self):
+		sock = socket.socket(socket.AF_NETLINK, socket.SOCK_DGRAM, socket.NETLINK_ROUTE);
+		sock.bind((0, 0));
+
+class TcCmd():
+	def __init__(self, dev):
+		self.tc_qdisc  = subprocess.Popen(["tc", "-s", "qdisc", "show", "dev", dev], stdout=subprocess.PIPE);
+		self.tc_class  = subprocess.Popen(["tc", "-s", "class", "show", "dev", dev], stdout=subprocess.PIPE);
+		self.tc_filter = subprocess.Popen(["tc", "-s", "filter", "show", "dev", dev], stdout=subprocess.PIPE);
+
+	def GetQdiscStats(self):
+		qdisc_dict = {}
+		while 1:
+			line = self.tc_qdisc.stdout.readline();
+			#qdisc netem d1: parent 1:d1 limit 14880000 delay 8.1ms
+			if not line:
+				break
+	
+			val = line.split();
+			list_cnt = len(val);
+	
+			if val[0] == "qdisc":
+				if val[1] == "netem":
+					handle_str = val[2];
+					handle = val[2].split(':');
+					if handle[0] == '':
+						handle[0] = "0";
+					if handle[1] == '':
+						handle[1] = "0";
+					handle_int = {"handle_int" : (int(handle[0], 16) << 16) ^ int(handle[1], 16)};
+
+					parent_str = val[4];
+					parent = val[4].split(':');
+					if parent[0] == '':
+						parent[0] = "0";
+					if parent[1] == '':
+						parent[1] = "0";
+					parent_int = (int(parent[0], 16) << 16) ^ int(parent[1], 16);
+
+					qdisc_dict[parent_int] = {};
+					qdisc_dict[parent_int].update(handle_int);
+
+					delay = {"delay" : 0};
+					limit = {"limit" : 0};
+					loss  = {"loss" : 0};
+					i = 5;
+					while True:
+						if list_cnt <= i:
+							break;
+						if val[i] == "limit":
+							limit = {"limit" : val[i + 1]};
+							i = i + 2;
+						elif val[i] == "delay":
+							delay = {"delay" : self.GetDelay(val[i + 1])};
+							i = i + 2;
+						elif val[i] == "loss":
+							loss = {"loss" : re.sub("%", "", val[i + 1])};
+							i = i + 2;
+						else:
+							i = i + 1;
+	
+					qdisc_dict[parent_int].update(limit);
+					qdisc_dict[parent_int].update(delay);
+					qdisc_dict[parent_int].update(loss);
+
+					line = self.tc_qdisc.stdout.readline();
+					#Sent 1079316974 bytes 712891 pkt (dropped 0, overlimits 0 requeues 0) 
+					val = line.split();
+					sent = {"sent" : val[1]};
+					pkts = {"pkts" : val[3]};
+					drop = {"drop" : val[6].rstrip(",")};
+					over = {"overlimits" : val[8]};
+					qdisc_dict[parent_int].update(sent);
+					qdisc_dict[parent_int].update(pkts);
+					qdisc_dict[parent_int].update(drop);
+					qdisc_dict[parent_int].update(over);
+			
+					#backlog 0b 0p requeues 0
+					line = self.tc_qdisc.stdout.readline();
+					val = line.split();
+
+					backlog_pkts = {"backlog_pkts" : val[2].rstrip("p")};
+					requeue      = {"requeue" : val[4]};
+					qdisc_dict[parent_int].update(backlog_pkts);
+					qdisc_dict[parent_int].update(requeue);
+
+		return qdisc_dict;
+	
+	def GetDelay(self, delay):
+		if delay.find("%") != -1:
+			return 0;
+	
+		if delay.find("us") != -1:
+			delay = float(delay.rstrip("us"));
+		elif delay.find("ms") != -1:
+			delay = float(delay.rstrip("ms")) * 1000;
+		elif delay.find("s") != -1:
+			delay = float(delay.rstrip("s")) * 1000 * 1000;
+	
+		return delay;
+	
+	def GetClassStats(self):
+		class_dict = {};
+		while 1:
+			line = self.tc_class.stdout.readline();
+			#qdisc netem d1: parent 1:d1 limit 14880000 delay 8.1ms
+			if not line:
+				break
+	
+			val = line.split();
+				
+			if val[1] == "netem":
+				break;
+	
+			#class htb 1:15 root leaf 15: prio 0 rate 8389Mbit ceil 8389Mbit burst 0b cburst 0b 
+			if val[0] == "class":
+				if val[1] == "htb":
+					classid_str = {"classid" : val[2]};
+					classid = val[2].split(':');
+					if classid[0] == '':
+						classid[0] = 0;
+					if classid[1] == '':
+						classid[1] = 0
+					classid_int = (int(classid[0], 16) << 16) ^ int(classid[1], 16);
+					class_dict[classid_int] = {};
+
+					class_dict[classid_int].update(classid_str);
+
+					parent_str = val[5];
+					if parent_str == "root":
+						parent_int = 0;
+					else:
+						parent = val[5].split(':');
+						if parent[0] == '':
+							parent[0] = "0";
+						if parent[1] == '':
+							parent[1] = "0";
+						parent_int = {"parent_int" : (int(parent[0], 16) << 16) ^ int(parent[1], 16)};
+
+					class_dict[classid_int].update(parent_int);
+
+					confrate = self.GetSpeed(val[9]);
+
+					#Sent 1640481074 bytes 1083541 pkt (dropped 0, overlimits 0 requeues 0) 
+					line = self.tc_class.stdout.readline();
+					val = line.split();
+
+					sent = {"sent" : val[1]};
+					pkts = {"pkts" : val[3]};
+					drop = {"drop" : val[6].rstrip(",")};
+					over = {"overlimits" : val[8]};
+					class_dict[classid_int].update(sent);
+					class_dict[classid_int].update(pkts);
+					class_dict[classid_int].update(drop);
+					class_dict[classid_int].update(over);
+			
+					#rate 3719Kbit 307pps backlog 0b 562p requeues 0 
+					line = self.tc_class.stdout.readline();
+					val = line.split();
+
+					rate         = {"rate" : val[2]};
+					rate_pkts    = {"rate_pkts" : val[3]};
+					backlog_pkts = {"backlog_pkts" : val[5].rstrip("p")};
+					requeue = {"requeue" : val[7]};
+					class_dict[classid_int].update(rate);
+					class_dict[classid_int].update(rate_pkts);
+					class_dict[classid_int].update(backlog_pkts);
+					class_dict[classid_int].update(requeue);
+			
+	
+					#lended :  1082979 borrowed :  0 giants :  0
+					line = self.tc_class.stdout.readline();
+
+					lended   = {"lended" : val[1]};
+					borrowed = {"borrowed" : val[3]};
+					giants   = {"giants" : val[5]};
+					class_dict[classid_int].update(lended);
+					class_dict[classid_int].update(borrowed);
+					class_dict[classid_int].update(giants);
+
+					#tokens :  0 ctokens :  0
+					line = self.tc_class.stdout.readline();
+
+					tokens  = {"tokens" : val[1]};
+					ctokens = {"ctokens" : val[3]};
+					class_dict[classid_int].update(tokens);
+					class_dict[classid_int].update(ctokens);
+
+					line = self.tc_class.stdout.readline();
+
+		return class_dict;
+	
+	def GetSpeed(self, rate):
+		if rate.find("Mbit") != -1:
+			rate = int(rate.rstrip("Mbit"));
+			rate = rate * 1024 * 1024;
+		elif rate.find("Kbit") != -1:
+			rate = int(rate.rstrip("Kbit"));
+			rate = rate * 1024;
+		elif rate.find("bit") != -1:
+			rate = int(rate);
+	
+		return rate;
+
+	def marge_cls_q(self, qdisc_dict, class_dict):
+		stat_dict = {};
+		for key in class_dict.iterkeys():
+			stat_dict[key] = {"qdisc" : qdisc_dict[key]};
+			stat_dict[key].update({"class" : class_dict[key]});
+
+		#print json.dumps(stat_dict);
+
+		return stat_dict;
+
+	def diff_stat(self, stat, priv_stat):
+		#stat[key]["qdisc"]["backlog_pkts"];
+		for key in priv_stat.iterkeys():
+			if key == 131071:
+				continue;
+
+			try:
+				flowid = stat[key]["class"]["classid"];
+				send = int(stat[key]["qdisc"]["sent"]) - int(priv_stat[key]["qdisc"]["sent"]);
+				delay = stat[key]["qdisc"]["delay"];
+				loss = stat[key]["qdisc"]["loss"];
+				backlog = stat[key]["qdisc"]["backlog_pkts"];
+				limit = stat[key]["qdisc"]["limit"];
+				drop = int(stat[key]["qdisc"]["drop"]) - int(priv_stat[key]["qdisc"]["drop"]);
+				print "key:", flowid, "send:", send, "backlog:", backlog, "/", limit, "delay:", delay, "loss:",  loss, "drop:", drop
+			except KeyError:
+				print "Netem ID", key, "is not found";
+				pass
+
+
+def main():
+	tc = TcCmd("ifb0");
+	qdisc_dict = tc.GetQdiscStats();
+	class_dict = tc.GetClassStats();
+
+	priv_stat = tc.marge_cls_q(qdisc_dict, class_dict);
+	del tc;
+
+	while True:
+		tc = TcCmd("ifb0");
+		qdisc_dict = tc.GetQdiscStats();
+		class_dict = tc.GetClassStats();
+	
+		stat_dict = tc.marge_cls_q(qdisc_dict, class_dict);
+		tc.diff_stat(stat_dict, priv_stat);
+
+		priv_stat = stat_dict.copy();
+		del tc;
+		time.sleep(1);
+
+if __name__ == "__main__":
+	main()

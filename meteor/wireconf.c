@@ -417,51 +417,23 @@ int32_t protocol;
                 printf("Cannot add ingress filter from %s to %s\n", device_list[i].dev_name, ifb_devname);
             }
         }
-
-/* debug now...
-        int i;
-        int nifaces;
-        struct ifconf ifconf;
-        static struct ifreq ifreqs[MAX_DEV];
-
-        memset(&ifconf, 0, sizeof(ifconf));
-        ifconf.ifc_buf = (char*) (ifreqs);
-        ifconf.ifc_len = sizeof(ifreqs);
-
-        if(get_iface_list(&ifconf) < 0) {
-            return -1;
-        }
-        nifaces =  ifconf.ifc_len / sizeof(struct ifreq);
-        dprintf(("Interfaces (count = %d)\n", nifaces));
-        for(i = 0; i < nifaces; i++) {
-            devname = ifreqs[i].ifr_name;
-            dprintf(("[init_rule] add ingress device %s\n", devname));
-
-            delete_netem_qdisc(devname, 0);
-            add_ingress_qdisc(devname);
-            add_ingress_filter(devname, ifb_devname);
-        }
-*/
         devname = ifb_devname;
     }
  
     delete_netem_qdisc(devname, 0);
 
+    uint32_t version = 3;
+    uint32_t r2q = 8000000000 / 200000;
+    uint32_t defcls = 65535;
     htb_qdisc_id[0] = TC_H_ROOT;
     htb_qdisc_id[1] = 0;
     htb_qdisc_id[2] = 1;
     htb_qdisc_id[3] = 0;
-    add_htb_qdisc(devname, htb_qdisc_id);
+    add_htb_qdisc(devname, htb_qdisc_id, version, r2q, defcls);
 
-    char srcaddr[20];
-    char dstaddr[20];
     uint32_t htb_class_id[4];
     uint32_t netem_qdisc_id[4];
-    uint32_t filter_id[4];
     struct qdisc_params qp;
-    struct u32_params ufp;
-
-    memset(&ufp, 0, sizeof(struct u32_params));
 
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
@@ -476,29 +448,8 @@ int32_t protocol;
     qp.loss = ~0;
     qp.limit = 100000;
     add_netem_qdisc(devname, netem_qdisc_id, qp);
-
-    filter_id[0] = 1;
-    filter_id[1] = 0;
-    filter_id[2] = 1;
-    filter_id[3] = 65535;
-
-    strcpy(srcaddr, "0.0.0.0/0");
-    ufp.match[IP_SRC].proto = "ip";
-    ufp.match[IP_SRC].filter = "src";
-    ufp.match[IP_SRC].type = "u32";
-    ufp.match[IP_SRC].arg = srcaddr;
-
-    strcpy(dstaddr, "0.0.0.0/0");
-    ufp.match[IP_DST].proto = "ip";
-    ufp.match[IP_DST].filter = "dst";
-    ufp.match[IP_DST].type = "u32";
-    ufp.match[IP_DST].arg = dstaddr;
-
-    ufp.classid[0] = filter_id[2];
-    ufp.classid[1] = filter_id[3];
-
-    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 #endif
+
     return 0;
 }
 
@@ -824,7 +775,7 @@ double lossrate;
     }
 
     qp.delay = delay;
-    qp.limit = 100000;
+    qp.limit = 14880000; // 14Mpps = 10Gbps(64byte/packet)
     if(lossrate == 1) {
         qp.loss = ~0;
     }

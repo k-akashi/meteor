@@ -367,9 +367,12 @@ io_write_settings_file (struct scenario_class *scenario, FILE * settings_file)
 // p_char (string) at the corresponding index;
 // return the number of addresses (=interfaces) successfully read, 
 // or ERROR on error
-    int
-io_read_settings_file (char *settings_filename,
-        in_addr_t * p, char *p_char, int p_size)
+int
+io_read_settings_file(settings_filename, p, p_char, p_size)
+char *settings_filename;
+in_addr_t *p;
+char *p_char;
+int p_size;
 {
     static char buf[BUFSIZ];
     int i = 0;
@@ -378,63 +381,53 @@ io_read_settings_file (char *settings_filename,
 
     int node_id;
     char node_ip[IP_ADDR_SIZE];
+    char *p_node_ip;
 
     // open settings file
-    if ((fd = fopen (settings_filename, "r")) == NULL)
-    {
-        WARNING ("Cannot open settings file '%s' for reading",
-                settings_filename);
+    if((fd = fopen(settings_filename, "r")) == NULL) {
+        fprintf(stderr, "Cannot open settings file '%s' for reading\n", settings_filename);
         return ERROR;
     }
 
     // parse file
-    while (fgets (buf, BUFSIZ, fd) != NULL)
-    {
+    while(fgets(buf, BUFSIZ, fd) != NULL) {
         line_nr++;
 
         // check we didn't exceed maximum size
-        if (i >= p_size)
-        {
-            WARNING ("Maximum number of IP addresses (%d) exceeded", p_size);
-            fclose (fd);
+        if(i >= p_size) {
+            fprintf(stderr, "Maximum number of IP addresses (%d) exceeded\n", p_size);
+            fclose(fd);
             return ERROR;
         }
-        else
-        {
+        else {
             int scaned_items;
             char node_name[MAX_STRING];
             char interface_name[MAX_STRING];
 
             // parse each line for node id and IP (assume MAX_STRING is 256)
-            scaned_items =
-                sscanf (buf, "%" MAX_STRING_STR "s %" MAX_STRING_STR "s %d %16s",
+            scaned_items = sscanf(buf, "%" MAX_STRING_STR "s %" MAX_STRING_STR "s %d %16s",
                         node_name, interface_name, &node_id, node_ip);
-            if (scaned_items < 4)
-            {
-                WARNING ("Skipped invalid line #%d in settings file '%s'",
-                        line_nr, settings_filename);
+
+            strtok(node_ip, "/");
+            if(scaned_items < 4) {
+                WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, settings_filename);
                 continue;
             }
-            if (node_id < 0 || node_id >= p_size)
-            {
-                WARNING
-                    ("Id %d is not within the permitted range [%d, %d]",
-                     node_id, 0, p_size);
-                fclose (fd);
+            if(node_id < 0 || node_id >= p_size) {
+                fprintf(stderr, "Id %d is not within the permitted range [%d, %d]\n", node_id, 0, p_size);
+                fclose(fd);
                 return ERROR;
             }
-            if ((p[node_id] = inet_addr (node_ip)) != INADDR_NONE)
-            {
-                DEBUG ("Valid IP setting: id=%d ip(char)=%s", node_id, node_ip);
+            if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE) {
+                DEBUG("Valid IP setting: id=%d ip(char)=%s", node_id, node_ip);
                 // TODO: replace with strncpy?!
-                snprintf (p_char + node_id * IP_ADDR_SIZE, IP_ADDR_SIZE,
-                        "%s", node_ip);
+                snprintf(p_char + node_id * IP_ADDR_SIZE, IP_ADDR_SIZE, "%s", node_ip);
                 i++;
             }
         }
     }
 
-    fclose (fd);
+    fclose(fd);
 
     return i;
 }
@@ -465,8 +458,8 @@ int array_size;
     char node_ip[IP_ADDR_SIZE];
 
     // open settings file
-    if((fd = fopen (settings_filename, "r")) == NULL) {
-        WARNING ("Cannot open MAC settings file '%s' for reading", settings_filename);
+    if((fd = fopen(settings_filename, "r")) == NULL) {
+        fprintf(stderr, "Cannot open MAC settings file '%s' for reading", settings_filename);
         return ERROR;
     }
 
@@ -476,7 +469,7 @@ int array_size;
 
         // check we didn't exceed maximum size
         if(i >= array_size) {
-            WARNING("Exceeded the size of the MAC address array (%d)", array_size);
+            fprintf(stderr, "Exceeded the size of the MAC address array (%d)\n", array_size);
             fclose(fd);
             return ERROR;
         }
@@ -488,32 +481,34 @@ int array_size;
 
             // parse each line for node name, interface name, node id and 
             // MAC address (assume MAX_STRING is 256)
-            scaned_items = sscanf (buf, "%" MAX_STRING_STR "s %" MAX_STRING_STR "s %d %15s %17s",
+            scaned_items = sscanf(buf, "%" MAX_STRING_STR "s %" MAX_STRING_STR "s %d %15s %17s",
                         node_name, interface_name, &node_id, node_ip, node_mac);
+
+            strtok(node_ip, "/");
             if(scaned_items < 4) {
                 WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, settings_filename);
                 continue;
             }
             if(node_id < 0 || node_id >= array_size) {
-                WARNING("Id %d is not within the permitted range [%d, %d]", node_id, 0, array_size);
+                fprintf(stderr, "Id %d is not within the permitted range [%d, %d]\n", node_id, 0, array_size);
                 fclose(fd);
                 return ERROR;
             }
 
-            if((p[node_id] = inet_addr (node_ip)) != INADDR_NONE) {
+            if((p[node_id] = inet_addr(node_ip)) != INADDR_NONE) {
                 DEBUG("Valid IP setting: id=%d ip(char)=%s", node_id, node_ip);
                 snprintf (p_char + node_id * IP_ADDR_SIZE, IP_ADDR_SIZE, "%s", node_ip);
             }
             else {
-                WARNING("IP address '%s' is not correctly formatted", node_ip);
+                fprintf(stderr, "IP address '%s' is not correctly formatted\n", node_ip);
                 return ERROR;
             }
 
-            if(sscanf (node_mac, "%x:%x:%x:%x:%x:%x", 
+            if(sscanf(node_mac, "%x:%x:%x:%x:%x:%x", 
                     &(mac_address[0]), &(mac_address[1]), 
                     &(mac_address[2]), &(mac_address[3]),
                     &(mac_address[4]), &(mac_address[5])) < 6) {
-                WARNING("MAC address '%s' is not correctly formatted", node_mac);
+                fprintf(stderr, "MAC address '%s' is not correctly formatted\n", node_mac);
                 fclose(fd);
                 return ERROR;
             }
@@ -526,7 +521,7 @@ int array_size;
                         mac_addresses[node_id][j] = (unsigned char) mac_address[j];
                     }
                     else {
-                        WARNING("MAC address '%s' is not correctly formatted (error at byte #%d='%d')",
+                        fprintf(stderr, "MAC address '%s' is not correctly formatted (error at byte #%d='%d')\n",
                              node_mac, j, mac_address[j]);
                         fclose(fd);
                         return ERROR;
@@ -555,20 +550,19 @@ int array_size;
 ////////////////////////////////////////////////
 
 // print binary header
-    void
-io_binary_print_header (struct bin_hdr_cls *bin_hdr)
+void
+io_binary_print_header(bin_hdr)
+struct bin_hdr_cls *bin_hdr;
 {
     // print signature (only first 3 characters)
-    printf ("Header signature: %c%c%c\n",
+    printf("Header signature: %c%c%c\n",
             bin_hdr->signature[0], bin_hdr->signature[1],
             bin_hdr->signature[2]);
-    printf ("Generated by QOMET v%d.%d.%d (revision %d)\n",
+    printf("Generated by QOMET v%d.%d.%d (revision %d)\n",
             bin_hdr->major_version, bin_hdr->minor_version,
             bin_hdr->subminor_version, bin_hdr->svn_revision);
-    printf ("Number of interfaces in file: %d\n",
-            bin_hdr->if_num);
-    printf ("Number of time records in file: %d\n",
-            bin_hdr->time_rec_num);
+    printf("Number of interfaces in file: %d\n", bin_hdr->if_num);
+    printf("Number of time records in file: %d\n", bin_hdr->time_rec_num);
 }
 
 // print binary time record
@@ -590,8 +584,12 @@ io_binary_print_record (struct bin_rec_cls *binary_record)
        binary_record->num_retransmissions, binary_record->operating_rate, 
        binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
      */
-    printf ("-- Record: from_id=%d to_id=%d FER=%.4f num_retr=%.4f \
-            standard=%d op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_record->from_id, binary_record->to_id, binary_record->frame_error_rate, binary_record->num_retransmissions, binary_record->standard, binary_record->operating_rate, binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
+    printf("-- Record: from_id=%d to_id=%d FER=%.4f "
+            "num_retr=%.4f standard=%d op_rate=%.2f "
+            "bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", 
+            binary_record->from_id, binary_record->to_id, binary_record->frame_error_rate, 
+            binary_record->num_retransmissions, binary_record->standard, binary_record->operating_rate, 
+            binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
 }
 
 // print binary record for gnuplot
@@ -622,8 +620,8 @@ io_bin_cp_rec(bin_rec_dst, bin_rec_src)
 }
 
 // build binary record
-    void
-io_binary_build_record (struct bin_rec_cls *binary_record,
+void
+io_binary_build_record(struct bin_rec_cls *binary_record,
         struct connection_class *connection,
         struct scenario_class *scenario)
 {
@@ -641,7 +639,7 @@ io_binary_build_record (struct bin_rec_cls *binary_record,
 // compare with binary record;
 // return TRUE if data is same with the one in the record,
 // FALSE otherwise
-    int
+int
 io_binary_compare_record (struct bin_rec_cls *binary_record,
         struct connection_class *connection,
         struct scenario_class *scenario)

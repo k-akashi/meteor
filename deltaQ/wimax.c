@@ -404,7 +404,7 @@ wimax_fer (struct connection_class *connection,
 			  adapter_802_16->Pr_thresholds[operating_rate],
 			  connection->SNR + WIMAX_STANDARD_NOISE);
 
-  DEBUG ("Pr_threshold_fer=%f model_alpha=%f Pr_thresholds[%d]=%f power=%f \
+  //DEBUG ("Pr_threshold_fer=%f model_alpha=%f Pr_thresholds[%d]=%f power=%f \
 (SNR=%f) => fer=%f", adapter_802_16->Pr_threshold_fer, adapter_802_16->model_alpha, operating_rate, adapter_802_16->Pr_thresholds[operating_rate], connection->SNR + WIMAX_STANDARD_NOISE, connection->SNR, fer_value);
 
   // this functionality is now included in environment_fading
