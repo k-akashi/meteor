@@ -3,13 +3,11 @@
 import subprocess
 import socket
 import json
-import time
+import time, datetime
 import re
 import StringIO
-import getopt
-import sys
-import fcntl
-import struct
+import getopt, sys
+import fcntl, struct
 
 class Tc():
 	def __init__(self):
@@ -198,7 +196,7 @@ class TcCmd():
 
 					rate         = {"rate" : val[1]};
 					rate_pkts    = {"rate_pkts" : val[2]};
-					backlog_pkts = {"backlog_pkts" : val[4].rstrip("p")};
+					backlog_pkts = {"backlog_pkts" : val[5].rstrip("p")};
 					requeue = {"requeue" : val[7]};
 					class_dict[classid_int].update(rate);
 					class_dict[classid_int].update(rate_pkts);
@@ -252,6 +250,8 @@ class TcCmd():
 
 	def diff_stat(self, stat, priv_stat, ofile):
 		#stat[key]["qdisc"]["backlog_pkts"];
+		time_unix_now = int(time.time());
+		time_datetime_now = datetime.datetime.fromtimestamp(time_unix_now);
 		for key in priv_stat.iterkeys():
 			if key == 131071:
 				continue;
@@ -267,7 +267,7 @@ class TcCmd():
 				drop = int(stat[key]["qdisc"]["drop"]) - int(priv_stat[key]["qdisc"]["drop"]);
 				over = int(stat[key]["qdisc"]["overlimits"]) - int(priv_stat[key]["qdisc"]["overlimits"]);
 
-				rets = "key:", flowid, "send:", send, "send_packets:", pkts, "backlog:", backlog + "/" + limit, "delay:", delay, "loss:",  loss, "drop:", drop, "overlimits:", over;
+				rets = time_unix_now, "key:", flowid, "send:", send, "send_packets:", pkts, "backlog:", backlog + "/" + limit, "delay:", delay, "loss:",  loss, "drop:", drop, "overlimits:", over;
 
 				for ret in rets:
 					if quiet == False:
