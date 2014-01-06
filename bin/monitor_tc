@@ -252,22 +252,32 @@ class TcCmd():
 				print "TypeError:" + e.message;
 
 def usage():
-	print "Usage: mada dayo-nn";
+	print "Usage: monitor_tc -i \"InterfaceName\" [-s INT] [-d || --dump-json]";
 
 def main():
+	sopt = "i:s:d";
+	lopt = [
+		"interface=", 
+		"step=", 
+		"dump-json"
+	]
+
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "i:s:", ["interface=", "step="])
+		opts, args = getopt.getopt(sys.argv[1:], sopt, lopt);
 	except getopt.GetoptError:
 		sys.exit(2);
 
 	ifname = None;
 	step = 1;
+	debug = False;
 
 	for opt, arg in opts:
-		if opt == "-i":
+		if opt in ("-i", "--interface"):
 			ifname = arg;
-		if opt == "-s":
+		if opt in ("-s", "--step"):
 			step = float(arg);
+		if opt in ("-d", "--dump-json"):
+			debug = True;
 
 	if ifname == None:
 		usage();
@@ -286,11 +296,13 @@ def main():
 		class_dict = tc.GetClassStats();
 	
 		stat_dict = tc.marge_cls_q(qdisc_dict, class_dict);
-		#tc.diff_stat(stat_dict, priv_stat);
+		tc.diff_stat(stat_dict, priv_stat);
 
-		io = StringIO.StringIO();
-		json.dump(stat_dict, io, sort_keys = False, indent = 4);
-		print io.getvalue()
+		if debug == True:
+			io = StringIO.StringIO();
+			json.dump(stat_dict, io, sort_keys = False, indent = 4);
+			print io.getvalue()
+
 		priv_stat = stat_dict.copy();
 		del tc;
 		time.sleep(step);
