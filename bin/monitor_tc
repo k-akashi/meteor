@@ -266,7 +266,7 @@ class TcCmd():
 				print "TypeError:" + e.message;
 
 def usage():
-	print "Usage: monitor_tc -i \"InterfaceName\" [-s INT] [-d || --dump-json]";
+	print "Usage: monitor_tc [-dhq] -i INTERFACE_NAME [-s FLOAT] [-o FILENAME]";
 
 def main():
 	sopt = "dhi:o:qs:";
@@ -296,6 +296,7 @@ def main():
 			debug = True;
 		if opt in ("-h", "--help"):
 			usage();
+			sys.exit(0);
 		if opt in ("-i", "--interface"):
 			ifname = arg;
 		if opt in ("-o", "--outfile"):
@@ -304,7 +305,6 @@ def main():
 			quiet = True;
 		if opt in ("-s", "--step"):
 			step = float(arg);
-			sys.exit(0);
 
 	if ifname == None:
 		usage();
