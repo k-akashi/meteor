@@ -255,11 +255,12 @@ def usage():
 	print "Usage: monitor_tc -i \"InterfaceName\" [-s INT] [-d || --dump-json]";
 
 def main():
-	sopt = "i:s:d";
+	sopt = "dhi:s:";
 	lopt = [
+		"dump-json",
+		"help",
 		"interface=", 
-		"step=", 
-		"dump-json"
+		"step="
 	]
 
 	try:
@@ -278,6 +279,9 @@ def main():
 			step = float(arg);
 		if opt in ("-d", "--dump-json"):
 			debug = True;
+		if opt in ("-h", "--help"):
+			usage();
+			sys.exit(0);
 
 	if ifname == None:
 		usage();
