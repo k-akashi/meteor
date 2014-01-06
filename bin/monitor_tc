@@ -2,10 +2,12 @@
 
 import subprocess
 import socket
-import sys
 import json
 import time
 import re
+import StringIO
+import getopt
+import sys
 
 class Tc():
 	def __init__(self):
@@ -14,9 +16,12 @@ class Tc():
 
 class TcCmd():
 	def __init__(self, dev):
-		self.tc_qdisc  = subprocess.Popen(["tc", "-s", "qdisc", "show", "dev", dev], stdout=subprocess.PIPE);
-		self.tc_class  = subprocess.Popen(["tc", "-s", "class", "show", "dev", dev], stdout=subprocess.PIPE);
-		self.tc_filter = subprocess.Popen(["tc", "-s", "filter", "show", "dev", dev], stdout=subprocess.PIPE);
+		try:
+			self.tc_qdisc  = subprocess.Popen(["tc", "-s", "qdisc", "show", "dev", dev], stdout=subprocess.PIPE);
+			self.tc_class  = subprocess.Popen(["tc", "-s", "class", "show", "dev", dev], stdout=subprocess.PIPE);
+			self.tc_filter = subprocess.Popen(["tc", "-s", "filter", "show", "dev", dev], stdout=subprocess.PIPE);
+		except Exception as e:
+			print "Error:" + str(type(e)) + e.message;
 
 	def GetQdiscStats(self):
 		qdisc_dict = {}
@@ -168,9 +173,9 @@ class TcCmd():
 					line = self.tc_class.stdout.readline();
 					val = line.split();
 
-					rate         = {"rate" : val[2]};
-					rate_pkts    = {"rate_pkts" : val[3]};
-					backlog_pkts = {"backlog_pkts" : val[5].rstrip("p")};
+					rate         = {"rate" : val[1]};
+					rate_pkts    = {"rate_pkts" : val[2]};
+					backlog_pkts = {"backlog_pkts" : val[4].rstrip("p")};
 					requeue = {"requeue" : val[7]};
 					class_dict[classid_int].update(rate);
 					class_dict[classid_int].update(rate_pkts);
@@ -180,6 +185,7 @@ class TcCmd():
 	
 					#lended :  1082979 borrowed :  0 giants :  0
 					line = self.tc_class.stdout.readline();
+					val = line.split();
 
 					lended   = {"lended" : val[1]};
 					borrowed = {"borrowed" : val[3]};
@@ -190,6 +196,7 @@ class TcCmd():
 
 					#tokens :  0 ctokens :  0
 					line = self.tc_class.stdout.readline();
+					val = line.split();
 
 					tokens  = {"tokens" : val[1]};
 					ctokens = {"ctokens" : val[3]};
@@ -218,8 +225,6 @@ class TcCmd():
 			stat_dict[key] = {"qdisc" : qdisc_dict[key]};
 			stat_dict[key].update({"class" : class_dict[key]});
 
-		#print json.dumps(stat_dict);
-
 		return stat_dict;
 
 	def diff_stat(self, stat, priv_stat):
@@ -231,19 +236,44 @@ class TcCmd():
 			try:
 				flowid = stat[key]["class"]["classid"];
 				send = int(stat[key]["qdisc"]["sent"]) - int(priv_stat[key]["qdisc"]["sent"]);
+				pkts = int(stat[key]["qdisc"]["pkts"]) - int(priv_stat[key]["qdisc"]["pkts"]);
 				delay = stat[key]["qdisc"]["delay"];
 				loss = stat[key]["qdisc"]["loss"];
 				backlog = stat[key]["qdisc"]["backlog_pkts"];
 				limit = stat[key]["qdisc"]["limit"];
 				drop = int(stat[key]["qdisc"]["drop"]) - int(priv_stat[key]["qdisc"]["drop"]);
-				print "key:", flowid, "send:", send, "backlog:", backlog, "/", limit, "delay:", delay, "loss:",  loss, "drop:", drop
-			except KeyError:
-				print "Netem ID", key, "is not found";
-				pass
+				over = int(stat[key]["qdisc"]["overlimits"]) - int(priv_stat[key]["qdisc"]["overlimits"]);
 
+				print "key:", flowid, "send:", send, "send_packets:", pkts, "backlog:", backlog + "/" + limit, "delay:", delay, "loss:",  loss, "drop:", drop, "overlimits:", over;
+			except KeyError as e:
+				print "KeyError: " + str(e.message);
+				pass
+			except TypeError as e:
+				print "TypeError:" + e.message;
+
+def usage():
+	print "Usage: mada dayo-nn";
 
 def main():
-	tc = TcCmd("ifb0");
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "i:s:", ["interface=", "step="])
+	except getopt.GetoptError:
+		sys.exit(2);
+
+	ifname = None;
+	step = 1;
+
+	for opt, arg in opts:
+		if opt == "-i":
+			ifname = arg;
+		if opt == "-s":
+			step = float(arg);
+
+	if ifname == None:
+		usage();
+		sys.exit(1);
+
+	tc = TcCmd(ifname);
 	qdisc_dict = tc.GetQdiscStats();
 	class_dict = tc.GetClassStats();
 
@@ -251,16 +281,19 @@ def main():
 	del tc;
 
 	while True:
-		tc = TcCmd("ifb0");
+		tc = TcCmd(ifname);
 		qdisc_dict = tc.GetQdiscStats();
 		class_dict = tc.GetClassStats();
 	
 		stat_dict = tc.marge_cls_q(qdisc_dict, class_dict);
-		tc.diff_stat(stat_dict, priv_stat);
+		#tc.diff_stat(stat_dict, priv_stat);
 
+		io = StringIO.StringIO();
+		json.dump(stat_dict, io, sort_keys = False, indent = 4);
+		print io.getvalue()
 		priv_stat = stat_dict.copy();
 		del tc;
-		time.sleep(1);
+		time.sleep(step);
 
 if __name__ == "__main__":
 	main()
