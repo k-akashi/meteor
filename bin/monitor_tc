@@ -8,6 +8,8 @@ import re
 import StringIO
 import getopt
 import sys
+import fcntl
+import struct
 
 class Tc():
 	def __init__(self):
@@ -16,15 +18,31 @@ class Tc():
 
 class TcCmd():
 	def __init__(self, dev):
+		self.dev = dev;
+		SIOCGIFADDR = 0x8915;
+		SIOCGIFFLAGS = 0x8913;
+
 		try:
-			self.tc_qdisc  = subprocess.Popen(["tc", "-s", "qdisc", "show", "dev", dev], stdout=subprocess.PIPE);
-			self.tc_class  = subprocess.Popen(["tc", "-s", "class", "show", "dev", dev], stdout=subprocess.PIPE);
-			self.tc_filter = subprocess.Popen(["tc", "-s", "filter", "show", "dev", dev], stdout=subprocess.PIPE);
+			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+			ifr = self.dev + '\0' * 256;
+			ret = fcntl.ioctl(sock.fileno(), SIOCGIFFLAGS, ifr);
+			flags, = struct.unpack('H', ret[16:18]);
+			state = flags & 1;
+			if state == 0:
+				print self.dev, "is down.";
+				sys.exit(4);
+		except Exception as e:
+			print str(e)
+			sys.exit(4);
+
+	def GetQdiscStats(self):
+		try:
+			self.tc_qdisc  = subprocess.Popen(["tc", "-s", "qdisc", "show", "dev", self.dev], stdout=subprocess.PIPE);
 		except Exception as e:
 			print "Error:" + str(type(e)) + e.message;
 
-	def GetQdiscStats(self):
 		qdisc_dict = {}
+
 		while 1:
 			line = self.tc_qdisc.stdout.readline();
 			#qdisc netem d1: parent 1:d1 limit 14880000 delay 8.1ms
@@ -115,6 +133,11 @@ class TcCmd():
 		return delay;
 	
 	def GetClassStats(self):
+		try:
+			self.tc_class  = subprocess.Popen(["tc", "-s", "class", "show", "dev", self.dev], stdout=subprocess.PIPE);
+		except Exception as e:
+			print "Error:" + str(type(e)) + e.message;
+
 		class_dict = {};
 		while 1:
 			line = self.tc_class.stdout.readline();
@@ -324,10 +347,8 @@ def main():
 	class_dict = tc.GetClassStats();
 
 	priv_stat = tc.marge_cls_q(qdisc_dict, class_dict);
-	del tc;
 
 	while True:
-		tc = TcCmd(ifname);
 		qdisc_dict = tc.GetQdiscStats();
 		class_dict = tc.GetClassStats();
 	
@@ -340,8 +361,13 @@ def main():
 			print io.getvalue()
 
 		priv_stat = stat_dict.copy();
-		del tc;
 		time.sleep(step);
+
+	def GetFilterStat(self):
+		try:
+			self.tc_filter = subprocess.Popen(["tc", "-s", "filter", "show", "dev", self.dev], stdout=subprocess.PIPE);
+		except Exception as e:
+			print "Error:" + str(type(e)) + e.message;
 
 try:
 	if __name__ == '__main__':
