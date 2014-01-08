@@ -397,7 +397,9 @@ def PrintTcStat(lock, ifname, ofilename):
 
 def sigterm_handler(signum, frame):
 	for j in jobs:
+		j.terminate();
 		j.join();
+	#end for
 
 def main():
 	sopt = "dhi:o:qs:";
@@ -454,7 +456,6 @@ def main():
 	#end if
 
 	lock = multiprocessing.Lock();
-	signal.signal(signal.SIGTERM, sigterm_handler);
 
 	for ifname in ifnames:
 		jobs.append(multiprocessing.Process(target=PrintTcStat, args=(lock, ifname, ofilename)));
@@ -463,6 +464,10 @@ def main():
 	for j in jobs:
 		j.start();
 	#end for
+
+	signal.signal(signal.SIGTERM, sigterm_handler);
+	signal.signal(signal.SIGINT, sigterm_handler);
+	signal.signal(signal.SIGQUIT, sigterm_handler);
 
 	for j in jobs:
 		j.join();
