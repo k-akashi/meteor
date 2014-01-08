@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import signal
 import multiprocessing
 import os
 import subprocess
@@ -15,6 +16,7 @@ class Tc():
 	def __init__(self):
 		sock = socket.socket(socket.AF_NETLINK, socket.SOCK_DGRAM, socket.NETLINK_ROUTE);
 		sock.bind((0, 0));
+	#end def __init__
 
 class TcCmd():
 	def __init__(self, dev):
@@ -32,14 +34,17 @@ class TcCmd():
 				print self.dev, "is down.";
 				sys.exit(4);
 		except Exception as e:
-			print str(e)
+			print self.dev, ":", str(e)
 			sys.exit(4);
+		#end try
+	#end def __init__
 
 	def GetQdiscStats(self):
 		try:
 			self.tc_qdisc  = subprocess.Popen(["tc", "-s", "qdisc", "show", "dev", self.dev], stdout=subprocess.PIPE);
 		except Exception as e:
 			print "Error:" + str(type(e)) + e.message;
+		#end try
 
 		qdisc_dict = {}
 
@@ -48,6 +53,7 @@ class TcCmd():
 			#qdisc netem d1: parent 1:d1 limit 14880000 delay 8.1ms
 			if not line:
 				break
+			#end if
 	
 			val = line.split();
 			list_cnt = len(val);
@@ -58,8 +64,10 @@ class TcCmd():
 					handle = val[2].split(':');
 					if handle[0] == '':
 						handle[0] = "0";
+					#end if
 					if handle[1] == '':
 						handle[1] = "0";
+					#end if
 					handle_int = {"handle_int" : (int(handle[0], 16) << 16) ^ int(handle[1], 16)};
 
 					key = val[4];
@@ -67,8 +75,10 @@ class TcCmd():
 					parent = val[4].split(':');
 					if parent[0] == '':
 						parent[0] = "0";
+					#end if
 					if parent[1] == '':
 						parent[1] = "0";
+					#end if
 					parent_int = {"parent_int" : (int(parent[0], 16) << 16) ^ int(parent[1], 16)};
 
 					qdisc_dict[key] = {};
@@ -83,6 +93,7 @@ class TcCmd():
 					while True:
 						if list_cnt <= i:
 							break;
+						#end if
 						if val[i] == "limit":
 							limit = {"limit" : val[i + 1]};
 							i = i + 2;
@@ -94,6 +105,8 @@ class TcCmd():
 							i = i + 2;
 						else:
 							i = i + 1;
+						#end if
+					#end while
 	
 					qdisc_dict[key].update(limit);
 					qdisc_dict[key].update(delay);
@@ -119,8 +132,12 @@ class TcCmd():
 					requeue      = {"requeue" : val[4]};
 					qdisc_dict[key].update(backlog_pkts);
 					qdisc_dict[key].update(requeue);
+				#end if
+			#end if
+		#end while
 
 		return qdisc_dict;
+	#end def GetQdiscStats
 	
 	def GetDelay(self, delay):
 		if delay.find("%") != -1:
@@ -140,6 +157,7 @@ class TcCmd():
 			self.tc_class  = subprocess.Popen(["tc", "-s", "class", "show", "dev", self.dev], stdout=subprocess.PIPE);
 		except Exception as e:
 			print "Error:" + str(type(e)) + e.message;
+		#end try
 
 		class_dict = {};
 		while 1:
@@ -147,11 +165,13 @@ class TcCmd():
 			#qdisc netem d1: parent 1:d1 limit 14880000 delay 8.1ms
 			if not line:
 				break
+			#end while
 	
 			val = line.split();
 				
 			if val[1] == "netem":
 				break;
+			#end if
 	
 			#class htb 1:15 root leaf 15: prio 0 rate 8389Mbit ceil 8389Mbit burst 0b cburst 0b 
 			if val[0] == "class":
@@ -161,8 +181,10 @@ class TcCmd():
 					classid = val[2].split(':');
 					if classid[0] == '':
 						classid[0] = 0;
+					#end if
 					if classid[1] == '':
 						classid[1] = 0
+					#end if
 					classid_int = {"classid_int" : (int(classid[0], 16) << 16) ^ int(classid[1], 16)};
 
 					class_dict[key] = {};
@@ -176,10 +198,13 @@ class TcCmd():
 						parent = val[5].split(':');
 						if parent[0] == '':
 							parent[0] = "0";
+						#end if
 						if parent[1] == '':
 							parent[1] = "0";
+						#end if
 						parent_int = {"parent_int" : (int(parent[0], 16) << 16) ^ int(parent[1], 16)};
 						parent_str = {"parent" : val[5]};
+					#end if
 
 					class_dict[key].update(parent_str);
 					class_dict[key].update(parent_int);
@@ -212,7 +237,6 @@ class TcCmd():
 					class_dict[key].update(backlog_pkts);
 					class_dict[key].update(requeue);
 			
-	
 					#lended :  1082979 borrowed :  0 giants :  0
 					line = self.tc_class.stdout.readline();
 					val = line.split();
@@ -234,6 +258,9 @@ class TcCmd():
 					class_dict[key].update(ctokens);
 
 					line = self.tc_class.stdout.readline();
+				#end if
+			#end if
+		#end while
 
 		return class_dict;
 	
@@ -246,16 +273,20 @@ class TcCmd():
 			rate = rate * 1024;
 		elif rate.find("bit") != -1:
 			rate = int(rate);
+		#end if
 	
 		return rate;
+	#end GetSpeed
 
 	def marge_cls_q(self, qdisc_dict, class_dict):
 		stat_dict = {};
 		for key in class_dict.iterkeys():
 			stat_dict[key] = {"qdisc" : qdisc_dict[key]};
 			stat_dict[key].update({"class" : class_dict[key]});
+		#end for
 
 		return stat_dict;
+	#end def marge_cls_q
 
 	def diff_stat(self, stat, priv_stat, ofile):
 		#stat[key]["qdisc"]["backlog_pkts"];
@@ -264,6 +295,7 @@ class TcCmd():
 		for key in priv_stat.iterkeys():
 			if key == "1:ffff":
 				continue;
+			#end if
 
 			try:
 				flowid = stat[key]["class"]["classid"];
@@ -281,44 +313,57 @@ class TcCmd():
 				for ret in rets:
 					if quiet == False:
 						print ret,;
+					#end if
 					if ofile != None:
 						ofile.write(str(ret) + " ");
 						ofile.flush();
+					#end if
+				#end for
 				
 				if quiet == False:
 					print "";
+				#end if
+
 				if ofile != None:
 					ofile.write("\n");
 					ofile.flush();
+				#end if
 
 			except KeyError as e:
 				print "KeyError: " + str(e.message);
 				pass
 			except TypeError as e:
 				print "TypeError:" + e.message;
+			#end try
+		#end for
+	#def diff_stat
 
 	def GetFilterStat(self):
 		try:
 			self.tc_filter = subprocess.Popen(["tc", "-s", "filter", "show", "dev", self.dev], stdout=subprocess.PIPE);
 		except Exception as e:
 			print "Error:" + str(type(e)) + e.message;
+		#end try
+	#end def GetFilterStat
 
 
 def usage():
 	print "Usage: monitor_tc [-dhq] -i INTERFACE_NAME [-s FLOAT] [-o FILENAME]";
+	print "  -o : output filename = FILENAME_INTERFACE_NAME.log"
+#end def usage
 
-def PrintTcStat(ifname, ofilename):
+def PrintTcStat(lock, ifname, ofilename):
 	try:
 		if ofilename != None:
 			try:
 				filename = ofilename + "_" + ifname + ".log";
 				ofile = open(filename, 'a');
 			except Exception as e:
-				print str(e); #message;
 				sys.exit(3);
+			#end try
 		else:
 			ofile = None;
-	
+		#end if	
 	
 		tc = TcCmd(ifname);
 		qdisc_dict = tc.GetQdiscStats();
@@ -336,13 +381,23 @@ def PrintTcStat(ifname, ofilename):
 			if debug == True:
 				io = StringIO.StringIO();
 				json.dump(stat_dict, io, sort_keys = False, indent = 4);
+				lock.acquire();
 				print io.getvalue()
+				lock.release();
+			#end if
 	
 			priv_stat = stat_dict.copy();
 			time.sleep(step);
+		#end while
 
 	except KeyboardInterrupt:
 		pass
+	#end try
+#end PrintTcStat
+
+def sigterm_handler(signum, frame):
+	for j in jobs:
+		j.join();
 
 def main():
 	sopt = "dhi:o:qs:";
@@ -360,47 +415,62 @@ def main():
 	except getopt.GetoptError:
 		sys.exit(2);
 
+	global jobs;
+	global step;
+	global debug;
+	global quiet;
 	ifnames = [];
 	jobs = [];
-	global step;
 	step = 1;
-	global debug;
 	debug = False;
 	ofilename = None;
-	global quiet;
 	quiet = False;
 
 	for opt, arg in opts:
 		if opt in ("-d", "--dump-json"):
 			debug = True;
+		#end if
 		if opt in ("-h", "--help"):
 			usage();
 			sys.exit(0);
+		#end if
 		if opt in ("-i", "--interface"):
 			ifnames.append(arg);
+		#end if
 		if opt in ("-o", "--outfile"):
 			ofilename = arg;
+		#end if
 		if opt in ("-q", "--quiet"):
 			quiet = True;
+		#end if
 		if opt in ("-s", "--step"):
 			step = float(arg);
+		#end if
+	#end for
 
-	print ifnames;
 	if ifnames == []:
 		usage();
 		sys.exit(1);
+	#end if
+
+	lock = multiprocessing.Lock();
+	signal.signal(signal.SIGTERM, sigterm_handler);
 
 	for ifname in ifnames:
-		jobs.append(multiprocessing.Process(target=PrintTcStat, args=(ifname, ofilename)));
+		jobs.append(multiprocessing.Process(target=PrintTcStat, args=(lock, ifname, ofilename)));
+	#end for
 
 	for j in jobs:
 		j.start();
+	#end for
 
 	for j in jobs:
 		j.join();
+	#end for
 
 try:
 	if __name__ == '__main__':
 		sys.exit(main())
 except KeyboardInterrupt:
 	pass
+#end try
