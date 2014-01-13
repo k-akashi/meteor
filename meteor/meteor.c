@@ -406,6 +406,7 @@ char **argv;
     char *saddr, *daddr;
     char buf[BUFSIZ];
     char settings_file_name[BUFSIZ];
+    char *exec_file;
     int32_t ret;
     int32_t loop = FALSE;
     int32_t dsock;
@@ -494,6 +495,7 @@ char **argv;
     memset(param_table, 0, sizeof(qomet_param) * MAX_RULE_NUM);
     memset(&param_over_read, 0, sizeof(qomet_param));
     memset(&device_list, 0, sizeof(struct DEVICE_LIST) * MAX_IFS);
+    memset(&exec_file, 0, sizeof(char) * 255);
 
     memset(&sa, 0, sizeof(struct sigaction));
     sa.sa_handler = &restart_scenario;
@@ -528,7 +530,7 @@ char **argv;
     }
 
     i = 0;
-    while((ch = getopt(argc, argv, "a:b:c:d:D:f:F:hi:I:lm:MNp:q:Q:r:Rs:t:T:p:")) != -1) {
+    while((ch = getopt(argc, argv, "a:b:c:d:D:e:f:F:hi:I:lm:MNp:q:Q:r:Rs:t:T:p:")) != -1) {
         switch(ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -569,6 +571,9 @@ char **argv;
                 break;
             case 'D':
                 division = strtol(optarg, &p, 10);
+                break;
+            case 'e':
+                exec_file = optarg;
                 break;
             case 'f':
                 fid = strtol(optarg, &p, 10);
@@ -922,6 +927,15 @@ char **argv;
             }
         }
     }
+
+    if(exec_file) {
+        ret = system(exec_file);
+        if(ret != 0) {
+            fprintf(stderr, "failed system: %s\n", exec_file);
+            exit(1);
+        }
+    }
+
     gettimeofday(&tp_begin, NULL);
 
     if(usage_type == 1) {

@@ -435,6 +435,7 @@ int32_t protocol;
     uint32_t netem_qdisc_id[4];
     struct qdisc_params qp;
 
+    // Default Drop rule
     htb_class_id[0] = 1;
     htb_class_id[1] = 0;
     htb_class_id[2] = 1;
@@ -446,6 +447,20 @@ int32_t protocol;
     netem_qdisc_id[2] = 65535;
     netem_qdisc_id[3] = 0;
     qp.loss = ~0;
+    qp.limit = 100000;
+    add_netem_qdisc(devname, netem_qdisc_id, qp);
+
+    // Default Pass rule
+    htb_class_id[0] = 1;
+    htb_class_id[1] = 0;
+    htb_class_id[2] = 1;
+    htb_class_id[3] = 65534;
+    add_htb_class(devname, htb_class_id, 1000000000);
+    netem_qdisc_id[0] = 1;
+    netem_qdisc_id[1] = 65534;
+    netem_qdisc_id[2] = 65534;
+    netem_qdisc_id[3] = 0;
+    qp.loss = 0;
     qp.limit = 100000;
     add_netem_qdisc(devname, netem_qdisc_id, qp);
 #endif
