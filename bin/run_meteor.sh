@@ -30,9 +30,9 @@ sudo ip link set up dev br0;
 
 # Start the QOMET emulation
 echo "* Starting QOMET emulation..." 
-echo "./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l -e ${EXEC}"
-./bin/monitor_tc -i ${INGRESS_IF} -q -o /var/tmp/meteor_${TIME} &
-./bin/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l -e ${EXEC}
+echo "${DIR}/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l -e ${EXEC}"
+${DIR}/monitor_tc -i ${INGRESS_IF} -q -o /var/tmp/meteor_${TIME} &
+${DIR}/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l -e ${EXEC}
 
 echo "finish!!"
 echo ----------------------------
