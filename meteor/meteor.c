@@ -802,8 +802,8 @@ char **argv;
                 daddr = (char*)calloc(1, MAC_ADDR_SIZE);
             }
             else if(protocol == IP) {
-                saddr = (char*)calloc(1, IP_ADDR_SIZE);
-                daddr = (char*)calloc(1, IP_ADDR_SIZE);
+                saddr = (char*)calloc(1, IP_ADDR_SIZE + 3);
+                daddr = (char*)calloc(1, IP_ADDR_SIZE + 3);
             }
             conn_list = conn_list_head;
             while(conn_list != NULL) {
