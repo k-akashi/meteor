@@ -300,7 +300,7 @@ int p_size;
         }
         else {
             int scaned_items;
-            scaned_items = sscanf(buf, "%s %s %d %16s",node_name, interface,  &node_id, node_ip);
+            scaned_items = sscanf(buf, "%s %s %d %s",node_name, interface,  &node_id, node_ip);
             if(scaned_items < 2) {
                 WARNING("Skipped invalid line #%d in settings file '%s'", line_nr, path);
                 continue;
@@ -802,8 +802,8 @@ char **argv;
                 daddr = (char*)calloc(1, MAC_ADDR_SIZE);
             }
             else if(protocol == IP) {
-                saddr = (char*)calloc(1, IP_ADDR_SIZE + 3);
-                daddr = (char*)calloc(1, IP_ADDR_SIZE + 3);
+                saddr = (char*)calloc(1, IP_ADDR_SIZE);
+                daddr = (char*)calloc(1, IP_ADDR_SIZE);
             }
             conn_list = conn_list_head;
             while(conn_list != NULL) {
@@ -819,8 +819,8 @@ char **argv;
                 }
                 else if(protocol == IP) {
                     strcpy(saddr, ipaddrs_c + src_id * IP_ADDR_SIZE);
-                    sprintf(saddr, "%s/%d", saddr, ipprefix[src_id]);
                     strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
+                    sprintf(saddr, "%s/%d", saddr, ipprefix[src_id]);
                     sprintf(daddr, "%s/%d", daddr, ipprefix[dst_id]);
                 }
 
