@@ -819,12 +819,12 @@ char **argv;
                 }
                 else if(protocol == IP) {
                     strcpy(saddr, ipaddrs_c + src_id * IP_ADDR_SIZE);
-                    strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
                     sprintf(saddr, "%s/%d", saddr, ipprefix[src_id]);
+                    strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
                     sprintf(daddr, "%s/%d", daddr, ipprefix[dst_id]);
                 }
 
-                ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, DIRECTION_OUT);
+                ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, direction);
                 if(ret != SUCCESS) {
                     fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
                     exit(1);
@@ -853,7 +853,7 @@ char **argv;
                     strcpy(saddr, ipaddrs_c + src_id  * IP_ADDR_SIZE);
                     strcpy(daddr, ipaddrs_c + dst_id * IP_ADDR_SIZE);
 
-                    ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, DIRECTION_OUT);
+                    ret = add_rule(dsock, rule_num, rule_num, protocol, saddr, daddr, direction);
                     if(ret != SUCCESS) {
                         fprintf(stderr, "Node %d: Could not add rule #%d", src_id, rule_num);
                         exit(1);
@@ -864,30 +864,30 @@ char **argv;
             free(daddr);
         }
         else {
+            saddr = (char*)calloc(1, IP_ADDR_SIZE);
+            daddr = (char*)calloc(1, IP_ADDR_SIZE);
             for(src_id = FIRST_NODE_ID; src_id < all_node_cnt; src_id++) {
                 if(src_id == my_id) {
                     continue;
                 }
                 offset_num = src_id;
-                INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
-                        my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, 
-                        ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
-                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, protocol,
-                            "any", ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE, 
-                            DIRECTION_OUT) < 0) {
-                    fprintf(stderr, "Node %d: Could not add rule #%d with pipe #%d to \
-                            destination %s\n", my_id, MIN_PIPE_ID_OUT + offset_num, 
-                            MIN_PIPE_ID_OUT + offset_num, 
-                            ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
-                    exit(1);
+
+                if(protocol == ETH) {
+                    strcpy(daddr, mac_char_addresses[src_id]);
                 }
-                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num + 1, MIN_PIPE_ID_OUT + offset_num + 1, protocol, 
-                            "any", ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE, 
-                            DIRECTION_OUT) < 0) {
+                else if(protocol == IP) {
+                    strcpy(daddr, ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
+                    sprintf(daddr, "%s/%d", daddr, ipprefix[src_id]);
+                }
+
+                INFO("Node %d: Add rule #%d with pipe #%d to destination %s", 
+                        my_id, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, daddr);
+
+                if(add_rule(dsock, MIN_PIPE_ID_OUT + offset_num, MIN_PIPE_ID_OUT + offset_num, protocol,
+                            "any", daddr, direction) < 0) {
                     fprintf(stderr, "Node %d: Could not add rule #%d with pipe #%d to \
                             destination %s\n", my_id, MIN_PIPE_ID_OUT + offset_num, 
-                            MIN_PIPE_ID_OUT + offset_num, 
-                            ipaddrs_c + (src_id - assign_id) * IP_ADDR_SIZE);
+                            MIN_PIPE_ID_OUT + offset_num, daddr);
                     exit(1);
                 }
             }
@@ -904,8 +904,8 @@ char **argv;
                         MIN_PIPE_ID_IN_BCAST + offset_num, baddr);
                 if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num, 
                             MIN_PIPE_ID_IN_BCAST + offset_num, protocol,
-                            ipaddrs_c+(j-assign_id)*IP_ADDR_SIZE,
-                            baddr, DIRECTION_IN) < 0)
+                            ipaddrs_c + (j-assign_id) * IP_ADDR_SIZE,
+                            baddr, direction) < 0)
                 {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
                             destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
@@ -916,7 +916,7 @@ char **argv;
                 if(add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num + 0, 
                             MIN_PIPE_ID_IN_BCAST + offset_num + 1, protocol,
                             ipaddrs_c+(j-assign_id)*IP_ADDR_SIZE,
-                            baddr, DIRECTION_IN) < 0)
+                            baddr, direction) < 0)
                 {
                     WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
                             destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
@@ -927,6 +927,11 @@ char **argv;
             }
         }
     }
+    gettimeofday(&tp_begin, NULL);
+
+    if(usage_type == 1) {
+        next_hop_id = tid;
+    }
 
     if(exec_file) {
         ret = system(exec_file);
@@ -934,12 +939,6 @@ char **argv;
             fprintf(stderr, "failed system: %s\n", exec_file);
             exit(1);
         }
-    }
-
-    gettimeofday(&tp_begin, NULL);
-
-    if(usage_type == 1) {
-        next_hop_id = tid;
     }
 
     INFO("Reading QOMET data from file...");
@@ -1177,7 +1176,8 @@ char **argv;
                 }
             }
             else {
-                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_HV || direction == DIRECTION_BR) {
+                if(do_adjust_deltaQ == FALSE || direction == DIRECTION_HV || direction == DIRECTION_BR
+                        || direction == DIRECTION_IN) {
                     uint32_t rec_index;
                     INFO("Adjustment of deltaQ is disabled.");
                     if(direction == DIRECTION_BR) {
@@ -1210,9 +1210,12 @@ char **argv;
                         }
                     }
                     else {
-                        if(rec_i != my_id) {
-                            io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
-                            DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
+                        int32_t dst_id;
+                        for(dst_id = FIRST_NODE_ID; dst_id < all_node_cnt; dst_id++) {
+                            if(dst_id != my_id) {
+                                io_bin_cp_rec(&(adjusted_recs_ucast[dst_id]), &(my_recs_ucast[my_id][dst_id]));
+                                DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", dst_id);
+                            }
                         }
                     }
                 }
@@ -1344,6 +1347,7 @@ char **argv;
                 else {
                     for(src_id = FIRST_NODE_ID; src_id < all_node_cnt; src_id++) {
                         int next_hop_id;
+                        node_i = src_id;
     
                         if(node_i == my_id) {
                             continue;
@@ -1354,11 +1358,11 @@ char **argv;
                         }
                         else {
                             next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, node_i, DIRECTION_OUT);
+                            next_hop_id = my_id * all_node_cnt + src_id;
                         }
     
                         if(next_hop_id == ERROR) {
                             WARNING("Could not locate the next hop for destination node %i", node_i);
-                            next_hop_id = node_i;
                         }
                         DEBUG("Next_hop=%i for destination=%i", next_hop_id, node_i);
     
@@ -1370,10 +1374,10 @@ char **argv;
     
                         next_hop_ids[node_i] = next_hop_id;
     
-                        bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
-                        delay = adjusted_recs_ucast[next_hop_id].delay;
-                        lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
-    
+                        bandwidth = adjusted_recs_ucast[node_i].bandwidth;
+                        delay = adjusted_recs_ucast[node_i].delay;
+                        lossrate = adjusted_recs_ucast[node_i].loss_rate;
+
                         if(bandwidth != UNDEFINED_BANDWIDTH) {
                             INFO ("-- Wireconf pipe=%d: #%d UCAST to #%d (next_hop_id=%d) \
                                 [%s] (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms",
@@ -1387,7 +1391,6 @@ char **argv;
                                 MIN_PIPE_ID_OUT + node_i, my_id, node_i, next_hop_id, 
                                 ipaddrs_c + (node_i - assign_id) * IP_ADDR_SIZE, crt_record_time);
                         }
-    
                         if(configure_rule(dsock, daddr, MIN_PIPE_ID_OUT + node_i, 
                                 bandwidth, delay, lossrate) == ERROR) {
                             WARNING("Error configuring UCAST pipe %d.", MIN_PIPE_ID_OUT + node_i);
@@ -1397,7 +1400,7 @@ char **argv;
                 }
 //                TCHK_END(time);
 
-                if(direction != DIRECTION_HV && direction != DIRECTION_BR) {
+                if(direction != DIRECTION_HV && direction != DIRECTION_BR && direction != DIRECTION_IN) {
                     for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {
                         if(node_i == my_id) {
                             continue;
