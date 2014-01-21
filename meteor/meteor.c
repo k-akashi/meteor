@@ -781,7 +781,7 @@ char **argv;
         exit(1);
     }
 
-    init_rule(daddr, protocol);
+    init_rule(daddr, protocol, direction);
 
     if(usage_type == 1) {
         INFO("Add rule #%d with pipe #%d from %s to %s", rulenum, pipe_nr, saddr, daddr);

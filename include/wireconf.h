@@ -85,7 +85,7 @@ int get_rule(uint s, int16_t rulenum);
 int get_rule_linux(void);
 #endif
 
-int32_t init_rule(char *dst, int protocol);
+int32_t init_rule(char *dst, int protocol, int direction);
 int32_t add_rule(int s, uint32_t rulenum, int pipe_nr, int32_t protocol, char *src, char *dst, int direction);
 int32_t configure_rule(int s, char* dst, int handle, int bandwidth, double delay, double lossrate);
 int32_t delete_rule(uint s, char *dst, u_int32_t rule_number);

@@ -389,14 +389,16 @@ int direction;
 #endif
 
 int32_t
-init_rule(dst, protocol)
+init_rule(dst, protocol, direction)
 char *dst;
 int32_t protocol;
+int direction;
 {
 #ifdef __linux
     int32_t i;
     char *devname;
     uint32_t htb_qdisc_id[4];
+    uint32_t defcls;
 
     ll_init_map(&rth);
 
@@ -424,7 +426,14 @@ int32_t protocol;
 
     uint32_t version = 3;
     uint32_t r2q = 8000000000 / 200000;
-    uint32_t defcls = 65535;
+
+    if(direction == DIRECTION_BR) {
+        defcls = 65535;
+    }
+    else {
+        defcls = 65534;
+    }
+
     htb_qdisc_id[0] = TC_H_ROOT;
     htb_qdisc_id[1] = 0;
     htb_qdisc_id[2] = 1;
