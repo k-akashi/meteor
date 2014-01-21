@@ -525,6 +525,9 @@ int direction;
     netem_qdisc_id[2] = handle_nr;
     netem_qdisc_id[3] = 0;
 
+    add_htb_class(devname, htb_class_id, 1000000000);
+    add_netem_qdisc(devname, netem_qdisc_id, qp);
+
     filter_id[0] = 1;
     filter_id[1] = 0;
     filter_id[2] = 1;
@@ -540,9 +543,11 @@ int direction;
     if(src != NULL) {
         if(protocol == ETH) {
             sprintf(srcaddr, "%s", src);
+            ufp.match[IP_SRC].proto = "ether";
         }
         else if(protocol == IP) {
             sprintf(srcaddr, "%s", src);
+            ufp.match[IP_SRC].proto = "ip";
         }
         dprintf(("[add_rule] filter source address : %s\n", srcaddr));
     }
@@ -552,9 +557,13 @@ int direction;
     if(dst != NULL) {
         if(protocol == ETH) {
             sprintf(dstaddr, "%s", dst);
+            ufp.match[IP_DST].proto = "ether";
+            ufp.match[IP_DST].offmask = 0;
         }
         else if(protocol == IP) {
             sprintf(dstaddr, "%s", dst);
+            ufp.match[IP_DST].proto = "ip";
+            ufp.match[IP_DST].offmask = 0;
         }
         dprintf(("[add_rule] filter dstination address : %s\n", dstaddr));
     }
@@ -562,9 +571,8 @@ int direction;
         dprintf(("[add_rule] destination address is NULL\n"));
     }
 
-    if(INGRESS) {
-        devname = ifb_devname;
-    }
+    ufp.match[IP_SRC].filter = "src";
+    ufp.match[IP_DST].filter = "dst";
 
     if(strcmp(src, "any") == 0) {
         strcpy(srcaddr, "0.0.0.0/0");
@@ -574,13 +582,6 @@ int direction;
         ufp.match[IP_SRC].type = "u32";
     }
 
-    if(protocol == ETH) {
-        ufp.match[IP_SRC].proto = "ether";
-    }
-    else if(protocol == IP) {
-        ufp.match[IP_SRC].proto = "ip";
-    }
-    ufp.match[IP_SRC].filter = "src";
     ufp.match[IP_SRC].arg = srcaddr;
 
     if(strcmp(dst, "any") == 0) {
@@ -591,21 +592,10 @@ int direction;
         ufp.match[IP_DST].type = "u32";
     }
 
-    if(protocol == ETH) {
-        ufp.match[IP_DST].proto = "ether";
-        ufp.match[IP_DST].offmask = 0;
-    }
-    else if(protocol == IP) {
-        ufp.match[IP_DST].proto = "ip";
-        ufp.match[IP_DST].offmask = 0;
-    }
-    ufp.match[IP_DST].filter = "dst";
     ufp.match[IP_DST].arg = dstaddr;
     ufp.classid[0] = filter_id[2];
     ufp.classid[1] = filter_id[3];
 
-    add_htb_class(devname, htb_class_id, 1000000000);
-    add_netem_qdisc(devname, netem_qdisc_id, qp);
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
     if(strcmp(dst, "any") == 0) {
@@ -624,10 +614,12 @@ int direction;
     ufp.match[IP_DST].arg = srcaddr;
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
-    ufp.match[IP_SRC].arg = srcaddr;
-    ufp.match[IP_DST].arg = bcastaddr;
+    if(direction != DIRECTION_IN) {
+        ufp.match[IP_SRC].arg = srcaddr;
+        ufp.match[IP_DST].arg = bcastaddr;
 
-    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+        add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+    }
 
     return 0;
 }
