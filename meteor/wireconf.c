@@ -533,6 +533,11 @@ int direction;
     filter_id[2] = 1;
     filter_id[3] = handle_nr;
 
+    ufp.classid[0] = filter_id[2];
+    ufp.classid[1] = filter_id[3];
+    ufp.match[IP_SRC].filter = "src";
+    ufp.match[IP_DST].filter = "dst";
+
     if(protocol == ETH) {
         sprintf(bcastaddr, "%s", "ff:ff:ff:ff:ff:ff");
     }
@@ -571,32 +576,30 @@ int direction;
         dprintf(("[add_rule] destination address is NULL\n"));
     }
 
-    ufp.match[IP_SRC].filter = "src";
-    ufp.match[IP_DST].filter = "dst";
-
     if(strcmp(src, "any") == 0) {
         strcpy(srcaddr, "0.0.0.0/0");
-        ufp.match[IP_SRC].type = NULL;
     }
-    else {
-        ufp.match[IP_SRC].type = "u32";
-    }
-
-    ufp.match[IP_SRC].arg = srcaddr;
-
     if(strcmp(dst, "any") == 0) {
         strcpy(dstaddr, "0.0.0.0/0");
-        ufp.match[IP_DST].type = NULL;
-    }
-    else {
-        ufp.match[IP_DST].type = "u32";
     }
 
-    ufp.match[IP_DST].arg = dstaddr;
-    ufp.classid[0] = filter_id[2];
-    ufp.classid[1] = filter_id[3];
-
-    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+    if(direction != DIRECTION_IN) {
+        if(strcmp(src, "any") == 0) {
+            ufp.match[IP_SRC].type = NULL;
+        }
+        else {
+            ufp.match[IP_SRC].type = "u32";
+        }
+        if(strcmp(dst, "any") == 0) {
+            ufp.match[IP_DST].type = NULL;
+        }
+        else {
+            ufp.match[IP_DST].type = "u32";
+        }
+        ufp.match[IP_SRC].arg = srcaddr;
+        ufp.match[IP_DST].arg = dstaddr;
+        add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+    }
 
     if(strcmp(dst, "any") == 0) {
         ufp.match[IP_SRC].type = NULL;
@@ -604,13 +607,13 @@ int direction;
     else {
         ufp.match[IP_SRC].type = "u32";
     }
-    ufp.match[IP_SRC].arg = dstaddr;
     if(strcmp(src, "any") == 0) {
         ufp.match[IP_DST].type = NULL;
     }
     else {
         ufp.match[IP_DST].type = "u32";
     }
+    ufp.match[IP_SRC].arg = dstaddr;
     ufp.match[IP_DST].arg = srcaddr;
     add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
 
