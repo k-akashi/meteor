@@ -1357,8 +1357,8 @@ char **argv;
                             next_hop_id = node_i;
                         }
                         else {
-                            next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, node_i, DIRECTION_OUT);
-                            next_hop_id = my_id * all_node_cnt + src_id;
+                            //next_hop_id = get_next_hop_id(ipaddrs, ipaddrs_c, node_i, DIRECTION_OUT);
+                            next_hop_id = src_id;
                         }
     
                         if(next_hop_id == ERROR) {
