@@ -15,9 +15,13 @@ PATH=${PATH}:${DIR}
 scenario_name=$1
 scenario_setting=$2
 scenario_connection=$3
-EXEC=$4
-IF1="eth0";
-IF2="eth1";
+
+if [ $# -ge 4 ]
+then
+    EXEC=" -e $4 "
+fi
+IF1="eth4";
+IF2="eth5";
 INGRESS_IF="ifb0";
 TIME=`date  +"%Y%m%d%H%M%S"`
 
@@ -32,7 +36,7 @@ sudo ip link set up dev br0;
 echo "* Starting QOMET emulation..." 
 echo "${DIR}/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l -e ${EXEC}"
 ${DIR}/monitor_tc -i ${INGRESS_IF} -q -o /var/tmp/meteor_${TIME} &
-${DIR}/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l -e ${EXEC}
+${DIR}/meteor -Q ${scenario_name} -s ${scenario_setting} -c ${scenario_connection} -I ${IF1} -I ${IF2} -d bridge -l ${EXEC}
 
 echo "finish!!"
 echo ----------------------------

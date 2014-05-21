@@ -246,13 +246,12 @@ FILE *ofile_fd;
             recs[rec_i].loss_rate = loss_rate;
          }
     }
+    rec_num++;
     fprintf(stdout, "Write Scenario...  %d/%u                 \n", rec_num, time_recs);
     bin_time_rec.time = priv_time;
     bin_time_rec.record_number = rec_i + 1;
     io_binary_write_time_record_to_file2(&bin_time_rec, ofile_fd);
 
-    printf("time: %.6f\n", priv_time);
-    printf("rec_i: %d\n", rec_i);
     for(i = 0; i <= rec_i+1; i++) {
         io_binary_write_record_to_file2(&recs[i], ofile_fd);
     }

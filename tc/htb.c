@@ -99,7 +99,8 @@ uint32_t bandwidth;
 	dprintf(("[htb_class_opt] opt.ceil.rate = %u\n", opt.ceil.rate));
 	dprintf(("[htb_class_opt] opt.cbuffer = %u\n", opt.cbuffer));
 
-    opt.quantum = opt.rate.rate * 8 / 1500;
+    //opt.quantum = opt.rate.rate * 8 / 1500;
+    opt.quantum = 1500;
     dprintf(("[htb_class_opt] opt.quantum = %u\n", opt.quantum));
 
     tail = NLMSG_TAIL(n);

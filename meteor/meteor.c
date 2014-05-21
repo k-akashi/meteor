@@ -122,6 +122,7 @@ typedef struct {
 int32_t assign_id = FIRST_NODE_ID;
 int32_t division = 1;
 int32_t re_flag = -1;
+int32_t print_flag = 1;
 
 #ifdef __linux
 int config_netem = TRUE;
@@ -530,7 +531,7 @@ char **argv;
     }
 
     i = 0;
-    while((ch = getopt(argc, argv, "a:b:c:d:D:e:f:F:hi:I:lm:MNp:q:Q:r:Rs:t:T:p:")) != -1) {
+    while((ch = getopt(argc, argv, "a:b:c:d:D:e:f:F:hi:I:lm:MNp:Pq:Q:r:Rs:t:T:p:")) != -1) {
         switch(ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -623,6 +624,9 @@ char **argv;
                     WARNING("Invalid pipe_number '%s'", optarg);
                     exit(1);
                 }
+                break;
+            case 'P':
+                print_flag = 0;
                 break;
             case 'q':
                 if(sc_type == BIN_SC) {
@@ -950,18 +954,21 @@ char **argv;
             WARNING("Aborting on input error (binary header)");
             exit(1);
         }
-        io_binary_print_header(&bin_hdr);
-        if(direction == DIRECTION_BR) {
-            fprintf(stdout, "Direction Mode: Bridge\n");
-        }
-        else if(direction == DIRECTION_HV) {
-            fprintf(stdout, "Direction Mode: HyperVisor\n");
-        }
-        else if(direction == DIRECTION_IN) {
-            fprintf(stdout, "Direction Mode: In\n");
-        }
-        else if(direction == DIRECTION_OUT) {
-            fprintf(stdout, "Direction Mode: Out\n");
+        if(print_flag == 1) {
+            io_binary_print_header(&bin_hdr);
+
+            if(direction == DIRECTION_BR) {
+                fprintf(stdout, "Direction Mode: Bridge\n");
+            }
+            else if(direction == DIRECTION_HV) {
+                fprintf(stdout, "Direction Mode: HyperVisor\n");
+            }
+            else if(direction == DIRECTION_IN) {
+                fprintf(stdout, "Direction Mode: In\n");
+            }
+            else if(direction == DIRECTION_OUT) {
+                fprintf(stdout, "Direction Mode: Out\n");
+            }
         }
 
         if(all_node_cnt != bin_hdr.if_num) {
@@ -1270,7 +1277,7 @@ char **argv;
                 uint32_t rec_index;
                 int32_t conf_rule_num;
                 int32_t ret;
-//                TCHK_START(time);
+                TCHK_START(time);
                 if(direction == DIRECTION_BR) {
                     conn_list = conn_list_head;
                     while(conn_list != NULL) {
@@ -1290,7 +1297,10 @@ char **argv;
                         delay = adjusted_recs_ucast[next_hop_id].delay;
                         lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
+                        
+//                        TCHK_START(time);
                         ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
+//                        TCHK_END(time);
                         if(ret != SUCCESS) {
                             fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                             exit(1);
@@ -1325,7 +1335,9 @@ char **argv;
                             delay = adjusted_recs_ucast[next_hop_id].delay;
                             lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
+//                            TCHK_START(time);
                             ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
+//                            TCHK_END(time);
                             if(ret != SUCCESS) {
                                 fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                                 exit(1);
@@ -1340,7 +1352,6 @@ char **argv;
                                 re_flag = FALSE;
                                 goto emulation_start;
                             }
-
                         }
                     }
                 }
@@ -1391,14 +1402,17 @@ char **argv;
                                 MIN_PIPE_ID_OUT + node_i, my_id, node_i, next_hop_id, 
                                 ipaddrs_c + (node_i - assign_id) * IP_ADDR_SIZE, crt_record_time);
                         }
-                        if(configure_rule(dsock, daddr, MIN_PIPE_ID_OUT + node_i, 
-                                bandwidth, delay, lossrate) == ERROR) {
+//                        TCHK_START(time);
+                        ret = configure_rule(dsock, daddr, MIN_PIPE_ID_OUT + node_i, 
+                                bandwidth, delay, lossrate);
+//                        TCHK_END(time);
+                        if(ret == ERROR) {
                             WARNING("Error configuring UCAST pipe %d.", MIN_PIPE_ID_OUT + node_i);
                             exit (1);
                         }
                     }
                 }
-//                TCHK_END(time);
+                TCHK_END(time);
 
                 if(direction != DIRECTION_HV && direction != DIRECTION_BR && direction != DIRECTION_IN) {
                     for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {

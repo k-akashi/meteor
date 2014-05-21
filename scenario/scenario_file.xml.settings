@@ -1,3 +1,3 @@
-node_ap interface0 0 aaa.bbb.ccc.ddd/32 AA:BB:CC:DD:EE:FF
-node_r interface0 1 aaa.bbb.ccc.ddd/32 AA:BB:CC:DD:EE:FF
-node_s interface0 2 aaa.bbb.ccc.ddd/32 AA:BB:CC:DD:EE:FF
+node0 interface0 0 172.16.0.1/32 00:00:00:00:00:01
+node1 interface0 1 172.16.0.2/32 00:00:00:00:00:02
+node2 interface0 2 172.16.0.3/32 00:00:00:00:00:03
