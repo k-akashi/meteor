@@ -1,6 +1,5 @@
 # METEOR Usage
 
----
 # Require
 
 * OS
@@ -10,14 +9,12 @@ Gentoo Linux
 * Packages:
 gcc, clang, libexpat
 
----
 # Download, Compile 
 
-# git clone https://github.com/k-akashi/meteor.git
-# cd meteor
-# make
+\# git clone https://github.com/k-akashi/meteor.git
+\# cd meteor
+\# make
 
----
 # Example
 
 * Scenario create
