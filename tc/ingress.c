@@ -31,17 +31,17 @@ char *dev;
         struct tcmsg    t;
         char            buf[TCA_BUF_MAX];
     } req;
-    memset(&req, 0, sizeof(req));
+    memset(&req, 0, sizeof (req));
 
     flags = NLM_F_EXCL|NLM_F_CREATE;
     dprintf(("[add_htb_qdisc] Ingress Interface : %s\n", dev));
-    strncpy(device, dev, sizeof(device) - 1);
+    strncpy(device, dev, sizeof (device) - 1);
 
-    if(tc_core_init() < 0) {
+    if (tc_core_init() < 0) {
         fprintf(stderr, "Missing tc core init\n");
     }
 
-    req.n.nlmsg_len   = NLMSG_LENGTH(sizeof(struct tcmsg));
+    req.n.nlmsg_len   = NLMSG_LENGTH(sizeof (struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type  = RTM_NEWQDISC;
     req.t.tcm_family  = AF_UNSPEC;
@@ -50,13 +50,13 @@ char *dev;
     req.t.tcm_handle = 0xffff0000;
     dprintf(("[add_ingress_qdisc] parent id = %d\n", req.t.tcm_parent));
     dprintf(("[add_ingress_qdisc] handle id = %d\n", req.t.tcm_handle));
-    addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+    addattr_l(&req.n, sizeof (req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
-    if(dev) {
+    if (dev) {
         int idx;
 
 //        ll_init_map(&rth);
-        if((idx = ll_name_to_index(dev)) == 0) {
+        if ((idx = ll_name_to_index(dev)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", dev);
             return 1;
         }
@@ -64,7 +64,7 @@ char *dev;
         dprintf(("[add_htb_qdisc] Ingress ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return 2;
     }
 
@@ -84,11 +84,11 @@ int offmask;
     int hwm = sel->nkeys;
 
     key &= mask;
-    for(i = 0; i < hwm; i++) {
-        if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
+    for (i = 0; i < hwm; i++) {
+        if (sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
             uint32_t intersect = mask&sel->keys[i].mask;
 
-            if((key ^ sel->keys[i].val) & intersect) {
+            if ((key ^ sel->keys[i].val) & intersect) {
                 return -1;
             }
             sel->keys[i].val |= key;
@@ -98,10 +98,10 @@ int offmask;
         }
     }
 
-    if(hwm >= 128) {
+    if (hwm >= 128) {
         return -1;
     }
-    if(off % 4) {
+    if (off % 4) {
         return -1;
     }
     sel->keys[hwm].val = key;
@@ -121,7 +121,7 @@ char *ifb;
     struct tc_mirred p;
     struct rtattr *tail;
 
-    memset(&p, 0, sizeof(struct tc_mirred));
+    memset(&p, 0, sizeof (struct tc_mirred));
 
     p.eaction = TCA_EGRESS_REDIR;
     p.action = TC_ACT_STOLEN;
@@ -133,7 +133,7 @@ char *ifb;
 
     tail = NLMSG_TAIL(n);
     addattr_l(n, MAX_MSG, TCA_ACT_OPTIONS, NULL, 0);
-    addattr_l(n, MAX_MSG, TCA_MIRRED_PARMS, &p, sizeof(p));
+    addattr_l(n, MAX_MSG, TCA_MIRRED_PARMS, &p, sizeof (p));
     tail->rta_len = (void *)NLMSG_TAIL(n) - (void *)tail;
 
     return 0;
@@ -177,7 +177,7 @@ char* ifb;
         struct tc_u32_sel sel;
         struct tc_u32_key keys[128];
     } sel;
-    memset(&sel, 0, sizeof(sel));
+    memset(&sel, 0, sizeof (sel));
 
     tail = NLMSG_TAIL(n);
     addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
@@ -191,7 +191,7 @@ char* ifb;
 
     action_ingress_filter(n, ifb);
 
-    addattr_l(n, MAX_MSG, TCA_U32_SEL, &sel, sizeof(sel.sel) + sel.sel.nkeys * sizeof(struct tc_u32_key));
+    addattr_l(n, MAX_MSG, TCA_U32_SEL, &sel, sizeof (sel.sel) + sel.sel.nkeys * sizeof (struct tc_u32_key));
     tail->rta_len = (void *)NLMSG_TAIL(n) - (void *)tail;
 
     return 0;
@@ -214,11 +214,11 @@ char *ifb;
         char            buf[MAX_MSG];
     } req;
 
-    memset(&req, 0, sizeof(req));
-    est = malloc(sizeof(struct tc_estimator));
-    memset(est, 0, sizeof(struct tc_estimator));
+    memset(&req, 0, sizeof (req));
+    est = malloc(sizeof (struct tc_estimator));
+    memset(est, 0, sizeof (struct tc_estimator));
 
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE;
     req.n.nlmsg_type = RTM_NEWTFILTER;
 
@@ -231,10 +231,10 @@ char *ifb;
     req.t.tcm_parent = 0xffff0000;
     req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
-    addattr_l(&req.n, sizeof(req), TCA_KIND, filter_kind, strlen(filter_kind) + 1);
+    addattr_l(&req.n, sizeof (req), TCA_KIND, filter_kind, strlen(filter_kind) + 1);
 
     ret = u32_ingress_filter(&req.n, ifb);
-    if(ret != 0) {
+    if (ret != 0) {
         return ret;
     }
 
@@ -242,7 +242,7 @@ char *ifb;
     req.t.tcm_ifindex = ll_name_to_index(dev);
 
     ret = rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL);
-    if(ret != 0) {
+    if (ret != 0) {
         return ret;
     }
 

@@ -27,35 +27,35 @@ char* str;
     hash = 0;
     nodeid = 0;
 
-	if(tmp == NULL) {
-		if(memcmp("0x", str, 2) == 0) {
+	if (tmp == NULL) {
+		if (memcmp("0x", str, 2) == 0) {
 			return get_u32(handle, str, 16);
         }
 		return -1;
 	}
 	htid = strtoul(str, &tmp, 16);
-	if(tmp == str && *str != ':' && *str != 0) {
+	if (tmp == str && *str != ':' && *str != 0) {
 		return -1;
     }
-	if(htid >= 0x1000) {
+	if (htid >= 0x1000) {
 		return -1;
     }
-	if(*tmp) {
+	if (*tmp) {
 		str = tmp + 1;
 		hash = strtoul(str, &tmp, 16);
-		if(tmp == str && *str != ':' && *str != 0) {
+		if (tmp == str && *str != ':' && *str != 0) {
 			return -1;
         }
-		if(hash >= 0x100) {
+		if (hash >= 0x100) {
 			return -1;
         }
-		if(*tmp) {
+		if (*tmp) {
 			str = tmp + 1;
 			nodeid = strtoul(str, &tmp, 16);
-			if(tmp == str && *str != 0) {
+			if (tmp == str && *str != 0) {
 				return -1;
             }
-			if(nodeid >= 0x1000) {
+			if (nodeid >= 0x1000) {
 				return -1;
             }
 		}
@@ -77,11 +77,11 @@ int offmask;
 
 	key &= mask;
 
-	for(i = 0; i < hwm; i++) {
-		if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
+	for (i = 0; i < hwm; i++) {
+		if (sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
 			uint32_t intersect = mask&sel->keys[i].mask;
 
-			if((key ^ sel->keys[i].val) & intersect) {
+			if ((key ^ sel->keys[i].val) & intersect) {
 				return -1;
             }
 			sel->keys[i].val |= key;
@@ -91,10 +91,10 @@ int offmask;
 		}
 	}
 
-	if(hwm >= 128) {
+	if (hwm >= 128) {
 		return -1;
     }
-	if(off % 4) {
+	if (off % 4) {
 		return -1;
     }
 	sel->keys[hwm].val = key;
@@ -128,11 +128,11 @@ uint32_t mask;
 int off;
 int offmask;
 {
-	if(key > 0xFFFF || mask > 0xFFFF) {
+	if (key > 0xFFFF || mask > 0xFFFF) {
 		return -1;
     }
 
-	if((off & 3) == 0) {
+	if ((off & 3) == 0) {
 		key <<= 16;
 		mask <<= 16;
 	}
@@ -152,19 +152,19 @@ uint32_t mask;
 int off;
 int offmask;
 {
-	if(key > 0xFF || mask > 0xFF) {
+	if (key > 0xFF || mask > 0xFF) {
 		return -1;
     }
 
-	if((off & 3) == 0) {
+	if ((off & 3) == 0) {
 		key <<= 24;
 		mask <<= 24;
 	}
-    else if((off & 3) == 1) {
+    else if ((off & 3) == 1) {
 		key <<= 16;
 		mask <<= 16;
 	}
-    else if((off & 3) == 2) {
+    else if ((off & 3) == 2) {
 		key <<= 8;
 		mask <<= 8;
 	}
@@ -182,7 +182,7 @@ parse_at(off, offmask)
 int *off;
 int *offmask;
 {
-	if(get_integer(off, offmask, 0)) {
+	if (get_integer(off, offmask, 0)) {
 		return -1;
     }
 	return 0;
@@ -198,15 +198,15 @@ int offmask;
 	uint32_t key;
 	uint32_t mask;
 
-	if(get_u32(&key, "0", 0)) {
+	if (get_u32(&key, "0", 0)) {
 		return -1;
     }
-	if(get_u32(&mask, "0", 16)) {
+	if (get_u32(&mask, "0", 16)) {
 		return -1;
     }
 
 /* at
-	if(parse_at(&argc, &argv, &off, &offmask)) {
+	if (parse_at(&argc, &argv, &off, &offmask)) {
 		return -1;
 	}
 */
@@ -226,15 +226,15 @@ int offmask;
 	uint32_t key;
 	uint32_t mask;
 
-	if(get_u32(&key, "0", 0)) {
+	if (get_u32(&key, "0", 0)) {
 		return -1;
     }
-	if(get_u32(&mask, "0", 16)) {
+	if (get_u32(&mask, "0", 16)) {
 		return -1;
     }
 
 /*
-    if(parse_at(&argc, &argv, &off, &offmask)) {
+    if (parse_at(&argc, &argv, &off, &offmask)) {
         return -1;
 	}
 */
@@ -254,15 +254,15 @@ int offmask;
 	uint32_t key;
 	uint32_t mask;
 
-	if(get_u32(&key, "0", 0)) {
+	if (get_u32(&key, "0", 0)) {
 		return -1;
     }
-	if(get_u32(&mask, "0", 16)) {
+	if (get_u32(&mask, "0", 16)) {
 		return -1;
     }
 
 /*
-    if(parse_at(&argc, &argv, &off, &offmask)) {
+    if (parse_at(&argc, &argv, &off, &offmask)) {
         return -1;
 	}
 */
@@ -283,21 +283,21 @@ int off;
 	uint32_t mask;
 	int offmask = 0;
 
-	if(get_prefix_1(&addr, match.arg, AF_INET)) {
+	if (get_prefix_1(&addr, match.arg, AF_INET)) {
 		return -1;
     }
 
 /* at
-    if(parse_at(match.at, &off, &offmask)) {
+    if (parse_at(match.at, &off, &offmask)) {
 			return -1;
 	}
 */
 
 	mask = 0;
-	if(addr.bitlen) {
+	if (addr.bitlen) {
 		mask = htonl(0xFFFFFFFF << (32 - addr.bitlen));
     }
-	if(pack_key(sel, addr.data[0], mask, off, offmask) < 0) {
+	if (pack_key(sel, addr.data[0], mask, off, offmask) < 0) {
 		return -1;
     }
 	res = 0;
@@ -321,28 +321,28 @@ int off;
     plen = 128;
     offmask = 0;
 
-	if(get_prefix_1(&addr, match.arg, AF_INET6)) {
+	if (get_prefix_1(&addr, match.arg, AF_INET6)) {
 		return -1;
     }
 
 /*
-    if(parse_at(match.at, &off, &offmask)) {
+    if (parse_at(match.at, &off, &offmask)) {
         return -1;
 	}
 */
 
 	plen = addr.bitlen;
 
-	for(i = 0; i < plen; i += 32) {
-//		if(((i + 31) &~ 0x1F) <= plen) {
-		if(((i + 31)) <= plen) {
-			if((res = pack_key(sel, addr.data[i / 32], 0xFFFFFFFF, off + 4 * (i/32), offmask)) < 0) {
+	for (i = 0; i < plen; i += 32) {
+//		if (((i + 31) &~ 0x1F) <= plen) {
+		if (((i + 31)) <= plen) {
+			if ((res = pack_key(sel, addr.data[i / 32], 0xFFFFFFFF, off + 4 * (i/32), offmask)) < 0) {
 				return -1;
             }
 		}
-        else if(i < plen) {
+        else if (i < plen) {
 			uint32_t mask = htonl(0xFFFFFFFF << (32 - (plen - i)));
-			if((res = pack_key(sel, addr.data[i /32], mask, off + 4 * (i / 32), offmask)) < 0) {
+			if ((res = pack_key(sel, addr.data[i /32], mask, off + 4 * (i / 32), offmask)) < 0) {
 				return -1;
             }
 		}
@@ -362,7 +362,7 @@ int off;
     uint8_t addr[6];
     int i; 
            
-    if(sscanf(match.arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+    if (sscanf(match.arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
            addr + 0, addr + 1, addr + 2,
            addr + 3, addr + 4, addr + 5) != 6) {
         fprintf(stderr, "parse_ether_addr: improperly formed address '%s'\n", match.arg); 
@@ -371,7 +371,7 @@ int off;
             
     for (i = 0; i < 6; i++) {
         res = pack_key8(sel, addr[i], 0xFF, off + i, match.offmask);
-        if(res < 0) {
+        if (res < 0) {
             return -1;
         }
     }
@@ -386,11 +386,11 @@ struct tc_u32_sel *sel;
 {
     int res = -1;
 
-	if(strcmp(match.filter, "src") == 0) {
+	if (strcmp(match.filter, "src") == 0) {
 		res = parse_ether_addr(match, sel, -8);
         return res;
 	}
-	if(strcmp(match.filter, "dst") == 0) {
+	if (strcmp(match.filter, "dst") == 0) {
 		res = parse_ether_addr(match, sel, -14);
         return res;
 	}
@@ -405,59 +405,59 @@ struct tc_u32_sel *sel;
 {
 	int res = -1;
 
-	if(strcmp(match.filter, "src") == 0) {
+	if (strcmp(match.filter, "src") == 0) {
 		res = parse_ip_addr(match, sel, 12);
         return res;
 	}
-	if(strcmp(match.filter, "dst") == 0) {
+	if (strcmp(match.filter, "dst") == 0) {
 		res = parse_ip_addr(match, sel, 16);
         return res;
 	}
-	if(strcmp(match.filter, "tos") == 0 || matches(match.filter, "dsfield") == 0) {
+	if (strcmp(match.filter, "tos") == 0 || matches(match.filter, "dsfield") == 0) {
 		res = parse_u8(match, sel, 1, 0);
         return res;
 	}
-	if(strcmp(match.filter, "ihl") == 0) {
+	if (strcmp(match.filter, "ihl") == 0) {
 		res = parse_u8(match, sel, 0, 0);
         return res;
 	}
-	if(strcmp(match.filter, "protocol") == 0) {
+	if (strcmp(match.filter, "protocol") == 0) {
 		res = parse_u8(match, sel, 9, 0);
         return res;
 	}
-	if(matches(match.filter, "precedence") == 0) {
+	if (matches(match.filter, "precedence") == 0) {
 		res = parse_u8(match, sel, 1, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "nofrag") == 0) {
+	if (strcmp(match.filter, "nofrag") == 0) {
 		res = pack_key16(sel, 0, 0x3FFF, 6, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "firstfrag") == 0) {
+	if (strcmp(match.filter, "firstfrag") == 0) {
 		res = pack_key16(sel, 0, 0x1FFF, 6, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "df") == 0) {
+	if (strcmp(match.filter, "df") == 0) {
 		res = pack_key16(sel, 0x4000, 0x4000, 6, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "mf") == 0) {
+	if (strcmp(match.filter, "mf") == 0) {
 		res = pack_key16(sel, 0x2000, 0x2000, 6, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "dport") == 0) {
+	if (strcmp(match.filter, "dport") == 0) {
 		res = parse_u16(match, sel, 22, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "sport") == 0) {
+	if (strcmp(match.filter, "sport") == 0) {
 		res = parse_u16(match, sel, 20, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "icmp_type") == 0) {
+	if (strcmp(match.filter, "icmp_type") == 0) {
 		res = parse_u8(match, sel, 20, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "icmp_code") == 0) {
+	if (strcmp(match.filter, "icmp_code") == 0) {
 		res = parse_u8(match, sel, 20, 1);
 		return res;
 	}
@@ -472,39 +472,39 @@ struct tc_u32_sel *sel;
 {
 	int res = -1;
 
-	if(strcmp(match.filter, "src") == 0) {
+	if (strcmp(match.filter, "src") == 0) {
 		res = parse_ip6_addr(match, sel, 8);
 		return res;
 	}
-	if(strcmp(match.filter, "dst") == 0) {
+	if (strcmp(match.filter, "dst") == 0) {
 		res = parse_ip6_addr(match, sel, 24);
 		return res;
 	}
-	if(strcmp(match.filter, "priority") == 0) {
+	if (strcmp(match.filter, "priority") == 0) {
 		res = parse_u8(match, sel, 4, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "protocol") == 0) {
+	if (strcmp(match.filter, "protocol") == 0) {
 		res = parse_u8(match, sel, 6, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "flowlabel") == 0) {
+	if (strcmp(match.filter, "flowlabel") == 0) {
 		res = parse_u32(match, sel, 0, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "dport") == 0) {
+	if (strcmp(match.filter, "dport") == 0) {
 		res = parse_u16(match, sel, 42, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "sport") == 0) {
+	if (strcmp(match.filter, "sport") == 0) {
 		res = parse_u16(match, sel, 40, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "icmp_type") == 0) {
+	if (strcmp(match.filter, "icmp_type") == 0) {
 		res = parse_u8(match, sel, 40, 0);
 		return res;
 	}
-	if(strcmp(match.filter, "icmp_code") == 0) {
+	if (strcmp(match.filter, "icmp_code") == 0) {
 		res = parse_u8(match, sel, 41, 1);
 		return res;
 	}
@@ -520,11 +520,11 @@ struct tc_u32_sel *sel;
 {
 	int res = -1;
 
-	if(strcmp(match.filter, "src") == 0) {
+	if (strcmp(match.filter, "src") == 0) {
 		res = parse_u16(match, sel, 0, -1);
         return res;
 	}
-	if(strcmp(match.filter, "dst") == 0) {
+	if (strcmp(match.filter, "dst") == 0) {
 		res = parse_u16(match, sel, 2, -1);
 	    return res;
 	}
@@ -540,11 +540,11 @@ struct tc_u32_sel *sel;
 {
 	int res = -1;
 
-	if(strcmp(match.filter, "type") == 0) {
+	if (strcmp(match.filter, "type") == 0) {
 		res = parse_u8(match, sel, 0, -1);
         return res;
 	}
-	if(strcmp(match.filter, "code") == 0) {
+	if (strcmp(match.filter, "code") == 0) {
 		res = parse_u8(match, sel, 1, -1);
         return res;
 	}
@@ -559,27 +559,27 @@ static int parse_mark(int *argc_p, char ***argv_p, struct nlmsghdr *n)
 	char **argv = *argv_p;
 	struct tc_u32_mark mark;
 
-	if(argc <= 1)
+	if (argc <= 1)
 		return -1;
 
-	if(get_u32(&mark.val, *argv, 0)) {
+	if (get_u32(&mark.val, *argv, 0)) {
 		fprintf(stderr, "Illegal \"mark\" value\n");
 		return -1;
 	}
 	NEXT_ARG();
 
-	if(get_u32(&mark.mask, *argv, 0)) {
+	if (get_u32(&mark.mask, *argv, 0)) {
 		fprintf(stderr, "Illegal \"mark\" mask\n");
 		return -1;
 	}
 	NEXT_ARG();
 
-	if((mark.val & mark.mask) != mark.val) {
+	if ((mark.val & mark.mask) != mark.val) {
 		fprintf(stderr, "Illegal \"mark\" (impossible combination)\n");
 		return -1;
 	}
 
-	addattr_l(n, MAX_MSG, TCA_U32_MARK, &mark, sizeof(mark));
+	addattr_l(n, MAX_MSG, TCA_U32_MARK, &mark, sizeof (mark));
 	res = 0;
 
 	*argc_p = argc;
@@ -597,47 +597,47 @@ struct nlmsghdr *n;
 	int res = -1;
 
     dprintf(("[parse_selector] match.proto : %s\n", match.proto));
-	if(matches(match.proto, "u32") == 0) {
+	if (matches(match.proto, "u32") == 0) {
 		res = parse_u32(sel, 0, 0);
 	    return res;
 	}
-	if(matches(match.proto, "u16") == 0) {
+	if (matches(match.proto, "u16") == 0) {
 		res = parse_u16(match, sel, 0, 0);
 	    return res;
 	}
-	if(matches(match.proto, "u8") == 0) {
+	if (matches(match.proto, "u8") == 0) {
 		res = parse_u8(match, sel, 0, 0);
 	    return res;
 	}
-    if(matches(match.proto, "ether") == 0) {
+    if (matches(match.proto, "ether") == 0) {
         res = parse_ether(match, sel);
         return res;
     }
-	if(matches(match.proto, "ip") == 0) {
+	if (matches(match.proto, "ip") == 0) {
 		res = parse_ip(match, sel);
 	    return res;
 	}
-	if(matches(match.proto, "ip6") == 0) {
+	if (matches(match.proto, "ip6") == 0) {
 		res = parse_ip6(match, sel);
 	    return res;
 	}
 /*
-	if(matches(*argv, "udp") == 0) {
+	if (matches(*argv, "udp") == 0) {
 		NEXT_ARG();
 		res = parse_udp(&argc, &argv, sel);
 	    return res;
 	}
-	if(matches(*argv, "tcp") == 0) {
+	if (matches(*argv, "tcp") == 0) {
 		NEXT_ARG();
 		res = parse_tcp(&argc, &argv, sel);
 	    return res;
 	}
-	if(matches(*argv, "icmp") == 0) {
+	if (matches(*argv, "icmp") == 0) {
 		NEXT_ARG();
 		res = parse_icmp(&argc, &argv, sel);
 	    return res;
 	}
-	if(matches(*argv, "mark") == 0) {
+	if (matches(*argv, "mark") == 0) {
 		NEXT_ARG();
 		res = parse_mark(&argc, &argv, n);
 	    return res;
@@ -653,42 +653,42 @@ parse_offset(match, sel)
 struct filter_match match;
 struct tc_u32_sel *sel;
 {
-    if(matches(match.filter, "plus") == 0) {
+    if (matches(match.filter, "plus") == 0) {
         int off;
-        if(get_integer(&off, match.arg, 0)) {
+        if (get_integer(&off, match.arg, 0)) {
             return -1;
         }
         sel->off = off;
         sel->flags |= TC_U32_OFFSET;
     }
-    else if(matches(match.filter, "at") == 0) {
+    else if (matches(match.filter, "at") == 0) {
         int off;
-        if(get_integer(&off, match.arg, 0)) {
+        if (get_integer(&off, match.arg, 0)) {
             return -1;
         }
         sel->offoff = off;
-        if(off % 2) {
+        if (off % 2) {
             return -1;
         }
         sel->flags |= TC_U32_VAROFFSET;
     }
-    else if(matches(match.filter, "mask") == 0) {
+    else if (matches(match.filter, "mask") == 0) {
 		uint16_t mask;
-		if(get_u16(&mask, match.arg, 16)) {
+		if (get_u16(&mask, match.arg, 16)) {
 			return -1;
         }
 		sel->offmask = htons(mask);
 		sel->flags |= TC_U32_VAROFFSET;
 	}
-    else if(matches(match.filter, "shift") == 0) {
+    else if (matches(match.filter, "shift") == 0) {
 		int shift;
-		if(get_integer(&shift, match.arg, 0)) {
+		if (get_integer(&shift, match.arg, 0)) {
 			return -1;
         }
 		sel->offshift = shift;
 		sel->flags |= TC_U32_VAROFFSET;
 	}
-    else if(matches(match.filter, "eat") == 0) {
+    else if (matches(match.filter, "eat") == 0) {
 		sel->flags |= TC_U32_EAT;
 	}
 
@@ -700,19 +700,19 @@ parse_hashkey(match, sel)
 struct filter_match match;
 struct tc_u32_sel *sel;
 {
-	if(matches(match.filter, "mask") == 0) {
+	if (matches(match.filter, "mask") == 0) {
 		uint32_t mask;
-		if(get_u32(&mask, match.arg, 16)) {
+		if (get_u32(&mask, match.arg, 16)) {
 			return -1;
         }
 		sel->hmask = htonl(mask);
 	}
-    else if(matches(match.filter, "at") == 0) {
+    else if (matches(match.filter, "at") == 0) {
 		int num;
-		if(get_integer(&num, match.arg, 0)) {
+		if (get_integer(&num, match.arg, 0)) {
 			return -1;
         }
-		if(num % 4) {
+		if (num % 4) {
 			return -1;
         }
 		sel->hoff = num;
@@ -739,7 +739,7 @@ char* dev;
 		struct tc_u32_key keys[128];
 	} sel;
 
-	memset(&sel, 0, sizeof(sel));
+	memset(&sel, 0, sizeof (sel));
 
     dprintf(("[u32_filter_parse] initalize\n"));
     dprintf(("[u32_filter_parse] handle : %d\n", handle));
@@ -748,82 +748,82 @@ char* dev;
 	tail = NLMSG_TAIL(n);
 	addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
-    for(i = 0; i < FILTER_MAX; i++) {
-        if(!up.match[i].type) {
+    for (i = 0; i < FILTER_MAX; i++) {
+        if (!up.match[i].type) {
             continue;
         }
-    	if(up.match[i].type) {
-    		if(parse_selector(up.match[i], &sel.sel, n)) {
+    	if (up.match[i].type) {
+    		if (parse_selector(up.match[i], &sel.sel, n)) {
     			fprintf(stderr, "Illegal \"match\"\n");
     			return -1;
     		}
     		sel_ok++;
     	}
     }
-	if(up.classid) {
+	if (up.classid) {
 		unsigned classid;
         classid = TC_HANDLE(up.classid[0], up.classid[1]);
 		addattr_l(n, MAX_MSG, TCA_U32_CLASSID, &classid, 4);
 		sel.sel.flags |= TC_U32_TERMINAL;
         dprintf(("[u32_filter_parse] classid : %d\n", classid));
 	}
-	if(up.divisor) {
+	if (up.divisor) {
 		unsigned divisor;
-		if(get_unsigned(&divisor, up.divisor, 0) || divisor == 0 || divisor > 0x100 || ((divisor - 1) & divisor)) {
+		if (get_unsigned(&divisor, up.divisor, 0) || divisor == 0 || divisor > 0x100 || ((divisor - 1) & divisor)) {
 			fprintf(stderr, "Illegal \"divisor\"\n");
 			return -1;
 		}
 		addattr_l(n, MAX_MSG, TCA_U32_DIVISOR, &divisor, 4);
 	}
-	if(up.order) {
-		if(get_u32(&order, up.order, 0)) {
+	if (up.order) {
+		if (get_u32(&order, up.order, 0)) {
 			fprintf(stderr, "Illegal \"order\"\n");
 			return -1;
 		}
 	}
-	if(up.link) {
+	if (up.link) {
 		unsigned link;
-		if(get_u32_handle(&link, up.link)) {
+		if (get_u32_handle(&link, up.link)) {
 			fprintf(stderr, "Illegal \"link\"\n");
 			return -1;
 		}
-		if(link && TC_U32_NODE(link)) {
+		if (link && TC_U32_NODE(link)) {
 			fprintf(stderr, "\"link\" must be a hash table.\n");
 			return -1;
 		}
 		addattr_l(n, MAX_MSG, TCA_U32_LINK, &link, 4);
 	}
-	if(up.ht) {
+	if (up.ht) {
 		unsigned ht;
-		if(get_u32_handle(&ht, up.ht)) {
+		if (get_u32_handle(&ht, up.ht)) {
 			fprintf(stderr, "Illegal \"ht\"\n");
 			return -1;
 		}
-		if(ht && TC_U32_NODE(ht)) {
+		if (ht && TC_U32_NODE(ht)) {
 			fprintf(stderr, "\"ht\" must be a hash table.\n");
 			return -1;
 		}
         htid = (ht & 0xFFFFF000);
 	}
-	if(up.action) {
-		if(parse_action(up.action, TCA_U32_ACT, n, dev)) {
+	if (up.action) {
+		if (parse_action(up.action, TCA_U32_ACT, n, dev)) {
 			fprintf(stderr, "Illegal \"action\"\n");
 			return -1;
 		}
 	}
-	if(order) {
-		if(TC_U32_NODE(t->tcm_handle) && order != TC_U32_NODE(t->tcm_handle)) {
+	if (order) {
+		if (TC_U32_NODE(t->tcm_handle) && order != TC_U32_NODE(t->tcm_handle)) {
 			fprintf(stderr, "\"order\" contradicts \"handle\"\n");
 			return -1;
 		}
 		t->tcm_handle |= order;
 	}
 
-	if(htid) {
+	if (htid) {
 		addattr_l(n, MAX_MSG, TCA_U32_HASH, &htid, 4);
     }
-	if(sel_ok) {
-		addattr_l(n, MAX_MSG, TCA_U32_SEL, &sel, sizeof(sel.sel)+sel.sel.nkeys*sizeof(struct tc_u32_key));
+	if (sel_ok) {
+		addattr_l(n, MAX_MSG, TCA_U32_SEL, &sel, sizeof (sel.sel) + sel.sel.nkeys * sizeof (struct tc_u32_key));
     }
 
 	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;

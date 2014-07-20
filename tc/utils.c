@@ -82,7 +82,7 @@ int get_u32(__u32* val, const char* arg, int base)
 	unsigned long res;
 	char* ptr;
 
-	if(!arg || !*arg) {
+	if (!arg || !*arg) {
 		return -1;
 	}
 
@@ -98,13 +98,13 @@ int get_u16(__u16* val, const char* arg, int base)
 	unsigned long res;
 	char* ptr;
 
-	if(!arg || !*arg)
+	if (!arg || !*arg)
 		return -1;
 	res = strtoul(arg, &ptr, base);
-	if(*ptr) {
+	if (*ptr) {
 		printf("\n\n*ptr\n\n");
 	}
-	if(!ptr || ptr == arg || *ptr || res > 0xFFFF)
+	if (!ptr || ptr == arg || *ptr || res > 0xFFFF)
 		return -1;
 	*val = res;
 	return 0;
@@ -158,7 +158,7 @@ int get_addr_1(inet_prefix* addr, const char* name, int family)
 	unsigned char* ap = (unsigned char*)addr->data;
 	int i;
 
-	memset(addr, 0, sizeof(*addr));
+	memset(addr, 0, sizeof (*addr));
 
 	if (strcmp(name, "default") == 0 ||
 	    strcmp(name, "all") == 0 ||
@@ -206,12 +206,12 @@ get_prefix_1(inet_prefix* dst, char* arg, int family)
 	unsigned plen;
 	char* slash;
 
-	memset(dst, 0, sizeof(*dst));
+	memset(dst, 0, sizeof (*dst));
 
-	if(strcmp(arg, "default") == 0 ||
+	if (strcmp(arg, "default") == 0 ||
     	    strcmp(arg, "any") == 0 ||
 	        strcmp(arg, "all") == 0) {
-		if(family == AF_DECnet) {
+		if (family == AF_DECnet) {
 			return -1;
         }
 		dst->family = family;
@@ -222,13 +222,13 @@ get_prefix_1(inet_prefix* dst, char* arg, int family)
 	}
 
 	slash = strchr(arg, '/');
-	if(slash) {
+	if (slash) {
 		*slash = 0;
     }
 
 	err = get_addr_1(dst, arg, family);
 	if (err == 0) {
-		switch(dst->family) {
+		switch (dst->family) {
 			case AF_INET6:
 				dst->bitlen = 128;
 				break;
@@ -239,8 +239,8 @@ get_prefix_1(inet_prefix* dst, char* arg, int family)
 			case AF_INET:
 				dst->bitlen = 32;
 		}
-		if(slash) {
-			if(get_unsigned(&plen, slash + 1, 0) || plen > dst->bitlen) {
+		if (slash) {
+			if (get_unsigned(&plen, slash + 1, 0) || plen > dst->bitlen) {
 				err = -1;
 				goto done;
 			}
@@ -369,9 +369,9 @@ __get_hz(void)
 		return atoi(getenv("HZ")) ? : HZ;
 
 	if (getenv("PROC_NET_PSCHED")) {
-		snprintf(name, sizeof(name) - 1, "%s", getenv("PROC_NET_PSCHED"));
+		snprintf(name, sizeof (name) - 1, "%s", getenv("PROC_NET_PSCHED"));
 	} else if (getenv("PROC_ROOT")) {
-		snprintf(name, sizeof(name) - 1, "%s/net/psched", getenv("PROC_ROOT"));
+		snprintf(name, sizeof (name) - 1, "%s/net/psched", getenv("PROC_ROOT"));
 	} else {
 		strcpy(name, "/proc/net/psched");
 	}
@@ -440,7 +440,7 @@ char* resolve_address(const char* addr, int len, int af)
 		    memcmp(n->addr.data, addr, len) == 0)
 			return n->name;
 	}
-	if ((n = malloc(sizeof(*n))) == NULL)
+	if ((n = malloc(sizeof (*n))) == NULL)
 		return NULL;
 	n->addr.family = af;
 	n->addr.bytelen = len;
@@ -559,7 +559,7 @@ int print_timestamp(FILE *fp)
 	struct timeval tv;
 	char* tstr;
 
-	memset(&tv, 0, sizeof(tv));
+	memset(&tv, 0, sizeof (tv));
 	gettimeofday(&tv, NULL);
 
 	tstr = asctime(localtime(&tv.tv_sec));

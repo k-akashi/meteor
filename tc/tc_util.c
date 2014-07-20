@@ -33,13 +33,13 @@ const char* str;
 	char*    p;
 
 	maj = TC_H_UNSPEC;
-	if(strcmp(str, "none") == 0)
+	if (strcmp(str, "none") == 0)
 		goto ok;
 	maj = strtoul(str, &p, 16);
-	if(p == str)
+	if (p == str)
 		return -1;
 	maj <<= 16;
-	if(*p != ':' && *p!=0)
+	if (*p != ':' && *p!=0)
 		return -1;
 ok:
 	*h = maj;
@@ -57,30 +57,30 @@ const char* str;
 
 	dprintf(("[get_tc_classid] Parent ID = %s\n", str));
 	maj = TC_H_ROOT;
-	if(strcmp(str, "root") == 0)
+	if (strcmp(str, "root") == 0)
 		goto ok;
 	maj = TC_H_UNSPEC;
-	if(strcmp(str, "none") == 0)
+	if (strcmp(str, "none") == 0)
 		goto ok;
 	maj = strtoul(str, &p, 16);
-	if(p == str) {
+	if (p == str) {
 		maj = 0;
-		if(*p != ':')
+		if (*p != ':')
 			return -1;
 	}
-	if(*p == ':') {
+	if (*p == ':') {
 		dprintf(("[get_tc_classid] Leaf ID = %s\n", p));
-		if(maj >= (1<<16))
+		if (maj >= (1<<16))
 			return -1;
         maj <<= 16;
         str = p + 1;
         min = strtoul(str, &p, 16);
-		if(*p != 0)
+		if (*p != 0)
 			return -1;
-		if(min >= (1 << 16))
+		if (min >= (1 << 16))
 			return -1;
 		maj |= min;
-	} else if(*p != 0)
+	} else if (*p != 0)
 		return -1;
 
 ok:
@@ -123,16 +123,16 @@ const char* str;
 	double bps = strtod(str, &p);
 	const struct rate_suffix* s;
 
-	if(p == str)
+	if (p == str)
 		return -1;
 
-	if(*p == '\0') {
+	if (*p == '\0') {
 		*rate = bps / 8.;	/* assume bytes/sec */
 		return 0;
 	}
 
 	for (s = suffixes; s->name; ++s) {
-		if(strcasecmp(s->name, p) == 0) {
+		if (strcasecmp(s->name, p) == 0) {
 			*rate = (bps * s->scale) / 8.;
 			return 0;
 		}
@@ -150,17 +150,17 @@ uint32_t rate;
 	double tmp = (double)rate * 8;
 	extern int use_iec;
 
-	if(use_iec) {
-		if(tmp >= 1000.0 * 1024.0 * 1024.0)
+	if (use_iec) {
+		if (tmp >= 1000.0 * 1024.0 * 1024.0)
 			snprintf(buf, len, "%.0fMibit", tmp / 1024.0 * 1024.0);
-		else if(tmp >= 1000.0 * 1024)
+		else if (tmp >= 1000.0 * 1024)
 			snprintf(buf, len, "%.0fKibit", tmp / 1024);
 		else
 			snprintf(buf, len, "%.0fbit", tmp);
 	} else {
-		if(tmp >= 1000.0 * 1000000.0)
+		if (tmp >= 1000.0 * 1000000.0)
 			snprintf(buf, len, "%.0fMbit", tmp / 1000000.0);
-		else if(tmp >= 1000.0 * 1000.0)
+		else if (tmp >= 1000.0 * 1000.0)
 			snprintf(buf, len, "%.0fKbit", tmp / 1000.0);
 		else
 			snprintf(buf, len, "%.0fbit",  tmp);
@@ -185,15 +185,15 @@ const char* str;
 	char* p;
 
 	t = strtod(str, &p);
-	if(p == str)
+	if (p == str)
 		return -1;
 
-	if(*p) {
-		if(strcasecmp(p, "s") == 0 || strcasecmp(p, "sec")==0 || strcasecmp(p, "secs") == 0)
+	if (*p) {
+		if (strcasecmp(p, "s") == 0 || strcasecmp(p, "sec")==0 || strcasecmp(p, "secs") == 0)
 			t *= 1000000;
-		else if(strcasecmp(p, "ms") == 0 || strcasecmp(p, "msec")==0 || strcasecmp(p, "msecs") == 0)
+		else if (strcasecmp(p, "ms") == 0 || strcasecmp(p, "msec")==0 || strcasecmp(p, "msecs") == 0)
 			t *= 1000;
-		else if(strcasecmp(p, "us") == 0 || strcasecmp(p, "usec")==0 || strcasecmp(p, "usecs") == 0)
+		else if (strcasecmp(p, "us") == 0 || strcasecmp(p, "usec")==0 || strcasecmp(p, "usecs") == 0)
 			t *= 1;
 		else
 			return -1;
@@ -212,23 +212,23 @@ char* str;
 	char *p;
 
 	sz = strtod(str, &p);
-	if(p == str)
+	if (p == str)
 		return -1;
 
-	if(*p) {
-		if(strcasecmp(p, "kb") == 0 || strcasecmp(p, "k")==0)
+	if (*p) {
+		if (strcasecmp(p, "kb") == 0 || strcasecmp(p, "k")==0)
 			sz *= 1024;
-		else if(strcasecmp(p, "gb") == 0 || strcasecmp(p, "g")==0)
+		else if (strcasecmp(p, "gb") == 0 || strcasecmp(p, "g")==0)
 			sz *= 1024 * 1024 * 1024;
-		else if(strcasecmp(p, "gbit") == 0)
+		else if (strcasecmp(p, "gbit") == 0)
 			sz *= 1024 * 1024 * 1024 / 8;
-		else if(strcasecmp(p, "mb") == 0 || strcasecmp(p, "m")==0)
+		else if (strcasecmp(p, "mb") == 0 || strcasecmp(p, "m")==0)
 			sz *= 1024 * 1024;
-		else if(strcasecmp(p, "mbit") == 0)
+		else if (strcasecmp(p, "mbit") == 0)
 			sz *= 1024 * 1024 / 8;
-		else if(strcasecmp(p, "kbit") == 0)
+		else if (strcasecmp(p, "kbit") == 0)
 			sz *= 1024 / 8;
-		else if(strcasecmp(p, "b") != 0)
+		else if (strcasecmp(p, "b") != 0)
 			return -1;
 	}
 
@@ -244,22 +244,22 @@ char* str;
 {
 	char* slash = strchr(str, '/');
 
-	if(slash)
+	if (slash)
 		*slash = 0;
 
-	if(get_size(size, str))
+	if (get_size(size, str))
 		return -1;
 
-	if(slash) {
+	if (slash) {
 		int cell;
 		int i;
 
-		if(get_integer(&cell, slash + 1, 0))
+		if (get_integer(&cell, slash + 1, 0))
 			return -1;
 		*slash = '/';
 
 		for (i = 0; i < 32; i++) {
-			if((1 << i) == cell) {
+			if ((1 << i) == cell) {
 				*cell_log = i;
 				return 0;
 			}
@@ -274,9 +274,9 @@ int get_percent(__u32 *percent, const char *str)
 	char *p;
 	double per = strtod(str, &p) / 100.;
 
-	if(per > 1. || per < 0)
+	if (per > 1. || per < 0)
 		return -1;
-	if(*p && strcmp(p, "%"))
+	if (*p && strcmp(p, "%"))
 		return -1;
 
 	*percent = (unsigned) rint(per * max_percent_value);
@@ -318,21 +318,21 @@ int* result;
 {
 	int res;
 
-	if(matches(arg, "continue") == 0)
+	if (matches(arg, "continue") == 0)
 		res = -1;
-	else if(matches(arg, "drop") == 0)
+	else if (matches(arg, "drop") == 0)
 		res = TC_ACT_SHOT;
-	else if(matches(arg, "shot") == 0)
+	else if (matches(arg, "shot") == 0)
 		res = TC_ACT_SHOT;
-	else if(matches(arg, "pass") == 0)
+	else if (matches(arg, "pass") == 0)
 		res = TC_ACT_OK;
-	else if(strcmp(arg, "ok") == 0)
+	else if (strcmp(arg, "ok") == 0)
 		res = TC_ACT_OK;
-	else if(matches(arg, "reclassify") == 0)
+	else if (matches(arg, "reclassify") == 0)
 		res = TC_ACT_RECLASSIFY;
 	else {
 		char dummy;
-		if(sscanf(arg, "%d%c", &res, &dummy) != 1)
+		if (sscanf(arg, "%d%c", &res, &dummy) != 1)
 			return -1;
 	}
 	*result = res;

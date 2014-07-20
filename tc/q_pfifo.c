@@ -33,7 +33,7 @@ struct nlmsghdr* n;
 {
 //	int ok=0;
 	struct tc_fifo_qopt opt;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, sizeof (opt));
 
 	get_size(&opt.limit, "1000");
 
@@ -57,7 +57,7 @@ struct nlmsghdr* n;
 		argc--; argv++;
 	}
 */
-	addattr_l(n, 1024, TCA_OPTIONS, &opt, sizeof(opt));
+	addattr_l(n, 1024, TCA_OPTIONS, &opt, sizeof (opt));
 
 	return 0;
 }

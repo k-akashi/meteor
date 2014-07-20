@@ -95,8 +95,8 @@ int len;
 
 	id = ntohs(id);
 
-	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(llproto_names[i].id == id) {
+	for (i = 0; i < sizeof (llproto_names) / sizeof (llproto_names[0]); i++) {
+		if (llproto_names[i].id == id) {
 			return llproto_names[i].name;
         }
 	}
@@ -111,14 +111,14 @@ char *buf;
 {
 	int i;
 
-	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(strcasecmp(llproto_names[i].name, buf) == 0) {
+	for (i = 0; i < sizeof (llproto_names) / sizeof (llproto_names[0]); i++) {
+		if (strcasecmp(llproto_names[i].name, buf) == 0) {
 			*id = htons(llproto_names[i].id);
 			return 0;
 		}
 	}
 
-	if(get_u16(id, buf, 0)) {
+	if (get_u16(id, buf, 0)) {
 		return -1;
     }
 	*id = htons(*id);
@@ -145,16 +145,16 @@ struct u32_params* up;
 		char buf[MAX_MSG];
 	} req;
 
-	memset(&req, 0, sizeof(req));
-	memset(&est, 0, sizeof(est));
-	memset(&req, 0, sizeof(req));
+	memset(&req, 0, sizeof (req));
+	memset(&est, 0, sizeof (est));
+	memset(&req, 0, sizeof (req));
 
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE;
 	req.n.nlmsg_type = RTM_NEWTFILTER;
 	req.t.tcm_family = AF_UNSPEC;
 
-    if(id[0] == 0) {
+    if (id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
@@ -163,31 +163,31 @@ struct u32_params* up;
     dprintf(("[add_tc_filter] parent id = %d\n", req.t.tcm_parent));
 	handle = TC_HANDLE(id[2], id[3]);
 
-	if(protocol) {
+	if (protocol) {
 		duparg("protocol", protocolid);
     }
-	if(ll_proto_a2n(&protocol_id, protocolid)) {
+	if (ll_proto_a2n(&protocol_id, protocolid)) {
 		invarg(protocolid, "invalid protocol");
     }
 	protocol = protocol_id;
     dprintf(("[add_tc_filter] protocol = %d\n", protocol));
     dprintf(("[add_tc_filter] kind = %s\n", type));
     req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
-    addattr_l(&req.n, sizeof(req), TCA_KIND, type, strlen(type) + 1);
+    addattr_l(&req.n, sizeof (req), TCA_KIND, type, strlen(type) + 1);
 
-    if(up->rdev) {
+    if (up->rdev) {
         sprintf(dev, "%s", up->rdev);
     }
 
     u32_filter_parse(handle, *up, &req.n, dev);
 
 //    ll_init_map(&rth);
-    if((req.t.tcm_ifindex = ll_name_to_index(dev)) == 0) {
+    if ((req.t.tcm_ifindex = ll_name_to_index(dev)) == 0) {
         fprintf(stderr, "Cannot find device \"%s\"\n", dev);
         return 1;
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         fprintf(stderr, "We have an error talking to the kernel\n");
         return 2;
     }

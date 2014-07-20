@@ -33,7 +33,7 @@ struct nlmsghdr* n;
 {
 //	int ok=0;
 	struct tc_fifo_qopt opt;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, sizeof (opt));
 
 	get_size(&opt.limit, "1000");
 
@@ -57,7 +57,7 @@ struct nlmsghdr* n;
 		argc--; argv++;
 	}
 */
-	addattr_l(n, 1024, TCA_OPTIONS, &opt, sizeof(opt));
+	addattr_l(n, 1024, TCA_OPTIONS, &opt, sizeof (opt));
 
 	return 0;
 }
@@ -70,14 +70,14 @@ struct rtattr* opt;
 {
 	struct tc_fifo_qopt *qopt;
 
-	if(opt == NULL)
+	if (opt == NULL)
 		return 0;
 
-	if(RTA_PAYLOAD(opt) < sizeof(*qopt))
+	if (RTA_PAYLOAD(opt) < sizeof (*qopt))
 		return -1;
 
 	qopt = RTA_DATA(opt);
-	if(strcmp(qu->id, "bfifo") == 0) {
+	if (strcmp(qu->id, "bfifo") == 0) {
 		SPRINT_BUF(b1);
 		fprintf(f, "limit %s", sprint_size(qopt->limit, b1));
 	} else

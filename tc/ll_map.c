@@ -32,17 +32,17 @@ gettimeofday(&name##_prev, NULL)
     gettimeofday(&name##_current, NULL);                                           \
 time_t name##_sec;                                                                 \
 suseconds_t name##_usec;                                                           \
-if(name##_current.tv_sec == name##_prev.tv_sec) {                                  \
+if (name##_current.tv_sec == name##_prev.tv_sec) {                                  \
     name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
     name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                    \
 }                                                                                  \
-else if(name ##_current.tv_sec != name##_prev.tv_sec) {                            \
+else if (name ##_current.tv_sec != name##_prev.tv_sec) {                            \
     int name##_carry = 1000000;                                                    \
     name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
-    if(name##_prev.tv_usec > name##_current.tv_usec) {                             \
+    if (name##_prev.tv_usec > name##_current.tv_usec) {                             \
         name##_usec = name##_carry - name##_prev.tv_usec + name##_current.tv_usec; \
         name##_sec--;                                                              \
-        if(name##_usec > name##_carry) {                                           \
+        if (name##_usec > name##_carry) {                                           \
             name##_usec = name##_usec - name##_carry;                              \
             name##_sec++;                                                          \
         }                                                                          \
@@ -77,32 +77,32 @@ void *arg;
 	struct idxmap *im, **imp;
 	struct rtattr *tb[IFLA_MAX+1];
 
-	if(n->nlmsg_type != RTM_NEWLINK) {
+	if (n->nlmsg_type != RTM_NEWLINK) {
 		return 0;
     }
 
-	if(n->nlmsg_len < NLMSG_LENGTH(sizeof(ifi))) {
+	if (n->nlmsg_len < NLMSG_LENGTH(sizeof (ifi))) {
 		return -1;
     }
 
 
-	memset(tb, 0, sizeof(tb));
+	memset(tb, 0, sizeof (tb));
 	parse_rtattr(tb, IFLA_MAX, IFLA_RTA(ifi), IFLA_PAYLOAD(n));
-	if(tb[IFLA_IFNAME] == NULL) {
+	if (tb[IFLA_IFNAME] == NULL) {
 		return 0;
     }
 
 	h = ifi->ifi_index&0xF;
 
-	for(imp = &idxmap[h]; (im=*imp) != NULL; imp = &im->next) {
-		if(im->index == ifi->ifi_index) {
+	for (imp = &idxmap[h]; (im=*imp) != NULL; imp = &im->next) {
+		if (im->index == ifi->ifi_index) {
 			break;
         }
     }
 
-	if(im == NULL) {
-		im = malloc(sizeof(*im));
-		if(im == NULL) {
+	if (im == NULL) {
+		im = malloc(sizeof (*im));
+		if (im == NULL) {
 			return 0;
         }
 		im->next = *imp;
@@ -112,17 +112,17 @@ void *arg;
 
 	im->type = ifi->ifi_type;
 	im->flags = ifi->ifi_flags;
-	if(tb[IFLA_ADDRESS]) {
+	if (tb[IFLA_ADDRESS]) {
 		int alen;
 		im->alen = alen = RTA_PAYLOAD(tb[IFLA_ADDRESS]);
-		if(alen > sizeof(im->addr)) {
-			alen = sizeof(im->addr);
+		if (alen > sizeof (im->addr)) {
+			alen = sizeof (im->addr);
         }
 		memcpy(im->addr, RTA_DATA(tb[IFLA_ADDRESS]), alen);
 	}
     else {
 		im->alen = 0;
-		memset(im->addr, 0, sizeof(im->addr));
+		memset(im->addr, 0, sizeof (im->addr));
 	}
 	strcpy(im->name, RTA_DATA(tb[IFLA_IFNAME]));
 
@@ -136,12 +136,12 @@ char *buf;
 {
 	struct idxmap* im;
 
-	if(idx == 0) {
+	if (idx == 0) {
 		return "*";
     }
 
-	for(im = idxmap[idx&0xF]; im; im = im->next) {
-		if(im->index == idx) {
+	for (im = idxmap[idx&0xF]; im; im = im->next) {
+		if (im->index == idx) {
 			return im->name;
         }
     }
@@ -168,17 +168,17 @@ const char *name;
 	struct idxmap *im;
 	int i;
 
-	if(name == NULL) {
+	if (name == NULL) {
 		return 0;
     }
 
-	if(icache && strcmp(name, ncache) == 0) {
+	if (icache && strcmp(name, ncache) == 0) {
 		return icache;
     }
 
-	for(i = 0; i < 16; i++) {
-		for(im = idxmap[i]; im; im = im->next) {
-			if(strcmp(im->name, name) == 0) {
+	for (i = 0; i < 16; i++) {
+		for (im = idxmap[i]; im; im = im->next) {
+			if (strcmp(im->name, name) == 0) {
 				icache = im->index;
 				strcpy(ncache, name);
 
@@ -194,12 +194,12 @@ int
 ll_init_map(rth)
 struct rtnl_handle *rth;
 {
-	if(rtnl_wilddump_request(rth, AF_UNSPEC, RTM_GETLINK) < 0) {
+	if (rtnl_wilddump_request(rth, AF_UNSPEC, RTM_GETLINK) < 0) {
 		perror("Cannot send dump request");
 		exit(1);
 	}
 
-	if(rtnl_dump_filter(rth, ll_remember_index, &idxmap, NULL, NULL) < 0) {
+	if (rtnl_dump_filter(rth, ll_remember_index, &idxmap, NULL, NULL) < 0) {
 		fprintf(stderr, "Dump terminated\n");
 		exit(1);
 	}

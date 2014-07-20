@@ -44,7 +44,7 @@ struct nlmsghdr* n;
 			opt.priomap[idx] = opt.priomap[TC_PRIO_BESTEFFORT];
 	}
 */
-	addattr_l(n, 1024, TCA_OPTIONS, &opt, sizeof(opt));
+	addattr_l(n, 1024, TCA_OPTIONS, &opt, sizeof (opt));
 	return 0;
 }
 
@@ -57,14 +57,14 @@ struct rtattr* opt;
 	int i;
 	struct tc_prio_qopt* qopt;
 
-	if(opt == NULL)
+	if (opt == NULL)
 		return 0;
 
-	if(RTA_PAYLOAD(opt) < sizeof(*qopt))
+	if (RTA_PAYLOAD(opt) < sizeof (*qopt))
 		return -1;
 	qopt = RTA_DATA(opt);
 	fprintf(f, "bands %u priomap ", qopt->bands);
-	for(i = 0; i <= TC_PRIO_MAX; i++)
+	for (i = 0; i <= TC_PRIO_MAX; i++)
 		fprintf(f, " %d", qopt->priomap[i]);
 
 	return 0;

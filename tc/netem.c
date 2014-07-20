@@ -25,13 +25,13 @@ const char* str;
 {
     unsigned t;
 
-    if(get_usecs(&t, str)) {
+    if (get_usecs(&t, str)) {
         return -1;
     }
 
     fprintf(stderr, "t : %d\n", t);
 
-    if(tc_core_time2big(t)) {
+    if (tc_core_time2big(t)) {
         fprintf(stderr, "Illegal %u time (too large)\n", t);
         return -1;
     } 
@@ -58,83 +58,83 @@ struct nlmsghdr *n;
     __s16* dist_data = NULL;
     int present[__TCA_NETEM_MAX];
 
-    memset(&opt, 0, sizeof(opt));
+    memset(&opt, 0, sizeof (opt));
     opt.limit = NETEM_LIMIT;
-    memset(&cor, 0, sizeof(cor));
-    memset(&reorder, 0, sizeof(reorder));
-    memset(&corrupt, 0, sizeof(corrupt));
-    memset(present, 0, sizeof(present));
+    memset(&cor, 0, sizeof (cor));
+    memset(&reorder, 0, sizeof (reorder));
+    memset(&corrupt, 0, sizeof (corrupt));
+    memset(present, 0, sizeof (present));
 
-    if(qp->limit) {
+    if (qp->limit) {
         opt.limit = qp->limit;
     }
-    if(qp->delay) {
+    if (qp->delay) {
         latency = qp->delay * 1000;
         opt.latency = tc_core_time2tick(latency);
     }
-    if(qp->jitter) {
+    if (qp->jitter) {
         qp->jitter = 0;
 /*
-        if(get_ticks(&opt.jitter, qp->jitter)) {
+        if (get_ticks(&opt.jitter, qp->jitter)) {
             return -1;
         }
 */
     }
-    if(qp->delay_corr) {
+    if (qp->delay_corr) {
         ++present[TCA_NETEM_CORR];
         cor.delay_corr = qp->delay_corr;
     }
-    if(qp->loss) {
+    if (qp->loss) {
         opt.loss = qp->loss;
     }
-    if(qp->loss_corr) {
+    if (qp->loss_corr) {
         ++present[TCA_NETEM_CORR];
         cor.loss_corr = qp->loss_corr;
     }
-    if(qp->reorder_prob) {
+    if (qp->reorder_prob) {
         present[TCA_NETEM_REORDER] = 1;
         reorder.probability = qp->reorder_prob;
     }
-    if(qp->reorder_corr) {
+    if (qp->reorder_corr) {
         ++present[TCA_NETEM_CORR];
         reorder.correlation = qp->reorder_corr;
     }
 
     tail = NLMSG_TAIL(n);
 
-    if(reorder.probability) {
-        if(opt.latency == 0) {
+    if (reorder.probability) {
+        if (opt.latency == 0) {
             fprintf(stderr, "reordering not possible without specifying some delay\n");
         }
-        if(opt.gap == 0) {
+        if (opt.gap == 0) {
             opt.gap = 1;
         }
-    } else if(opt.gap > 0) {
+    } else if (opt.gap > 0) {
         fprintf(stderr, "gap specified without reorder probability\n");
         return -1;
     }
-    if(dist_data && (opt.latency == 0 || opt.jitter == 0)) {
+    if (dist_data && (opt.latency == 0 || opt.jitter == 0)) {
         fprintf(stderr, "distribution specified but no latency and jitter values\n");
         return -1;
     }
-    if(addattr_l(n, TCA_BUF_MAX, TCA_OPTIONS, &opt, sizeof(opt)) < 0) {
+    if (addattr_l(n, TCA_BUF_MAX, TCA_OPTIONS, &opt, sizeof (opt)) < 0) {
         return -1;
     }
-    if(cor.delay_corr || cor.loss_corr || cor.dup_corr) {
-        if (present[TCA_NETEM_CORR] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof(cor)) < 0) {
+    if (cor.delay_corr || cor.loss_corr || cor.dup_corr) {
+        if (present[TCA_NETEM_CORR] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORR, &cor, sizeof (cor)) < 0) {
             return -1;
         }
     }
-    if(present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof(reorder)) < 0) {
+    if (present[TCA_NETEM_REORDER] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_REORDER, &reorder, sizeof (reorder)) < 0) {
         return -1;
     }
-    if(corrupt.probability) {
-        if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof(corrupt)) < 0) {
+    if (corrupt.probability) {
+        if (present[TCA_NETEM_CORRUPT] && addattr_l(n, TCA_BUF_MAX, TCA_NETEM_CORRUPT, &corrupt, sizeof (corrupt)) < 0) {
             return -1;
         }
     }
-    if(dist_data) {
-        if(addattr_l(n, 32768, TCA_NETEM_DELAY_DIST, dist_data, dist_size * sizeof(dist_data[0])) < 0) {
+    if (dist_data) {
+        if (addattr_l(n, 32768, TCA_NETEM_DELAY_DIST, dist_data, dist_size * sizeof (dist_data[0])) < 0) {
             return -1;
         }
     }
@@ -157,20 +157,20 @@ struct qdisc_params qp;
         struct tcmsg t;
         char buf[TCA_BUF_MAX];
     } req;
-    memset(&req, 0, sizeof(req));
-    strncpy(device, dev, sizeof(device) - 1);
+    memset(&req, 0, sizeof (req));
+    strncpy(device, dev, sizeof (device) - 1);
 
-    if(tc_core_init() < 0) {
+    if (tc_core_init() < 0) {
         fprintf(stderr, "Missing tc core init\n");
     }
 
     flags = NLM_F_EXCL|NLM_F_CREATE;
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type = RTM_NEWQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    if(id[0] == 0) {
+    if (id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
@@ -178,7 +178,7 @@ struct qdisc_params qp;
     }
     req.t.tcm_handle = TC_HANDLE(id[2], id[3]);
 
-    addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+    addattr_l(&req.n, sizeof (req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
     dprintf(("[add_netem_qdisc] parent id = %u\n", req.t.tcm_parent));
     dprintf(("[add_netem_qdisc] handle id = %u\n", req.t.tcm_handle));
     dprintf(("[add_netem_qdisc] delay = %f\n", qp.delay));
@@ -186,11 +186,11 @@ struct qdisc_params qp;
 
     netem_opt(&qp, &req.n);
 
-    if(device[0]) {
+    if (device[0]) {
         int idx;
 
 //        ll_init_map(&rth);
-        if((idx = ll_name_to_index(device)) == 0) {
+        if ((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
         }
@@ -198,7 +198,7 @@ struct qdisc_params qp;
         dprintf(("[add_netem_qdisc] netem ifindex = %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
     }
 
@@ -219,21 +219,21 @@ struct qdisc_params qp;
         struct tcmsg t;
         char buf[TCA_BUF_MAX];
     } req;
-    memset(&req, 0, sizeof(req));
-    strncpy(device, dev, sizeof(device) - 1);
+    memset(&req, 0, sizeof (req));
+    strncpy(device, dev, sizeof (device) - 1);
 
-    if(tc_core_init() < 0) {
+    if (tc_core_init() < 0) {
         fprintf(stderr, "Missing tc core init\n");
     }
 
     flags = 0;
 
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type = RTM_NEWQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    if(id[0] == 0) {
+    if (id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
@@ -245,15 +245,15 @@ struct qdisc_params qp;
     dprintf(("[change_netem_qdisc] delay = %f\n", qp.delay));
     dprintf(("[change_netem_qdisc] loss = %f\n", qp.loss));
 
-    addattr_l(&req.n, sizeof(req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
+    addattr_l(&req.n, sizeof (req), TCA_KIND, qdisc_kind, strlen(qdisc_kind) + 1);
 
     netem_opt(&qp, &req.n);
 
-    if(device[0]) {
+    if (device[0]) {
         int idx;
 
 //        ll_init_map(&rth);
-        if((idx = ll_name_to_index(device)) == 0) {
+        if ((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
         }
@@ -261,7 +261,7 @@ struct qdisc_params qp;
         dprintf(("[change_netem_qdisc] netem ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
     }
 
@@ -282,31 +282,31 @@ int ingress;
 	} req;
 
     flags = 0;
-    memset(&req, 0, sizeof(req));
+    memset(&req, 0, sizeof (req));
 
-    if(tc_core_init() < 0) {
+    if (tc_core_init() < 0) {
         fprintf(stderr, "Missing tc core init\n");
     }
 
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type = RTM_DELQDISC;
     req.t.tcm_family = AF_UNSPEC;
 
-    strncpy(device, dev, sizeof(device) - 1);
+    strncpy(device, dev, sizeof (device) - 1);
 
-    if(ingress == 1) {
+    if (ingress == 1) {
 	    req.t.tcm_parent = 0xffff0000;
     }
     else {
 	    req.t.tcm_parent = TC_H_ROOT;
     }
 	
-    if(device[0]) {
+    if (device[0]) {
         int idx;
 
 //       ll_init_map(&rth);
-        if((idx = ll_name_to_index(device)) == 0) {
+        if ((idx = ll_name_to_index(device)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", device);
             return 1;
         }
@@ -314,7 +314,7 @@ int ingress;
         dprintf(("[delete_netem_qdisc] netem ifindex : %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
     }
 

@@ -45,71 +45,71 @@ char** argv;
 
 	__u32 handle;
 
-	memset(&req, 0, sizeof(req));
-	memset(&est, 0, sizeof(est));
-	memset(&d, 0, sizeof(d));
-	memset(&k, 0, sizeof(k));
+	memset(&req, 0, sizeof (req));
+	memset(&est, 0, sizeof (est));
+	memset(&d, 0, sizeof (d));
+	memset(&k, 0, sizeof (k));
 
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
 	req.n.nlmsg_type = cmd;
 	req.t.tcm_family = AF_UNSPEC;
 
 	/* device set */
-	if(d[0])
+	if (d[0])
 		duparg("dev", dev);
-	strncpy(d, dev, sizeof(d) - 1);
+	strncpy(d, dev, sizeof (d) - 1);
 
 	/* handle id set */
-	if(req.t.tcm_handle)
+	if (req.t.tcm_handle)
 		duparg("handle", handle_id);
-	if(get_qdisc_handle(&handle, handle_id))
+	if (get_qdisc_handle(&handle, handle_id))
 		invarg(handle_id, "invalid qdisc ID");
 	req.t.tcm_handle = handle;
 
 	/* root id */
-	if(req.t.tcm_parent) {
+	if (req.t.tcm_parent) {
 		fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
 		return -1;
 	}
 	req.t.tcm_parent = TC_H_ROOT;
 
 	/* parent id set */
-	if(req.t.tcm_parent)
+	if (req.t.tcm_parent)
 		duparg("parent", *argv);
-	if(get_tc_classid(&handle, *argv))
+	if (get_tc_classid(&handle, *argv))
 		invarg(*argv, "invalid parent ID");
 	req.t.tcm_parent = handle;
 
-	strncpy(k, *argv, sizeof(k)-1);
+	strncpy(k, *argv, sizeof (k)-1);
 
 	q = get_qdisc_kind(k);
 
-	if(k[0])
-		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
-	if(est.ewma_log)
-		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
+	if (k[0])
+		addattr_l(&req.n, sizeof (req), TCA_KIND, k, strlen(k)+1);
+	if (est.ewma_log)
+		addattr_l(&req.n, sizeof (req), TCA_RATE, &est, sizeof (est));
 
-	if(q) {
-		if(!q->parse_qopt) {
+	if (q) {
+		if (!q->parse_qopt) {
 			fprintf(stderr, "qdisc '%s' does not support option parsing\n", k);
 			return -1;
 		}
 	}
 
-	if(d[0])  {
+	if (d[0])  {
 		int idx;
 
  		ll_init_map(&rth);
 
-		if((idx = ll_name_to_index(d)) == 0) {
+		if ((idx = ll_name_to_index(d)) == 0) {
 			fprintf(stderr, "Cannot find device \"%s\"\n", d);
 			return 1;
 		}
 		req.t.tcm_ifindex = idx;
 	}
 
- 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) 
+ 	if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) 
 		return 2;
 
 	return 0;

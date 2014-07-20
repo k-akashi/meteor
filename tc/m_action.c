@@ -80,26 +80,26 @@ char *str;
 	int looked4gact = 0;
 restart_s:
 #endif
-	for(a = action_list; a; a = a->next) {
+	for (a = action_list; a; a = a->next) {
 		if (strcmp(a->id, str) == 0)
 			return a;
 	}
 
-	snprintf(buf, sizeof(buf), "m_%s.so", str);
+	snprintf(buf, sizeof (buf), "m_%s.so", str);
 	dlh = dlopen(buf, RTLD_LAZY);
-	if(dlh == NULL) {
+	if (dlh == NULL) {
 		dlh = aBODY;
-		if(dlh == NULL) {
+		if (dlh == NULL) {
 			dlh = aBODY = dlopen(NULL, RTLD_LAZY);
-			if(dlh == NULL) {
+			if (dlh == NULL) {
 				goto noexist;
             }
 		}
 	}
 
-	snprintf(buf, sizeof(buf), "%s_action_util", str);
+	snprintf(buf, sizeof (buf), "%s_action_util", str);
 	a = dlsym(dlh, buf);
-	if(a == NULL) {
+	if (a == NULL) {
 		goto noexist;
     }
 
@@ -110,15 +110,15 @@ reg:
 
 noexist:
 #ifdef CONFIG_GACT
-	if(!looked4gact) {
+	if (!looked4gact) {
 		looked4gact = 1;
 		strcpy(str,"gact");
 		goto restart_s;
 	}
 #endif
-	a = malloc(sizeof(*a));
-	if(a) {
-		memset(a, 0, sizeof(*a));
+	a = malloc(sizeof (*a));
+	if (a) {
+		memset(a, 0, sizeof (*a));
 		strncpy(a->id, "noact", 15);
 //		a->parse_aopt = parse_noaopt;
 //		a->print_aopt = print_noaopt;

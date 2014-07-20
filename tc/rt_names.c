@@ -31,7 +31,7 @@ static void rtnl_tab_initialize(char *file, char **tab, int size)
 	fp = fopen(file, "r");
 	if (!fp)
 		return;
-	while (fgets(buf, sizeof(buf), fp)) {
+	while (fgets(buf, sizeof (buf), fp)) {
 		char *p = buf;
 		int id;
 		char namebuf[512];

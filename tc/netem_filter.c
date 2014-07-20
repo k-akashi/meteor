@@ -95,8 +95,8 @@ int len;
 
 	id = ntohs(id);
 
-	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(llproto_names[i].id == id)
+	for (i = 0; i < sizeof (llproto_names) / sizeof (llproto_names[0]); i++) {
+		if (llproto_names[i].id == id)
 			return llproto_names[i].name;
 	}
 	snprintf(buf, len, "[%d]", id);
@@ -110,14 +110,14 @@ char* buf;
 {
 	int i;
 
-	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(strcasecmp(llproto_names[i].name, buf) == 0) {
+	for (i = 0; i < sizeof (llproto_names) / sizeof (llproto_names[0]); i++) {
+		if (strcasecmp(llproto_names[i].name, buf) == 0) {
 			*id = htons(llproto_names[i].id);
 			return 0;
 		}
 	}
 
-	if(get_u16(id, buf, 0))
+	if (get_u16(id, buf, 0))
 		return -1;
 
 	*id = htons(*id);
@@ -137,11 +137,11 @@ int offmask;
 
 	key &= mask;
 
-	for(i = 0; i < hwm; i++) {
-		if(sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
+	for (i = 0; i < hwm; i++) {
+		if (sel->keys[i].off == off && sel->keys[i].offmask == offmask) {
 			uint32_t intersect = mask&sel->keys[i].mask;
 
-			if((key ^ sel->keys[i].val) & intersect)
+			if ((key ^ sel->keys[i].val) & intersect)
 				return -1;
 			sel->keys[i].val |= key;
 			sel->keys[i].mask |= mask;
@@ -149,9 +149,9 @@ int offmask;
 		}
 	}
 
-	if(hwm >= 128)
+	if (hwm >= 128)
 		return -1;
-	if(off % 4)
+	if (off % 4)
 		return -1;
 	sel->keys[hwm].val = key;
 	sel->keys[hwm].mask = mask;
@@ -170,13 +170,13 @@ struct tc_u32_sel* sel;
     inet_prefix addr;
     uint32_t mask;
 
-    if(get_prefix_1(&addr, match.org, AF_INET))
+    if (get_prefix_1(&addr, match.org, AF_INET))
         return -1;
 
     mask = 0;
-    if(addr.bitlen)
+    if (addr.bitlen)
         mask = hton(0xFFFFFFFF << (24 - addr.bitlen));
-    if(pack_key(sel, addr.data[0], mask, 12, 0))
+    if (pack_key(sel, addr.data[0], mask, 12, 0))
         return -1;
 
     return 0;
@@ -212,9 +212,9 @@ char* handle;
     struct rtattr* tail;
     int protocol;
 
-    if(handle) {
+    if (handle) {
         dprintf(("[u32_opt] handle : %s\n", handle));
-        if(get_u32_handle(&t->tcm_handle, handle)) {
+        if (get_u32_handle(&t->tcm_handle, handle)) {
             fprintf(stderr, "Illegal Filter ID\n");
             return -1;
         }
@@ -225,7 +225,7 @@ char* handle;
 
     parse_u32(sel, );
     
-//    if(ipv4) {
+//    if (ipv4) {
     parse_ipv4_dstaddr(match, sel);
 //    }
 
@@ -274,24 +274,24 @@ struct u32_parameter* up;
 	char  filter_kind[16];
 	struct tc_estimator est;
 
-	memset(&req, 0, sizeof(req));
-	memset(&est, 0, sizeof(est));
-	memset(d, 0, sizeof(d));
-	memset(k, 0, sizeof(k));
-	memset(&req, 0, sizeof(req));
+	memset(&req, 0, sizeof (req));
+	memset(&est, 0, sizeof (est));
+	memset(d, 0, sizeof (d));
+	memset(k, 0, sizeof (k));
+	memset(&req, 0, sizeof (req));
 
 
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
 	req.n.nlmsg_type = RTM_NEWTFILTER;
 	req.t.tcm_family = AF_UNSPEC;
 
 	dprintf(("\n[add_netem_filter] filter function\n"));
 
-	strncpy(device, dev, sizeof(device)-1);
+	strncpy(device, dev, sizeof (device)-1);
 
-	if(*parentid == '0') {
-		if(req.t.tcm_parent) {
+	if (*parentid == '0') {
+		if (req.t.tcm_parent) {
 			fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
 			return -1;
 		}
@@ -299,42 +299,42 @@ struct u32_parameter* up;
 	}
 	else {
 		__u32 handle;
-		if(req.t.tcm_parent)
+		if (req.t.tcm_parent)
 			duparg("parent", parentid);
-		if(get_tc_classid(&handle, parentid))
+		if (get_tc_classid(&handle, parentid))
 			invarg(parentid, "Invalid parent ID");
 		req.t.tcm_parent = handle;
 	}
 
 	// protocol set
 	__u16 id;
-	if(protocol)
+	if (protocol)
 		duparg("protocol", protocolid);
-	if(ll_proto_a2n(&id, protocolid))
+	if (ll_proto_a2n(&id, protocolid))
 		invarg(protocolid, "invalid protocol");
 	protocol = id;
 
     if (get_u32(&prio, "16", 0))
         invarg("16", "invalid prpriority value");
 
-	strncpy(filter_kind, "u32", sizeof(filter_kind) - 1);
+	strncpy(filter_kind, "u32", sizeof (filter_kind) - 1);
 	q = get_filter_kind(k);
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
-	if(filter_kind[0])
-		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);
+	if (filter_kind[0])
+		addattr_l(&req.n, sizeof (req), TCA_KIND, k, strlen(k) + 1);
 
-	if(up->rdev) {
+	if (up->rdev) {
 		sprintf(dev, "%s", up->rdev);
 	}
 
     u32_opt();
 
-	if(est.ewma_log)
-		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
+	if (est.ewma_log)
+		addattr_l(&req.n, sizeof (req), TCA_RATE, &est, sizeof (est));
 
-	if(d[0]) {
+	if (d[0]) {
  		ll_init_map(&rth);
 
 		if ((req.t.tcm_ifindex = ll_name_to_index(d)) == 0) {
@@ -343,7 +343,7 @@ struct u32_parameter* up;
 		}
 	}
 
- 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+ 	if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
 		fprintf(stderr, "We have an error talking to the kernel\n");
 		return 2;
 	}
@@ -375,23 +375,23 @@ struct u32_parameter* up;
 	char  k[16];
 	struct tc_estimator est;
 
-	memset(&req, 0, sizeof(req));
-	memset(&est, 0, sizeof(est));
-	memset(d, 0, sizeof(d));
-	memset(k, 0, sizeof(k));
-	memset(&req, 0, sizeof(req));
+	memset(&req, 0, sizeof (req));
+	memset(&est, 0, sizeof (est));
+	memset(d, 0, sizeof (d));
+	memset(k, 0, sizeof (k));
+	memset(&req, 0, sizeof (req));
 
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
 	req.n.nlmsg_type = cmd;
 	req.t.tcm_family = AF_UNSPEC;
 
 	dprintf(("\nfilter function\n"));
 
-	strncpy(d, dev, sizeof(d)-1);
+	strncpy(d, dev, sizeof (d)-1);
 
-	if(*parentid == '0') {
-		if(req.t.tcm_parent) {
+	if (*parentid == '0') {
+		if (req.t.tcm_parent) {
 			fprintf(stderr, "Error: \"root\" is duplicate parent ID\n");
 			return -1;
 		}
@@ -399,47 +399,47 @@ struct u32_parameter* up;
 	}
 	else {
 		__u32 handle;
-		if(req.t.tcm_parent)
+		if (req.t.tcm_parent)
 			duparg("parent", parentid);
-		if(get_tc_classid(&handle, parentid))
+		if (get_tc_classid(&handle, parentid))
 			invarg(parentid, "Invalid parent ID");
 		req.t.tcm_parent = handle;
 	}
 
-	if(fhandle)
+	if (fhandle)
 		duparg("handle", handleid);
 	fhandle = handleid;
 
 	__u16 id;
-	if(protocol)
+	if (protocol)
 		duparg("protocol", protocolid);
-	if(ll_proto_a2n(&id, protocolid))
+	if (ll_proto_a2n(&id, protocolid))
 		invarg(protocolid, "invalid protocol");
 	protocol = id;
 
-    if(get_u32(&prio, "16", 0))
+    if (get_u32(&prio, "16", 0))
         invarg("16", "invalid prpriority value");
 
-	strncpy(k, type, sizeof(k) - 1);
+	strncpy(k, type, sizeof (k) - 1);
 	q = get_filter_kind(k);
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
-	if(k[0])
-		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
+	if (k[0])
+		addattr_l(&req.n, sizeof (req), TCA_KIND, k, strlen(k)+1);
 
-	if(up->rdev) {
+	if (up->rdev) {
 		sprintf(dev, "%s", up->rdev);
 	}
-	if(q) {
-		if(q->parse_fopt(q, fhandle, *up, &req.n, dev))
+	if (q) {
+		if (q->parse_fopt(q, fhandle, *up, &req.n, dev))
 			return 1;
 	}
 
-	if(est.ewma_log)
-		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
+	if (est.ewma_log)
+		addattr_l(&req.n, sizeof (req), TCA_RATE, &est, sizeof (est));
 
-	if(d[0]) {
+	if (d[0]) {
  		ll_init_map(&rth);
 
 		if ((req.t.tcm_ifindex = ll_name_to_index(d)) == 0) {
@@ -448,7 +448,7 @@ struct u32_parameter* up;
 		}
 	}
 
- 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+ 	if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
 		fprintf(stderr, "We have an error talking to the kernel\n");
 		return 2;
 	}

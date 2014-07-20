@@ -107,8 +107,8 @@ int len;
 
 	id = ntohs(id);
 
-	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(llproto_names[i].id == id)
+	for (i = 0; i < sizeof (llproto_names) / sizeof (llproto_names[0]); i++) {
+		if (llproto_names[i].id == id)
 			return llproto_names[i].name;
 	}
 	snprintf(buf, len, "[%d]", id);
@@ -122,14 +122,14 @@ char* buf;
 {
 	int i;
 
-	for(i = 0; i < sizeof(llproto_names) / sizeof(llproto_names[0]); i++) {
-		if(strcasecmp(llproto_names[i].name, buf) == 0) {
+	for (i = 0; i < sizeof (llproto_names) / sizeof (llproto_names[0]); i++) {
+		if (strcasecmp(llproto_names[i].name, buf) == 0) {
 			*id = htons(llproto_names[i].id);
 			return 0;
 		}
 	}
 
-	if(get_u16(id, buf, 0))
+	if (get_u16(id, buf, 0))
 		return -1;
 
 	*id = htons(*id);
@@ -159,20 +159,20 @@ struct u32_parameter* up;
 	char  k[16];
 	struct tc_estimator est;
 
-	memset(&req, 0, sizeof(req));
-	memset(&est, 0, sizeof(est));
-	memset(d, 0, sizeof(d));
-	memset(k, 0, sizeof(k));
-	memset(&req, 0, sizeof(req));
+	memset(&req, 0, sizeof (req));
+	memset(&est, 0, sizeof (est));
+	memset(d, 0, sizeof (d));
+	memset(k, 0, sizeof (k));
+	memset(&req, 0, sizeof (req));
 
-	req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+	req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
 	req.n.nlmsg_flags = NLM_F_REQUEST|flags;
 	req.n.nlmsg_type = cmd;
 	req.t.tcm_family = AF_UNSPEC;
 
-	strncpy(d, dev, sizeof(d)-1);
+	strncpy(d, dev, sizeof (d)-1);
 
-    if(id[0] == 0) {
+    if (id[0] == 0) {
         req.t.tcm_parent = TC_H_ROOT;
     }
     else {
@@ -191,43 +191,43 @@ struct u32_parameter* up;
 */
 
 	__u16 protocol_id;
-	if(protocol) {
+	if (protocol) {
 		duparg("protocol", protocolid);
     }
-	if(ll_proto_a2n(&protocol_id, protocolid)) {
+	if (ll_proto_a2n(&protocol_id, protocolid)) {
 		invarg(protocolid, "invalid protocol");
     }
 	protocol = protocol_id;
     dprintf(("[tc_filter_modify] protocol = %d\n", protocol));
 
-    if(get_u32(&prio, "16", 0))
+    if (get_u32(&prio, "16", 0))
         invarg("16", "invalid prpriority value");
 
-	strncpy(k, type, sizeof(k) - 1);
+	strncpy(k, type, sizeof (k) - 1);
     dprintf(("[tc_filter_modify] kind = %s\n", k));
 	q = get_filter_kind(k);
 
 	req.t.tcm_info = TC_H_MAKE(prio << 16, protocol);
 
-	if(k[0])
-		addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k)+1);
+	if (k[0])
+		addattr_l(&req.n, sizeof (req), TCA_KIND, k, strlen(k)+1);
 
-	if(up->rdev) {
+	if (up->rdev) {
 		sprintf(dev, "%s", up->rdev);
 	}
 
     u32_filter_parse(q, fhandle, *up, &req.n, dev);
 /*
-	if(q) {
-		if(q->parse_fopt(q, fhandle, *up, &req.n, dev))
+	if (q) {
+		if (q->parse_fopt(q, fhandle, *up, &req.n, dev))
 			return 1;
 	}
 */
 
-	if(est.ewma_log)
-		addattr_l(&req.n, sizeof(req), TCA_RATE, &est, sizeof(est));
+	if (est.ewma_log)
+		addattr_l(&req.n, sizeof (req), TCA_RATE, &est, sizeof (est));
 
-	if(d[0]) {
+	if (d[0]) {
  		ll_init_map(&rth);
 
 		if ((req.t.tcm_ifindex = ll_name_to_index(d)) == 0) {
@@ -236,7 +236,7 @@ struct u32_parameter* up;
 		}
 	}
 
- 	if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+ 	if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
 		fprintf(stderr, "We have an error talking to the kernel\n");
 		return 2;
 	}

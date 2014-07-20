@@ -61,8 +61,8 @@ char* dev;
 	struct rtattr *tail;
 	char d[16];
 
-	memset(d, 0, sizeof(d) - 1);
-	memset(&p, 0 ,sizeof(struct tc_mirred));
+	memset(d, 0, sizeof (d) - 1);
+	memset(&p, 0 ,sizeof (struct tc_mirred));
 
 	/* not implememted
 	// index
@@ -72,20 +72,20 @@ char* dev;
 	}
 	*/
 
-	if(strcmp("mirror", egress) == 0) {
+	if (strcmp("mirror", egress) == 0) {
 		// mirror
 		mirror=1;
-		if(redir) {
+		if (redir) {
 			fprintf(stderr, "Cant have both mirror and redir\n");
 			return -1;
 		}
 		p.eaction = TCA_EGRESS_MIRROR;
 		p.action = TC_ACT_PIPE;
 	}
-	else if(strcmp("redirect", egress) == 0) {
+	else if (strcmp("redirect", egress) == 0) {
 		// redirect
 		redir=1;
-		if(mirror) {
+		if (mirror) {
 			fprintf(stderr, "Cant have both mirror and redir\n");
 			return -1;
 		}
@@ -95,11 +95,11 @@ char* dev;
 
 	// device (redirect || mirror)
 	printf("dev = %s\n", dev);
-	if(mirror || redir) {
-		strncpy(d, dev, sizeof(d)-1);
+	if (mirror || redir) {
+		strncpy(d, dev, sizeof (d)-1);
 	}
 
-	if(d[0])  {
+	if (d[0])  {
 		int idx;
 		ll_init_map(&rth);
 
@@ -152,7 +152,7 @@ char* dev;
 	}
 */
 
-	if(mirred_d)
+	if (mirred_d)
 		fprintf(stdout, "Action %d device %s ifindex %d\n",p.action, d,p.ifindex);
 
 	tail = NLMSG_TAIL(n);
@@ -175,7 +175,7 @@ char* dev;
 	int ret;
 
 	ret = parse_egress(a, egress, tca_id, n, dev);
-	if(ret == 0) {
+	if (ret == 0) {
 		return 0;
 	}
 

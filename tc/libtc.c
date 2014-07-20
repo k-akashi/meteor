@@ -36,8 +36,8 @@ char *addr;
     inet_prefix dst;
     char abuf[256];
 
-    if(open_flag) {
-        if(rtnl_open(&rth, 0) < 0)
+    if (open_flag) {
+        if (rtnl_open(&rth, 0) < 0)
             exit(1);
         open_flag = 0;
     }
@@ -46,29 +46,29 @@ char *addr;
     struct rtmsg *r = NLMSG_DATA(&req.n);
     int len = req.n.nlmsg_len;
 
-    len -= NLMSG_LENGTH(sizeof(*r));
+    len -= NLMSG_LENGTH(sizeof (*r));
     parse_rtattr(tb, RTA_MAX, RTM_RTA(r), len);
-    memset(&dst, 0, sizeof(dst));
+    memset(&dst, 0, sizeof (dst));
     dst.family = r->rtm_family;
-    if(filter.oifmask) {
+    if (filter.oifmask) {
         int oif = 0;
-        if(tb[RTA_OIF])
+        if (tb[RTA_OIF])
             oif = *(int*)RTA_DATA(tb[RTA_OIF]);
-        if((oif^filter.oif)&filter.oifmask) {
+        if ((oif^filter.oif)&filter.oifmask) {
             return 0;
         }
     }
 
-    if(strcmp(info, "dev") == 0) {
+    if (strcmp(info, "dev") == 0) {
         return (char* )ll_index_to_name(*(int* )RTA_DATA(tb[RTA_OIF]));
-    } else if(strcmp(info, "next") == 0){
-        if((char* )inet_ntop(r->rtm_family, RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof(abuf)) == NULL) {
+    } else if (strcmp(info, "next") == 0){
+        if ((char* )inet_ntop(r->rtm_family, RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof (abuf)) == NULL) {
             return addr;
         }
         else {
             dprintf(("[get_route_info] %s\n",  (char* )inet_ntop(r->rtm_family,
-                            RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof(abuf))));
-            return (char* )inet_ntop(r->rtm_family, RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof(abuf));
+                            RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof (abuf))));
+            return (char* )inet_ntop(r->rtm_family, RTA_DATA(tb[RTA_GATEWAY]), abuf, sizeof (abuf));
         }
     }
     else {
@@ -101,41 +101,41 @@ char *type;
     tc_core_init();
     dprintf(("[tc_cmd] Start tc_cmd function type = %s\n", type));
 
-    memset(&req, 0, sizeof(req));
-    memset(&d, 0, sizeof(d));
-    memset(&k, 0, sizeof(k));
+    memset(&req, 0, sizeof (req));
+    memset(&d, 0, sizeof (d));
+    memset(&k, 0, sizeof (k));
 
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct tcmsg));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct tcmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST|flags;
     req.n.nlmsg_type = cmd;
     req.t.tcm_family = AF_UNSPEC;
 
-    strncpy(d, dev, sizeof(d) - 1);
-    if(cmd != RTM_DELQDISC) {
+    strncpy(d, dev, sizeof (d) - 1);
+    if (cmd != RTM_DELQDISC) {
         //puts(handleid);
         //get_qdisc_handle(&handle, handleid);
         handle = TC_HANDLE(200, 1);
         req.t.tcm_handle = handle;
         dprintf(("[tc_cmd] req.t.tcm.handle = %d\n", req.t.tcm_handle));
     }
-    if(strcmp(root, "root") == 0)
+    if (strcmp(root, "root") == 0)
         req.t.tcm_parent = TC_H_ROOT;
-    else if(strcmp(root, "ingress") == 0) {
+    else if (strcmp(root, "ingress") == 0) {
         req.t.tcm_parent = TC_H_INGRESS;
-        memset(&qp, 0, sizeof(struct qdisc_params));
+        memset(&qp, 0, sizeof (struct qdisc_params));
         // lookup device table and set device 
-        //if(set_ifb(ifb_device_name, "up") < 0) {
+        //if (set_ifb(ifb_device_name, "up") < 0) {
         //  printf("cannot create ifb device\n");
         //  return 1;
         //}
-        if(cmd == RTM_DELQDISC) {
-            strncpy(k, type, sizeof(k) - 1);
+        if (cmd == RTM_DELQDISC) {
+            strncpy(k, type, sizeof (k) - 1);
             q = get_qdisc_kind(k);
         }
         req.t.tcm_handle = 0xffff0000;
     }
     else {
-        if(get_tc_classid(&handle, root)) {
+        if (get_tc_classid(&handle, root)) {
             invarg(handleid, "invalid parent ID");
         }
         req.t.tcm_parent = handle;
@@ -147,33 +147,33 @@ char *type;
 
        ll_init_map(&rth);
 
-       if((idx = ll_name_to_index(d)) == 0) {
+       if ((idx = ll_name_to_index(d)) == 0) {
        fprintf(stderr, "Cannot find device \"%s\"\n", d);
        return 1;
        }
        req.t.tcm_ifindex = idx;
     */
 
-    if(cmd != RTM_DELQDISC) {
-        strncpy(k, type, sizeof(k) - 1);
+    if (cmd != RTM_DELQDISC) {
+        strncpy(k, type, sizeof (k) - 1);
         q = get_qdisc_kind(k);
     }
 
-    if(k[0]) {
-        addattr_l(&req.n, sizeof(req), TCA_KIND, k, strlen(k) + 1);
+    if (k[0]) {
+        addattr_l(&req.n, sizeof (req), TCA_KIND, k, strlen(k) + 1);
     }
 
-    if(q) {
-        if(q->parse_qopt(q, &qp, &req.n)) {
+    if (q) {
+        if (q->parse_qopt(q, &qp, &req.n)) {
             return 1;
         }
     }
-    if(d[0]) {
+    if (d[0]) {
         int idx;
 
         ll_init_map(&rth);
 
-        if((idx = ll_name_to_index(d)) == 0) {
+        if ((idx = ll_name_to_index(d)) == 0) {
             fprintf(stderr, "Cannot find device \"%s\"\n", d);
             return 1;
         }
@@ -181,7 +181,7 @@ char *type;
         dprintf(("[tc_cmd] tc ifindex = %d\n", idx));
     }
 
-    if(rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
+    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0) {
         return -1;
     }
 
@@ -200,16 +200,16 @@ char **argv;
     ret = (char*)get_route_info(argv[1], argv[2]);
     printf("result = %s\n", ret);
     
-    if(strcmp("add", argv[3]) == 0) {
-        if(tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+    if (strcmp("add", argv[3]) == 0) {
+        if (tc_cmd(RTM_NEWQDISC, NLM_F_EXCL|NLM_F_CREATE, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
         printf("missing tc\n");
     }
-    else if(strcmp("change", argv[3]) == 0) {
-        if(tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+    else if (strcmp("change", argv[3]) == 0) {
+        if (tc_cmd(RTM_NEWQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
         printf("missing tc\n");
     }
-    else if(strcmp("del", argv[3]) == 0) {
-        if(tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
+    else if (strcmp("del", argv[3]) == 0) {
+        if (tc_cmd(RTM_DELQDISC, 0, (char* )get_route_info("dev", argv[2]), "1", "1", qp, "netem") < 0)
         printf("missing tc\n");
     }
     else {
