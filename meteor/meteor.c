@@ -748,6 +748,13 @@ char **argv;
         exit(1);
     }
 
+    if (direction == DIRECTION_IN || direction == DIRECTION_OUT) {
+        if (my_id == -1) {
+            fprintf(stderr, "Please specify node id. option: -i ID\n");
+            exit(1);
+        }
+    }
+
     unsigned char mac_addresses[MAX_NODES][ETH_SIZE];
     char mac_char_addresses[MAX_NODES][MAC_ADDR_SIZE];
     if (sc_type == BIN_SC) {
@@ -1128,6 +1135,7 @@ char **argv;
                     src_id = bin_recs[rec_i].from_id;
                     dst_id = bin_recs[rec_i].to_id;
                     next_hop_id = src_id * all_node_cnt + dst_id;
+
                     io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                     //my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
                     my_recs_ucast_changed[next_hop_id] = TRUE;
@@ -1318,7 +1326,7 @@ char **argv;
                         conn_list = conn_list->next_ptr;
                     }
                 }
-                else  if (direction == DIRECTION_HV) {
+                else if (direction == DIRECTION_HV) {
                     for(src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                         for(dst_id = 0; dst_id < all_node_cnt; dst_id++) {
                              if (src_id <= dst_id) {
