@@ -454,7 +454,7 @@ char **argv;
     
     int32_t pkt_i;
 
-    uint32_t sc_type;
+    uint32_t sc_type = 0;
     uint32_t usage_type;
 
     double time, dummy[PARAMETERS_UNUSED], bandwidth, delay, lossrate;
