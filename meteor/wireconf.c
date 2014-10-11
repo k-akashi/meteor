@@ -598,7 +598,7 @@ int direction;
         }
         ufp.match[IP_SRC].arg = srcaddr;
         ufp.match[IP_DST].arg = dstaddr;
-        add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+        add_tc_filter(devname, filter_id, "all", "u32", &ufp);
     }
 
     if(strcmp(dst, "any") == 0) {
@@ -615,13 +615,13 @@ int direction;
     }
     ufp.match[IP_SRC].arg = dstaddr;
     ufp.match[IP_DST].arg = srcaddr;
-    add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+    add_tc_filter(devname, filter_id, "all", "u32", &ufp);
 
     if(direction != DIRECTION_IN) {
         ufp.match[IP_SRC].arg = srcaddr;
         ufp.match[IP_DST].arg = bcastaddr;
 
-        add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+        add_tc_filter(devname, filter_id, "all", "u32", &ufp);
     }
 
     return 0;
