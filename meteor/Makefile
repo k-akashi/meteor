@@ -12,7 +12,7 @@ INCDIR = ../include
 INCS = -I${INCDIR}
 LIBS = -L${LIBDIR} -ldeltaQ -lwireconf -ltimer -lm -lexpat -lrt
 
-#MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG 
+MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_INFO -DTCDEBUG 
 CFLAGS = -g -O3 -Wall ${MESSAGE_FLAGS}
 
 UNAME = $(shell uname)

@@ -1117,17 +1117,17 @@ char **argv;
 
             //for(rec_i = assign_id * all_node_cnt; rec_i < bin_time_rec.record_number; rec_i++) {}
             for(rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
-                 if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
+                if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
                     INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
                     exit(1);
                 }
-                 if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
+                if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
                     INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
                         bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
                     exit(1);
                 }
 
-                 if (bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
+                if (bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     int32_t src_id;
                     int32_t dst_id;
                     int32_t next_hop_id;
@@ -1141,8 +1141,22 @@ char **argv;
                     my_recs_ucast_changed[next_hop_id] = TRUE;
                     //io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
                 }
+                else if (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_IN) {
+                    int32_t src_id;
+                    int32_t dst_id;
+                    int32_t next_hop_id;
 
-                 if (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
+                    src_id = bin_recs[rec_i].to_id;
+                    dst_id = bin_recs[rec_i].from_id;
+                    next_hop_id = src_id * all_node_cnt + dst_id;
+
+                    io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                    //my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
+                    my_recs_ucast_changed[next_hop_id] = TRUE;
+                    //io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
+                 }
+
+                if (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
                     io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                     //my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
                     my_recs_ucast_changed[next_hop_id] = TRUE;
