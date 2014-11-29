@@ -28,12 +28,7 @@
 
 /************************************************************************
  *
- * QOMET Emulator Implementation
- *
- * File name: meteor.c
- * Function: Main source file of the real-time wired-network emulator 
- *           configuration program. At the moment it can be used to 
- *           drive the netwrok emulator dummynet on FreeBSD 
+ * Meteor Emulator Implementation
  *
  * Authors: Junya Nakata, Lan Nguyen Tien, Razvan Beuran
  * Changes : Kunio AKASHI
@@ -49,6 +44,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <getopt.h>
+#include <sched.h>
 
 #include "global.h"
 #include "wireconf.h"
@@ -57,67 +53,20 @@
 #include "statistics.h"
 #include "timer.h"
 #include "tc_util.h"
-#include <sched.h>
-
-#define PARAMETERS_TOTAL        19
-#define PARAMETERS_UNUSED       13
-
-#define MIN_PIPE_ID_HV          10
-#define MIN_PIPE_ID_BR          10
-#define MIN_PIPE_ID_IN          10000
-#define MIN_PIPE_ID_IN_BCAST	20000
-#define MIN_PIPE_ID_OUT         30000
-
-#define MAX_RULE_NUM            100
-#define MAX_RULE_COUNT          500
-
-#define UNDEFINED_SIGNED        -1
-#define UNDEFINED_UNSIGNED      65535
-#define UNDEFINED_BANDWIDTH     -1.0
-#define SCALING_FACTOR          1.0
-
-#define TCHK_START(name)           \
-struct timeval name##_prev;        \
-struct timeval name##_current;     \
-gettimeofday(&name##_prev, NULL)
-
-#define TCHK_END(name)                                                             \
-    gettimeofday(&name##_current, NULL);                                           \
-time_t name##_sec;                                                                 \
-suseconds_t name##_usec;                                                           \
-if(name##_current.tv_sec == name##_prev.tv_sec) {                                  \
-    name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
-    name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                    \
-}                                                                                  \
-else if(name ##_current.tv_sec != name##_prev.tv_sec) {                            \
-    int name##_carry = 1000000;                                                    \
-    name##_sec = name##_current.tv_sec - name##_prev.tv_sec;                       \
-    if(name##_prev.tv_usec > name##_current.tv_usec) {                             \
-        name##_usec = name##_carry - name##_prev.tv_usec + name##_current.tv_usec; \
-        name##_sec--;                                                              \
-        if(name##_usec > name##_carry) {                                           \
-            name##_usec = name##_usec - name##_carry;                              \
-            name##_sec++;                                                          \
-        }                                                                          \
-    }                                                                              \
-    else {                                                                         \
-        name##_usec = name##_current.tv_usec - name##_prev.tv_usec;                \
-    }                                                                              \
-}                                                                                  \
-printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
-
-typedef struct {
-    float time;
-    int32_t next_hop_id;
-    double bandwidth;
-    double delay;
-    double lossrate;
-} qomet_param;
+#include "meteor.h"
 
 int32_t assign_id = FIRST_NODE_ID;
 int32_t division = 1;
-int32_t re_flag = -1;
-int32_t print_flag = 1;
+int32_t re_flag = FALSE;
+int32_t print_flag = TRUE;
+
+#ifdef __amd64__
+#define rdtsc(t)                                                              \
+    __asm__ __volatile__ ("rdtsc; movq %%rdx, %0; salq $32, %0;orq %%rax, %0" \
+    : "=r"(t) : : "%rax", "%rdx"); 
+#else
+#define rdtsc(t) asm volatile("rdtsc" : "=A" (t))
+#endif
 
 void
 usage()
@@ -139,14 +88,6 @@ usage()
     fprintf(stderr, "\t-a, --assign_id: \n");
     fprintf(stderr, "\t-a, --division: \n");
 }
-
-#ifdef __amd64__
-#define rdtsc(t)                                                              \
-    __asm__ __volatile__ ("rdtsc; movq %%rdx, %0; salq $32, %0;orq %%rax, %0" \
-    : "=r"(t) : : "%rax", "%rdx"); 
-#else
-#define rdtsc(t) asm volatile("rdtsc" : "=A" (t))
-#endif
 
 void
 restart_scenario()
@@ -187,7 +128,7 @@ get_cpu_frequency(void)
     FILE *cpuinfo;
 
     if ((cpuinfo = fopen("/proc/cpuinfo", "r")) == NULL) {
-        printf("/proc/cpuinfo file cannot open\n");
+        fprintf(stderr, "/proc/cpuinfo file cannot open\n");
         exit(EXIT_FAILURE);
     }
 
@@ -239,11 +180,11 @@ timer_init_rdtsc(void)
 int
 read_settings(char *path, in_addr_t *p, int *prefix, int p_size)
 {
+    char *slash;
+    char *ptr;
     char node_name[20];
     char interface[20];
     char node_ip[IP_ADDR_SIZE];
-    char *slash;
-    char *ptr;
     static char buf[BUFSIZ];
     int32_t i = 0;
     int32_t line_nr = 0;
@@ -271,8 +212,7 @@ read_settings(char *path, in_addr_t *p, int *prefix, int p_size)
                 continue;
             }
             if (node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
-                fprintf(stderr, "Node id %d is not within the permitted range [%d, %d]\n",
-                        node_id, FIRST_NODE_ID, MAX_NODES);
+                fprintf(stderr, "Node id %d is not within the permitted range [%d, %d]\n", node_id, FIRST_NODE_ID, MAX_NODES);
                 fclose(fd);
                 return -1;
             }
@@ -280,7 +220,7 @@ read_settings(char *path, in_addr_t *p, int *prefix, int p_size)
             slash = strchr(node_ip, '/');
             if (slash) {
                 *slash = 0;
-            }       
+            }
                 
             prefix[node_id] = 32;
             if (slash) {
@@ -289,7 +229,7 @@ read_settings(char *path, in_addr_t *p, int *prefix, int p_size)
                     prefix[node_id] = 32;
                 }
                 prefix[node_id] = strtoul(slash, &ptr, 0);
-                if (!ptr || ptr == slash || *ptr || *prefix > UINT_MAX)
+                if (!ptr || ptr == slash || *ptr || *prefix > UINT_MAX) {
                     prefix[node_id] = 32;
                 }
             }
@@ -297,6 +237,7 @@ read_settings(char *path, in_addr_t *p, int *prefix, int p_size)
                 i++;
             }
         }
+    }
 
     fclose(fd);
     return i;
@@ -396,7 +337,6 @@ main(int argc, char **argv)
     int32_t dsock;
     int32_t node_cnt = 0;
     int32_t all_node_cnt;
-    uint16_t rulenum;
     uint32_t bin_hdr_if_num;
     int64_t time_i;
     struct bin_hdr_cls bin_hdr;
@@ -459,7 +399,6 @@ main(int argc, char **argv)
     rule_num = -1;
     qomet_fd = NULL;
     saddr = daddr = NULL;
-    rulenum = 65535;
 
     my_id = -1;
     all_node_cnt = -1;
@@ -536,12 +475,9 @@ main(int argc, char **argv)
                     exit(1);
                 }
                 for (i = 0; i < all_node_cnt; i++) {
-                    snprintf(ipaddrs_c + i * IP_ADDR_SIZE, IP_ADDR_SIZE, 
-                            "%d.%d.%d.%d",
-                            *(((uint8_t *)&ipaddrs[i]) + 0),
-                            *(((uint8_t *)&ipaddrs[i]) + 1),
-                            *(((uint8_t *)&ipaddrs[i]) + 2),
-                            *(((uint8_t *)&ipaddrs[i]) + 3));
+                    snprintf(ipaddrs_c + i * IP_ADDR_SIZE, IP_ADDR_SIZE, "%d.%d.%d.%d",
+                        *(((uint8_t *)&ipaddrs[i]) + 0), *(((uint8_t *)&ipaddrs[i]) + 1),
+                        *(((uint8_t *)&ipaddrs[i]) + 2), *(((uint8_t *)&ipaddrs[i]) + 3));
                 }
                 break;
             default:
@@ -603,6 +539,10 @@ main(int argc, char **argv)
     if (division > 0) {
         node_cnt = all_node_cnt / division;
     }
+    else {
+        fprintf(stderr, "division is not lower 0\n");
+        exit(1);
+    }
 
     DEBUG("Initialize timer...");
     if ((timer = timer_init_rdtsc()) == NULL) {
@@ -617,6 +557,7 @@ main(int argc, char **argv)
 
     init_rule(daddr, protocol, direction);
 
+    // add default rule
     uint32_t src_id;
     uint32_t dst_id;
     if (direction == DIRECTION_BR) {
@@ -702,35 +643,24 @@ main(int argc, char **argv)
         }
     }
     if (direction != DIRECTION_HV && direction != DIRECTION_BR) {
+        int rulenum;
         for (j = assign_id; j < node_cnt + assign_id; j++) {
             if (j == my_id || direction != DIRECTION_HV) {
                 continue;
             }
             offset_num = j; 
+            rulenum = MIN_PIPE_ID_IN_BCAST + offset_num;
 
-            INFO("Node %d: Add rule #%d with pipe #%d to destination %s",
-                    my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
-                    MIN_PIPE_ID_IN_BCAST + offset_num, baddr);
-            if (add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        MIN_PIPE_ID_IN_BCAST + offset_num, protocol,
-                        ipaddrs_c + (j-assign_id) * IP_ADDR_SIZE,
-                        baddr, direction) < 0)
+            INFO("Node %d: Add rule #%d to destination %s", my_id, rulenum, baddr);
+            if (add_rule(dsock, rulenum, rulenum, protocol, ipaddrs_c + (j - assign_id) * IP_ADDR_SIZE, baddr, direction) < 0)
             {
-                WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
-                        destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        ipaddrs_c + (j - assign_id) * IP_ADDR_SIZE, baddr);
+                WARNING("Node %d: Could not add rule #%d from %s to destination %s", my_id, rule_num, ipaddrs_c + (j - assign_id) * IP_ADDR_SIZE, baddr);
                 exit(1);
             }
-            if (add_rule(dsock, MIN_PIPE_ID_IN_BCAST + offset_num + 0, 
-                        MIN_PIPE_ID_IN_BCAST + offset_num + 1, protocol,
-                        ipaddrs_c+(j-assign_id)*IP_ADDR_SIZE,
-                        baddr, direction) < 0)
+            if (add_rule(dsock, rulenum, rulenum + 1, protocol, ipaddrs_c+(j-assign_id)*IP_ADDR_SIZE, baddr, direction) < 0)
             {
-                WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to \
-                        destination %s", my_id, MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        MIN_PIPE_ID_IN_BCAST + offset_num, 
-                        ipaddrs_c + (j - assign_id) * IP_ADDR_SIZE, baddr);
+                WARNING("Node %d: Could not add rule #%d with pipe #%d from %s to destination %s", 
+                        my_id, rulenum, rulenum + 1, ipaddrs_c + (j - assign_id) * IP_ADDR_SIZE, baddr);
                 exit(1);
             }
         }
@@ -796,8 +726,6 @@ main(int argc, char **argv)
 
 emulation_start:
     for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
-        int j;
-
         if (my_recs_ucast[node_i] == NULL) {
             my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
         }
@@ -805,12 +733,14 @@ emulation_start:
             fprintf(stderr, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
             exit(1);
         }
-        for (j = 0; j < bin_hdr.if_num; j++) {
-            my_recs_ucast[node_i][j].bandwidth = UNDEFINED_BANDWIDTH;
+
+        int node_j;
+        for (node_j = 0; node_j < bin_hdr.if_num; node_j++) {
+            my_recs_ucast[node_i][node_j].bandwidth = UNDEFINED_BANDWIDTH;
         }
     }
 
-    if (direction == DIRECTION_HV || direction == DIRECTION_BR || adjusted_recs_ucast) {
+    if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
         bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
     }
     else {
@@ -818,37 +748,37 @@ emulation_start:
     }
     if (adjusted_recs_ucast == NULL) {
         adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
-    }
-    if (adjusted_recs_ucast == NULL) {
-        fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
-        exit(1);
+        if (adjusted_recs_ucast == NULL) {
+            fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
+            exit(1);
+        }
     }
 
     if (my_recs_ucast_changed == NULL) {
         my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
-    }
-    if (my_recs_ucast_changed == NULL) {
-        fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
-        exit(1);
+        if (my_recs_ucast_changed == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
+            exit(1);
+        }
     }
 
-    if (my_recs_bcast == NULL) {
+    if (my_recs_bcast == NULL && use_mac_addr == FALSE) {
         my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
-    }
-    if (my_recs_bcast == NULL) {
-        fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
-        exit(1);
-    }
-    for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
-        my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
+        if (my_recs_bcast == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
+            exit(1);
+        }
+        for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
+            my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
+        }
+        my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
+        if (my_recs_bcast_changed == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_bcast_changed\n");
+            exit(1);
+        }
     }
 
-    my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
-    if (my_recs_bcast_changed == NULL) {
-        fprintf(stderr, "Cannot allocate memory for my_recs_bcast_changed\n");
-        exit(1);
-    }
-    
+   
     for (time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
         int rec_i;
         DEBUG("Reading QOMET data from file... Time : %ld/%d\n", time_i, bin_hdr.time_rec_num);
@@ -881,20 +811,51 @@ emulation_start:
                 exit(1);
             }
 
-            if (bin_recs[rec_i].from_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
-                src_id = bin_recs[rec_i].from_id;
-                dst_id = bin_recs[rec_i].to_id;
-                next_hop_id = src_id * all_node_cnt + dst_id;
+            //for(rec_i = assign_id * all_node_cnt; rec_i < bin_time_rec.record_number; rec_i++) {}
+            for(rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
+                int32_t src_id;
+                int32_t dst_id;
+                int32_t next_hop_id;
+                if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
+                    INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
+                    exit(1);
+                }
+                if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
+                    INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
+                        bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
+                    exit(1);
+                }
 
-                io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
-                //my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
-                my_recs_ucast_changed[next_hop_id] = TRUE;
-                //io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
+                if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
+                    src_id = bin_recs[rec_i].from_id;
+                    dst_id = bin_recs[rec_i].to_id;
+                    next_hop_id = src_id * all_node_cnt + dst_id;
+
+                    io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                    my_recs_ucast_changed[next_hop_id] = TRUE;
+
+                    if (print_flag == TRUE) {
+                        io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
+                    }
+                }
+                else if (direction == DIRECTION_IN && bin_recs[rec_i].to_id == my_id) {
+                    src_id = bin_recs[rec_i].to_id;
+                    dst_id = bin_recs[rec_i].from_id;
+                    next_hop_id = src_id * all_node_cnt + dst_id;
+
+                    io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                    my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
+                    my_recs_ucast_changed[next_hop_id] = TRUE;
+
+                    if(print_flag) {
+                        io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
+                    }
+                 }
             }
 
-            if (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR) {
+            if (use_mac_addr == FALSE && (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR)) {
                 io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
-                //my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
+                my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
                 my_recs_ucast_changed[next_hop_id] = TRUE;
                 //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
             }
@@ -927,11 +888,9 @@ emulation_start:
             }
             else {
                 for (rec_i = FIRST_NODE_ID; rec_i < all_node_cnt; rec_i++) {
-                    // do not consider the node itself
                      if (rec_i != my_id) {
                         io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
-                        //io_binary_print_record (&(adjusted_recs_ucast[rec_i]));
                     }
                 }
             }

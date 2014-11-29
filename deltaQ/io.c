@@ -538,7 +538,6 @@ int array_size;
             }
         }
     }
-
     fclose(fd);
 
     return i;

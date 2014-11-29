@@ -327,7 +327,7 @@ int direction;
         }
         ufp.match[IP_SRC].arg = srcaddr;
         ufp.match[IP_DST].arg = dstaddr;
-        add_tc_filter(devname, filter_id, "ip", "u32", &ufp);
+        add_tc_filter(devname, filter_id, "all", "u32", &ufp);
     }
 
     if(strcmp(dst, "any") == 0) {
