@@ -79,35 +79,19 @@ struct connection_list {
     uint16_t rec_i;
 };
 
-#ifdef __FreeBSD__
-int get_rule(uint s, int16_t rulenum);
-#elif __linux
 int get_rule_linux(void);
-#endif
 
 int32_t init_rule(char *dst, int protocol, int direction);
 int32_t add_rule(int s, uint32_t rulenum, int pipe_nr, int32_t protocol, char *src, char *dst, int direction);
 int32_t configure_rule(int s, char* dst, int handle, int bandwidth, double delay, double lossrate);
 int32_t delete_rule(uint s, char *dst, u_int32_t rule_number);
 
-// print a rule structure
-#ifdef __FreeBSD__
-void print_rule(struct ip_fw *rule);
-#endif
-
-// print a pipe structure
-#ifdef __FreeBSD__
-void print_pipe(struct dn_pipe *pipe);
-#endif
-
-#ifdef __linux
 #define MAX_IFS 100
 #define IFNAME_LEN 16
 struct DEVICE_LIST {
     char dev_name[IFNAME_LEN];
 } device_list[MAX_IFS];
 int32_t if_num;
-#endif
 
 struct wireconf_class {
     struct timespec start_time;
