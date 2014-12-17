@@ -677,6 +677,7 @@ main(int argc, char **argv)
     INFO("Reading QOMET data from file...");
     next_time = 0;
 
+emulation_start:
     if (io_binary_read_header_from_file(&bin_hdr, qomet_fd) == ERROR) {
         WARNING("Aborting on input error (binary header)");
         exit(1);
@@ -724,7 +725,6 @@ main(int argc, char **argv)
         exit(1);
     }
 
-emulation_start:
     for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
         if (my_recs_ucast[node_i] == NULL) {
             my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
