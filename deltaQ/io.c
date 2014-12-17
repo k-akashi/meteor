@@ -573,7 +573,7 @@ struct bin_time_rec_cls *binary_time_record;
 }
 
 // print binary record
-    void
+void
 io_binary_print_record (struct bin_rec_cls *binary_record)
 {
     /*
@@ -585,7 +585,7 @@ io_binary_print_record (struct bin_rec_cls *binary_record)
      */
     printf("-- Record: from_id=%d to_id=%d FER=%.4f "
             "num_retr=%.4f standard=%d op_rate=%.2f "
-            "bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", 
+            "rate=%.2f loss=%.4f delay=%.4f\n", 
             binary_record->from_id, binary_record->to_id, binary_record->frame_error_rate, 
             binary_record->num_retransmissions, binary_record->standard, binary_record->operating_rate, 
             binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);

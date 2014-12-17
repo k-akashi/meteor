@@ -58,7 +58,7 @@
 int32_t assign_id = FIRST_NODE_ID;
 int32_t division = 1;
 int32_t re_flag = FALSE;
-int32_t print_flag = TRUE;
+int32_t verbose = FALSE;
 
 #ifdef __amd64__
 #define rdtsc(t)                                                              \
@@ -319,9 +319,9 @@ struct option options[] =
     {"interface", required_argument, NULL, 'I'},
     {"loop", no_argument, NULL, 'l'},
     {"use_mac_address", no_argument, NULL, 'M'},
-    {"print_message", no_argument, NULL, 'P'},
     {"qomet_scenario", required_argument, NULL, 'q'},
     {"settings", required_argument, NULL, 's'},
+    {"verbose", no_argument, NULL, 'v'},
     {0, 0, 0, 0}
 };
 
@@ -407,7 +407,7 @@ main(int argc, char **argv)
     i = 0;
     char ch;
     int index;
-    while ((ch = getopt_long(argc, argv, "a:b:c:d:e:hi:I:lm:Mp:Pq:s:", options, &index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "a:b:c:d:e:hi:I:lm:Mp:q:s:v", options, &index)) != -1) {
         switch (ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -438,7 +438,7 @@ main(int argc, char **argv)
                 loop = TRUE;
                 break;
             case 'm':
-                if (strcmp(optarg, "in") == 0) {
+                if ((strcmp(optarg, "ingress") == 0) || strcmp(optarg, "in") == 0) {
                     direction = DIRECTION_IN;
                 }
                 else if (strcmp(optarg, "out") == 0) {
@@ -459,9 +459,6 @@ main(int argc, char **argv)
                 use_mac_addr = TRUE;
                 protocol = ETH;
                 break;
-            case 'P':
-                print_flag = 0;
-                break;
             case 'q':
                 if ((qomet_fd = fopen(optarg, "rb")) == NULL) {
                     WARNING("Could not open QOMET output file '%s'", optarg);
@@ -479,6 +476,9 @@ main(int argc, char **argv)
                         *(((uint8_t *)&ipaddrs[i]) + 0), *(((uint8_t *)&ipaddrs[i]) + 1),
                         *(((uint8_t *)&ipaddrs[i]) + 2), *(((uint8_t *)&ipaddrs[i]) + 3));
                 }
+                break;
+            case 'v':
+                verbose = TRUE;
                 break;
             default:
                 usage();
@@ -681,7 +681,7 @@ main(int argc, char **argv)
         WARNING("Aborting on input error (binary header)");
         exit(1);
     }
-    if (print_flag == 1) {
+    if (verbose) {
         io_binary_print_header(&bin_hdr);
 
         switch (direction) {
@@ -834,8 +834,8 @@ emulation_start:
                     io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                     my_recs_ucast_changed[next_hop_id] = TRUE;
 
-                    if (print_flag == TRUE) {
-                        io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
+                    if (verbose) {
+                        io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
                     }
                 }
                 else if (direction == DIRECTION_IN && bin_recs[rec_i].to_id == my_id) {
@@ -847,8 +847,8 @@ emulation_start:
                     my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
                     my_recs_ucast_changed[next_hop_id] = TRUE;
 
-                    if(print_flag) {
-                        io_binary_print_record(&(my_recs_ucast[bin_recs[rec_i].from_id][bin_recs[rec_i].to_id]));
+                    if(verbose) {
+                        io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
                     }
                  }
             }
@@ -989,7 +989,7 @@ emulation_start:
                     bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
                     delay = adjusted_recs_ucast[next_hop_id].delay;
                     lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
-                    
+
                     ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
                     if (ret != SUCCESS) {
                         fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
@@ -1027,7 +1027,7 @@ emulation_start:
 
                         ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
                         if (ret != SUCCESS) {
-                            fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
+                            fprintf(stderr, "Error: rule %d. Error Code %d\n", conf_rule_num, ret);
                             exit(1);
                         }
                         my_recs_ucast_changed[next_hop_id] = FALSE;
@@ -1104,7 +1104,6 @@ emulation_start:
                 }
             }
         }
-
         loop_cnt++;
     }
 
