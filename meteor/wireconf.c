@@ -403,8 +403,7 @@ uint32_t rule_number;
 }
 
 int
-configure_qdisc(dst, handle, bandwidth, delay, lossrate)
-char* dst;
+configure_qdisc(handle, bandwidth, delay, lossrate)
 int32_t handle;
 int32_t bandwidth;
 float delay;
@@ -465,13 +464,12 @@ double lossrate;
 }
 
 int32_t
-configure_rule(dsock, dst, pipe_nr, bandwidth, delay, lossrate)
+configure_rule(dsock, pipe_nr, bandwidth, delay, lossrate)
 int dsock;
-char* dst;
 int32_t pipe_nr;
 int32_t bandwidth;
 double delay;
 double lossrate;
 {
-    return configure_qdisc(dst, pipe_nr, bandwidth, delay, lossrate);
+    return configure_qdisc(pipe_nr, bandwidth, delay, lossrate);
 }

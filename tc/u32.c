@@ -512,6 +512,7 @@ struct tc_u32_sel *sel;
 	return -1;
 }
 
+/*
 #define parse_tcp parse_udp
 static int
 parse_udp(match, sel)
@@ -531,6 +532,7 @@ struct tc_u32_sel *sel;
 
 	return -1;
 }
+*/
 
 /*
 static
@@ -648,6 +650,7 @@ struct nlmsghdr *n;
 
 }
 
+/*
 static int
 parse_offset(match, sel)
 struct filter_match match;
@@ -720,6 +723,7 @@ struct tc_u32_sel *sel;
 
 	return 0;
 }
+*/
 
 int
 u32_filter_parse(handle, up, n, dev)

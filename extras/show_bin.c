@@ -224,8 +224,7 @@ main(int argc, char *argv[])
         }
         io_binary_print_time_record(&binary_time_record);
         if(binary_time_record.record_number > bin_rec_max_cnt) {
-            WARNING("Time: %d Number of records exceeds maximum (%d > %d)", 
-                    time_i, binary_time_record.record_number, bin_rec_max_cnt);
+            WARNING("Time: %ld Number of records exceeds maximum (%d > %d)", time_i, binary_time_record.record_number, bin_rec_max_cnt);
             fclose(bin_file);
             exit(1);
         }

@@ -55,10 +55,14 @@
 #include "tc_util.h"
 #include "meteor.h"
 
+int32_t use_mac_addr = FALSE;
 int32_t assign_id = FIRST_NODE_ID;
 int32_t division = 1;
 int32_t re_flag = FALSE;
-int32_t verbose = FALSE;
+int32_t verbose_level = 0;
+int32_t my_id;
+int32_t loop = FALSE;
+int32_t direction;
 
 #ifdef __amd64__
 #define rdtsc(t)                                                              \
@@ -71,22 +75,17 @@ int32_t verbose = FALSE;
 void
 usage()
 {
-    fprintf(stderr, "Meteor. Drive network emulation using QOMET data.\n\n");
-    fprintf(stderr, "Configure all connections from the current node <current_id> given the\n");
-    fprintf(stderr, "    IP Address or MAC Address in <settings_file> and the OPTIONAL broadcast address(baddr).\n");
-    fprintf(stderr, "    The settings file contains on each line pairs of ids and IP addresses or MAC Address.\n");
-    fprintf(stderr, "    Usage: meteor -q <deltaQ_output_binary_file> -i <current_id> -s <settings_file> -m <in|hypervisor|bridge>\n"
-            "\t\t[-M] [-b <baddr>] [-I <Interface Name>] [-a <assign_id>] [-d <division>] [-l]\n");
+    fprintf(stderr, "Meteor. Drive network emulation using QOMET scenario.\n\n");
+    fprintf(stderr, "    Usage: meteor -q <deltaQ_output_binary_file> -i <own_id> -s <settings_file> -m <in|hypervisor|bridge>\n"
+            "\t\t[-M] [-b <baddr>] [-I <Interface Name>] [-a <assign_id>] [-d <division>] [-l] [-d]\n");
 
-    fprintf(stderr, "\t-q, --qomet_scenario: \n");
-    fprintf(stderr, "\t-i, --id: \n");
-    fprintf(stderr, "\t-s, --settings: \n");
-    fprintf(stderr, "\t-m, --mode: \n");
-    fprintf(stderr, "\t-M, --use_mac_address: \n");
-    fprintf(stderr, "\t-b, --broadcast: \n");
-    fprintf(stderr, "\t-I, --interface: \n");
-    fprintf(stderr, "\t-a, --assign_id: \n");
-    fprintf(stderr, "\t-a, --division: \n");
+    fprintf(stderr, "\t-q, --qomet_scenario: Scenario file.\n");
+    fprintf(stderr, "\t-i, --id: Own ID in QOMET scenario\n");
+    fprintf(stderr, "\t-s, --settings: Setting file.\n");
+    fprintf(stderr, "\t-m, --mode: ingress|hypervisor|bridge\n");
+    fprintf(stderr, "\t-M, --use_mac_address: Meteor use MAC Address filtering for network emulation. Default: IP Address\n");
+    fprintf(stderr, "\t-I, --interface: Physical interface select for network emulation.\n");
+    fprintf(stderr, "\t-d, --daemon: Daemon mode.\n");
 }
 
 void
@@ -306,13 +305,455 @@ create_conn_list(FILE *conn_fd, int32_t all_node_cnt)
     return conn_list_head;
 }
 
+int
+meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_rec_cls *bin_recs, int32_t all_node_cnt, int32_t node_cnt, int direction, struct connection_list *conn_list_head)
+{
+    int time_i, node_i, ret;
+    int32_t next_hop_id;
+    int32_t bin_recs_max_cnt;
+    uint32_t bin_hdr_if_num;
+    float crt_record_time = 0.0;
+    double bandwidth, delay, lossrate;
+    struct bin_time_rec_cls bin_time_rec;
+    struct bin_rec_cls **my_recs_ucast = NULL;
+    struct bin_rec_cls *adjusted_recs_ucast = NULL;
+    struct timer_handle *timer;
+    int *my_recs_ucast_changed = NULL;
+    struct bin_rec_cls *my_recs_bcast = NULL;
+    int *my_recs_bcast_changed = NULL;
+    struct connection_list *conn_list = NULL;
+ 
+    if ((timer = timer_init_rdtsc()) == NULL) {
+        fprintf(stderr, "Could not initialize timer");
+        exit(1);
+    }
+
+    if (all_node_cnt != bin_hdr.if_num) {
+        fprintf(stderr, "Number of nodes according to the settings file (%d) "
+                "and number of nodes according to QOMET scenario (%d) differ", 
+                all_node_cnt, bin_hdr.if_num);
+        exit(1);
+    }
+
+    bin_recs_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
+    if (bin_recs == NULL) {
+        bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof (struct bin_rec_cls));
+    }
+    if (bin_recs == NULL) {
+        WARNING("Cannot allocate memory for binary records");
+        exit(1);
+    }
+
+    if (my_recs_ucast == NULL) {
+        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls*));
+    }
+    if (my_recs_ucast == NULL) {
+        fprintf(stderr, "Cannot allocate memory for my_recs_ucast\n");
+        exit(1);
+    }
+
+    for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
+        if (my_recs_ucast[node_i] == NULL) {
+            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
+        }
+        if (my_recs_ucast[node_i] == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
+            exit(1);
+        }
+
+        int node_j;
+        for (node_j = 0; node_j < bin_hdr.if_num; node_j++) {
+            my_recs_ucast[node_i][node_j].bandwidth = UNDEFINED_BANDWIDTH;
+        }
+    }
+
+    if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
+        bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
+    }
+    else {
+        bin_hdr_if_num = bin_hdr.if_num;
+    }
+    if (adjusted_recs_ucast == NULL) {
+        adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
+        if (adjusted_recs_ucast == NULL) {
+            fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
+            exit(1);
+        }
+    }
+
+    if (my_recs_ucast_changed == NULL) {
+        my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
+        if (my_recs_ucast_changed == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
+            exit(1);
+        }
+    }
+
+    if (my_recs_bcast == NULL && use_mac_addr == FALSE) {
+        my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
+        if (my_recs_bcast == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
+            exit(1);
+        }
+        for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
+            my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
+        }
+        my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
+        if (my_recs_bcast_changed == NULL) {
+            fprintf(stderr, "Cannot allocate memory for my_recs_bcast_changed\n");
+            exit(1);
+        }
+    }
+
+emulation_start:
+    for (time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
+        int rec_i;
+
+        if (verbose_level >= 2) {
+            printf("Reading QOMET data from file... Time : %d/%d\n", time_i, bin_hdr.time_rec_num);
+        }
+
+        if (io_binary_read_time_record_from_file(&bin_time_rec, qomet_fd) == ERROR) {
+            fprintf(stderr, "Aborting on input error (time record)\n");
+            exit (1);
+        }
+        io_binary_print_time_record(&bin_time_rec);
+        crt_record_time = bin_time_rec.time;
+
+        if (bin_time_rec.record_number > bin_recs_max_cnt) {
+            fprintf(stderr, "The number of records to be read exceeds allocated size (%d)\n", bin_recs_max_cnt);
+            exit (1);
+        }
+
+        if (io_binary_read_records_from_file(bin_recs, bin_time_rec.record_number, qomet_fd) == ERROR) {
+            fprintf(stderr, "Aborting on input error (records)\n");
+            exit (1);
+        }
+
+        for (rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
+            if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
+                INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
+                exit(1);
+            }
+            if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
+                INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
+                    bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
+                exit(1);
+            }
+
+            int32_t src_id;
+            int32_t dst_id;
+            int32_t next_hop_id;
+
+            if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
+                src_id = bin_recs[rec_i].from_id;
+                dst_id = bin_recs[rec_i].to_id;
+                next_hop_id = src_id * all_node_cnt + dst_id;
+
+                io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                my_recs_ucast_changed[next_hop_id] = TRUE;
+
+                if (verbose_level >= 3) {
+                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
+                }
+            }
+            else if (direction == DIRECTION_IN && bin_recs[rec_i].to_id == my_id) {
+                src_id = bin_recs[rec_i].to_id;
+                dst_id = bin_recs[rec_i].from_id;
+                next_hop_id = src_id * all_node_cnt + dst_id;
+
+                io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
+                my_recs_ucast_changed[next_hop_id] = TRUE;
+
+                if(verbose_level >= 3) {
+                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
+                }
+            }
+
+            if (use_mac_addr == FALSE && (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR)) {
+                io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
+                my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
+                my_recs_ucast_changed[next_hop_id] = TRUE;
+                //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
+            }
+        }
+
+        if (time_i == 0 && re_flag == -1) {
+            uint32_t rec_index;
+            if (direction == DIRECTION_BR) {
+                int32_t src_id, dst_id;
+                conn_list = conn_list_head;
+                while (conn_list != NULL) {
+                    src_id = conn_list->src_id;
+                    dst_id = conn_list->dst_id;
+                    rec_index = conn_list->rec_i;
+                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                    DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
+
+                    conn_list = conn_list->next_ptr;
+                }
+            }
+            else  if (direction == DIRECTION_HV) {
+                int32_t src_id, dst_id;
+                for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
+                    for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                        rec_index = src_id * all_node_cnt + dst_id;
+                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
+                    }
+                }
+            }
+            else {
+                for (rec_i = FIRST_NODE_ID; rec_i < all_node_cnt; rec_i++) {
+                     if (rec_i != my_id) {
+                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
+                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
+                    }
+                }
+            }
+        }
+        else {
+            uint32_t rec_index;
+            INFO("Adjustment of deltaQ is disabled.");
+            if (direction == DIRECTION_BR) {
+                int32_t src_id, dst_id;
+                conn_list = conn_list_head;
+                while (conn_list != NULL) {
+                    src_id = conn_list->src_id;
+                    dst_id = conn_list->dst_id;
+                    rec_index = conn_list->rec_i;
+                    INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
+                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                    DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
+
+                    conn_list = conn_list->next_ptr;
+                }
+            }
+            else if (direction == DIRECTION_HV) {
+                int32_t src_id, dst_id;
+                for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
+                    for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                        if (src_id <= dst_id) {
+                            break;
+                        }
+                        rec_index = src_id * all_node_cnt + dst_id;
+                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                        INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
+                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
+                    }
+                }
+            }
+            else {
+                int32_t dst_id;
+                for (dst_id = FIRST_NODE_ID; dst_id < all_node_cnt; dst_id++) {
+                    if (dst_id != my_id) {
+                        io_bin_cp_rec(&(adjusted_recs_ucast[dst_id]), &(my_recs_ucast[my_id][dst_id]));
+                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", dst_id);
+                    }
+                }
+            }
+        }
+
+        if (time_i == 0) {
+            timer_reset(timer, crt_record_time);
+        }
+        else {
+            if (SCALING_FACTOR == 10.0) {
+                INFO("Waiting to reach time %.6f s...", crt_record_time);
+            }
+            else {
+                INFO("Waiting to reach real time %.6f s (scenario time %.6f)...\n", crt_record_time * SCALING_FACTOR, crt_record_time);
+
+                if ((ret = timer_wait_rdtsc(timer, crt_record_time * 1000000)) < 0) {
+                    WARNING("Timer deadline missed at time=%.6f s", crt_record_time);
+                    WARNING("This rule is skip.\n");
+                    continue;
+                }
+                if (ret == 2) {
+                    fseek(qomet_fd, 0L, SEEK_SET);
+                    if ((timer = timer_init_rdtsc()) == NULL) {
+                        fprintf(stderr, "Could not initialize timer\n");
+                        exit(1);
+                    }
+                    io_binary_read_header_from_file(&bin_hdr, qomet_fd);
+                    if (verbose_level >= 1) {
+                        io_binary_print_header(&bin_hdr);
+                    }
+                    re_flag = FALSE;
+                    goto emulation_start;
+                }
+/*
+                if (timer_wait(timer, crt_record_time * SCALING_FACTOR) != 0) {
+                    fprintf(stderr, "Timer deadline missed at time=%.2f s\n", crt_record_time);
+                }
+*/
+            }
+
+            int32_t src_id, dst_id;
+            uint32_t rec_index;
+            int32_t conf_rule_num;
+            if (direction == DIRECTION_BR) {
+                conn_list = conn_list_head;
+                while (conn_list != NULL) {
+                    src_id = conn_list->src_id;
+                    dst_id = conn_list->dst_id;
+                    rec_index = src_id * all_node_cnt + dst_id;
+                    
+                    if (my_recs_ucast_changed[rec_index] == FALSE) {
+                        conn_list = conn_list->next_ptr;
+                        continue;
+                    }
+
+                    next_hop_id = conn_list->rec_i;
+                    conf_rule_num = next_hop_id + MIN_PIPE_ID_BR;
+
+                    bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
+                    delay = adjusted_recs_ucast[next_hop_id].delay;
+                    lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
+
+                    ret = configure_rule(dsock, conf_rule_num, bandwidth, delay, lossrate);
+                    if (ret != SUCCESS) {
+                        fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
+                        exit(1);
+                    }
+                    my_recs_ucast_changed[next_hop_id] = FALSE;
+                    if (re_flag == TRUE) {
+                        fseek(qomet_fd, 0L, SEEK_SET);
+                        if ((timer = timer_init_rdtsc()) == NULL) {
+                            WARNING("Could not initialize timer");
+                            exit(1);
+                        }
+                        io_binary_read_header_from_file(&bin_hdr, qomet_fd);
+                        if (verbose_level >= 1) {
+                            io_binary_print_header(&bin_hdr);
+                        }
+                        re_flag = FALSE;
+                        goto emulation_start;
+                    }
+                    conn_list = conn_list->next_ptr;
+                }
+            }
+            else if (direction == DIRECTION_HV) {
+                for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
+                    for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
+                         if (src_id <= dst_id) {
+                            break;
+                        }
+                        next_hop_id = src_id * all_node_cnt + dst_id;
+                        conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_OUT;
+
+                        if (my_recs_ucast_changed[next_hop_id] == FALSE) {
+                            continue;
+                        }
+
+                        bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
+                        delay = adjusted_recs_ucast[next_hop_id].delay;
+                        lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
+
+                        ret = configure_rule(dsock, conf_rule_num, bandwidth, delay, lossrate);
+                        if (ret != SUCCESS) {
+                            fprintf(stderr, "Error: rule %d. Error Code %d\n", conf_rule_num, ret);
+                            exit(1);
+                        }
+                        my_recs_ucast_changed[next_hop_id] = FALSE;
+                        if (re_flag == TRUE) {
+                            fseek(qomet_fd, 0L, SEEK_SET);
+                            if ((timer = timer_init_rdtsc()) == NULL) {
+                                WARNING("Could not initialize timer");
+                                exit(1);
+                            }
+                            io_binary_read_header_from_file(&bin_hdr, qomet_fd);
+                            if (verbose_level >= 1) {
+                                io_binary_print_header(&bin_hdr);
+                            }
+                            re_flag = FALSE;
+                            goto emulation_start;
+                        }
+                    }
+                }
+            }
+            else {
+                for (src_id = FIRST_NODE_ID; src_id < all_node_cnt; src_id++) {
+                    if (src_id == my_id) {
+                        continue;
+                    }
+
+                    if (src_id < 0 || (src_id > bin_hdr.if_num - 1)) {
+                        WARNING("Next hop with id = %d is out of the valid range [%d, %d]", bin_recs[rec_i].to_id, 0, bin_hdr.if_num - 1);
+                        exit(1);
+                    }
+
+                    bandwidth = adjusted_recs_ucast[src_id].bandwidth;
+                    delay = adjusted_recs_ucast[src_id].delay;
+                    lossrate = adjusted_recs_ucast[src_id].loss_rate;
+
+                    if (bandwidth != UNDEFINED_BANDWIDTH) {
+                        INFO ("-- Meteor id = %d #%d to me (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms",
+                            MIN_PIPE_ID_OUT + src_id, src_id, crt_record_time, bandwidth, lossrate, delay);
+                    }
+                    else {
+                        INFO ("-- Meteor id = %d #%d to me (time=%.2f s): no valid record could be found => configure with no degradation", 
+                            MIN_PIPE_ID_OUT + src_id, src_id, crt_record_time);
+                    }
+                    ret = configure_rule(dsock, MIN_PIPE_ID_OUT + src_id, bandwidth, delay, lossrate);
+                    if (ret != SUCCESS) {
+                        WARNING("Error configuring Meteor rule %d.", MIN_PIPE_ID_OUT + src_id);
+                        exit (1);
+                    }
+                }
+            }
+            if (direction != DIRECTION_HV && direction != DIRECTION_BR && direction != DIRECTION_IN) {
+                for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {
+                    if (node_i == my_id) {
+                        continue;
+                    }
+                        
+                    if (use_mac_addr == TRUE) {
+                        continue;
+                    }
+    
+                    bandwidth = my_recs_bcast[node_i].bandwidth;
+                    delay = my_recs_bcast[node_i].delay;
+                    lossrate = my_recs_bcast[node_i].loss_rate;
+    
+                    DEBUG("Used contents of my_recs_bcast for deltaQ parameters (index is node_i=%d).", node_i);
+                    //io_binary_print_record (&(my_recs_bcast[node_i]));
+                }
+    
+                if (configure_rule(dsock, MIN_PIPE_ID_IN_BCAST + node_i, bandwidth, delay, lossrate) == ERROR) {
+                    WARNING("Error configuring BCAST pipe %d.", MIN_PIPE_ID_IN_BCAST + node_i);
+                    exit (1);
+                }
+            }
+        }
+    }
+
+    if (loop == TRUE) {
+        re_flag = FALSE;
+        fseek(qomet_fd, 0L, SEEK_SET);
+        if ((timer = timer_init_rdtsc()) == NULL) {
+            WARNING("Could not initialize timer");
+            exit(1);
+        }
+        io_binary_read_header_from_file(&bin_hdr, qomet_fd);
+        if (verbose_level >= 1) {
+            io_binary_print_header(&bin_hdr);
+        }
+        goto emulation_start;
+    }
+
+    return 0;
+}
+
 struct option options[] = 
 {
     {"assign_id", required_argument, NULL, 'a'},
     {"broadcast", required_argument, NULL, 'b'},
     {"connection", required_argument, NULL, 'c'},
     {"mode", required_argument, NULL, 'm'},
-    {"division", required_argument, NULL, 'd'},
+    {"daemon", no_argument, NULL, 'd'},
+    {"division", required_argument, NULL, 'D'},
     {"exec", required_argument, NULL, 'e'},
     {"help", no_argument, NULL, 'h'},
     {"id", required_argument, NULL, 'i'},
@@ -333,38 +774,19 @@ main(int argc, char **argv)
     char settings_file_name[BUFSIZ];
     char *exec_file;
     int32_t ret;
-    int32_t loop = FALSE;
+    int32_t node_i;
     int32_t dsock;
     int32_t node_cnt = 0;
     int32_t all_node_cnt;
-    uint32_t bin_hdr_if_num;
-    int64_t time_i;
+    int daemon_flag = FALSE;
     struct bin_hdr_cls bin_hdr;
-
-    float crt_record_time = 0.0;
-    struct bin_time_rec_cls bin_time_rec;
     struct bin_rec_cls *bin_recs = NULL;
-    int32_t bin_recs_max_cnt;
 
-    int32_t node_i;
   
-    int use_mac_addr = FALSE;
-  
-    struct bin_rec_cls **my_recs_ucast = NULL;
-    struct bin_rec_cls *adjusted_recs_ucast = NULL;
-    int *my_recs_ucast_changed = NULL;
-    struct bin_rec_cls *my_recs_bcast = NULL;
-    int *my_recs_bcast_changed = NULL;
-    
-    double bandwidth, delay, lossrate;
     FILE *qomet_fd;
     FILE *conn_fd;
-    struct timer_handle *timer;
-    int32_t loop_cnt = 0;
-    int32_t direction = DIRECTION_HV;
 
     int32_t i, j;
-    int32_t my_id;
     in_addr_t ipaddrs[MAX_NODES];
     int ipprefix[MAX_NODES];
     char ipaddrs_c[MAX_NODES * IP_ADDR_SIZE];
@@ -399,15 +821,16 @@ main(int argc, char **argv)
     rule_num = -1;
     qomet_fd = NULL;
     saddr = daddr = NULL;
+    direction = DIRECTION_IN;
 
-    my_id = -1;
+    //my_id = -1;
     all_node_cnt = -1;
     strncpy(baddr, "255.255.255.255", IP_ADDR_SIZE);
 
     i = 0;
     char ch;
     int index;
-    while ((ch = getopt_long(argc, argv, "a:b:c:d:e:hi:I:lm:Mp:q:s:v", options, &index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "a:b:c:dD:e:hi:I:lm:M:q:s:v", options, &index)) != -1) {
         switch (ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -419,6 +842,9 @@ main(int argc, char **argv)
                 conn_fd = fopen(optarg, "r");
                 break;
             case 'd':
+                daemon_flag = TRUE;
+                break;
+            case 'D':
                 division = strtol(optarg, &p, 10);
                 break;
             case 'e':
@@ -478,7 +904,7 @@ main(int argc, char **argv)
                 }
                 break;
             case 'v':
-                verbose = TRUE;
+                verbose_level += 1;
                 break;
             default:
                 usage();
@@ -544,17 +970,23 @@ main(int argc, char **argv)
         exit(1);
     }
 
+/*
     DEBUG("Initialize timer...");
     if ((timer = timer_init_rdtsc()) == NULL) {
         fprintf(stderr, "Could not initialize timer");
         exit(1);
     }
+*/
     DEBUG("Open control socket...");
     if ((dsock = get_socket()) < 0) {
         WARNING("Could not open control socket (requires root priviledges)\n");
         exit(1);
     }
 
+    if (daemon_flag == TRUE) {
+        loop = TRUE;
+        ret = daemon(0, 0);
+    }
     init_rule(daddr, protocol, direction);
 
     // add default rule
@@ -677,12 +1109,11 @@ main(int argc, char **argv)
     INFO("Reading QOMET data from file...");
     next_time = 0;
 
-emulation_start:
     if (io_binary_read_header_from_file(&bin_hdr, qomet_fd) == ERROR) {
         WARNING("Aborting on input error (binary header)");
         exit(1);
     }
-    if (verbose) {
+    if (verbose_level >= 1) {
         io_binary_print_header(&bin_hdr);
 
         switch (direction) {
@@ -708,422 +1139,10 @@ emulation_start:
         exit(1);
     }
 
-    bin_recs_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
-    if (bin_recs == NULL) {
-        bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof (struct bin_rec_cls));
-    }
-    if (bin_recs == NULL) {
-        WARNING("Cannot allocate memory for binary records");
-        exit(1);
-    }
-
-    if (my_recs_ucast == NULL) {
-        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls*));
-    }
-    if (my_recs_ucast == NULL) {
-        fprintf(stderr, "Cannot allocate memory for my_recs_ucast\n");
-        exit(1);
-    }
-
-    for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
-        if (my_recs_ucast[node_i] == NULL) {
-            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
-        }
-        if (my_recs_ucast[node_i] == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
-            exit(1);
-        }
-
-        int node_j;
-        for (node_j = 0; node_j < bin_hdr.if_num; node_j++) {
-            my_recs_ucast[node_i][node_j].bandwidth = UNDEFINED_BANDWIDTH;
-        }
-    }
-
-    if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
-        bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
-    }
-    else {
-        bin_hdr_if_num = bin_hdr.if_num;
-    }
-    if (adjusted_recs_ucast == NULL) {
-        adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
-        if (adjusted_recs_ucast == NULL) {
-            fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
-            exit(1);
-        }
-    }
-
-    if (my_recs_ucast_changed == NULL) {
-        my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
-        if (my_recs_ucast_changed == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
-            exit(1);
-        }
-    }
-
-    if (my_recs_bcast == NULL && use_mac_addr == FALSE) {
-        my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
-        if (my_recs_bcast == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
-            exit(1);
-        }
-        for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
-            my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
-        }
-        my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
-        if (my_recs_bcast_changed == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_bcast_changed\n");
-            exit(1);
-        }
-    }
-
-   
-    for (time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
-        int rec_i;
-        DEBUG("Reading QOMET data from file... Time : %ld/%d\n", time_i, bin_hdr.time_rec_num);
-
-        if (io_binary_read_time_record_from_file(&bin_time_rec, qomet_fd) == ERROR) {
-            fprintf(stderr, "Aborting on input error (time record)\n");
-            exit (1);
-        }
-        io_binary_print_time_record(&bin_time_rec);
-        crt_record_time = bin_time_rec.time;
-
-        if (bin_time_rec.record_number > bin_recs_max_cnt) {
-            fprintf(stderr, "The number of records to be read exceeds allocated size (%d)\n", bin_recs_max_cnt);
-            exit (1);
-        }
-
-        if (io_binary_read_records_from_file(bin_recs, bin_time_rec.record_number, qomet_fd) == ERROR) {
-            fprintf(stderr, "Aborting on input error (records)\n");
-            exit (1);
-        }
-
-        for (rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
-            if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
-                INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
-                exit(1);
-            }
-            if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
-                INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
-                    bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
-                exit(1);
-            }
-
-            //for(rec_i = assign_id * all_node_cnt; rec_i < bin_time_rec.record_number; rec_i++) {}
-            for(rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
-                int32_t src_id;
-                int32_t dst_id;
-                int32_t next_hop_id;
-                if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
-                    INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
-                    exit(1);
-                }
-                if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
-                    INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
-                        bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
-                    exit(1);
-                }
-
-                if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
-                    src_id = bin_recs[rec_i].from_id;
-                    dst_id = bin_recs[rec_i].to_id;
-                    next_hop_id = src_id * all_node_cnt + dst_id;
-
-                    io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
-                    my_recs_ucast_changed[next_hop_id] = TRUE;
-
-                    if (verbose) {
-                        io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
-                    }
-                }
-                else if (direction == DIRECTION_IN && bin_recs[rec_i].to_id == my_id) {
-                    src_id = bin_recs[rec_i].to_id;
-                    dst_id = bin_recs[rec_i].from_id;
-                    next_hop_id = src_id * all_node_cnt + dst_id;
-
-                    io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
-                    my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
-                    my_recs_ucast_changed[next_hop_id] = TRUE;
-
-                    if(verbose) {
-                        io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
-                    }
-                 }
-            }
-
-            if (use_mac_addr == FALSE && (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR)) {
-                io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
-                my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
-                my_recs_ucast_changed[next_hop_id] = TRUE;
-                //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
-            }
-        }
-
-        if (time_i == 0 && re_flag == -1) {
-            uint32_t rec_index;
-            if (direction == DIRECTION_BR) {
-                int32_t src_id, dst_id;
-                conn_list = conn_list_head;
-                while (conn_list != NULL) {
-                    src_id = conn_list->src_id;
-                    dst_id = conn_list->dst_id;
-                    rec_index = conn_list->rec_i;
-                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
-                    DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
-
-                    conn_list = conn_list->next_ptr;
-                }
-            }
-            else  if (direction == DIRECTION_HV) {
-                int32_t src_id, dst_id;
-                for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
-                    for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
-                        rec_index = src_id * all_node_cnt + dst_id;
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
-                    }
-                }
-            }
-            else {
-                for (rec_i = FIRST_NODE_ID; rec_i < all_node_cnt; rec_i++) {
-                     if (rec_i != my_id) {
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
-                    }
-                }
-            }
-        }
-        else {
-            uint32_t rec_index;
-            INFO("Adjustment of deltaQ is disabled.");
-            if (direction == DIRECTION_BR) {
-                int32_t src_id, dst_id;
-                conn_list = conn_list_head;
-                while (conn_list != NULL) {
-                    src_id = conn_list->src_id;
-                    dst_id = conn_list->dst_id;
-                    rec_index = conn_list->rec_i;
-                    INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
-                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
-                    DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
-
-                    conn_list = conn_list->next_ptr;
-                }
-            }
-            else if (direction == DIRECTION_HV) {
-                int32_t src_id, dst_id;
-                for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
-                    for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
-                        if (src_id <= dst_id) {
-                            break;
-                        }
-                        rec_index = src_id * all_node_cnt + dst_id;
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
-                        INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
-                    }
-                }
-            }
-            else {
-                int32_t dst_id;
-                for (dst_id = FIRST_NODE_ID; dst_id < all_node_cnt; dst_id++) {
-                    if (dst_id != my_id) {
-                        io_bin_cp_rec(&(adjusted_recs_ucast[dst_id]), &(my_recs_ucast[my_id][dst_id]));
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", dst_id);
-                    }
-                }
-            }
-        }
-
-        if (time_i == 0) {
-            timer_reset(timer, crt_record_time);
-        }
-        else {
-            if (SCALING_FACTOR == 10.0) {
-                INFO("Waiting to reach time %.6f s...", crt_record_time);
-            }
-            else {
-                INFO("Waiting to reach real time %.6f s (scenario time %.6f)...\n", crt_record_time * SCALING_FACTOR, crt_record_time);
-
-                if ((ret = timer_wait_rdtsc(timer, crt_record_time * 1000000)) < 0) {
-                    WARNING("Timer deadline missed at time=%.6f s", crt_record_time);
-                    WARNING("This rule is skip.\n");
-                    continue;
-                }
-                if (ret == 2) {
-                    fseek(qomet_fd, 0L, SEEK_SET);
-                    if ((timer = timer_init_rdtsc()) == NULL) {
-                        fprintf(stderr, "Could not initialize timer\n");
-                        exit(1);
-                    }
-                    re_flag = FALSE;
-                    goto emulation_start;
-                }
-/*
-                if (timer_wait(timer, crt_record_time * SCALING_FACTOR) != 0) {
-                    fprintf(stderr, "Timer deadline missed at time=%.2f s\n", crt_record_time);
-                }
-*/
-            }
-
-            int32_t src_id, dst_id;
-            uint32_t rec_index;
-            int32_t conf_rule_num;
-            if (direction == DIRECTION_BR) {
-                conn_list = conn_list_head;
-                while (conn_list != NULL) {
-                    src_id = conn_list->src_id;
-                    dst_id = conn_list->dst_id;
-                    rec_index = src_id * all_node_cnt + dst_id;
-                    
-                    if (my_recs_ucast_changed[rec_index] == FALSE) {
-                        conn_list = conn_list->next_ptr;
-                        continue;
-                    }
-
-                    next_hop_id = conn_list->rec_i;
-                    conf_rule_num = next_hop_id + MIN_PIPE_ID_BR;
-
-                    bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
-                    delay = adjusted_recs_ucast[next_hop_id].delay;
-                    lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
-
-                    ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
-                    if (ret != SUCCESS) {
-                        fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
-                        exit(1);
-                    }
-                    my_recs_ucast_changed[next_hop_id] = FALSE;
-                    if (re_flag == TRUE) {
-                        fseek(qomet_fd, 0L, SEEK_SET);
-                        if ((timer = timer_init_rdtsc()) == NULL) {
-                            WARNING("Could not initialize timer");
-                            exit(1);
-                        }
-                        re_flag = FALSE;
-                        goto emulation_start;
-                    }
-                    conn_list = conn_list->next_ptr;
-                }
-            }
-            else if (direction == DIRECTION_HV) {
-                for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
-                    for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
-                         if (src_id <= dst_id) {
-                            break;
-                        }
-                        next_hop_id = src_id * all_node_cnt + dst_id;
-                        conf_rule_num = (src_id - assign_id) * all_node_cnt + dst_id + MIN_PIPE_ID_OUT;
-
-                        if (my_recs_ucast_changed[next_hop_id] == FALSE) {
-                            continue;
-                        }
-
-                        bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
-                        delay = adjusted_recs_ucast[next_hop_id].delay;
-                        lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
-
-                        ret = configure_rule(dsock, daddr, conf_rule_num, bandwidth, delay, lossrate);
-                        if (ret != SUCCESS) {
-                            fprintf(stderr, "Error: rule %d. Error Code %d\n", conf_rule_num, ret);
-                            exit(1);
-                        }
-                        my_recs_ucast_changed[next_hop_id] = FALSE;
-                        if (re_flag == TRUE) {
-                            fseek(qomet_fd, 0L, SEEK_SET);
-                            if ((timer = timer_init_rdtsc()) == NULL) {
-                                WARNING("Could not initialize timer");
-                                exit(1);
-                            }
-                            re_flag = FALSE;
-                            goto emulation_start;
-                        }
-                    }
-                }
-            }
-            else {
-                for (src_id = FIRST_NODE_ID; src_id < all_node_cnt; src_id++) {
-                    if (src_id == my_id) {
-                        continue;
-                    }
-
-                    if (src_id < 0 || (src_id > bin_hdr.if_num - 1)) {
-                        WARNING("Next hop with id = %d is out of the valid range [%d, %d]", bin_recs[rec_i].to_id, 0, bin_hdr.if_num - 1);
-                        exit(1);
-                    }
-
-                    bandwidth = adjusted_recs_ucast[src_id].bandwidth;
-                    delay = adjusted_recs_ucast[src_id].delay;
-                    lossrate = adjusted_recs_ucast[src_id].loss_rate;
-
-                    if (bandwidth != UNDEFINED_BANDWIDTH) {
-                        INFO ("-- Meteor id = %d #%d to me (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms",
-                            MIN_PIPE_ID_OUT + src_id, src_id, crt_record_time, bandwidth, lossrate, delay);
-                    }
-                    else {
-                        INFO ("-- Meteor id = %d #%d to me (time=%.2f s): no valid record could be found => configure with no degradation", 
-                            MIN_PIPE_ID_OUT + src_id, src_id, crt_record_time);
-                    }
-                    ret = configure_rule(dsock, daddr, MIN_PIPE_ID_OUT + src_id, bandwidth, delay, lossrate);
-                    if (ret != SUCCESS) {
-                        WARNING("Error configuring Meteor rule %d.", MIN_PIPE_ID_OUT + src_id);
-                        exit (1);
-                    }
-                }
-            }
-            if (direction != DIRECTION_HV && direction != DIRECTION_BR && direction != DIRECTION_IN) {
-                for (node_i = assign_id; node_i < (node_cnt + assign_id); node_i++) {
-                    if (node_i == my_id) {
-                        continue;
-                    }
-                        
-                    if (use_mac_addr == TRUE) {
-                        continue;
-                    }
-    
-                    bandwidth = my_recs_bcast[node_i].bandwidth;
-                    delay = my_recs_bcast[node_i].delay;
-                    lossrate = my_recs_bcast[node_i].loss_rate;
-    
-                    DEBUG("Used contents of my_recs_bcast for deltaQ parameters (index is node_i=%d).", node_i);
-                    //io_binary_print_record (&(my_recs_bcast[node_i]));
-    
-                    if (bandwidth != UNDEFINED_BANDWIDTH) {
-                        INFO ("-- Wireconf pipe=%d: #%d BCAST from #%d [%s] \ (time=%.2f s): bandwidth=%.2fbit/s lossrate=%.4f delay=%.4f ms", 
-                            MIN_PIPE_ID_IN_BCAST + node_i, my_id, node_i, 
-                            ipaddrs_c + (node_i - assign_id) * IP_ADDR_SIZE, 
-                            crt_record_time, bandwidth, lossrate, delay);
-                    }
-                }
-    
-                if (configure_rule(dsock, daddr, MIN_PIPE_ID_IN_BCAST + node_i, bandwidth, delay, lossrate) == ERROR) {
-                    WARNING("Error configuring BCAST pipe %d.", MIN_PIPE_ID_IN_BCAST + node_i);
-                    exit (1);
-                }
-            }
-        }
-        loop_cnt++;
-    }
-
-    if (loop == TRUE) {
-        re_flag = FALSE;
-        fseek(qomet_fd, 0L, SEEK_SET);
-        if ((timer = timer_init_rdtsc()) == NULL) {
-            WARNING("Could not initialize timer");
-            exit(1);
-        }
-        goto emulation_start;
-    }
-
-    if (loop_cnt == 0) {
-        WARNING("No valid line was found for the node %d", my_id); 
-    }
+    meteor_loop(qomet_fd, dsock, bin_hdr, bin_recs, all_node_cnt, node_cnt, direction, conn_list_head);
 
     delete_rule(dsock, daddr, rule_num);
     close_socket(dsock);
 
     return 0;
 }
-
