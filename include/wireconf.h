@@ -81,6 +81,8 @@ struct connection_list {
 
 int get_rule_linux(void);
 
+int32_t create_ifb(uint32_t id);
+int32_t delete_ifb();
 int32_t init_rule(char *dst, int protocol, int direction);
 int32_t add_rule(int s, uint32_t rulenum, int pipe_nr, int32_t protocol, char *src, char *dst, int direction);
 int32_t configure_rule(int s, int handle, int bandwidth, double delay, double lossrate);

@@ -464,7 +464,6 @@ emulation_start:
 
                 io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                 my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
-                my_recs_ucast_changed[next_hop_id] = TRUE;
 
                 if(verbose_level >= 3) {
                     io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
@@ -474,7 +473,6 @@ emulation_start:
             if (use_mac_addr == FALSE && (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR)) {
                 io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                 my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
-                my_recs_ucast_changed[next_hop_id] = TRUE;
                 //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
             }
         }
@@ -830,7 +828,7 @@ main(int argc, char **argv)
     i = 0;
     char ch;
     int index;
-    while ((ch = getopt_long(argc, argv, "a:b:c:dD:e:hi:I:lm:M:q:s:v", options, &index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "a:b:c:dD:e:hi:I:lm:Mq:s:v", options, &index)) != -1) {
         switch (ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -927,6 +925,11 @@ main(int argc, char **argv)
         exit(1);
     }
 
+    if (all_node_cnt - 1 < my_id) {
+        fprintf(stderr, "Invalid ID\n");
+        exit(1);
+    }
+
     if (conn_fd != NULL && direction == DIRECTION_BR) {
         conn_list_head = create_conn_list(conn_fd, all_node_cnt);
     }
@@ -987,6 +990,8 @@ main(int argc, char **argv)
         loop = TRUE;
         ret = daemon(0, 0);
     }
+
+    create_ifb(my_id);
     init_rule(daddr, protocol, direction);
 
     // add default rule
@@ -1142,6 +1147,7 @@ main(int argc, char **argv)
     meteor_loop(qomet_fd, dsock, bin_hdr, bin_recs, all_node_cnt, node_cnt, direction, conn_list_head);
 
     delete_rule(dsock, daddr, rule_num);
+    delete_ifb();
     close_socket(dsock);
 
     return 0;

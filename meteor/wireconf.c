@@ -43,9 +43,11 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <dlfcn.h>
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -92,8 +94,8 @@ else if(name ##_current.tv_sec != name##_prev.tv_sec) {                         
 }                                                                                  \
 printf("%s: sec:%lu usec:%06ld\n", #name, name##_sec, name##_usec);
 
-char ifb_devname[DEV_NAME] = "ifb0";
-
+char ifb_devname[DEV_NAME];
+//char ifb_devname[DEV_NAME] = "ifb0";
 typedef union {
     uint8_t octet[4];
     uint32_t word;
@@ -131,6 +133,68 @@ int16_t rulenum;
 
     return 0;
 }
+
+struct iplink_req {
+    struct nlmsghdr     n;
+    struct ifinfomsg    i;
+    char            buf[1024];
+};
+
+int32_t
+create_ifb(uint32_t id)
+{
+    int ret;
+    int len;
+    int iflatype;
+    char *type = "ifb";
+    struct iplink_req req;
+    struct rtattr *linkinfo;
+
+    snprintf(ifb_devname, DEV_NAME, "ifb%d", id);
+    memset(&req, 0, sizeof (req));
+
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct ifinfomsg));
+    req.n.nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+    req.n.nlmsg_type = RTM_NEWLINK;
+    req.i.ifi_family = preferred_family;
+    req.i.ifi_index = 0;
+
+    len = strlen(ifb_devname) + 1;
+    addattr_l(&req.n, sizeof(req), IFLA_IFNAME, ifb_devname, len);
+
+    linkinfo = NLMSG_TAIL(&req.n);
+    addattr_l(&req.n, sizeof (req), IFLA_LINKINFO, NULL, 0);
+    addattr_l(&req.n, sizeof (req), IFLA_INFO_KIND, type, strlen(type));
+
+    iflatype = IFLA_INFO_DATA;
+
+    linkinfo->rta_len = (void *)NLMSG_TAIL(&req.n) - (void *)linkinfo;
+ 
+    ret = rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL);
+    if (ret < 0) {
+        fprintf(stderr, "Cannot create ifb device ret: %d\n", ret);
+        return 2; 
+    }
+
+    return 0;
+}
+
+int32_t
+delete_ifb()
+{
+    int ret;
+    char cmd[255];
+
+    snprintf(cmd, 255, "ip link del dev %s", ifb_devname);
+    ret = system(cmd);
+    if (ret != 0) {
+        fprintf(stderr, "Cannot delete ifb device\n");
+        return 1;
+    }
+
+    return 0;
+}
+
 
 int32_t
 init_rule(dst, protocol, direction)
