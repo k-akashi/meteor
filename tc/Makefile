@@ -1,4 +1,4 @@
-CC = gcc
+CC = clang
 CFLAGS := -g -O3 -Wall
 
 #DEBUG := -DTCDEBUG

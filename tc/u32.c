@@ -189,7 +189,8 @@ int *offmask;
 }
 */
 
-static int parse_u32(sel, off, offmask)
+static int parse_u32(match, sel, off, offmask)
+struct filter_match match;
 struct tc_u32_sel *sel;
 int off; 
 int offmask;
@@ -217,7 +218,8 @@ int offmask;
 }
 
 static int
-parse_u16(sel, off, offmask)
+parse_u16(match, sel, off, offmask)
+struct filter_match match;
 struct tc_u32_sel *sel;
 int off;
 int offmask;
@@ -245,7 +247,8 @@ int offmask;
 }
 
 static int
-parse_u8(sel, off, offmask)
+parse_u8(match, sel, off, offmask)
+struct filter_match match;
 struct tc_u32_sel *sel;
 int off;
 int offmask;
@@ -600,7 +603,7 @@ struct nlmsghdr *n;
 
     dprintf(("[parse_selector] match.proto : %s\n", match.proto));
 	if (matches(match.proto, "u32") == 0) {
-		res = parse_u32(sel, 0, 0);
+		res = parse_u32(match, sel, 0, 0);
 	    return res;
 	}
 	if (matches(match.proto, "u16") == 0) {

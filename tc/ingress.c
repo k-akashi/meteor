@@ -182,7 +182,7 @@ char* ifb;
     tail = NLMSG_TAIL(n);
     addattr_l(n, MAX_MSG, TCA_OPTIONS, NULL, 0);
 
-    pack_key(sel, htonl(key), htonl(mask), off, offmask);
+    pack_key((struct tc_u32_sel *)&sel, htonl(key), htonl(mask), off, offmask);
 
     handle = TC_HANDLE(1, 1);
     dprintf(("[u32_ingress_filter] handle id %d\n", handle));

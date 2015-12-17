@@ -63,6 +63,7 @@ uint32_t bandwidth;
 	mtu = 1600;
 
 //	get_rate(&opt.rate.rate, bandwidth);
+    opt.ceil.rate = bandwidth;
     opt.rate.rate = bandwidth;
 
     if (!opt.ceil.rate) {
