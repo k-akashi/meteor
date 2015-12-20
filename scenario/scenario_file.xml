@@ -1,6 +1,6 @@
 <!-- Example scenario file for QOMET v1.3-beta -->
 
-<qomet_scenario duration="20" step="0.1">
+<qomet_scenario duration="20" step="0.003">
         
   <node name="node_ap" type="access_point" id="1" x="0" y="0" z="0" Pt="20" internal_delay="1"/>
   <node name="node_r" type="regular" id="2" connection="infrastructure" adapter="orinoco" x="0" y="10" z="0" Pt="20" internal_delay="1"/>

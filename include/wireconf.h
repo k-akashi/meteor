@@ -39,13 +39,7 @@
  *
  ***********************************************************************/
 
-#ifdef __FreeBSD__
-#include <netinet/ip_fw.h>
-#include <netinet/ip_dummynet.h>
-#endif
-
-
-#ifndef	__WIRECONF_H
+#ifndef	__WIRECONF_H_
 #define	__WIRECONF_H_
 
 #include <sys/queue.h>
@@ -55,7 +49,9 @@
 
 #include <net/if.h>
 #include <netinet/in.h>
-
+#include <asm/types.h>
+#include <netlink/socket.h>
+#include <linux/netlink.h>
 
 #define DIRECTION_BOTH                  0
 #define DIRECTION_IN                    1
@@ -69,9 +65,6 @@
 #define ETH         1
 #define IP          2
 
-int get_socket(void);
-void close_socket(int socket_id);
-
 struct connection_list {
     struct connection_list *next_ptr;
     int32_t src_id;
@@ -81,12 +74,11 @@ struct connection_list {
 
 int get_rule_linux(void);
 
-int32_t create_ifb(uint32_t id);
-int32_t delete_ifb();
-int32_t init_rule(char *dst, int protocol, int direction);
-int32_t add_rule(int s, uint32_t rulenum, int pipe_nr, int32_t protocol, char *src, char *dst, int direction);
-int32_t configure_rule(int s, int handle, int bandwidth, double delay, double lossrate);
-//int32_t configure_rule(int s, char* dst, int handle, int bandwidth, double delay, double lossrate);
+int32_t create_ifb(struct nl_sock *sock, int32_t id);
+int32_t delete_ifb(struct nl_sock *sock, int32_t if_index);
+int init_rule(struct nl_sock *sock, int if_index, int ifb_index, int32_t protocol);
+//int add_rule(struct nl_sock *sock, int ifb_index, uint16_t parent, uint16_t handle, int32_t proto, struct node_data *src, struct node_data *dst);
+int configure_rule(struct nl_sock *sock, int ifb_index, uint16_t parent, uint16_t handle, int32_t bandwidth, double delay, double lossrate);
 int32_t delete_rule(uint s, char *dst, u_int32_t rule_number);
 
 #define MAX_IFS 100
