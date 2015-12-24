@@ -49,7 +49,7 @@ add_mirred_filter(struct nl_sock *sock, int src_if, int dst_if)
 
     cls = rtnl_cls_alloc();
     rtnl_tc_set_ifindex(TC_CAST(cls), src_if);
-    rtnl_tc_set_parent(TC_CAST(cls), TC_H_INGRESS);
+    rtnl_tc_set_parent(TC_CAST(cls), TC_HANDLE(0xffff, 0));
     rtnl_cls_set_protocol(cls, ETH_P_ALL);
     rtnl_tc_set_kind(TC_CAST(cls), "u32");
 
@@ -80,6 +80,8 @@ add_mirred_filter(struct nl_sock *sock, int src_if, int dst_if)
     rtnl_mirred_set_policy(act, TC_ACT_STOLEN);
     rtnl_mirred_set_ifindex(act, dst_if);
     rtnl_u32_add_action(cls, act);
+
+    rtnl_u32_set_cls_terminal(cls);
 
     int err;
     if ((err = rtnl_cls_add(sock, cls, NLM_F_CREATE)) < 0) {
