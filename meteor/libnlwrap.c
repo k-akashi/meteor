@@ -116,10 +116,10 @@ add_class_ipv4filter(struct nl_sock *sock, int if_index, uint32_t parent, uint32
     rtnl_tc_set_kind(TC_CAST(cls), "u32");
 
     if (src_addr || src_prefix) {
-        rtnl_u32_add_key_uint32(cls, src_addr, src_mask, 12, 0);
+        rtnl_u32_add_key_uint32(cls, htonl(src_addr), src_mask, 12, 0);
     }
     if (dst_addr || dst_prefix) {
-        rtnl_u32_add_key_uint32(cls, dst_addr, dst_mask, 16, 0);
+        rtnl_u32_add_key_uint32(cls, htonl(dst_addr), dst_mask, 16, 0);
     }
 
     rtnl_u32_set_classid(cls, handle);
