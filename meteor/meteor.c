@@ -681,7 +681,7 @@ main(int argc, char **argv)
     int if_index, ifb_index;
     struct nl_cache *cache;
     rtnl_link_alloc_cache(sock, AF_UNSPEC, &cache);
-    if_index = get_ifindex(cache, "eth0");
+    if_index = get_ifindex(cache, device_list[0].dev_name);
     ifb_index = create_ifb(sock, my_id);
     init_rule(sock, if_index, ifb_index, proto);
 
