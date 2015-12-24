@@ -732,6 +732,7 @@ main(int argc, char **argv)
         node = node_list_head;
         for (i = 0; i < node_cnt; i++) {
             if (node->id == my_id) {
+                node++;
                 continue;
             }
             printf("Node %d: Add rule #%d from source %s\n", my_id, node->id, inet_ntoa(node->ipv4addr));
