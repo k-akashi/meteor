@@ -165,12 +165,24 @@ add_rule(struct nl_sock *sock, int ifb_index, uint16_t parent, uint16_t handle,
     add_htb_class(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 1, 1000000000);
 
     if (proto == ETH_P_ALL) {
-        add_class_macfilter(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 
-                src->mac, dst->mac);
+        if (!dst) {
+            add_class_macfilter(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 
+                    src->mac, NULL);
+        }
+        else {
+            add_class_macfilter(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 
+                    src->mac, dst->mac);
+        }
     }
     if (proto == ETH_P_IP) {
-        add_class_ipv4filter(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 
-                src->ipv4addr.s_addr, src->ipv4prefix, dst->ipv4addr.s_addr, dst->ipv4prefix);
+        if (!dst) {
+            add_class_ipv4filter(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 
+                    src->ipv4addr.s_addr, src->ipv4prefix, NULL, NULL);
+        }
+        else {
+            add_class_ipv4filter(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 
+                    src->ipv4addr.s_addr, src->ipv4prefix, dst->ipv4addr.s_addr, dst->ipv4prefix);
+        }
     }
 
     int delay = 0 ;

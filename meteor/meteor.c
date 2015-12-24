@@ -737,7 +737,7 @@ main(int argc, char **argv)
             }
             printf("Node %d: Add rule #%d from source %s\n", my_id, node->id, inet_ntoa(node->ipv4addr));
 
-            if (add_rule(sock, ifb_index, node->id + 10, node->id + 10, proto, node, my_node) < 0) {
+            if (add_rule(sock, ifb_index, node->id + 10, node->id + 10, proto, node, NULL) < 0) {
                 fprintf(stderr, "Node %d: Could not add rule #%d from source %s\n", 
                         my_id, node->id, inet_ntoa(node->ipv4addr));
                 exit(1);
