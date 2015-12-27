@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <errno.h>
 
 #include <string.h>
 #include <unistd.h>
@@ -11,12 +12,60 @@
 #include "config.hpp"
 
 int
+parse_ipaddr(const char *val, struct in_addr *addr, int *prefix)
+{
+    int ret;
+    char *s, *p;
+    const char *delm = "/";
+
+    s = strtok_r((char *)val, delm, &p);
+    if (!s) {
+        return 1;
+    }
+
+    ret = inet_aton(s, addr);
+    if (ret == 0) {
+        return 1;
+    }
+    s = strtok_r(NULL, delm, &p);
+    if (s) {
+        *prefix = strtol(s, &p, 10);
+    }
+    else {
+        *prefix= 32;
+    }
+
+    return 0;
+}
+
+int
+parse_macaddr(const char *val, uint8_t *mac)
+{
+    int i = 0;
+    char *s, *p;
+    char *endptr;
+    const char *delm = ":";
+
+    s = strtok_r((char *)val, delm, &p);
+    if (!s) {
+        return 1;
+    }
+    mac[i] = strtol(s, &endptr, 16);
+    for (i = 1; i < 6; i++) {
+        s = strtok_r(NULL, delm, &p);
+        if (!s) {
+            return 1;
+        }
+        mac[i] = strtol(s, &endptr, 16);
+    }
+
+    return 0;
+}
+
+int
 add_node_param(struct node_data *node, char *key, const char *val)
 {
-    char *s, *p;
-    const char *ipdelm = "/";
-    const char *macdelm = ":";
-
+    int ret;
     //"node0" : { "interface": "mesh0", "id": 0, "ipaddr": "172.16.0.1/32", "macaddr": "00:00:00:00:00:01" }
 
     if (strncmp(key, "node", sizeof ("nod")) == 0) {
@@ -29,32 +78,17 @@ add_node_param(struct node_data *node, char *key, const char *val)
         node->id = atoi(val);
     }
     else if (strncmp(key, "ipaddr", sizeof ("ipaddr")) == 0) {
-        s = strtok_r((char *)val, ipdelm, &p);
-        inet_aton(s, &(node->ipv4addr));
-        if (p) {
-            s = strtok_r(NULL, ipdelm, &p);
-            node->ipv4prefix = strtol(s, &p, 10);
+        ret = parse_ipaddr(val, &(node->ipv4addr), &(node->ipv4prefix));
+        if (ret) {
+            fprintf(stderr, "Invalid IPv4 address.\n");
+            exit(1);
         }
-        else {
-            node->ipv4prefix = 32;
-        }
-
-        //strncpy(node->ip, val, IPADDR_SIZE);
     }
     else if (strncmp(key, "macaddr", sizeof ("macaddr")) == 0) {
-        int i;
-        char **strtol_p = NULL;
-        s = strtok_r((char *)val, macdelm, &p);
-        if (!s) {
-            return -1;
-        }
-        node->mac[0] = strtol(s, strtol_p, 16);
-        for (i = 1; i < 6; i++) {
-            s = strtok_r(NULL, macdelm, &p);
-            if (!s) {
-                return -1;
-            }
-            node->mac[i] = strtol(s, strtol_p, 16);
+        ret = parse_macaddr(val, node->mac);
+        if (ret) {
+            fprintf(stderr, "Invalid MAC address.\n");
+            exit(1);
         }
     }
 
@@ -107,6 +141,7 @@ dump_node_list(struct node_data *node_list, int node_cnt)
     int i;
     struct node_data *node_ptr = node_list;
 
+    //"node0" : { "interface": "mesh0", "id": 0, "ipaddr": "172.16.0.1/32", "macaddr": "00:00:00:00:00:01" }
     for (i = 0; i < node_cnt; i++) {
         printf("node info:\n");
         printf("\tnode name:           %s\n", node_ptr->name);
@@ -120,10 +155,9 @@ dump_node_list(struct node_data *node_list, int node_cnt)
 
         node_ptr++;
     }
-    //"node0" : { "interface": "mesh0", "id": 0, "ipaddr": "172.16.0.1/32", "macaddr": "00:00:00:00:00:01" }
 }
 
-#if 0
+#ifdef DEBUG
 int
 main(int argc, char **argv)
 {

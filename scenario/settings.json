@@ -1,5 +1,5 @@
 {
-    "node0" : { "interface": "eth0", "id": 0, "ipaddr": "172.16.0.1/32", "macaddr": "42:00:00:00:00:00" },
+    "node0" : { "interface": "eth0", "id": 0, "ipaddr": "172.16.0.1/32", "macaddr": "42:00:00:00:00:2222" },
     "node1" : { "interface": "eth0", "id": 1, "ipaddr": "172.16.0.2/32", "macaddr": "42:00:00:00:01:00" },
     "node2" : { "interface": "eth0", "id": 2, "ipaddr": "172.16.0.3/32", "macaddr": "42:00:00:00:02:00" }
 }

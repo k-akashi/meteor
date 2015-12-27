@@ -56,7 +56,6 @@
 #include "config.hpp"
 #include "libnlwrap.h"
 
-int32_t use_mac_addr = FALSE;
 int32_t re_flag = FALSE;
 int32_t verbose_level = 0;
 int32_t my_id;
@@ -607,7 +606,6 @@ main(int argc, char **argv)
                 }
                 break;
             case 'M':
-                use_mac_addr = TRUE;
                 proto = ETH_P_ALL;
                 break;
             case 'q':
@@ -735,7 +733,9 @@ main(int argc, char **argv)
                 node++;
                 continue;
             }
-            printf("Node %d: Add rule #%d from source %s\n", my_id, node->id, inet_ntoa(node->ipv4addr));
+            if (verbose_level >= 1) {
+                printf("Node %d: Add rule #%d from source %s\n", my_id, node->id, inet_ntoa(node->ipv4addr));
+            }
 
             if (add_rule(sock, ifb_index, node->id + 10, node->id + 10, proto, node, NULL) < 0) {
                 fprintf(stderr, "Node %d: Could not add rule #%d from source %s\n", 

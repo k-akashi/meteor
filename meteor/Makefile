@@ -31,6 +31,9 @@ all: $(TARGETS)
 meteor: meteor.o config.o libnlwrap.o wireconf.o config.o
 	${CC} ${CFLAGS} -g -o ${BINDIR}/$@ $^ $(LDFLAGS) ${INCS} ${LIBS}
 
+config: config.c
+	${CC} -DDEBUG -g -o $@ $< ${INCS} -ljson-c
+
 meteor.o: meteor.c
 config.o: config.c
 libnlwrap.o: libnlwrap.c
