@@ -53,11 +53,9 @@
 #include <netlink/socket.h>
 #include <linux/netlink.h>
 
-#define DIRECTION_BOTH                  0
-#define DIRECTION_IN                    1
-#define DIRECTION_OUT                   2
-#define DIRECTION_HV                    3
-#define DIRECTION_BR                    4
+#define DIRECTION_BOTH 0
+#define INGRESS        1
+#define BRIDGE         4
 
 #define QLEN                            100000
 

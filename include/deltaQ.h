@@ -149,11 +149,10 @@
 
 // parse scenario file and store results in scenario object;
 // return 0 if no error occured, non-0 values otherwise
-int xml_scenario_parse (FILE * scenario_file,
-			struct xml_scenario_class *xml_scenario);
+int xml_scenario_parse(FILE *scenario_file, struct xml_scenario_class *xml_scenario);
 
 // print the main properties of an XML scenario
-void xml_scenario_print (struct xml_scenario_class *xml_scenario);
+void xml_scenario_print(struct xml_scenario_class *xml_scenario);
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -167,8 +166,7 @@ void xml_scenario_print (struct xml_scenario_class *xml_scenario);
 // Annex B, pp. 41:
 //   http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
 // return SUCCESS on success, ERROR on error
-int blh2xyz (const struct coordinate_class *point_blh,
-	     struct coordinate_class *point_xyz);
+int blh2xyz(const struct coordinate_class *point_blh, struct coordinate_class *point_xyz);
 
 // compute latitude, longitude and height from x, y, z coordinates;
 // input data is in point_xyz, output data in point_blh;
@@ -176,8 +174,7 @@ int blh2xyz (const struct coordinate_class *point_blh,
 // systems in Great Britain", Annex B, pp. 41:
 //   http://www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
 // return SUCCESS on success, ERROR on error
-int xyz2blh (const struct coordinate_class *point_xyz,
-	     struct coordinate_class *point_blh);
+int xyz2blh(const struct coordinate_class *point_xyz, struct coordinate_class *point_blh);
 
 // compute the meridional arc given the ellipsoid semi major axis
 // multiplied by central meridian scale factor 'bF0' in meters,
@@ -185,14 +182,13 @@ int xyz2blh (const struct coordinate_class *point_xyz,
 // false origin 'phi0_rad' and initial or final latitude of point 
 // 'phi_rad' in radians; 
 // returns the meridional arc
-double meridional_arc (double bF0, double n, double phi0_rad, double phi_rad);
+double meridional_arc(double bF0, double n, double phi0_rad, double phi_rad);
 
 // convert latitude & longitude coordinates to easting & northing 
 // (xy map coordinates);
 // height/z parameter is copied;
 // input data is in point_blh, output data in point_xyz
-void ll2en (struct coordinate_class *point_blh,
-	    struct coordinate_class *point_xyz);
+void ll2en(struct coordinate_class *point_blh, struct coordinate_class *point_xyz);
 
 // compute initial value of latitude given the northing of point 'North' 
 // and northing of false origin 'n0' in meters, semi major axis multiplied 
@@ -201,15 +197,13 @@ void ll2en (struct coordinate_class *point_blh,
 // ellipsoid semi major axis multiplied by central meridian scale factor 'bf0'
 // in meters;
 // returns the initial value of latitude
-double initial_latitude (double North, double n0, double aF0, double phi0,
-			 double n, double bF0);
+double initial_latitude(double North, double n0, double aF0, double phi0, double n, double bF0);
 
 // convert easting & northing (xy map coordinates) to 
 // latitude & longitude;
 // height/z parameter is copied;
 // input data is in point_blh, output data in point_xyz
-void en2ll (struct coordinate_class *point_xyz,
-	    struct coordinate_class *point_blh);
+void en2ll(struct coordinate_class *point_xyz, struct coordinate_class *point_blh);
 
 
 #endif

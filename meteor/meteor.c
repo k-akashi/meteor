@@ -307,7 +307,7 @@ meteor_loop(FILE *qomet_fd, struct nl_sock *sock, int ifb_index,
         }
     }
 
-    if (direction == DIRECTION_BR) {
+    if (direction == BRIDGE) {
         bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
     }
     else {
@@ -367,13 +367,14 @@ emulation_start:
 
             int32_t src_id;
             int32_t dst_id;
-            if (direction == DIRECTION_BR) {
+            if (direction == BRIDGE) {
             }
-            else if (direction == DIRECTION_IN && bin_recs[rec_i].to_id == my_id) {
+            else if (direction == INGRESS && bin_recs[rec_i].to_id == my_id || bin_recs[rec_i].from_id == my_id) {
                 src_id = bin_recs[rec_i].to_id;
                 dst_id = bin_recs[rec_i].from_id;
 
                 io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                io_bin_cp_rec(&(my_recs_ucast[dst_id][src_id]), &bin_recs[rec_i]);
                 my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
 
                 if(verbose_level >= 3) {
@@ -383,7 +384,7 @@ emulation_start:
         }
 
         if (time_i == 0 && re_flag == -1) {
-            if (direction == DIRECTION_BR) {
+            if (direction == BRIDGE) {
                 uint32_t rec_index;
                 int32_t src_id, dst_id;
                 conn_list = conn_list_head;
@@ -402,6 +403,7 @@ emulation_start:
                 node = node_list_head;
                 for (i = 1; i < node_cnt; i++) {
                      if (node->id != my_id) {
+                        printf("node->id => %d\n", node->id);
                         io_bin_cp_rec(&(adjusted_recs_ucast[node->id]), &(my_recs_ucast[my_id][node->id]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", node->id);
                     }
@@ -411,13 +413,13 @@ emulation_start:
         }
         else {
             INFO("Adjustment of deltaQ is disabled.");
-            if (direction == DIRECTION_BR) {
+            if (direction == BRIDGE) {
                 //uint32_t rec_index;
             }
             else {
                 int i;
                 node = node_list_head;
-                for (i = 1 ; i < node_cnt; i++) {
+                for (i = 0 ; i < node_cnt; i++) {
                     if (node->id != my_id) {
                         io_bin_cp_rec(&(adjusted_recs_ucast[node->id]), &(my_recs_ucast[my_id][node->id]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", node->id);
@@ -462,13 +464,14 @@ emulation_start:
 */
             }
 
-            if (direction == DIRECTION_BR) {
+            if (direction == BRIDGE) {
             }
             else {
                 int i;
                 node = node_list_head;
-                for (i = 0; i < node_cnt - 1; i++) {
+                for (i = 0; i < node_cnt; i++) {
                     if (node->id == my_id) {
+                        node++;
                         continue;
                     }
 
@@ -564,7 +567,7 @@ main(int argc, char **argv)
 
     if_num = 0;
     qomet_fd = NULL;
-    direction = DIRECTION_IN;
+    direction = INGRESS;
 
     //my_id = -1;
     node_cnt = -1;
@@ -595,10 +598,10 @@ main(int argc, char **argv)
                 break;
             case 'm':
                 if ((strcmp(optarg, "ingress") == 0) || strcmp(optarg, "in") == 0) {
-                    direction = DIRECTION_IN;
+                    direction = INGRESS;
                 }
                 else if ((strcmp(optarg, "bridge") == 0) ||(strcmp(optarg, "br") == 0)) {
-                    direction = DIRECTION_BR;
+                    direction = BRIDGE;
                 }
                 else {
                     WARNING("Invalid direction '%s'", optarg);
@@ -641,18 +644,18 @@ main(int argc, char **argv)
         exit(1);
     }
 
-    if (direction == DIRECTION_IN) {
+    if (direction == INGRESS) {
         if (my_id == -1) {
             fprintf(stderr, "Please specify node id. option: -i ID\n");
             exit(1);
         }
     }
-    if (!conn_fd && direction == DIRECTION_BR) {
+    if (!conn_fd && direction == BRIDGE) {
         fprintf(stderr, "no connection file");
         usage();
         exit(1);
     }
-    else if (direction == DIRECTION_BR) {
+    else if (direction == BRIDGE) {
         conn_list_head = create_conn_list(conn_fd, node_cnt);
     }
 
@@ -687,7 +690,7 @@ main(int argc, char **argv)
     // add default rule
     uint32_t src_id;
     uint32_t dst_id;
-    if (direction == DIRECTION_BR) {
+    if (direction == BRIDGE) {
         conn_list = conn_list_head;
         while (conn_list != NULL) {
             src_id = conn_list->src_id;
@@ -716,9 +719,9 @@ main(int argc, char **argv)
         }
     }
 */
-    if (direction == DIRECTION_BR) {
+    if (direction == BRIDGE) {
     }
-    if (direction == DIRECTION_IN) {
+    if (direction == INGRESS) {
         struct node_data *node;
         struct node_data *my_node;
         for (node = node_list_head; node->id < node_cnt; node++) {
@@ -756,10 +759,10 @@ main(int argc, char **argv)
         io_binary_print_header(&bin_hdr);
 
         switch (direction) {
-            case DIRECTION_BR:
+            case BRIDGE:
                 fprintf(stdout, "Direction Mode: Bridge\n");
                 break;
-            case DIRECTION_IN:
+            case INGRESS:
                 fprintf(stdout, "Direction Mode: In\n");
                 break;
         }
