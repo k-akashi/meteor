@@ -147,7 +147,7 @@ add_class_macfilter(struct nl_sock *sock, int if_index, uint32_t parent, uint32_
 
     rtnl_tc_set_ifindex(TC_CAST(cls), if_index);
     rtnl_tc_set_parent(TC_CAST(cls), parent);
-    rtnl_cls_set_protocol(cls, ETH_P_ALL);
+    rtnl_cls_set_protocol(cls, ETH_P_802_3);
     rtnl_tc_set_kind(TC_CAST(cls), "u32");
 
     if (dst_addr) {
