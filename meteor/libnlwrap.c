@@ -157,10 +157,10 @@ add_class_macfilter(struct nl_sock *sock, int if_index, uint32_t parent, uint32_
         rtnl_u32_add_key_uint16(cls, htons(*dst_addr2), 0xffff, 4, 0);
     }
     if (src_addr) {
-        uint16_t *src_addr2 = (uint16_t *)src_addr;
-        uint32_t *src_addr4 = (uint32_t *)(src_addr + 2);
-        rtnl_u32_add_key_uint16(cls, htons(*src_addr2), 0xffff, 6, 0);
-        rtnl_u32_add_key_uint32(cls, htonl(*src_addr4), 0xffffffff, 8, 0);
+        uint32_t *src_addr4 = (uint32_t *)src_addr;
+        uint16_t *src_addr2 = (uint16_t *)(src_addr + 4);
+        rtnl_u32_add_key_uint32(cls, htons(*src_addr4), 0xffffffff, -8, 0);
+        rtnl_u32_add_key_uint16(cls, htonl(*src_addr2), 0xffff, -4, 0);
     }
     rtnl_u32_set_classid(cls, handle);
     rtnl_u32_set_cls_terminal(cls);
