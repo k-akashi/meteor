@@ -182,9 +182,13 @@ class TcCmd():
 					if classid[0] == '':
 						classid[0] = 0;
 					#end if
-					if classid[1] == '':
+					try:
+						if classid[1] == '':
+							classid[1] = 0
+						#endif
+					except:
 						classid[1] = 0
-					#end if
+					#endtry
 					classid_int = {"classid_int" : (int(classid[0], 16) << 16) ^ int(classid[1], 16)};
 
 					class_dict[key] = {};
@@ -199,9 +203,13 @@ class TcCmd():
 						if parent[0] == '':
 							parent[0] = "0";
 						#end if
-						if parent[1] == '':
-							parent[1] = "0";
-						#end if
+						try:
+							if parent[1] == '':
+								parent[1] = "0";
+							#end if
+						except:
+							parent.insert(1, '0')
+						#endtry
 						parent_int = {"parent_int" : (int(parent[0], 16) << 16) ^ int(parent[1], 16)};
 						parent_str = {"parent" : val[5]};
 					#end if
@@ -265,13 +273,17 @@ class TcCmd():
 		return class_dict;
 	
 	def GetSpeed(self, rate):
-		if rate.find("Mbit") != -1:
+		if rate.find("Gbit") != -1:
+			rate = int(rate.rstrip("Gbit"));
+			rate = rate * 1024 * 1024 * 1024;
+		elif rate.find("Mbit") != -1:
 			rate = int(rate.rstrip("Mbit"));
 			rate = rate * 1024 * 1024;
 		elif rate.find("Kbit") != -1:
 			rate = int(rate.rstrip("Kbit"));
 			rate = rate * 1024;
 		elif rate.find("bit") != -1:
+			rate = int(rate.rstrip("bit"));
 			rate = int(rate);
 		#end if
 	
@@ -281,8 +293,12 @@ class TcCmd():
 	def marge_cls_q(self, qdisc_dict, class_dict):
 		stat_dict = {};
 		for key in class_dict.iterkeys():
-			stat_dict[key] = {"qdisc" : qdisc_dict[key]};
-			stat_dict[key].update({"class" : class_dict[key]});
+			try:
+				stat_dict[key] = {"qdisc" : qdisc_dict[key]};
+				stat_dict[key].update({"class" : class_dict[key]});
+			except:
+				continue
+			#endtry
 		#end for
 
 		return stat_dict;
