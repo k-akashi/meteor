@@ -189,7 +189,8 @@ int *offmask;
 }
 */
 
-static int parse_u32(sel, off, offmask)
+static int parse_u32(match, sel, off, offmask)
+struct filter_match match;
 struct tc_u32_sel *sel;
 int off; 
 int offmask;
@@ -217,7 +218,8 @@ int offmask;
 }
 
 static int
-parse_u16(sel, off, offmask)
+parse_u16(match, sel, off, offmask)
+struct filter_match match;
 struct tc_u32_sel *sel;
 int off;
 int offmask;
@@ -245,7 +247,8 @@ int offmask;
 }
 
 static int
-parse_u8(sel, off, offmask)
+parse_u8(match, sel, off, offmask)
+struct filter_match match;
 struct tc_u32_sel *sel;
 int off;
 int offmask;
