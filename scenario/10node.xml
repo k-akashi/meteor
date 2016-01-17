@@ -1,0 +1,108 @@
+<!-- Example scenario file for QOMET v1.3-beta -->
+
+<qomet_scenario duration="60" step="0.05">
+        
+  <node name="node_1"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="23" y="32" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_2"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="26" y="48" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_3"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="20" y="18" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_4"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="5"  y="28" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_5"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="39" y="36" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_6"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="10" y="19" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_7"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="28" y="30" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_8"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="40" y="46" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_9"  type="regular" id="2" connection="infrastructure" adapter="orinoco" x="33" y="50" z="0" Pt="20" internal_delay="1"/>
+  <node name="node_10" type="regular" id="2" connection="infrastructure" adapter="orinoco" x="1"  y="11" z="0" Pt="20" internal_delay="1"/>
+
+  <environment name="env" alpha="5.6" sigma="0" W="0" noise_power="-100"/>
+
+  <connection from_node="node_1" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_1" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_2" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_3" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_4" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_5" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_6" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_7" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_8" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_9" to_node="node_10" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_1" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_2" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_3" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_4" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_5" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_6" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_7" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_8" through_environment="env" standard="802.11b" packet_size="1024"/>
+  <connection from_node="node_10" to_node="node_9" through_environment="env" standard="802.11b" packet_size="1024"/>
+</qomet_scenario>
