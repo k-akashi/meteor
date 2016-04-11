@@ -46,7 +46,7 @@ scenario_init (struct scenario_class *scenario)
   scenario->environment_number = 0;
   scenario->motion_number = 0;
   scenario->connection_number = 0;
-  scenario->if_num = 0;
+  scenario->interface_number = 0;
 
   scenario->current_time = 0.0;
 }
@@ -55,8 +55,8 @@ scenario_init (struct scenario_class *scenario)
 void
 scenario_print (struct scenario_class *scenario)
 {
-  printf ("Scenario: node_number=%d if_num=%d object_number=%d \
-environment_number=%d motion_number=%d connection_number=%d\n", scenario->node_number, scenario->if_num, scenario->object_number, scenario->environment_number, scenario->motion_number, scenario->connection_number);
+  printf ("Scenario: node_number=%d interface_number=%d object_number=%d \
+environment_number=%d motion_number=%d connection_number=%d\n", scenario->node_number, scenario->interface_number, scenario->object_number, scenario->environment_number, scenario->motion_number, scenario->connection_number);
 }
 
 // add a node to the scenario structure;
@@ -576,13 +576,12 @@ scenario_init_state (struct scenario_class *scenario,
 	  return ERROR;
 	}
     }
-  fprintf (stderr, "* Node validation and initialization done (%d nodes)\n",
-	   scenario->node_number);
+  DEBUG ("* Node validation and initialization done (%d nodes)\n",
+	 scenario->node_number);
 
   // nothing to be done for environment validation...
-  fprintf (stderr,
-	   "* Environment validation and initialization done (%d environments)\n",
-	   scenario->environment_number);
+  DEBUG ("* Environment validation and initialization done (%d environments)\n",
+	 scenario->environment_number);
 
   // loop for each object for init
   for (object_i = 0; object_i < scenario->object_number; object_i++)
@@ -690,9 +689,8 @@ no merging necessary", crt_object->name);
 	break;
     }
 
-  fprintf (stderr,
-	   "* Object validation and initialization done (%d objects)\n",
-	   scenario->object_number);
+  DEBUG ("* Object validation and initialization done (%d objects)\n",
+	 scenario->object_number);
 
 #ifdef MESSAGE_DEBUG
 
@@ -719,9 +717,8 @@ no merging necessary", crt_object->name);
 	}
     }
 
-  fprintf (stderr,
-	   "* Motion validation and initialization done (%d motions)\n",
-	   scenario->motion_number);
+  DEBUG ("* Motion validation and initialization done (%d motions)\n",
+	 scenario->motion_number);
 
   // init indexes of each connection; since this may take a while
   // for large scenarios, a counter is displayed
@@ -785,7 +782,11 @@ no merging necessary", crt_object->name);
 	      // a steady state cannot be achieved => warning
 	      if (num_iterations >= MAXIMUM_PRECOMPUTE)
 		{
-		  WARNING ("Maximum number of iterations (%d) was \
+		  // FIXME: It appears that the maximum number of 
+		  // iterations is sometimes exceeded even though
+		  // the operating rate is stable because the deltaQ
+		  // parameters are not. Cause is not yet known.
+		  DEBUG ("Maximum number of iterations (%d) was \
 reached during precomputation phase without reaching steady state", MAXIMUM_PRECOMPUTE);
 		  break;
 		}
@@ -797,7 +798,7 @@ reached during precomputation phase without reaching steady state", MAXIMUM_PREC
 		connection_i);
 	}
 
-      fprintf (stderr, "* Connection validation and initialization done (%d \
+      DEBUG ("* Connection validation and initialization done (%d \
 connections)      \n", scenario->connection_number);
     }
 
@@ -887,7 +888,7 @@ scenario_reset_node_interference_flag (struct scenario_class *scenario)
   for (node_i = 0; node_i < scenario->node_number; node_i++)
     {
       node = &(scenario->nodes[node_i]);
-      for (interf_j = 0; interf_j < node->if_num; interf_j++)
+      for (interf_j = 0; interf_j < node->interface_number; interf_j++)
 	node->interfaces[interf_j].interference_accounted = FALSE;
     }
 }

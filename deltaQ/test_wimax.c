@@ -15,7 +15,7 @@
  *
  * Author: Razvan Beuran, Muhammad Imran Tariq
  *
- * $Id: test_wimax.c 146 2013-06-20 00:50:48Z razvan $
+ * $Id: test_wimax.c 166 2014-02-14 02:03:51Z razvan $
  *
  ***********************************************************************/
 
@@ -23,10 +23,29 @@
 #include "message.h"
 #include "wimax.h"
 
+// system bandwidth values and selection array
+double system_bandwidth_array[WIMAX_SYS_BW_NUMBER] = 
+  { SYS_BW_1, SYS_BW_3, SYS_BW_5, SYS_BW_7, SYS_BW_8, SYS_BW_10,
+    SYS_BW_20 };
+// MCS values and selection array
+int mcs_array[WIMAX_RATES_NUMBER] =
+  { QPSK_18, QPSK_14, QPSK_12, QPSK_34,
+    QAM16_12, QAM16_23, QAM16_34,
+    QAM64_12, QAM64_23, QAM64_34,
+    QAM64_56
+  };
+
 // number of bandwidth values for which we compute the results
-#define MAX_CALCULATION_BW   7
+#define MAX_CALCULATION_BW   1 //7
+int system_bandwidth_select_array[MAX_CALCULATION_BW] =
+  // { 6, 5, 4, 3, 2, 1, 0 };
+  { 5 };
+
 // number of MCS values for which we compute the results
-#define MAX_CALCULATION_MCS  8
+#define MAX_CALCULATION_MCS  1 //8
+int mcs_select_array[MAX_CALCULATION_MCS] = 
+  //{ 2, 3, 4, 6, 7, 8, 9, 10 };
+  { 4 };
 
 int
 main (void)
@@ -34,26 +53,8 @@ main (void)
   // capacity variable
   struct capacity_class capacity;
 
-  // system bandwidth values and selection array
-  double system_bandwidth_array[WIMAX_SYS_BW_NUMBER]
-    =
-    { SYS_BW_1, SYS_BW_3, SYS_BW_5, SYS_BW_7, SYS_BW_8, SYS_BW_10,
-SYS_BW_20 };
-  // indexes in above array
-  int system_bandwidth_select_array[MAX_CALCULATION_BW] =
-    { 6, 5, 4, 3, 2, 1, 0 };
-  double system_bandwidth;
-
-  // MCS values and selection array
-  int mcs_array[WIMAX_RATES_NUMBER] =
-    { QPSK_1_8, QPSK_1_4, QPSK_1_2, QPSK_3_4,
-    QAM_16_1_2, QAM_16_2_3, QAM_16_3_4,
-    QAM_64_1_2, QAM_64_2_3, QAM_64_3_4,
-    QAM_64_5_6
-  };
-  // indexes in above array
-  int mcs_select_array[MAX_CALCULATION_MCS] = { 2, 3, 4, 6, 7, 8, 9, 10 };
   int mcs;
+  double system_bandwidth;
 
   int i, j;
 
@@ -66,8 +67,9 @@ SYS_BW_20 };
 
       // update the entire capacity calculation structure;
       // MCS is not yet know, so we use the value "1"
-      if (capacity_update_all (&capacity, system_bandwidth, QPSK_1_8,
-			       MIMO_TYPE_MATRIX_A, 1, 1) == ERROR)
+      if (capacity_update_all (&capacity, system_bandwidth, 
+			       mcs_array[mcs_select_array[0]],
+			       MIMO_TYPE_SISO, 1, 1) == ERROR)
 	{
 	  printf ("Error updating system bandwidth and MCS for the \
 capacity calculation structure.\n");

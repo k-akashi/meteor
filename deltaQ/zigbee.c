@@ -16,7 +16,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: zigbee.c 146 2013-06-20 00:50:48Z razvan $
+ * $Id: zigbee.c 152 2013-08-29 23:58:04Z razvan $
  *
  ***********************************************************************/
 
@@ -334,8 +334,8 @@ zigbee_compute_channel_interference (struct connection_class *connection,
 	add_powers (connection->interference_noise, virtual_connection.Pr,
 		    ZIGBEE_MINIMUM_NOISE_POWER);
 
-      printf ("Channel noise=%f (inter channel distance=%d)\n",
-	      connection->interference_noise, channel_distance);
+      DEBUG ("Channel noise=%f (inter channel distance=%d)\n",
+	     connection->interference_noise, channel_distance);
     }
 
   // if the noise connection power is superior or equal to the 

@@ -15,7 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: environment.c 146 2013-06-20 00:50:48Z razvan $
+ * $Id: environment.c 162 2014-02-13 08:17:06Z razvan $
  *
  ***********************************************************************/
 
@@ -1124,7 +1124,7 @@ environment_fading (struct environment_class *environment,
   // adjust gamma and sensitivity_delta accordingly
   if (environment->fading == AWGN_FADING)
     {
-      printf ("\nAWGN fading\n");
+      //printf ("\nAWGN fading\n");
       // gamma multiplier in exponent; fitting data is below
       // QPSK  => 1.767 (-90.33 dBm)
       // 16QAM => 1.691 (-86.62 dBm)
@@ -1166,12 +1166,12 @@ environment_fading (struct environment_class *environment,
   if (fer > MAXIMUM_ERROR_RATE)
     fer = MAXIMUM_ERROR_RATE;
 
-  double fer2 = (1 - pow (1 - Pr_threshold_ber, 8 * (double) frame_size))
-    * exp (rx_sensitivity - Pr);
+  //double fer2 = (1 - pow (1 - Pr_threshold_ber, 8 * (double) frame_size))
+  //  * exp (rx_sensitivity - Pr);
 
-  printf
-    ("ber=%f fer=%f Pr_threshold_ber=%f frame_size=%d gamma=%f rx_sensitivity=%f Pr=%f   fer2=%f\n",
-     ber, fer, Pr_threshold_ber, frame_size, gamma, rx_sensitivity, Pr, fer2);
+  //printf
+  //  ("ber=%f fer=%f Pr_threshold_ber=%f frame_size=%d gamma=%f rx_sensitivity=%f Pr=%f   fer2=%f\n",
+  //    ber, fer, Pr_threshold_ber, frame_size, gamma, rx_sensitivity, Pr, fer2);
 
 
   return fer;

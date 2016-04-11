@@ -95,6 +95,7 @@ struct scenario_class
 
   // current execution time of the scenario
   double current_time;
+  int own_id;
 };
 
 

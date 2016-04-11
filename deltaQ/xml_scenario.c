@@ -16,7 +16,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: xml_scenario.c 146 2013-06-20 00:50:48Z razvan $
+ * $Id: xml_scenario.c 164 2014-02-13 08:22:08Z razvan $
  *
  ***********************************************************************/
 
@@ -151,7 +151,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_ADAPTER_STRING) == 0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	if (strcmp (attributes[i + 1], INTERFACE_ADAPTER_ORINOCO_STRING) == 0)
 	  node->interfaces[0].adapter_type = ORINOCO;
@@ -182,7 +182,8 @@ purposes.");
 	    // * init built-in capacity structure
 	    // * init adapter properties
 	    capacity_update_all (&(node->interfaces[0].wimax_params),
-				 SYS_BW_10, QPSK_1_8, MIMO_TYPE_SISO, 1, 1);
+				 WIMAX_DEFAULT_SYS_BW,  WIMAX_DEFAULT_MCS, 
+				 MIMO_TYPE_SISO, 1, 1);
 
 	    if (wimax_init_ns3_adapter (&ns3_wimax) == ERROR)
 	      {
@@ -200,7 +201,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_ANTENNA_GAIN_STRING) == 0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -211,7 +212,7 @@ purposes.");
     else if (strcmp (attributes[i], INTERFACE_AZIMUTH_ORIENTATION_STRING) ==
 	     0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -221,7 +222,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_AZIMUTH_BEAMWIDTH_STRING) == 0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -232,7 +233,7 @@ purposes.");
     else if (strcmp (attributes[i], INTERFACE_ELEVATION_ORIENTATION_STRING) ==
 	     0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -243,7 +244,7 @@ purposes.");
     else if (strcmp (attributes[i], INTERFACE_ELEVATION_BEAMWIDTH_STRING) ==
 	     0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -253,7 +254,7 @@ purposes.");
       }
     else if (strcmp (attributes[i], INTERFACE_ANTENNA_COUNT_STRING) == 0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	long_int_result = long_int_value (attributes[i + 1]);
 	if (long_int_result == LONG_MIN)
@@ -303,7 +304,7 @@ Ignored incorrect value ('%s')", INTERFACE_ANTENNA_COUNT_STRING, 1, MAX_ANTENNA_
       }
     else if (strcmp (attributes[i], INTERFACE_PT_STRING) == 0)
       {
-	node->if_num = 1;	// interface attribute was set => define interface
+	node->interface_number = 1;	// interface attribute was set => define interface
 
 	double_result = double_value (attributes[i + 1]);
 	if (double_result == -HUGE_VAL)
@@ -363,7 +364,7 @@ Ignored negative value ('%s')", NODE_INTERNAL_DELAY_STRING, attributes[i + 1]);
     }
 
   // initialize locally defined interface (always with index 0)
-  if (node->if_num == 1)
+  if (node->interface_number == 1)
     {
       // update the Pr0 field of the interface
       wlan_interface_update_Pr0 (&(node->interfaces[0]));
@@ -2213,7 +2214,7 @@ is not of 'QOMET definition' type!", XML_SCENARIO_STRING);
 		(struct node_class *) stack_top_element->element;
 
 	      DEBUG ("Adding interface #%d for node '%s'",
-		     node->if_num, node->name);
+		     node->interface_number, node->name);
 	      node_add_interface (node, &interface);
 	    }
 
@@ -2399,9 +2400,9 @@ end_element (void *data, const char *element)
 	// check whether any interfaces were explicitly defined;
 	// otherwise, set the number of interfaces to 1 and
 	// initialize the interface
-	if (node->if_num == 0)
+	if (node->interface_number == 0)
 	  {
-	    node->if_num = 1;
+	    node->interface_number = 1;
 	  }
 
 	INFO ("Node element ended");

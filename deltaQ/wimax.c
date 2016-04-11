@@ -15,7 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: wimax.c 146 2013-06-20 00:50:48Z razvan $
+ * $Id: wimax.c 166 2014-02-14 02:03:51Z razvan $
  *
  ***********************************************************************/
 
@@ -105,15 +105,16 @@ wimax_get_interface_adapter (struct connection_class *connection,
 // init the Ns-3 WiMAX adapter structure;
 // return SUCCESS on succes, ERROR on error
 int
-wimax_init_ns3_adapter (struct parameters_802_16 *ns3_wimax)
+wimax_init_ns3_adapter (struct parameters_802_16 *adapter)
 {
-  int i;
   // capacity variable
   struct capacity_class capacity;
-  int mcs;
 
-  mcs = QPSK_1_8;
-  if (capacity_update_all (&capacity, SYS_BW_1, mcs,
+  int mcs = QPSK_18;
+
+  // init capacity for default BW and all MCSes starting at QPSK_18;
+  // needed in order to initialize thresholds 
+  if (capacity_update_all (&capacity, WIMAX_DEFAULT_SYS_BW, mcs,
 			   MIMO_TYPE_SISO, 1, 1) == ERROR)
     {
       WARNING ("Error updating system bandwidth and MCS for the \
@@ -121,12 +122,15 @@ capacity calculation structure.\n");
       return ERROR;
     }
 
-  strncpy (ns3_wimax->name, "Ns-3 WiMAX", MAX_STRING);
+  //printf("WiMAX values: bandwidth = %.2f MCS = %2d: PHY data rate [Mbps]: DL = %5.2f UL = %5.2f\n", WIMAX_DEFAULT_SYS_BW, mcs, capacity.dl_data_rate, capacity.ul_data_rate);
 
+  strncpy (adapter->name, "Ns-3 WiMAX", MAX_STRING);
+
+  int i;
   for (i = 0; i < WIMAX_RATES_NUMBER; i++)
     {
-      ns3_wimax->Pr_thresholds[i] = wimax_min_threshold (&capacity);
-      if (mcs < QAM_64_5_6)
+      adapter->Pr_thresholds[i] = wimax_min_threshold (&capacity);
+      if (mcs < QAM64_56)
 	{
 	  mcs++;
 	  if (capacity_update_mcs (&capacity, mcs) == ERROR)
@@ -135,6 +139,7 @@ capacity calculation structure.\n");
 structure.\n");
 	      return ERROR;
 	    }
+	  //	  printf("WiMAX values: bandwidth = %.2f MCS = %2d: PHY data rate [Mbps]: DL = %5.2f UL = %5.2f\n", WIMAX_DEFAULT_SYS_BW, mcs, capacity.dl_data_rate, capacity.ul_data_rate);
 	}
     }
 
@@ -147,7 +152,9 @@ structure.\n");
 
   // we now specify BER directly, but it can also be computed from FER:
   // ber = (1-pow(1-Pr_threshold_fer, 1/(8*(double)frame_size))) 
-  ns3_wimax->Pr_threshold_ber = 1e-6;
+  adapter->Pr_threshold_ber = 1e-6;
+
+  //wimax_print_adapter(adapter);
 
   return SUCCESS;
 }
@@ -192,41 +199,41 @@ wimax_min_threshold (struct capacity_class *capacity)
   switch (capacity->mcs)
     {
       // QPSK MCS
-    case QPSK_1_8:
+    case QPSK_18:
       SNR_Rx = 1;
       break;			// extrapolated based on Table 338
-    case QPSK_1_4:
+    case QPSK_14:
       SNR_Rx = 2;
       break;			// extrapolated based on Table 338
-    case QPSK_1_2:
+    case QPSK_12:
       SNR_Rx = 5;
       break;			// Table 338
-    case QPSK_3_4:
+    case QPSK_34:
       SNR_Rx = 8;
       break;			// Table 338
 
       // QAM-16 MCS
-    case QAM_16_1_2:
+    case QAM16_12:
       SNR_Rx = 10.5;
       break;			// Table 338
-    case QAM_16_2_3:
+    case QAM16_23:
       SNR_Rx = 12.84;
       break;			// extrapolated based on Table 338
-    case QAM_16_3_4:
+    case QAM16_34:
       SNR_Rx = 14;
       break;			// Table 338
 
       // QAM-64 MCS
-    case QAM_64_1_2:
+    case QAM64_12:
       SNR_Rx = 16;
       break;			// Table 338
-    case QAM_64_2_3:
+    case QAM64_23:
       SNR_Rx = 18;
       break;			// Table 338
-    case QAM_64_3_4:
+    case QAM64_34:
       SNR_Rx = 20;
       break;			// Table 338
-    case QAM_64_5_6:
+    case QAM64_56:
       SNR_Rx = 22;
       break;			// extrapolated based on Table 338
 
@@ -317,13 +324,14 @@ wimax_fer (struct connection_class *connection,
 
   // compute SNR decrease due to Doppler;
   // we do it before computing gain, but is this correct?!
-  double relative_velocity = motion_relative_velocity (scenario,
-						       &(scenario->
-							 nodes[connection->
-							       from_node_index]),
-						       &(scenario->
-							 nodes[connection->
-							       to_node_index]));
+  double relative_velocity 
+    = motion_relative_velocity (scenario,
+				&(scenario->
+				  nodes[connection->
+					from_node_index]),
+				&(scenario->
+				  nodes[connection->
+					to_node_index]));
   struct capacity_class *capacity =
     &(((scenario->nodes[connection->from_node_index]).
        interfaces[connection->from_interface_index]).wimax_params);
@@ -404,7 +412,7 @@ wimax_fer (struct connection_class *connection,
 			  adapter_802_16->Pr_thresholds[operating_rate],
 			  connection->SNR + WIMAX_STANDARD_NOISE);
 
-  //DEBUG ("Pr_threshold_fer=%f model_alpha=%f Pr_thresholds[%d]=%f power=%f \
+  DEBUG ("Pr_threshold_fer=%f model_alpha=%f Pr_thresholds[%d]=%f power=%f \
 (SNR=%f) => fer=%f", adapter_802_16->Pr_threshold_fer, adapter_802_16->model_alpha, operating_rate, adapter_802_16->Pr_thresholds[operating_rate], connection->SNR + WIMAX_STANDARD_NOISE, connection->SNR, fer_value);
 
   // this functionality is now included in environment_fading
@@ -418,6 +426,8 @@ wimax_fer (struct connection_class *connection,
   /// fer_value = MAXIMUM_ERROR_RATE;
 
   DEBUG ("FER=%g\n", fer_value);
+
+  // printf("Pr=%f operating_rate=%d mcs=%d Pr_thresholds[operating_rate]=%f fer=%f\n", connection->Pr, operating_rate, capacity->mcs, adapter_802_16->Pr_thresholds[operating_rate], fer_value); 
 
   (*fer) = fer_value;
 
@@ -449,7 +459,12 @@ int
 wimax_operating_rate (struct connection_class *connection,
 		      struct scenario_class *scenario, int *operating_rate)
 {
-  // FIXME: compute correctly
+  // update operating rate based on MCS value in capacity structure
+ struct capacity_class *capacity =
+    &(((scenario->nodes[connection->from_node_index]).
+       interfaces[connection->from_interface_index]).wimax_params);
+  connection->operating_rate = capacity->mcs;
+
   (*operating_rate) = connection->operating_rate;
   return SUCCESS;
 }
@@ -469,7 +484,8 @@ wimax_delay_jitter (struct connection_class *connection,
   // is constant and equal to the frame duration;
   // also we assume there is no jitter
   // FIXME: is it correct?!
-  (*variable_delay) = WIMAX_FRAME_DURATION;
+  // delay is actually handled by Ns-3, so we set this to 0
+  (*variable_delay) = 0;//WIMAX_FRAME_DURATION;
   (*jitter) = 0;
 
   // delay is equal to the fixed delay configured for the nodes
@@ -497,9 +513,16 @@ wimax_bandwidth (struct connection_class *connection,
      interfaces[connection->to_interface_index]).antenna_count;
   capacity_update_mimo (capacity, capacity->mimo_type);
 
-  // FIXME: how to use UL data rate?!
-  (*bandwidth) = capacity->dl_data_rate;
-
+  // we assume that the base station has the highest index, hence
+  // low-to-high index connections are uplink
+  // FIXME: implement a more generic method?
+  if(connection->from_node_index<connection->to_node_index)
+    (*bandwidth) = capacity->ul_data_rate;
+  else
+    (*bandwidth) = capacity->dl_data_rate;
+  /*
+  printf("bandwidth = %.2f MCS = %2d: PHY data rate [Mbps]: DL = %5.2f UL = %5.2f\n", capacity->system_bandwidth, capacity->mcs, capacity->dl_data_rate, capacity->ul_data_rate);
+  */
   return SUCCESS;
 }
 
@@ -516,6 +539,9 @@ wimax_connection_update (struct connection_class *connection,
     &(scenario->nodes[connection->from_node_index]);
   struct environment_class *environment =
     &(scenario->environments[connection->through_environment_index]);
+
+  //connection->operating_rate = node_tx->interfaces[0].wimax_params.mcs;
+  //printf("tx.mcs=%d rx.mcs=%d => operating_rate=%d\n",node_tx->interfaces[0].wimax_params.mcs, node_rx->interfaces[0].wimax_params.mcs,connection->operating_rate );
 
   // update distance in function of the new node positions
   connection->distance =
@@ -671,6 +697,8 @@ capacity_update_all (struct capacity_class *capacity,
 		     int Nt, int Nr)
 {
   // system bandwidth in MHz
+  //printf("capacity_update_all: bw=%.2f mcs=%d\n", system_bandwidth, mcs);
+
   capacity->system_bandwidth = system_bandwidth;
 
   capacity->Nt = Nt;
@@ -889,6 +917,14 @@ capacity_update_all (struct capacity_class *capacity,
     = floor (FRAME_DURATION / capacity->OFDMA_symbol_time
 	     - capacity->ttg_rtg_duration);
 
+#ifdef DL_SYMBOL_RATIO
+  if (1)
+    {
+      capacity->dl_symbols = (int) floor(capacity->total_symbols*DL_SYMBOL_RATIO);
+      capacity->ul_symbols = (int) floor(capacity->total_symbols*(1-DL_SYMBOL_RATIO));
+      //printf("Update DL and UL symbol count: dl_symbols=%d ul_symbols=%d (DL_SYMBOL_RATIO=%.2f)\n", capacity->dl_symbols, capacity->ul_symbols, DL_SYMBOL_RATIO);
+    }
+#endif
 
   ////////////////////////////////////////////
   // compute subcarrier values ([1] Table 2])
@@ -1055,7 +1091,7 @@ capacity_update_mcs (struct capacity_class *capacity, int mcs)
 {
   // MCS dependent part starts here
   // check whether modulation scheme is supported
-  if (mcs < QPSK_1_8 || mcs > QAM_64_5_6)
+  if (mcs < QPSK_18 || mcs > QAM64_56)
     {
       WARNING ("Modulation scheme '%d' is not supported", mcs);
       return ERROR;
@@ -1108,7 +1144,7 @@ capacity_update_mcs (struct capacity_class *capacity, int mcs)
   // proportional decrease in data rate; 
   // note that repetition coding is only possible for QPSK rates!
   // FIXME: make repetition factor dynamic not predefined constant
-  if (mcs >= QPSK_1_8 && mcs <= QPSK_3_4)
+  if (mcs >= QPSK_18 && mcs <= QPSK_34)
     if (REPETITION_FACTOR > 1)
       {
 	capacity->dl_data_rate /= (double) REPETITION_FACTOR;
@@ -1205,41 +1241,41 @@ capacity_bytes_per_slot (struct capacity_class *capacity, int downlink)
     {
 
       // QPSK MCS
-    case QPSK_1_8:
+    case QPSK_18:
       data_bits_per_symbol = 2 * 0.125;
       break;
-    case QPSK_1_4:
+    case QPSK_14:
       data_bits_per_symbol = 2 * 0.250;
       break;
-    case QPSK_1_2:
+    case QPSK_12:
       data_bits_per_symbol = 2 * 0.500;
       break;
-    case QPSK_3_4:
+    case QPSK_34:
       data_bits_per_symbol = 2 * 0.750;
       break;
 
       // QAM-16 MCS
-    case QAM_16_1_2:
+    case QAM16_12:
       data_bits_per_symbol = 4 * 0.500;
       break;
-    case QAM_16_2_3:
+    case QAM16_23:
       data_bits_per_symbol = 4 * 0.667;
       break;
-    case QAM_16_3_4:
+    case QAM16_34:
       data_bits_per_symbol = 4 * 0.750;
       break;
 
       // QAM-64 MCS
-    case QAM_64_1_2:
+    case QAM64_12:
       data_bits_per_symbol = 6 * 0.500;
       break;
-    case QAM_64_2_3:
+    case QAM64_23:
       data_bits_per_symbol = 6 * 0.667;
       break;
-    case QAM_64_3_4:
+    case QAM64_34:
       data_bits_per_symbol = 6 * 0.750;
       break;
-    case QAM_64_5_6:
+    case QAM64_56:
       data_bits_per_symbol = 6 * 0.833;
       break;
 
@@ -1260,9 +1296,9 @@ capacity_bytes_per_slot (struct capacity_class *capacity, int downlink)
       * (UL_SUBCARRIERS_PER_SLOT * UL_SYMBOLS_PER_SLOT -
 	 UL_PILOTS_PER_SLOT) / 8;
 
-  // for MCS=QPSK_1_8, the result 1.5 is expected, otherwise round the result
+  // for MCS=QPSK_18, the result 1.5 is expected, otherwise round the result
   // to closest integer to compensate for numerical errors
-  if (capacity->mcs != QPSK_1_8)
+  if (capacity->mcs != QPSK_18)
     bytes_per_symbol = round (bytes_per_symbol);
 
   return bytes_per_symbol;

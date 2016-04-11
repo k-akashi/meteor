@@ -15,7 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: connection.c 146 2013-06-20 00:50:48Z razvan $
+ * $Id: connection.c 166 2014-02-14 02:03:51Z razvan $
  *
  ***********************************************************************/
 
@@ -103,11 +103,6 @@ connection_init (struct connection_class *connection, char *from_node,
 
   connection->fixed_deltaQ_number = 0;
   connection->fixed_deltaQ_crt = 0;
-
-  /*
-     capacity_update_all(&(connection->wimax_capacity), SYS_BW_10,  QPSK_1_8, 
-     MIMO_TYPE_SISO);
-   */
 
   // do this at the end since it may cause an error
   return connection_init_standard (connection, standard);
@@ -198,7 +193,7 @@ connection_init_standard (struct connection_class *connection, int standard)
       connection->standard = standard;
 
       // we assume WiMAX adapters start from the lowest rate/MCS and go up
-      connection->new_operating_rate = QPSK_1_8;
+      connection->new_operating_rate = QPSK_18;
       connection->operating_rate = connection->new_operating_rate;
       connection->bandwidth =
 	wimax_operating_rates[connection->operating_rate];
@@ -262,7 +257,7 @@ connection_init_indexes (struct connection_class *connection,
 		}
 	      else		// try to find from_interface among those of the node
 		{
-		  for (j = 0; j < node->if_num; j++)
+		  for (j = 0; j < node->interface_number; j++)
 		    if (strcmp (node->interfaces[j].name,
 				connection->from_interface) == 0)
 		      {
@@ -271,9 +266,9 @@ connection_init_indexes (struct connection_class *connection,
 			break;
 		      }
 
-		  // if j equals node->if_num, then the from_interface 
+		  // if j equals node->interface_number, then the from_interface 
 		  // could not be found => return ERROR
-		  if (j >= node->if_num)
+		  if (j >= node->interface_number)
 		    {
 		      WARNING
 			("Connection attribute '%s' with value '%s' does not exist for node '%s'.",
@@ -299,7 +294,7 @@ connection_init_indexes (struct connection_class *connection,
 		}
 	      else		// try to find to_interface among those of the node
 		{
-		  for (j = 0; j < node->if_num; j++)
+		  for (j = 0; j < node->interface_number; j++)
 		    if (strcmp (node->interfaces[j].name,
 				connection->to_interface) == 0)
 		      {
@@ -308,9 +303,9 @@ connection_init_indexes (struct connection_class *connection,
 			break;
 		      }
 
-		  // if j equals node->if_num, then the to_interface 
+		  // if j equals node->interface_number, then the to_interface 
 		  // could not be found => return ERROR
-		  if (j >= node->if_num)
+		  if (j >= node->interface_number)
 		    {
 		      WARNING
 			("Connection attribute '%s' with value '%s' does not exist for node '%s'.",
@@ -575,8 +570,8 @@ connection_get_operating_rate (struct connection_class *connection)
     else
       return zigbee_operating_rates[connection->operating_rate];
   else if (connection->standard == WIMAX_802_16)
-    if ((connection->operating_rate < QPSK_1_8) ||
-	(connection->operating_rate > QAM_64_5_6))
+    if ((connection->operating_rate < QPSK_18) ||
+	(connection->operating_rate > QAM64_56))
       {
 	WARNING ("Invalid operating rate index '%d' for 802.16",
 		 connection->operating_rate);
@@ -856,6 +851,15 @@ connection_do_compute (struct connection_class *connection,
          connection->interference_noise = ZIGBEE_MINIMUM_NOISE_POWER;
          }
        */
+
+      // initialize/update operating rate
+      if (wimax_operating_rate (connection, scenario,
+			       &(connection->new_operating_rate)) == ERROR)
+	{
+	  WARNING ("Error while computing operating rate (WiMAX)");
+	  return ERROR;
+	}
+
       if (connection->loss_rate_defined == FALSE)
 	// compute loss rate
 	if (wimax_loss_rate (connection, scenario,
