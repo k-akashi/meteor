@@ -79,13 +79,12 @@ struct bin_rec_cls
 };
 
 
-struct io_connection_state_class
+typedef struct io_connection_state_class
 {
   struct bin_time_rec_cls binary_time_record;
   struct bin_rec_cls binary_records[MAX_CONNECTIONS];
   int state_changed[MAX_CONNECTIONS];
-};
-
+} io_cls;
 
 ////////////////////////////////////////////////
 // Text I/O functions
