@@ -13,6 +13,8 @@
 #
 ###################################################################
 
+CC=gcc
+
 ifndef $(COMPILE_TYPE)
 COMPILE_TYPE=debug
 #COMPILE_TYPE=profile
@@ -24,18 +26,10 @@ MESSAGE_FLAGS = -DMESSAGE_WARNING
 #MESSAGE_FLAGS = -DMESSAGE_WARNING -DMESSAGE_DEBUG -DMESSAGE_INFO
 GENERAL_FLAGS = -Werror ${MESSAGE_FLAGS}
 
-# only need these for non-standard installations
-EXPAT_PATH=/usr/local
-EXPAT_INC=-I${EXPAT_PATH}/include
-EXPAT_LIB=-L${EXPAT_PATH}/lib -lexpat
-DELTAQ_PATH=.
-DELTAQ_INC=-I${DELTAQ_PATH}
-DELTAQ_LIB=-L. -ldeltaQ
-
-INCS=${EXPAT_INC} -I$(STAGING_DIR)/usr/include
+INCS=-I../include
 # order of libraries is importan, deltaQ must be first because it uses
 # the other ones!
-LIBS=${DELTAQ_LIB} -lm ${EXPAT_LIB} -L$(STAGING_DIR)/usr/lib
+LIBS=-L../lib -ldeltaQ -lm -lexpat
 
 # Uncomment the line below if compiling using Windows Visual C
 #WIN_FLAGS = -D__WINDOWS__
@@ -92,82 +86,82 @@ SVN_DEFINE = -D'SVN_REVISION=$(SVN_REVISION)'
 all: libdeltaQ.a deltaQ all_test
 all_test: test_wimax
 
-libdeltaQ.a : ${OBJECTS}
-	ar rc libdeltaQ.a ${OBJECTS} ${STATIC_EXPAT} && ranlib libdeltaQ.a
+libdeltaQ.a: ${OBJECTS}
+	ar rc ../lib/libdeltaQ.a ${OBJECTS} ${STATIC_EXPAT} && ranlib libdeltaQ.a
 
-deltaQ : deltaQ.o libdeltaQ.a
+deltaQ: deltaQ.o
 	$(CC) $(LDFLAGS) $(GCC_FLAGS) deltaQ.o -o deltaQ ${INCS} ${LIBS}
 
-deltaQ.o : deltaQ.c deltaQ.h message.h global.h ${DELTA_Q_OBJECTS}
+deltaQ.o: deltaQ.c
 	$(CC) $(CFLAGS) $(SVN_DEFINE) $(GCC_FLAGS) deltaQ.c -c ${INCS}
 
-active_tag.o : active_tag.c active_tag.h deltaQ.h message.h generic.h global.h
+active_tag.o: active_tag.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) active_tag.c -c ${INCS}
 
-connection.o : connection.c connection.h deltaQ.h message.h global.h
+connection.o: connection.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) connection.c -c ${INCS}
 
-coordinate.o : coordinate.c coordinate.h global.h
+coordinate.o: coordinate.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) coordinate.c -c ${INCS}
 
-environment.o : environment.c environment.h deltaQ.h message.h global.h
+environment.o: environment.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) environment.c -c ${INCS}
 
-ethernet.o : ethernet.c ethernet.h deltaQ.h message.h global.h
+ethernet.o: ethernet.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) ethernet.c -c ${INCS}
 
-fixed_deltaQ.o : fixed_deltaQ.c fixed_deltaQ.h deltaQ.h message.h global.h
+fixed_deltaQ.o: fixed_deltaQ.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) fixed_deltaQ.c -c ${INCS}
 
-generic.o : generic.c generic.h message.h global.h
+generic.o: generic.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) generic.c -c ${INCS}
 
-geometry.o : geometry.c geometry.h message.h global.h
+geometry.o: geometry.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) geometry.c -c ${INCS}
 
-io.o    : io.c io.h message.h global.h
+io.o: io.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) io.c -c ${INCS}
 
-interface.o : interface.c interface.h message.h global.h
+interface.o: interface.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) interface.c -c ${INCS}
 
-motion.o : motion.c motion.h deltaQ.h message.h global.h
+motion.o: motion.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) motion.c -c ${INCS}
 
-node.o : node.c node.h deltaQ.h message.h global.h
+node.o: node.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) node.c -c ${INCS}
 
-object.o : object.c object.h deltaQ.h message.h global.h
+object.o: object.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) object.c -c ${INCS}
 
-scenario.o : scenario.c scenario.h deltaQ.h message.h global.h
+scenario.o: scenario.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) scenario.c -c ${INCS}
 
-stack.o : stack.c stack.h message.h global.h
+stack.o: stack.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) stack.c -c ${INCS}
 
-wimax.o : wimax.c wimax.h deltaQ.h message.h generic.h global.h
+wimax.o: wimax.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) wimax.c -c ${INCS}
 
-wlan.o : wlan.c wlan.h deltaQ.h message.h generic.h global.h
+wlan.o: wlan.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) wlan.c -c ${INCS}
 
-xml_jpgis.o : xml_jpgis.c xml_jpgis.h message.h global.h
+xml_jpgis.o: xml_jpgis.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) xml_jpgis.c -c ${INCS}
 
-xml_scenario.o : xml_scenario.c xml_scenario.h deltaQ.h message.h global.h
+xml_scenario.o: xml_scenario.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) xml_scenario.c -c ${INCS}
 
-zigbee.o : zigbee.c zigbee.h deltaQ.h message.h generic.h global.h
+zigbee.o: zigbee.c
 	$(CC) $(CFLAGS) $(GCC_FLAGS) zigbee.c -c ${INCS}
 
 # test files
 TEST_FLAGS = -DMESSAGE_WARNING -DMESSAGE_DEBUG -DMESSAGE_INFO
-test_wimax : test_wimax.c wimax.o deltaQ.h message.h generic.h global.h
+test_wimax: test_wimax.c
 	$(CC) $(LDLAGS) $(GCC_FLAGS) $(TEST_FLAGS) test_wimax.c -o test_wimax ${INCS} ${LIBS}
 
 #deltaQ : deltaQ.o libdeltaQ.a
 #	$(CC) $(LDFLAGS) $(GCC_FLAGS) deltaQ.o -o deltaQ ${INCS} ${LIBS}
 
 clean:
-	rm -f libdeltaQ.a deltaQ test_wimax *.o core
+	rm -f ../lib/libdeltaQ.a deltaQ test_wimax *.o core

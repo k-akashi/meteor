@@ -91,12 +91,12 @@ struct scenario_class
   int connection_number;
 
   // global number of interfaces for all nodes
-  int if_num;
+  int interface_number;
 
   // current execution time of the scenario
   double current_time;
   int own_id;
-};
+} sc_cls;
 
 
 /////////////////////////////////////////

@@ -116,7 +116,7 @@ print_systeminfo()
 
     printf("Data structure [bytes]: ");
     printf("bin_hdr_cls=%zu  bin_time_rec_cls=%zu bin_rec_cls=%zu\n", 
-        sizeof(struct bin_hdr_cls), sizeof(struct bin_time_rec_cls), sizeof(struct bin_rec_cls));
+        sizeof(bin_hdr_cls), sizeof(bin_time_rec_cls), sizeof(bin_rec_cls));
     printf("------------------------------------------------------------------------\n");
 
 }
@@ -130,13 +130,13 @@ main(int argc, char *argv[])
     FILE *bin_file;
 
     // binary file header data structure
-    struct bin_hdr_cls bin_hdr;
+    bin_hdr_cls bin_hdr;
 
     // binary file time record data structure
-    struct bin_time_rec_cls binary_time_record;
+    bin_time_rec_cls binary_time_record;
 
     // binary file record data structure and max count
-    struct bin_rec_cls *bin_recs = NULL;
+    bin_rec_cls *bin_recs = NULL;
     uint32_t bin_rec_max_cnt;
 
     // counters for time and binary records
@@ -205,8 +205,8 @@ main(int argc, char *argv[])
     printf("* HEADER INFORMATION:\n");
     io_binary_print_header(&bin_hdr);
 
-    bin_rec_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
-    bin_recs = (struct bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(struct bin_rec_cls));
+    bin_rec_max_cnt = bin_hdr.interface_number * (bin_hdr.interface_number - 1);
+    bin_recs = (bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(bin_rec_cls));
     if(bin_recs == NULL) {
         WARNING("Cannot allocate memory for records");
         fclose(bin_file);
@@ -214,8 +214,8 @@ main(int argc, char *argv[])
     }
 
     printf("* RECORD CONTENT:\n");
-    printf("bin_hdr.time_rec_num: %d\n", bin_hdr.time_rec_num);
-    for(time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
+    printf("bin_hdr.time_rec_num: %d\n", bin_hdr.time_record_number);
+    for(time_i = 0; time_i < bin_hdr.time_record_number; time_i++) {
         // read time record
         if(io_binary_read_time_record_from_file(&binary_time_record, bin_file) == ERROR) {
             WARNING("Aborting on input error (time record)");
@@ -242,7 +242,7 @@ main(int argc, char *argv[])
                         io_binary_print_record(&bin_recs[rec_i]);
                     }
                     else if(type == PRINT_GNUPLOT) {
-                        io_bin_rec2gnuplot(&bin_recs[rec_i], binary_time_record.time);
+                        //io_bin_rec2gnuplot(&bin_recs[rec_i], binary_time_record.time);
                     }
                 }
             }

@@ -29,8 +29,8 @@
 /////////////////////////////////////////////
 
 // WiMAX operating frequency (capacity paper, page 10)
-#define FREQUENCY_WIMAX                  2.35e9
-#define WIMAX_FRAME_DURATION             5
+#define FREQUENCY_WIMAX                  5e9 //2.35e9
+//#define WIMAX_FRAME_DURATION             5
 // defines for supported WiMAX adapters
 #define NS3_WIMAX                        0
 
@@ -39,17 +39,17 @@
 // QAM-16: 1/2 2/3 3/4
 // QAM-64: 1/2 2/3 3/4 5/6
 #define WIMAX_RATES_NUMBER               11
-#define QPSK_1_8                         0
-#define QPSK_1_4                         1
-#define QPSK_1_2                         2
-#define QPSK_3_4                         3
-#define QAM_16_1_2                       4
-#define QAM_16_2_3                       5
-#define QAM_16_3_4                       6
-#define QAM_64_1_2                       7
-#define QAM_64_2_3                       8
-#define QAM_64_3_4                       9
-#define QAM_64_5_6                       10
+#define QPSK_18                         0 
+#define QPSK_14                         1 // ~ Ns-3 [0] BPSK ?!
+#define QPSK_12                         2 // Ns-3 [1] 
+#define QPSK_34                         3 // Ns-3 [2] (bad)
+#define QAM16_12                        4 // Ns-3 [3] (default)
+#define QAM16_23                        5
+#define QAM16_34                        6 // Ns-3 [4]
+#define QAM64_12                        7
+#define QAM64_23                        8 // Ns-3 [5]
+#define QAM64_34                        9 // Ns-3 [6]
+#define QAM64_56                        10
 
 // number of system bandwidth values ([1] Table 1) and their values
 #define WIMAX_SYS_BW_NUMBER              7
@@ -61,6 +61,9 @@
 #define SYS_BW_10                        10.0
 #define SYS_BW_20                        20.0
 
+#define WIMAX_DEFAULT_MCS                QAM64_34
+#define WIMAX_DEFAULT_SYS_BW             SYS_BW_10
+
 // thermal noise level associated to Pr-threshold 
 // determining technique; for 10 MHz frequency band 
 // of WiMAX it is equal to -104 dBm
@@ -70,7 +73,7 @@
 #define WIMAX_MINIMUM_NOISE_POWER        -104.0
 #define WIMAX_STANDARD_NOISE             -104.0
 
-#define WIMAX_FRAME_SIZE                 1024
+//#define WIMAX_FRAME_SIZE                 1300//1024
 #define MAXIMUM_ERROR_RATE               0.999999999	//FIXME: redefined in several headers
 
 // data structure to hold 802.16 parameters
@@ -98,17 +101,24 @@ extern double wimax_operating_rates[];
 #define SAMPLING_FACTOR_28_25            (28.0/25.0)
 #define SAMPLING_FACTOR_8_7              (8.0/7.0)
 
-// frame duration in ns;
+// frame duration in ns; (FIXME: not ns but us?)
 // 5 millisecond frame is recommended by WiMAX forum
 // (together with 10 MHz system bandwidth: [1] Sec. 3, paragraph 5)
 // other values (in ms) are: 2, 2.5, 4, 8, 10, 12.5, 20 ([4] Table 2)
-#define FRAME_DURATION                   5000
+#define FRAME_DURATION                  10000 //5000
+
+// NOTE: Needs to be defined if frame duration is 10 ms because 
+// predefined values are only valid for 5 ms frames
+
+// DL:UL ratio of 2:1 => 0.667????
+// DL:UL ratio of 1:1 => 0.5 (0.44 gives balance closer to 1:1)
+#define DL_SYMBOL_RATIO                 0.43
 
 // by default we use values in [1] for various parameters such as 
 // the number of uplink and downlink symbols, or the DL overhead;
 // comment line below in order to enable alternative values from 
 // [2] use for result validation purposes
-//#define USE_PAPER_VALUES
+#define USE_PAPER_VALUES
 
 #ifdef USE_PAPER_VALUES
 //#define DL_MAP_REPETITION_FACTOR         0

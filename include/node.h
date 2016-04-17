@@ -15,7 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: node.h 146 2013-06-20 00:50:48Z razvan $
+ * $Id: node.h 155 2013-09-05 00:27:09Z razvan $
  *
  ***********************************************************************/
 
@@ -78,29 +78,9 @@ struct node_class
   // internal operation fixed delay for the current node
   double internal_delay;
 
-  /*
-     // transmitted power in dBm
-     double Pt;
-
-     // received power at distance 1 m when _this_ node transmits
-     // for a and b/g standars, respectively
-     double Pr0_a, Pr0_bg;
-
-     // received power at distance 1 m when _this_ node transmits
-     // for Smart Tag
-     double Pr0_active_tag;
-
-     // received power at distance 1 m when _this_ node transmits
-     // for ZigBee
-     double Pr0_zigbee;
-
-     // set to TRUE if interference caused by this node
-     // was already accounted; FALSE otherwise
-     int interference_accounted;
-   */
-
+  // interfaces of this node
   struct interface_class interfaces[MAX_INTERFACES];
-  int if_num;
+  int interface_number;
 
   // motion index in 'scenario' structure;
   // default value is INVALID_INDEX for nodes which have no motion

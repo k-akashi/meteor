@@ -31,9 +31,9 @@ FILE *ofile_fd;
 {
     int32_t bin_rec_max_cnt;
     int64_t time_i;
-    struct bin_hdr_cls bin_hdr;
-    struct bin_time_rec_cls bin_time_rec;
-    struct bin_rec_cls *recs = NULL;
+    bin_hdr_cls bin_hdr;
+    bin_time_rec_cls bin_time_rec;
+    bin_rec_cls *recs = NULL;
 
     double src_node_x, src_node_y, src_node_z;
     double dst_node_x, dst_node_y, dst_node_z;
@@ -52,8 +52,8 @@ FILE *ofile_fd;
     printf("* HEADER INFORMATION:\n");
     io_binary_print_header(&bin_hdr);
 
-    bin_rec_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
-    recs = (struct bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(struct bin_rec_cls));
+    bin_rec_max_cnt = bin_hdr.interface_number * (bin_hdr.interface_number - 1);
+    recs = (bin_rec_cls *)calloc(bin_rec_max_cnt, sizeof(bin_rec_cls));
     if(recs == NULL) {
         fprintf(stderr, "Cannot allocate memory for records");
         fclose(ifile_fd);
@@ -66,7 +66,7 @@ FILE *ofile_fd;
             "num_retr op_rate bandwidth loss_rate delay jitter\n");
 
     printf("* RECORD CONTENT:\n");
-    for(time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
+    for(time_i = 0; time_i < bin_hdr.time_record_number; time_i++) {
         // read time record
         if(io_binary_read_time_record_from_file(&bin_time_rec, ifile_fd) == ERROR) {
             fprintf(stderr, "Aborting on input error (time record)");
@@ -130,9 +130,9 @@ FILE *ofile_fd;
     float fer;
     float dummy[PARAMS_TOTAL];
 
-    struct bin_time_rec_cls bin_time_rec;
-    struct bin_rec_cls *recs = NULL;
-    struct bin_rec_cls *priv_rec = NULL;
+    bin_time_rec_cls bin_time_rec;
+    bin_rec_cls *recs = NULL;
+    bin_rec_cls *priv_rec = NULL;
 
     max_node_num = 0;
     time_recs = 0;
@@ -170,8 +170,8 @@ FILE *ofile_fd;
     printf("max node number : %d\n", max_node_num);
 
     rec_size = max_node_num * max_node_num;
-    priv_rec = (struct bin_rec_cls *)calloc(rec_size, sizeof(struct bin_rec_cls));
-    recs = (struct bin_rec_cls *)calloc(rec_size, sizeof(struct bin_rec_cls));
+    priv_rec = (bin_rec_cls *)calloc(rec_size, sizeof(bin_rec_cls));
+    recs = (bin_rec_cls *)calloc(rec_size, sizeof(bin_rec_cls));
 
     bin_time_rec.time = 0.0;
     bin_time_rec.record_number = max_node_num;

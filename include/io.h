@@ -15,7 +15,7 @@
  *
  * Author: Razvan Beuran
  *
- * $Id: io.h 146 2013-06-20 00:50:48Z razvan $
+ * $Id: io.h 161 2014-02-04 00:32:16Z razvan $
  *
  ***********************************************************************/
 
@@ -41,50 +41,51 @@
 //////////////////////////////////
 
 // binary file header
-struct bin_hdr_cls
+typedef struct binary_header_class
 {
   char signature[4];
-  int32_t major_version;
-  int32_t minor_version;
-  int32_t subminor_version;
-  int32_t svn_revision;
+  int major_version;
+  int minor_version;
+  int subminor_version;
+  int svn_revision;
   //char reserved[4];
-  int32_t if_num;
-  int32_t time_rec_num;
+  int interface_number;
+  int time_record_number;
 
-};
+} bin_hdr_cls;
 
 // binary file time record
-struct bin_time_rec_cls
+typedef struct binary_time_record_class
 {
   float time;
   int record_number;
-};
+} bin_time_rec_cls;
 
 // binary file record holding most important fields
 // NOTE: update 'io_binary_print_record', 'io_binary_build_record', 
 // 'io_copy_record' and 'io_binary_compare_record' when making changes
-struct bin_rec_cls
+typedef struct binary_record_class
 {
-    int32_t from_id;
-    int32_t to_id;
-    float frame_error_rate;
-    float num_retransmissions;
-    int32_t standard;
-    float operating_rate;
-    float bandwidth;
-    float loss_rate;
-    float delay;
-    //float jitter; // not needed yet
-};
+  int from_id;
+  int to_id;
+  float frame_error_rate;
+  float num_retransmissions;
+  int standard;
+  float operating_rate;
+  float bandwidth;
+  float loss_rate;
+  float delay;
+  //float jitter; // not needed yet
+} bin_rec_cls;
 
 
 typedef struct io_connection_state_class
 {
-  struct bin_time_rec_cls binary_time_record;
-  struct bin_rec_cls binary_records[MAX_CONNECTIONS];
+  struct binary_time_record_class binary_time_record;
+  struct binary_record_class binary_records[MAX_CONNECTIONS];
   int state_changed[MAX_CONNECTIONS];
 } io_cls;
+
 
 ////////////////////////////////////////////////
 // Text I/O functions
@@ -113,10 +114,20 @@ int io_write_nam_motion_info_to_file (struct scenario_class *scenario,
 int io_write_ns2_motion_header_to_file (struct scenario_class *scenario,
 					FILE * motion_file);
 
+// write header of motion file in NS-2 format;
+// return SUCCESS on succes, ERROR on error
+int io_write_ns2_motion_header_to_file_new (struct scenario_class *scenario,
+					    FILE *motion_file, float time);
+
 // write motion file information in NAM format;
 // return SUCCESS on succes, ERROR on error
 int io_write_ns2_motion_info_to_file (struct scenario_class *scenario,
 				      FILE * motion_file, float time);
+
+// write motion file information in NAM format;
+// return SUCCESS on succes, ERROR on error
+int io_write_ns2_motion_info_to_file_new (struct scenario_class *scenario,
+					  FILE * motion_file, float time);
 
 // write objects to file;
 // return SUCCESS on succes, ERROR on error
@@ -154,39 +165,41 @@ int io_read_settings_file_mac (char *settings_filename,
 ////////////////////////////////////////////////
 
 // print binary header
-void io_binary_print_header (struct bin_hdr_cls *bin_hdr);
+void io_binary_print_header (struct binary_header_class *binary_header);
 
 // print binary time record
-void io_binary_print_time_record (struct bin_time_rec_cls
+void io_binary_print_time_record (struct binary_time_record_class
 				  *binary_time_record);
 
 // print binary record
-void io_binary_print_record (struct bin_rec_cls *binary_record);
-void io_bin_rec2gnuplot(struct bin_rec_cls *bin_rec, double time);
+void io_binary_print_record (struct binary_record_class *binary_record);
 
 // copy binary record
-void io_bin_cp_rec(struct bin_rec_cls *binary_record_dst, struct bin_rec_cls *binary_record_src);
+void io_binary_copy_record (struct binary_record_class *binary_record_dst,
+			    struct binary_record_class *binary_record_src);
 
 // build binary record
-void io_binary_build_record (struct bin_rec_cls *binary_record,
+void io_binary_build_record (struct binary_record_class *binary_record,
 			     struct connection_class *connection,
 			     struct scenario_class *scenario);
 
 // compare with binary record;
 // return TRUE if data is same with the one in the record,
 // FALSE otherwise
-int io_binary_compare_record (struct bin_rec_cls *binary_record,
+int io_binary_compare_record (struct binary_record_class *binary_record,
 			      struct connection_class *connection,
 			      struct scenario_class *scenario);
 
 // read header of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_header_from_file (struct bin_hdr_cls *bin_hdr, FILE * bin_in_file);
+int io_binary_read_header_from_file (struct binary_header_class
+				     *binary_header,
+				     FILE * binary_input_file);
 
 // write header of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_write_header_to_file (int if_num,
-				    long int time_rec_num,
+int io_binary_write_header_to_file (int interface_number,
+				    long int time_record_number,
 				    int major_version,
 				    int minor_version,
 				    int subminor_version,
@@ -194,9 +207,9 @@ int io_binary_write_header_to_file (int if_num,
 
 // read a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_time_record_from_file (struct bin_time_rec_cls
+int io_binary_read_time_record_from_file (struct binary_time_record_class
 					  *binary_time_record,
-					  FILE * bin_in_file);
+					  FILE * binary_input_file);
 
 // write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
@@ -205,21 +218,21 @@ int io_binary_write_time_record_to_file (float time, int record_number,
 
 // directly write a time record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_write_time_record_to_file2 (struct bin_time_rec_cls
+int io_binary_write_time_record_to_file2 (struct binary_time_record_class
 					  *binary_time_record,
 					  FILE * binary_file);
 
 // read a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_record_from_file (struct bin_rec_cls
+int io_binary_read_record_from_file (struct binary_record_class
 				     *binary_record,
-				     FILE * bin_in_file);
+				     FILE * binary_input_file);
 
 // read 'number_records' records from a QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_read_records_from_file (struct bin_rec_cls
+int io_binary_read_records_from_file (struct binary_record_class
 				      *binary_records, int number_records,
-				      FILE * bin_in_file);
+				      FILE * binary_input_file);
 
 // write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
@@ -229,6 +242,7 @@ int io_binary_write_record_to_file (struct connection_class *connection,
 
 // directly write a record of QOMET binary output file;
 // return SUCCESS on succes, ERROR on error
-int io_binary_write_record_to_file2 (struct bin_rec_cls *binary_record, FILE * binary_file);
+int io_binary_write_record_to_file2 (struct binary_record_class
+				     *binary_record, FILE * binary_file);
 
 #endif

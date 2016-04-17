@@ -6,7 +6,6 @@ COMPILE_TYPE=debug
 #COMPILE_TYPE=profile
 #COMPILE_TYPE=release
 
-
 BINDIR=../bin
 LIBDIR=../lib
 INCDIR=../include

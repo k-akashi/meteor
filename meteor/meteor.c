@@ -306,7 +306,7 @@ create_conn_list(FILE *conn_fd, int32_t all_node_cnt)
 }
 
 int
-meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_rec_cls *bin_recs, int32_t all_node_cnt, int32_t node_cnt, int direction, struct connection_list *conn_list_head)
+meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_recs, int32_t all_node_cnt, int32_t node_cnt, int direction, struct connection_list *conn_list_head)
 {
     int time_i, node_i, ret;
     int32_t next_hop_id;
@@ -314,12 +314,12 @@ meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_re
     uint32_t bin_hdr_if_num;
     float crt_record_time = 0.0;
     double bandwidth, delay, lossrate;
-    struct bin_time_rec_cls bin_time_rec;
-    struct bin_rec_cls **my_recs_ucast = NULL;
-    struct bin_rec_cls *adjusted_recs_ucast = NULL;
+    bin_time_rec_cls bin_time_rec;
+    bin_rec_cls **my_recs_ucast = NULL;
+    bin_rec_cls *adjusted_recs_ucast = NULL;
     struct timer_handle *timer;
     int *my_recs_ucast_changed = NULL;
-    struct bin_rec_cls *my_recs_bcast = NULL;
+    bin_rec_cls *my_recs_bcast = NULL;
     int *my_recs_bcast_changed = NULL;
     struct connection_list *conn_list = NULL;
  
@@ -328,16 +328,16 @@ meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_re
         exit(1);
     }
 
-    if (all_node_cnt != bin_hdr.if_num) {
+    if (all_node_cnt != bin_hdr.interface_number) {
         fprintf(stderr, "Number of nodes according to the settings file (%d) "
                 "and number of nodes according to QOMET scenario (%d) differ", 
-                all_node_cnt, bin_hdr.if_num);
+                all_node_cnt, bin_hdr.interface_number);
         exit(1);
     }
 
-    bin_recs_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
+    bin_recs_max_cnt = bin_hdr.interface_number * (bin_hdr.interface_number - 1);
     if (bin_recs == NULL) {
-        bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof (struct bin_rec_cls));
+        bin_recs = (bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof (bin_rec_cls));
     }
     if (bin_recs == NULL) {
         WARNING("Cannot allocate memory for binary records");
@@ -345,16 +345,16 @@ meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_re
     }
 
     if (my_recs_ucast == NULL) {
-        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls*));
+        my_recs_ucast = (bin_rec_cls**)calloc(bin_hdr.interface_number, sizeof (bin_rec_cls *));
     }
     if (my_recs_ucast == NULL) {
         fprintf(stderr, "Cannot allocate memory for my_recs_ucast\n");
         exit(1);
     }
 
-    for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
+    for (node_i = 0; node_i < bin_hdr.interface_number; node_i++) {
         if (my_recs_ucast[node_i] == NULL) {
-            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
+            my_recs_ucast[node_i] = (bin_rec_cls *)calloc(bin_hdr.interface_number, sizeof (bin_rec_cls));
         }
         if (my_recs_ucast[node_i] == NULL) {
             fprintf(stderr, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
@@ -362,19 +362,19 @@ meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_re
         }
 
         int node_j;
-        for (node_j = 0; node_j < bin_hdr.if_num; node_j++) {
+        for (node_j = 0; node_j < bin_hdr.interface_number; node_j++) {
             my_recs_ucast[node_i][node_j].bandwidth = UNDEFINED_BANDWIDTH;
         }
     }
 
     if (direction == DIRECTION_HV || direction == DIRECTION_BR) {
-        bin_hdr_if_num = bin_hdr.if_num * bin_hdr.if_num;
+        bin_hdr_if_num = bin_hdr.interface_number * bin_hdr.interface_number;
     }
     else {
-        bin_hdr_if_num = bin_hdr.if_num;
+        bin_hdr_if_num = bin_hdr.interface_number;
     }
     if (adjusted_recs_ucast == NULL) {
-        adjusted_recs_ucast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
+        adjusted_recs_ucast = (bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (bin_rec_cls));
         if (adjusted_recs_ucast == NULL) {
             fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
             exit(1);
@@ -390,12 +390,12 @@ meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_re
     }
 
     if (my_recs_bcast == NULL && use_mac_addr == FALSE) {
-        my_recs_bcast = (struct bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (struct bin_rec_cls));
+        my_recs_bcast = (bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (bin_rec_cls));
         if (my_recs_bcast == NULL) {
             fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
             exit(1);
         }
-        for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
+        for (node_i = 0; node_i < bin_hdr.interface_number; node_i++) {
             my_recs_bcast[node_i].bandwidth = UNDEFINED_BANDWIDTH;
         }
         my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
@@ -406,11 +406,11 @@ meteor_loop(FILE *qomet_fd, int dsock, struct bin_hdr_cls bin_hdr, struct bin_re
     }
 
 emulation_start:
-    for (time_i = 0; time_i < bin_hdr.time_rec_num; time_i++) {
+    for (time_i = 0; time_i < bin_hdr.time_record_number; time_i++) {
         int rec_i;
 
         if (verbose_level >= 2) {
-            printf("Reading QOMET data from file... Time : %d/%d\n", time_i, bin_hdr.time_rec_num);
+            printf("Reading QOMET data from file... Time : %d/%d\n", time_i, bin_hdr.time_record_number);
         }
 
         if (io_binary_read_time_record_from_file(&bin_time_rec, qomet_fd) == ERROR) {
@@ -435,9 +435,9 @@ emulation_start:
                 INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
                 exit(1);
             }
-            if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
+            if (bin_recs[rec_i].from_id > bin_hdr.interface_number) {
                 INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
-                    bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
+                    bin_recs[rec_i].from_id, assign_id, bin_hdr.interface_number + assign_id - 1, rec_i);
                 exit(1);
             }
 
@@ -450,7 +450,7 @@ emulation_start:
                 dst_id = bin_recs[rec_i].to_id;
                 next_hop_id = src_id * all_node_cnt + dst_id;
 
-                io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                io_binary_copy_record(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                 my_recs_ucast_changed[next_hop_id] = TRUE;
 
                 if (verbose_level >= 3) {
@@ -462,7 +462,7 @@ emulation_start:
                 dst_id = bin_recs[rec_i].from_id;
                 next_hop_id = src_id * all_node_cnt + dst_id;
 
-                io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
+                io_binary_copy_record(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
                 my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
 
                 if(verbose_level >= 3) {
@@ -471,7 +471,7 @@ emulation_start:
             }
 
             if (use_mac_addr == FALSE && (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR)) {
-                io_bin_cp_rec(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
+                io_binary_copy_record(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                 my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
                 //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
             }
@@ -486,7 +486,7 @@ emulation_start:
                     src_id = conn_list->src_id;
                     dst_id = conn_list->dst_id;
                     rec_index = conn_list->rec_i;
-                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                    io_binary_copy_record(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                     DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
 
                     conn_list = conn_list->next_ptr;
@@ -497,7 +497,7 @@ emulation_start:
                 for (src_id = assign_id; src_id < all_node_cnt; src_id += division) {
                     for (dst_id = 0; dst_id < all_node_cnt; dst_id++) {
                         rec_index = src_id * all_node_cnt + dst_id;
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                        io_binary_copy_record(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
                     }
                 }
@@ -505,7 +505,7 @@ emulation_start:
             else {
                 for (rec_i = FIRST_NODE_ID; rec_i < all_node_cnt; rec_i++) {
                      if (rec_i != my_id) {
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
+                        io_binary_copy_record(&(adjusted_recs_ucast[rec_i]), &(my_recs_ucast[my_id][rec_i]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_i);
                     }
                 }
@@ -522,7 +522,7 @@ emulation_start:
                     dst_id = conn_list->dst_id;
                     rec_index = conn_list->rec_i;
                     INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
-                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                    io_binary_copy_record(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                     DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
 
                     conn_list = conn_list->next_ptr;
@@ -536,7 +536,7 @@ emulation_start:
                             break;
                         }
                         rec_index = src_id * all_node_cnt + dst_id;
-                        io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
+                        io_binary_copy_record(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
                         INFO("index: %d src: %d dst: %d delay: %f\n", rec_index, src_id, dst_id, my_recs_ucast[src_id][dst_id].delay);
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).\n", rec_index);
                     }
@@ -546,7 +546,7 @@ emulation_start:
                 int32_t dst_id;
                 for (dst_id = FIRST_NODE_ID; dst_id < all_node_cnt; dst_id++) {
                     if (dst_id != my_id) {
-                        io_bin_cp_rec(&(adjusted_recs_ucast[dst_id]), &(my_recs_ucast[my_id][dst_id]));
+                        io_binary_copy_record(&(adjusted_recs_ucast[dst_id]), &(my_recs_ucast[my_id][dst_id]));
                         DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", dst_id);
                     }
                 }
@@ -677,8 +677,8 @@ emulation_start:
                         continue;
                     }
 
-                    if (src_id < 0 || (src_id > bin_hdr.if_num - 1)) {
-                        WARNING("Next hop with id = %d is out of the valid range [%d, %d]", bin_recs[rec_i].to_id, 0, bin_hdr.if_num - 1);
+                    if (src_id < 0 || (src_id > bin_hdr.interface_number - 1)) {
+                        WARNING("Next hop with id = %d is out of the valid range [%d, %d]", bin_recs[rec_i].to_id, 0, bin_hdr.interface_number - 1);
                         exit(1);
                     }
 
@@ -777,8 +777,8 @@ main(int argc, char **argv)
     int32_t node_cnt = 0;
     int32_t all_node_cnt;
     int daemon_flag = FALSE;
-    struct bin_hdr_cls bin_hdr;
-    struct bin_rec_cls *bin_recs = NULL;
+    bin_hdr_cls bin_hdr;
+    bin_rec_cls *bin_recs = NULL;
 
   
     FILE *qomet_fd;
@@ -1137,10 +1137,10 @@ main(int argc, char **argv)
         }
     }
 
-    if (all_node_cnt != bin_hdr.if_num) {
+    if (all_node_cnt != bin_hdr.interface_number) {
         fprintf(stderr, "Number of nodes according to the settings file (%d) "
                 "and number of nodes according to QOMET scenario (%d) differ", 
-                all_node_cnt, bin_hdr.if_num);
+                all_node_cnt, bin_hdr.interface_number);
         exit(1);
     }
 

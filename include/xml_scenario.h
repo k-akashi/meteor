@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2006-2013 The StarBED Project  All rights reserved.
+ * Copyright(c) 2006-2013 The StarBED Project  All rights reserved.
  *
  * See the file 'LICENSE' for licensing information.
  *
@@ -324,7 +324,7 @@ int xml_depth;
 // xml_scenario structure definition
 /////////////////////////////////////////
 
-struct xml_scenario_class
+typedef struct xml_scenario_class
 {
   // main scenario components
   struct scenario_class scenario;
@@ -342,7 +342,7 @@ struct xml_scenario_class
   double motion_step_divider;
 
   // flag to indicate whether the coordinate system
-  // is cartesian or not (that is, latitude, longitude, altitude)
+  // is cartesian or not(that is, latitude, longitude, altitude)
   int cartesian_coord_syst;
 
   // XML parse error indicator
@@ -363,7 +363,7 @@ struct xml_scenario_class
 
   // flag showing whether a JPGIS filename was provided
   int jpgis_filename_provided;
-};
+} xml_cls;
 
 
 ////////////////////////////////////////
@@ -374,40 +374,40 @@ struct xml_scenario_class
 // flag 'cartesian_coord_syst' specifies whether
 // cartesian coordinates are used or not;
 // return SUCCESS on succes, ERROR on error
-int xml_node_init (struct node_class *node, const char **attributes,
+int xml_node_init(struct node_class *node, const char **attributes,
 		   int cartesian_coord_syst);
 
 // initialize a topology object from XML attributes
 // flag 'cartesian_coord_syst' specifies whether
 // cartesian coordinates are used or not;
 // return SUCCESS on succes, ERROR on error
-int xml_object_init (struct object_class *object, const char **attributes,
+int xml_object_init(struct object_class *object, const char **attributes,
 		     int cartesian_coord_syst);
 
 // initialize an environment object from XML attributes
 // return SUCCESS on succes, ERROR on error
-int xml_environment_init (struct environment_class *environment,
+int xml_environment_init(struct environment_class *environment,
 			  const char **attributes);
 
 // initialize a motion object from XML attributes
 // flag 'cartesian_coord_syst' specifies whether
 // cartesian coordinates are used or not;
 // return SUCCESS on succes, ERROR on error
-int xml_motion_init (struct motion_class *motion, const char **attributes,
+int xml_motion_init(struct motion_class *motion, const char **attributes,
 		     int cartesian_coord_syst);
 
 // initialize a connection object from XML attributes
 // return SUCCESS on succes, ERROR on error
-int xml_connection_init (struct connection_class *connection,
+int xml_connection_init(struct connection_class *connection,
 			 const char **attributes);
 
 // initialize an xml_scenario object from XML attributes
 // return SUCCESS on succes, ERROR on error
-int xml_scenario_init (struct xml_scenario_class *xml_scenario,
+int xml_scenario_init(struct xml_scenario_class *xml_scenario,
 		       const char **attributes);
 
 // print the main properties of an XML scenario
-void xml_scenario_print (struct xml_scenario_class *xml_scenario);
+void xml_scenario_print(struct xml_scenario_class *xml_scenario);
 
 
 /////////////////////////////////////////////////
@@ -427,7 +427,7 @@ void xml_scenario_print (struct xml_scenario_class *xml_scenario);
 // doesn't need to be defined
 //static void XMLCALL end_element(void *data, const char *element);
 
-//static void XML character_data (void *userData, const XML_Char *string, 
+//static void XML character_data(void *userData, const XML_Char *string, 
 //                              int length)
 
 /////////////////////////////////////////////////
@@ -435,7 +435,7 @@ void xml_scenario_print (struct xml_scenario_class *xml_scenario);
 
 // parse scenario file and store results in scenario object
 // return SUCCESS on succes, ERROR on error
-int xml_scenario_parse (FILE * scenario_file,
+int xml_scenario_parse(FILE * scenario_file,
 			struct xml_scenario_class *xml_scenario);
 
 
