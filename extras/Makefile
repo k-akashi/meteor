@@ -23,7 +23,7 @@ else ifeq ($(COMPILE_TYPE), release)
 GCC_FLAGS = $(GENERAL_FLAGS)
 endif
 
-ANY_OS_TARGETS = show_bin generate_scenario scenario_converter
+ANY_OS_TARGETS = show_bin generate_scenario scenario_converter scenario_splitter
 
 OS_NAME=$(shell uname)
 ifeq ($(OS_NAME),FreeBSD)
@@ -42,6 +42,9 @@ show_bin : show_bin.c ${LIBDIR}/libdeltaQ.a
 
 scenario_converter: scenario_converter.c ${LIBDIR}/libdeltaQ.a
 	gcc ${CFLAGS} -DMESSAGE_INFO scenario_converter.c -o ${BINDIR}/scenario_converter ${INCS} ${LIBS}
+
+scenario_splitter: scenario_splitter.c ${LIBDIR}/libdeltaQ.a
+	gcc ${CFLAGS} -DMESSAGE_INFO $< -o ${BINDIR}/$@ ${INCS} ${LIBS}
 
 clean:
 	rm -f  *.o core
