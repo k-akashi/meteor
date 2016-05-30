@@ -87,7 +87,7 @@ all: libdeltaQ.a deltaQ all_test
 all_test: test_wimax
 
 libdeltaQ.a: ${OBJECTS}
-	ar rc ../lib/libdeltaQ.a ${OBJECTS} ${STATIC_EXPAT} && ranlib libdeltaQ.a
+	ar rc ../lib/libdeltaQ.a ${OBJECTS} ${STATIC_EXPAT} && ranlib ../lib/libdeltaQ.a
 
 deltaQ: deltaQ.o
 	$(CC) $(LDFLAGS) $(GCC_FLAGS) deltaQ.o -o deltaQ ${INCS} ${LIBS}
