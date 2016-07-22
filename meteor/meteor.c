@@ -606,7 +606,7 @@ emulation_start:
                     next_hop_id = conn_list->rec_i;
                     conf_rule_num = next_hop_id + MIN_PIPE_ID_BR;
 
-                    bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth;
+                    bandwidth = adjusted_recs_ucast[next_hop_id].bandwidth / 8;
                     delay = adjusted_recs_ucast[next_hop_id].delay;
                     lossrate = adjusted_recs_ucast[next_hop_id].loss_rate;
 
