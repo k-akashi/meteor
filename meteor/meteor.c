@@ -27,8 +27,6 @@
 #include "libnlwrap.h"
 
 int32_t re_flag = FALSE;
-int32_t loop = FALSE;
-int32_t direction;
 
 #ifdef __amd64__
 #define rdtsc(t)                                                              \
@@ -238,11 +236,11 @@ meteor_loop(struct METEOR_CONF *meteor_conf, struct nl_sock *sock, struct bin_hd
     float crt_record_time = 0.0;
     double bandwidth, delay, lossrate;
     struct bin_time_rec_cls bin_time_rec;
-    struct bin_rec_cls *bin_recs = NULL;
-    struct bin_rec_cls **my_recs_ucast = NULL;
+    struct bin_rec_cls *bin_recs_all = NULL;
+    struct bin_rec_cls **recs_ucast = NULL;
     struct bin_rec_cls *adjusted_recs_ucast = NULL;
     struct timer_handle *timer;
-    int *my_recs_ucast_changed = NULL;
+    int *recs_ucast_changed = NULL;
     struct connection_list *conn_list = NULL;
  
     struct node_data *node;
@@ -266,35 +264,31 @@ meteor_loop(struct METEOR_CONF *meteor_conf, struct nl_sock *sock, struct bin_hd
     }
 
     bin_recs_max_cnt = bin_hdr.if_num * (bin_hdr.if_num - 1);
-    if (!bin_recs) {
-        bin_recs = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof (struct bin_rec_cls));
-    }
-    if (!bin_recs) {
+    bin_recs_all = (struct bin_rec_cls *)calloc(bin_recs_max_cnt, sizeof (struct bin_rec_cls));
+    if (!bin_recs_all) {
         WARNING("[%s] Cannot allocate memory for binary records", __func__);
         exit(1);
     }
 
-    if (!my_recs_ucast) {
-        my_recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls*));
-    }
-    if (!my_recs_ucast) {
-        fprintf(stderr, "[%s] Cannot allocate memory for my_recs_ucast\n", __func__);
+    recs_ucast = (struct bin_rec_cls**)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls*));
+    if (!recs_ucast) {
+        fprintf(stderr, "[%s] Cannot allocate memory for recs_ucast\n", __func__);
         exit(1);
     }
 
     for (node_i = 0; node_i < bin_hdr.if_num; node_i++) {
-        if (!my_recs_ucast[node_i]) {
-            my_recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
+        if (!recs_ucast[node_i]) {
+            recs_ucast[node_i] = (struct bin_rec_cls *)calloc(bin_hdr.if_num, sizeof (struct bin_rec_cls));
         }
-        if (!my_recs_ucast[node_i]) {
-            fprintf(stderr, "[%s] Cannot allocate memory for my_recs_ucast[%d]\n",
+        if (!recs_ucast[node_i]) {
+            fprintf(stderr, "[%s] Cannot allocate memory for recs_ucast[%d]\n",
                             __func__, node_i);
             exit(1);
         }
 
         int node_j;
         for (node_j = 0; node_j < bin_hdr.if_num; node_j++) {
-            my_recs_ucast[node_i][node_j].bandwidth = UNDEFINED_BANDWIDTH;
+            recs_ucast[node_i][node_j].bandwidth = UNDEFINED_BANDWIDTH;
         }
     }
 
@@ -312,10 +306,10 @@ meteor_loop(struct METEOR_CONF *meteor_conf, struct nl_sock *sock, struct bin_hd
         }
     }
 
-    if (!my_recs_ucast_changed) {
-        my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
-        if (my_recs_ucast_changed == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
+    if (!recs_ucast_changed) {
+        recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
+        if (recs_ucast_changed == NULL) {
+            fprintf(stderr, "Cannot allocate memory for recs_ucast_changed\n");
             exit(1);
         }
     }
@@ -340,37 +334,39 @@ emulation_start:
             exit (1);
         }
 
-        if (io_binary_read_records_from_file(bin_recs, bin_time_rec.record_number, meteor_conf->deltaq_fd) == ERROR) {
+        if (io_binary_read_records_from_file(bin_recs_all, bin_time_rec.record_number, meteor_conf->deltaq_fd) == ERROR) {
             fprintf(stderr, "Aborting on input error (records)\n");
             exit (1);
         }
 
         for (rec_i = 0; rec_i < bin_time_rec.record_number; rec_i++) {
-            if (bin_recs[rec_i].from_id < FIRST_NODE_ID) {
-                INFO("Source with id = %d is smaller first node id : %d", bin_recs[rec_i].from_id, assign_id);
+            if (bin_recs_all[rec_i].from_id < FIRST_NODE_ID) {
+                INFO("Source with id = %d is smaller first node id : %d", bin_recs_all[rec_i].from_id, assign_id);
                 exit(1);
             }
-            if (bin_recs[rec_i].from_id > bin_hdr.if_num) {
+            if (bin_recs_all[rec_i].from_id > bin_hdr.if_num) {
                 INFO("Source with id = %d is out of the valid range [%d, %d] rec_i : %d\n", 
-                    bin_recs[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
+                    bin_recs_all[rec_i].from_id, assign_id, bin_hdr.if_num + assign_id - 1, rec_i);
                 exit(1);
             }
 
             int32_t src_id;
             int32_t dst_id;
-            if (meteor_conf->direction == BRIDGE) {
-            }
-            else if (meteor_conf->direction == INGRESS && (bin_recs[rec_i].to_id == meteor_conf->id || bin_recs[rec_i].from_id == meteor_conf->id)) {
-                src_id = bin_recs[rec_i].to_id;
-                dst_id = bin_recs[rec_i].from_id;
+            if (meteor_conf->direction == INGRESS) {
+                if (bin_recs_all[rec_i].to_id == meteor_conf->id || bin_recs_all[rec_i].from_id == meteor_conf->id) {
+                    src_id = bin_recs_all[rec_i].to_id;
+                    dst_id = bin_recs_all[rec_i].from_id;
 
-                io_bin_cp_rec(&(my_recs_ucast[src_id][dst_id]), &bin_recs[rec_i]);
-                io_bin_cp_rec(&(my_recs_ucast[dst_id][src_id]), &bin_recs[rec_i]);
-                my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
+                    io_bin_cp_rec(&(recs_ucast[src_id][dst_id]), &bin_recs_all[rec_i]);
+                    io_bin_cp_rec(&(recs_ucast[dst_id][src_id]), &bin_recs_all[rec_i]);
+                    recs_ucast_changed[bin_recs_all[rec_i].to_id] = TRUE;
 
-                if(meteor_conf->verbose >= 3) {
-                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
+                    if(meteor_conf->verbose >= 3) {
+                        io_binary_print_record(&(recs_ucast[src_id][dst_id]));
+                    }
                 }
+            }
+            else if (meteor_conf->direction == BRIDGE) {
             }
         }
 
@@ -383,8 +379,8 @@ emulation_start:
                     src_id = conn_list->src_id;
                     dst_id = conn_list->dst_id;
                     rec_index = conn_list->rec_i;
-                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(my_recs_ucast[src_id][dst_id]));
-                    DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
+                    io_bin_cp_rec(&(adjusted_recs_ucast[rec_index]), &(recs_ucast[src_id][dst_id]));
+                    DEBUG("Copied recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", rec_index);
 
                     conn_list = conn_list->next_ptr;
                 }
@@ -395,8 +391,8 @@ emulation_start:
                 for (i = 1; i < meteor_conf->node_cnt; i++) {
                      if (node->id != meteor_conf->id) {
                         printf("node->id => %d\n", node->id);
-                        io_bin_cp_rec(&(adjusted_recs_ucast[node->id]), &(my_recs_ucast[meteor_conf->id][node->id]));
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", node->id);
+                        io_bin_cp_rec(&(adjusted_recs_ucast[node->id]), &(recs_ucast[meteor_conf->id][node->id]));
+                        DEBUG("Copied recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", node->id);
                     }
                     node++;
                 }
@@ -412,8 +408,8 @@ emulation_start:
                 node = meteor_conf->node_list_head;
                 for (i = 0 ; i < meteor_conf->node_cnt; i++) {
                     if (node->id != meteor_conf->id) {
-                        io_bin_cp_rec(&(adjusted_recs_ucast[node->id]), &(my_recs_ucast[meteor_conf->id][node->id]));
-                        DEBUG("Copied my_recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", node->id);
+                        io_bin_cp_rec(&(adjusted_recs_ucast[node->id]), &(recs_ucast[meteor_conf->id][node->id]));
+                        DEBUG("Copied recs_ucast to adjusted_recs_ucast (index is rec_i=%d).", node->id);
                     }
                     node++;
                 }
@@ -468,7 +464,7 @@ emulation_start:
 
                     if (node->id < 0 || (node->id > bin_hdr.if_num - 1)) {
                         WARNING("Next hop with id = %d is out of the valid range [%d, %d]",
-                                bin_recs[node->id].to_id, 0, bin_hdr.if_num - 1);
+                                bin_recs_all[node->id].to_id, 0, bin_hdr.if_num - 1);
                         exit(1);
                     }
 
@@ -495,7 +491,7 @@ emulation_start:
         }
     }
 
-    if (loop == TRUE) {
+    if (meteor_conf->loop == TRUE) {
         re_flag = FALSE;
         fseek(meteor_conf->deltaq_fd, 0L, SEEK_SET);
         if ((timer = timer_init_rdtsc()) == NULL) {
@@ -580,7 +576,7 @@ main(int argc, char **argv)
                 meteor_conf->pif_index = get_ifindex(cache, optarg);
                 break;
             case 'l':
-                loop = TRUE;
+                meteor_conf->loop = TRUE;
                 break;
             case 'm':
                 if ((strcmp(optarg, "ingress") == 0) || strcmp(optarg, "in") == 0) {
