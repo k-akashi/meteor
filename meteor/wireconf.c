@@ -51,6 +51,7 @@
 #include <stdio.h>
 
 //#include "wireconf.h"
+#include "meteor.h"
 #include "utils.h"
 #include "libnlwrap.h"
 #include "config.hpp"
@@ -135,25 +136,25 @@ delete_ifb(struct nl_sock *sock, int32_t if_index)
 }
 
 int
-init_rule(struct nl_sock *sock, int if_index, int ifb_index, int32_t protocol)
+init_rule(struct nl_sock *sock, struct METEOR_CONF *meteor_conf)
 {
-    delete_qdisc(sock, if_index, TC_H_INGRESS, 0);
-    add_ingress_qdisc(sock, if_index);
-    add_mirred_filter(sock, if_index, ifb_index);
+    delete_qdisc(sock, meteor_conf->pif_index, TC_H_INGRESS, 0);
+    add_ingress_qdisc(sock, meteor_conf->pif_index);
+    add_mirred_filter(sock, meteor_conf->pif_index, meteor_conf->ifb_index);
 
-    delete_qdisc(sock, ifb_index, TC_H_ROOT, 0);
+    delete_qdisc(sock, meteor_conf->ifb_index, TC_H_ROOT, 0);
 
-    add_htb_qdisc(sock, ifb_index, TC_H_ROOT, TC_HANDLE(1, 0), 65535);
-    add_htb_class(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, 1), 1, 1000000000);
+    add_htb_qdisc(sock, meteor_conf->ifb_index, TC_H_ROOT, TC_HANDLE(1, 0), 65535);
+    add_htb_class(sock, meteor_conf->ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, 1), 1, DEF_BW);
 
     // Default Drop rule
-    add_htb_class(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, 1), 1, 1000000000);
-    add_htb_class(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, 65535), 1, 1000000);
+    add_htb_class(sock, meteor_conf->ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, 1), 1, DEF_BW);
+    add_htb_class(sock, meteor_conf->ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, 65535), 1, DEF_BW);
 
-    int delay = 0; // us
-    int jitter = 0; // us
-    uint32_t loss = 100; // %
-    add_netem_qdisc(sock, ifb_index, TC_HANDLE(1, 65535), TC_HANDLE(65535, 0), delay, jitter, loss, 1000);
+    int delay     = DEF_DELAY; // us
+    int jitter    = DEF_DELAY; // us
+    uint32_t loss = DEF_LOSS;  // %
+    add_netem_qdisc(sock, meteor_conf->ifb_index, TC_HANDLE(1, 65535), TC_HANDLE(65535, 0), delay, jitter, loss, 1000);
 
     return 0;
 }
@@ -162,7 +163,7 @@ int
 add_rule(struct nl_sock *sock, int ifb_index, uint16_t parent, uint16_t handle, 
         int32_t proto, struct node_data *src, struct node_data *dst)
 {
-    add_htb_class(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 1, 1000000000);
+    add_htb_class(sock, ifb_index, TC_HANDLE(1, 0), TC_HANDLE(1, parent), 1, DEF_BW);
 
     if (proto == ETH_P_ALL) {
         if (!dst) {

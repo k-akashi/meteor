@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "config.hpp"
+#include "global.h"
 
 int
 parse_ipaddr(const char *val, struct in_addr *addr, int *prefix)

@@ -52,6 +52,7 @@
 #include <asm/types.h>
 #include <netlink/socket.h>
 #include <linux/netlink.h>
+#include "meteor.h"
 
 #define DIRECTION_BOTH 0
 #define INGRESS        1
@@ -74,7 +75,7 @@ int get_rule_linux(void);
 
 int32_t create_ifb(struct nl_sock *sock, int32_t id);
 int32_t delete_ifb(struct nl_sock *sock, int32_t if_index);
-int init_rule(struct nl_sock *sock, int if_index, int ifb_index, int32_t protocol);
+int init_rule(struct nl_sock *sock, struct METEOR_CONF *meteor_conf);
 //int add_rule(struct nl_sock *sock, int ifb_index, uint16_t parent, uint16_t handle, int32_t proto, struct node_data *src, struct node_data *dst);
 int configure_rule(struct nl_sock *sock, int ifb_index, uint16_t parent, uint16_t handle, int32_t bandwidth, double delay, double lossrate);
 int32_t delete_rule(uint s, char *dst, u_int32_t rule_number);

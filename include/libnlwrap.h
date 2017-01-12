@@ -13,6 +13,12 @@
 #include <linux/if_ether.h>
 #include <stdio.h>
 
+// Qdisc module
+#define NL_INGRESS "ingress"
+
+// Filter module
+#define NL_U32 "u32"
+
 int get_ifindex(struct nl_cache *cache, char *ifname);
 int add_ingress_qdisc(struct nl_sock *sock, int if_index);
 int add_mirred_filter(struct nl_sock *sock, int src_if, int dst_if);

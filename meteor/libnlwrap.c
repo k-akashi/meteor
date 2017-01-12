@@ -1,14 +1,4 @@
-#include <netlink/route/tc.h>
-#include <netlink/route/qdisc.h>
-#include <netlink/route/qdisc/netem.h>
-#include <netlink/route/qdisc/htb.h>
-#include <netlink/route/action.h>
-#include <netlink/route/act/mirred.h>
-#include <netlink/route/classifier.h>
-#include <netlink/route/cls/u32.h>
-#include <netlink/route/act/skbedit.h>
-#include <linux/if_ether.h>
-#include <stdio.h>
+#include "libnlwrap.h"
 
 int
 get_ifindex(struct nl_cache *cache, char *ifname)
@@ -20,6 +10,7 @@ get_ifindex(struct nl_cache *cache, char *ifname)
     if_index = rtnl_link_get_ifindex(link);
 
     rtnl_link_put(link);
+
     return if_index;
 }
 
@@ -53,26 +44,13 @@ add_mirred_filter(struct nl_sock *sock, int src_if, int dst_if)
     rtnl_cls_set_protocol(cls, ETH_P_ALL);
     rtnl_tc_set_kind(TC_CAST(cls), "u32");
 
-    uint32_t keyval = 0x00000000; // 0.0.0.0
+    uint32_t keyaddr = 0x00000000; // 0.0.0.0
     uint32_t keymask = 0x00000000; // /0
     int keyoff = 0;
     int keyoffmask = 0;
-    rtnl_u32_add_key_uint32(cls, keyval, keymask, keyoff, keyoffmask);
+    rtnl_u32_add_key_uint32(cls, keyaddr, keymask, keyoff, keyoffmask);
 
-/*
-    struct rtnl_act *skbedit;
-    skbedit = rtnl_act_alloc();
-    if (!skbedit) {
-            printf("rtnl_act_alloc() returns %p\n", skbedit);
-            return -1;
-    }
-    rtnl_tc_set_kind(TC_CAST(skbedit), "skbedit");
-    rtnl_skbedit_set_queue_mapping(skbedit, 4);
-    rtnl_skbedit_set_action(skbedit, TC_ACT_PIPE);
-    rtnl_u32_add_action(cls, skbedit);
-*/
-
-    // action mirred egress redirect dev ifb0
+    // action mirred egress redirect dev ifb
     struct rtnl_act *act;
     act = rtnl_act_alloc();
     rtnl_tc_set_kind(TC_CAST(act), "mirred");
@@ -80,12 +58,12 @@ add_mirred_filter(struct nl_sock *sock, int src_if, int dst_if)
     rtnl_mirred_set_policy(act, TC_ACT_STOLEN);
     rtnl_mirred_set_ifindex(act, dst_if);
     rtnl_u32_add_action(cls, act);
-
     rtnl_u32_set_cls_terminal(cls);
 
     int err;
     if ((err = rtnl_cls_add(sock, cls, NLM_F_CREATE)) < 0) {
         printf("Can not add classifier: %s\n", nl_geterror(err));
+
         return -1;
     }
 
@@ -115,10 +93,10 @@ add_class_ipv4filter(struct nl_sock *sock, int if_index, uint32_t parent, uint32
     rtnl_cls_set_protocol(cls, ETH_P_IP);
     rtnl_tc_set_kind(TC_CAST(cls), "u32");
 
-    if (src_addr || src_prefix) {
+    if (src_addr || src_mask) {
         rtnl_u32_add_key_uint32(cls, htonl(src_addr), src_mask, 12, 0);
     }
-    if (dst_addr || dst_prefix) {
+    if (dst_addr || dst_mask) {
         rtnl_u32_add_key_uint32(cls, htonl(dst_addr), dst_mask, 16, 0);
     }
 
