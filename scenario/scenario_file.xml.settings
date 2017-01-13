@@ -1,3 +1,3 @@
-node001 interface0 0 aaa.bbb.ccc.ddd/32 AA:BB:CC:DD:EE:FF
-node002 interface0 1 aaa.bbb.ccc.ddd/32 AA:BB:CC:DD:EE:FF
-node003 interface0 2 aaa.bbb.ccc.ddd/32 AA:BB:CC:DD:EE:FF
+node001 interface0 0 aaa.bbb.ccc.ddd
+node002 interface0 1 aaa.bbb.ccc.ddd
+node003 interface0 2 aaa.bbb.ccc.ddd

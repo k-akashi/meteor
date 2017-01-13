@@ -169,10 +169,10 @@ void io_binary_print_header (struct binary_header_class *binary_header);
 
 // print binary time record
 void io_binary_print_time_record (struct binary_time_record_class
-				  *binary_time_record);
+				  *binary_time_record, FILE *logfd);
 
 // print binary record
-void io_binary_print_record (struct binary_record_class *binary_record);
+void io_binary_print_record (struct binary_record_class *binary_record, FILE *logfd);
 
 // copy binary record
 void io_binary_copy_record (struct binary_record_class *binary_record_dst,

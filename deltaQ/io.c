@@ -626,15 +626,15 @@ io_binary_print_header (struct binary_header_class *binary_header)
 // print binary time record
 void
 io_binary_print_time_record (struct binary_time_record_class
-			     *binary_time_record)
+			     *binary_time_record, FILE *logfd)
 {
-  printf ("- Time: %.2f s (%d records)\n", binary_time_record->time,
+  fprintf (logfd, "- Time: %.2f s (%d records)\n", binary_time_record->time,
 	  binary_time_record->record_number);
 }
 
 // print binary record
 void
-io_binary_print_record (struct binary_record_class *binary_record)
+io_binary_print_record (struct binary_record_class *binary_record, FILE *logfd)
 {
   /*
      printf ("-- Record: from_node=%d to_node=%d FER=%.4f num_retr=%.4f \
@@ -643,7 +643,7 @@ io_binary_print_record (struct binary_record_class *binary_record)
      binary_record->num_retransmissions, binary_record->operating_rate, 
      binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
    */
-  printf ("-- Record: from_id=%d to_id=%d FER=%.4f num_retr=%.4f \
+  fprintf (logfd, "-- Record: from_id=%d to_id=%d FER=%.4f num_retr=%.4f \
 standard=%d op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_record->from_id, binary_record->to_id, binary_record->frame_error_rate, binary_record->num_retransmissions, binary_record->standard, binary_record->operating_rate, binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
 }
 

@@ -64,6 +64,9 @@ int32_t my_id;
 int32_t loop = FALSE;
 int32_t direction;
 
+char *logfile = NULL;
+FILE *logfd;
+
 #ifdef __amd64__
 #define rdtsc(t)                                                              \
     __asm__ __volatile__ ("rdtsc; movq %%rdx, %0; salq $32, %0;orq %%rax, %0" \
@@ -127,7 +130,7 @@ get_cpu_frequency(void)
     FILE *cpuinfo;
 
     if ((cpuinfo = fopen("/proc/cpuinfo", "r")) == NULL) {
-        fprintf(stderr, "/proc/cpuinfo file cannot open\n");
+        fprintf(logfd, "/proc/cpuinfo file cannot open\n");
         exit(EXIT_FAILURE);
     }
 
@@ -211,7 +214,7 @@ read_settings(char *path, in_addr_t *p, int *prefix, int p_size)
                 continue;
             }
             if (node_id < 0 || node_id < FIRST_NODE_ID || node_id >= MAX_NODES) {
-                fprintf(stderr, "Node id %d is not within the permitted range [%d, %d]\n", node_id, FIRST_NODE_ID, MAX_NODES);
+                fprintf(logfd, "Node id %d is not within the permitted range [%d, %d]\n", node_id, FIRST_NODE_ID, MAX_NODES);
                 fclose(fd);
                 return -1;
             }
@@ -283,16 +286,16 @@ create_conn_list(FILE *conn_fd, int32_t all_node_cnt)
     conn_list_head = NULL;
     while (fgets(buf, BUFSIZ, conn_fd) != NULL) {
         if (sscanf(buf, "%d %d", &src_id, &dst_id) != 2) {
-            fprintf(stderr, "Invalid Parameters");
+            fprintf(logfd, "Invalid Parameters");
             exit(1);
         }
 
         if (src_id > all_node_cnt) {
-            fprintf(stderr, "Source node id too big: %d > %d\n", src_id, all_node_cnt);
+            fprintf(logfd, "Source node id too big: %d > %d\n", src_id, all_node_cnt);
             exit(1);
         }
         else if (dst_id > all_node_cnt) {
-            fprintf(stderr, "Destination node id too big: %d > %d\n", dst_id, all_node_cnt);
+            fprintf(logfd, "Destination node id too big: %d > %d\n", dst_id, all_node_cnt);
             exit(1);
         }
 
@@ -324,12 +327,12 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
     struct connection_list *conn_list = NULL;
  
     if ((timer = timer_init_rdtsc()) == NULL) {
-        fprintf(stderr, "Could not initialize timer");
+        fprintf(logfd, "Could not initialize timer");
         exit(1);
     }
 
     if (all_node_cnt != bin_hdr.interface_number) {
-        fprintf(stderr, "Number of nodes according to the settings file (%d) "
+        fprintf(logfd, "Number of nodes according to the settings file (%d) "
                 "and number of nodes according to QOMET scenario (%d) differ", 
                 all_node_cnt, bin_hdr.interface_number);
         exit(1);
@@ -348,7 +351,7 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
         my_recs_ucast = (bin_rec_cls**)calloc(bin_hdr.interface_number, sizeof (bin_rec_cls *));
     }
     if (my_recs_ucast == NULL) {
-        fprintf(stderr, "Cannot allocate memory for my_recs_ucast\n");
+        fprintf(logfd, "Cannot allocate memory for my_recs_ucast\n");
         exit(1);
     }
 
@@ -357,7 +360,7 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
             my_recs_ucast[node_i] = (bin_rec_cls *)calloc(bin_hdr.interface_number, sizeof (bin_rec_cls));
         }
         if (my_recs_ucast[node_i] == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
+            fprintf(logfd, "Cannot allocate memory for my_recs_ucast[%d]\n", node_i);
             exit(1);
         }
 
@@ -376,7 +379,7 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
     if (adjusted_recs_ucast == NULL) {
         adjusted_recs_ucast = (bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (bin_rec_cls));
         if (adjusted_recs_ucast == NULL) {
-            fprintf(stderr, "Cannot allocate memory for adjusted_recs_ucast");
+            fprintf(logfd, "Cannot allocate memory for adjusted_recs_ucast");
             exit(1);
         }
     }
@@ -384,7 +387,7 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
     if (my_recs_ucast_changed == NULL) {
         my_recs_ucast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
         if (my_recs_ucast_changed == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_ucast_changed\n");
+            fprintf(logfd, "Cannot allocate memory for my_recs_ucast_changed\n");
             exit(1);
         }
     }
@@ -392,7 +395,7 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
     if (my_recs_bcast == NULL && use_mac_addr == FALSE) {
         my_recs_bcast = (bin_rec_cls *)calloc(bin_hdr_if_num, sizeof (bin_rec_cls));
         if (my_recs_bcast == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_bcast\n");
+            fprintf(logfd, "Cannot allocate memory for my_recs_bcast\n");
             exit(1);
         }
         for (node_i = 0; node_i < bin_hdr.interface_number; node_i++) {
@@ -400,7 +403,7 @@ meteor_loop(FILE *qomet_fd, int dsock, bin_hdr_cls bin_hdr, bin_rec_cls *bin_rec
         }
         my_recs_bcast_changed = (int32_t *)calloc(bin_hdr_if_num, sizeof (int32_t));
         if (my_recs_bcast_changed == NULL) {
-            fprintf(stderr, "Cannot allocate memory for my_recs_bcast_changed\n");
+            fprintf(logfd, "Cannot allocate memory for my_recs_bcast_changed\n");
             exit(1);
         }
     }
@@ -410,23 +413,23 @@ emulation_start:
         int rec_i;
 
         if (verbose_level >= 2) {
-            printf("Reading QOMET data from file... Time : %d/%d\n", time_i, bin_hdr.time_record_number);
+            fprintf(logfd, "Reading QOMET data from file... Time : %d/%d\n", time_i, bin_hdr.time_record_number);
         }
 
         if (io_binary_read_time_record_from_file(&bin_time_rec, qomet_fd) == ERROR) {
-            fprintf(stderr, "Aborting on input error (time record)\n");
+            fprintf(logfd, "Aborting on input error (time record)\n");
             exit (1);
         }
-        io_binary_print_time_record(&bin_time_rec);
+        io_binary_print_time_record(&bin_time_rec, logfd);
         crt_record_time = bin_time_rec.time;
 
         if (bin_time_rec.record_number > bin_recs_max_cnt) {
-            fprintf(stderr, "The number of records to be read exceeds allocated size (%d)\n", bin_recs_max_cnt);
+            fprintf(logfd, "The number of records to be read exceeds allocated size (%d)\n", bin_recs_max_cnt);
             exit (1);
         }
 
         if (io_binary_read_records_from_file(bin_recs, bin_time_rec.record_number, qomet_fd) == ERROR) {
-            fprintf(stderr, "Aborting on input error (records)\n");
+            fprintf(logfd, "Aborting on input error (records)\n");
             exit (1);
         }
 
@@ -454,7 +457,7 @@ emulation_start:
                 my_recs_ucast_changed[next_hop_id] = TRUE;
 
                 if (verbose_level >= 3) {
-                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
+                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]), logfd);
                 }
             }
             else if (direction == DIRECTION_IN && bin_recs[rec_i].to_id == my_id) {
@@ -466,14 +469,14 @@ emulation_start:
                 my_recs_ucast_changed[bin_recs[rec_i].to_id] = TRUE;
 
                 if(verbose_level >= 3) {
-                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]));
+                    io_binary_print_record(&(my_recs_ucast[src_id][dst_id]), logfd);
                 }
             }
 
             if (use_mac_addr == FALSE && (bin_recs[rec_i].to_id == my_id || direction == DIRECTION_HV || direction == DIRECTION_BR)) {
                 io_binary_copy_record(&(my_recs_bcast[bin_recs[rec_i].from_id]), &bin_recs[rec_i]);
                 my_recs_bcast_changed[bin_recs[rec_i].from_id] = TRUE;
-                //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]));
+                //io_binary_print_record (&(my_recs_bcast[bin_recs[rec_i].from_node]), logfd);
             }
         }
 
@@ -571,7 +574,7 @@ emulation_start:
                 if (ret == 2) {
                     fseek(qomet_fd, 0L, SEEK_SET);
                     if ((timer = timer_init_rdtsc()) == NULL) {
-                        fprintf(stderr, "Could not initialize timer\n");
+                        fprintf(logfd, "Could not initialize timer\n");
                         exit(1);
                     }
                     io_binary_read_header_from_file(&bin_hdr, qomet_fd);
@@ -583,7 +586,7 @@ emulation_start:
                 }
 /*
                 if (timer_wait(timer, crt_record_time * SCALING_FACTOR) != 0) {
-                    fprintf(stderr, "Timer deadline missed at time=%.2f s\n", crt_record_time);
+                    fprintf(logfd, "Timer deadline missed at time=%.2f s\n", crt_record_time);
                 }
 */
             }
@@ -612,7 +615,7 @@ emulation_start:
 
                     ret = configure_rule(dsock, conf_rule_num, bandwidth, delay, lossrate);
                     if (ret != SUCCESS) {
-                        fprintf(stderr, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
+                        fprintf(logfd, "Error: UCAST rule %d. Error Code %d\n", conf_rule_num, ret);
                         exit(1);
                     }
                     my_recs_ucast_changed[next_hop_id] = FALSE;
@@ -651,7 +654,7 @@ emulation_start:
 
                         ret = configure_rule(dsock, conf_rule_num, bandwidth, delay, lossrate);
                         if (ret != SUCCESS) {
-                            fprintf(stderr, "Error: rule %d. Error Code %d\n", conf_rule_num, ret);
+                            fprintf(logfd, "Error: rule %d. Error Code %d\n", conf_rule_num, ret);
                             exit(1);
                         }
                         my_recs_ucast_changed[next_hop_id] = FALSE;
@@ -808,7 +811,7 @@ main(int argc, char **argv)
     sa.sa_flags |= SA_RESTART;
 
     if (sigaction(SIGUSR1, &sa, NULL) != 0) {
-        fprintf(stderr, "Signal Set Error\n");
+        fprintf(logfd, "Signal Set Error\n");
         exit(1);
     }
 
@@ -828,7 +831,7 @@ main(int argc, char **argv)
     i = 0;
     char ch;
     int index;
-    while ((ch = getopt_long(argc, argv, "a:b:c:dD:e:hi:I:lm:Mq:s:v", options, &index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "a:b:c:dD:e:hi:I:lL:m:Mq:s:v", options, &index)) != -1) {
         switch (ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
@@ -860,6 +863,10 @@ main(int argc, char **argv)
                 break;
             case 'l':
                 loop = TRUE;
+                break;
+            case 'L':
+                logfile = optarg;
+                logfd = fopen(logfile, "w");
                 break;
             case 'm':
                 if ((strcmp(optarg, "ingress") == 0) || strcmp(optarg, "in") == 0) {
@@ -910,6 +917,10 @@ main(int argc, char **argv)
         }
     }
 
+    if (logfd == NULL) {
+        logfd = stderr;
+    }
+
     if (use_mac_addr == TRUE) {
         saddr = (char*)calloc(1, MAC_ADDR_SIZE);
         daddr = (char*)calloc(1, MAC_ADDR_SIZE);
@@ -920,7 +931,7 @@ main(int argc, char **argv)
     }
 
     if (qomet_fd == NULL) {
-        fprintf(stderr, "No QOMET data file was provided\n");
+        fprintf(logfd, "No QOMET data file was provided\n");
         usage();
         exit(1);
     }

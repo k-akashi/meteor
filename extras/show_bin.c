@@ -222,7 +222,7 @@ main(int argc, char *argv[])
             fclose(bin_file);
             exit(1);
         }
-        io_binary_print_time_record(&binary_time_record);
+        //io_binary_print_time_record(&binary_time_record);
         if(binary_time_record.record_number > bin_rec_max_cnt) {
             WARNING("Time: %ld Number of records exceeds maximum (%d > %d)", time_i, binary_time_record.record_number, bin_rec_max_cnt);
             fclose(bin_file);
@@ -239,7 +239,7 @@ main(int argc, char *argv[])
             if(src_id == -1 || src_id == bin_recs[rec_i].from_id) {
                 if(dst_id == -1 || dst_id == bin_recs[rec_i].to_id) {
                     if(type == PRINT_SC) {
-                        io_binary_print_record(&bin_recs[rec_i]);
+                        //io_binary_print_record(&bin_recs[rec_i]);
                     }
                     else if(type == PRINT_GNUPLOT) {
                         //io_bin_rec2gnuplot(&bin_recs[rec_i], binary_time_record.time);

@@ -77,7 +77,7 @@ FILE *ofile_fd;
             exit(1);
         }
 
-        io_binary_print_time_record(&bin_time_rec);
+        //io_binary_print_time_record(&bin_time_rec);
         if(bin_time_rec.record_number > bin_rec_max_cnt) {
             fprintf(stderr, "Number of records exceeds maximum (%d)", bin_rec_max_cnt);
             fclose(ifile_fd);
