@@ -1,3 +1,3 @@
-node001 interface0 0 aaa.bbb.ccc.ddd
-node002 interface0 1 aaa.bbb.ccc.ddd
-node003 interface0 2 aaa.bbb.ccc.ddd
+node001 interface0 0 10.10.0.1 00:00:00:00:00:1
+node002 interface0 1 10.10.0.2 00:00:00:00:00:2
+node003 interface0 2 10.10.0.3 00:00:00:00:00:3

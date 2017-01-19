@@ -728,6 +728,7 @@ emulation_start:
                 }
             }
         }
+        fflush(logfd);
     }
 
     if (loop == TRUE) {
