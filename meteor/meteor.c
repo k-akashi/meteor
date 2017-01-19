@@ -998,7 +998,6 @@ main(int argc, char **argv)
     }
 
     if (daemon_flag == TRUE) {
-        loop = TRUE;
         ret = daemon(0, 0);
     }
 
