@@ -1149,13 +1149,18 @@ main(int argc, char **argv)
     }
 
     if (all_node_cnt != bin_hdr.interface_number) {
-        fprintf(stderr, "Number of nodes according to the settings file (%d) "
+        fprintf(logfd, "Number of nodes according to the settings file (%d) "
                 "and number of nodes according to QOMET scenario (%d) differ", 
                 all_node_cnt, bin_hdr.interface_number);
         exit(1);
     }
 
     meteor_loop(qomet_fd, dsock, bin_hdr, bin_recs, all_node_cnt, node_cnt, direction, conn_list_head);
+
+    if (logfd) {
+        fprintf(logfd, "Emulation finished.\n");
+        fclose(logfd);
+    }
 
     delete_rule(dsock, daddr, rule_num);
     delete_ifb();
