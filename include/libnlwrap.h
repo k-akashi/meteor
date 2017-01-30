@@ -30,4 +30,6 @@ int change_htb_class(struct nl_sock *sock, int if_index, uint32_t parent, uint32
 int add_netem_qdisc(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle, int delay, int jitter, int loss, int limit);
 int change_netem_qdisc(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle, int delay, int jitter, int loss, int limit);
 int delete_qdisc(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle);
+int delete_class(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle);
+int delete_ipv4filter(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle);
 #endif

@@ -74,12 +74,18 @@ add_mirred_filter(struct nl_sock *sock, int src_if, int dst_if)
 }
 
 int
-add_class_ipv4filter(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle, 
-        uint32_t src_addr, int src_prefix, uint32_t dst_addr, int dst_prefix)
+add_class_ipv4filter(struct nl_sock *sock, int if_index, 
+        uint32_t parent, uint32_t handle, 
+        uint32_t src_addr, int src_prefix, 
+        uint32_t dst_addr, int dst_prefix)
 {
     int offset;
     uint32_t src_mask, dst_mask;
     struct rtnl_cls *cls;
+
+    if (src_addr == 0 && dst_addr == 0) {
+        return -1;
+    }
 
     offset = 32 - src_prefix;
     src_mask = 0xffffffff >> offset << offset;
@@ -90,6 +96,7 @@ add_class_ipv4filter(struct nl_sock *sock, int if_index, uint32_t parent, uint32
 
     rtnl_tc_set_ifindex(TC_CAST(cls), if_index);
     rtnl_tc_set_parent(TC_CAST(cls), parent);
+    rtnl_cls_set_prio(cls, (handle - (1 << 16)));
     rtnl_cls_set_protocol(cls, ETH_P_IP);
     rtnl_tc_set_kind(TC_CAST(cls), "u32");
 
@@ -115,7 +122,8 @@ add_class_ipv4filter(struct nl_sock *sock, int if_index, uint32_t parent, uint32
 }
 
 int
-add_class_macfilter(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle, 
+add_class_macfilter(struct nl_sock *sock, int if_index,
+        uint32_t parent, uint32_t handle, 
         uint8_t src_addr[6], uint8_t dst_addr[6])
 {
     int err;
@@ -177,7 +185,8 @@ add_htb_qdisc(struct nl_sock *sock, int if_index,
 }
 
 int
-add_htb_class(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle,
+add_htb_class(struct nl_sock *sock, int if_index,
+        uint32_t parent, uint32_t handle,
         uint32_t clsid, uint32_t rate)
 {
     int err;
@@ -206,7 +215,8 @@ add_htb_class(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t hand
 }
 
 int
-change_htb_class(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle,
+change_htb_class(struct nl_sock *sock, int if_index,
+        uint32_t parent, uint32_t handle,
         uint32_t clsid, uint32_t rate)
 {
     int err;
@@ -237,7 +247,8 @@ change_htb_class(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t h
 
 int
 add_netem_qdisc(struct nl_sock *sock, int if_index, 
-        uint32_t parent, uint32_t handle, int delay, int jitter, int loss, int limit)
+        uint32_t parent, uint32_t handle,
+        int delay, int jitter, int loss, int limit)
 {
     int err;
     struct rtnl_qdisc *qdisc;
@@ -252,7 +263,8 @@ add_netem_qdisc(struct nl_sock *sock, int if_index,
     rtnl_netem_set_loss(qdisc, 0xffffffff / 100 * loss);
 
     if ((err = rtnl_qdisc_add(sock, qdisc, NLM_F_CREATE)) < 0) {
-        printf("Can not add Netem. parent: %u. handle: %u. error: %s\n", parent, handle, nl_geterror(err));
+        printf("Can not add Netem. parent: %u. handle: %u. error: %s\n",
+                parent, handle, nl_geterror(err));
         return -1;
     }
 
@@ -262,7 +274,8 @@ add_netem_qdisc(struct nl_sock *sock, int if_index,
 
 int
 change_netem_qdisc(struct nl_sock *sock, int if_index, 
-        uint32_t parent, uint32_t handle, int delay, int jitter, int loss, int limit)
+        uint32_t parent, uint32_t handle,
+        int delay, int jitter, int loss, int limit)
 {
     int err;
     struct rtnl_qdisc *qdisc;
@@ -286,8 +299,10 @@ change_netem_qdisc(struct nl_sock *sock, int if_index,
 }
 
 int
-delete_qdisc(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handle)
+delete_qdisc(struct nl_sock *sock, int if_index,
+        uint32_t parent, uint32_t handle)
 {
+    int ret;
     struct rtnl_qdisc *qdisc;
 
     qdisc = rtnl_qdisc_alloc();
@@ -297,11 +312,53 @@ delete_qdisc(struct nl_sock *sock, int if_index, uint32_t parent, uint32_t handl
         rtnl_tc_set_handle(TC_CAST(qdisc), handle);
     }
 
-    rtnl_qdisc_delete(sock, qdisc);
+    ret = rtnl_qdisc_delete(sock, qdisc);
 
     rtnl_qdisc_put(qdisc);
 
-    return 0;
+    return ret;
+}
+
+int
+delete_class(struct nl_sock *sock, int if_index,
+        uint32_t parent, uint32_t handle)
+{
+    int ret;
+    struct rtnl_class *class;
+
+    class = rtnl_class_alloc();
+    rtnl_tc_set_ifindex(TC_CAST(class), if_index);
+    rtnl_tc_set_parent(TC_CAST(class), parent);
+    if (handle) {
+        rtnl_tc_set_handle(TC_CAST(class), handle);
+    }
+
+    ret = rtnl_class_delete(sock, class);
+    rtnl_class_put(class);
+
+    return ret;
+}
+
+int
+delete_ipv4filter(struct nl_sock *sock, int if_index,
+        uint32_t parent, uint32_t handle)
+{
+    int ret;
+    struct rtnl_cls *cls;
+
+    cls = rtnl_cls_alloc();
+
+    rtnl_tc_set_ifindex(TC_CAST(cls), if_index);
+    rtnl_cls_set_prio(cls, (handle - (1 << 16)));
+    rtnl_cls_set_protocol(cls, ETH_P_IP);
+    rtnl_u32_set_classid(cls, handle);
+    rtnl_tc_set_kind(TC_CAST(cls), "u32");
+
+
+    ret = rtnl_cls_delete(sock, cls, 0);
+    rtnl_cls_put(cls);
+
+    return ret;
 }
 
 #if 0

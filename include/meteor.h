@@ -1,6 +1,11 @@
 #ifndef METEOR_H
 #define METEOR_H
 
+#define FRAME_LENGTH            1522
+#define INGRESS                 1
+#define DEV_NAME                256
+#define OFFSET_RULE             32767
+
 #define PARAMETERS_TOTAL        19
 #define PARAMETERS_UNUSED       13
 
@@ -22,6 +27,21 @@
 #define DEF_BW                  1000000000
 #define DEF_LOSS                100
 
+#define DIRECTION_BOTH          0
+#define INGRESS                 1
+#define BRIDGE                  4
+
+#define QLEN                    100000
+
+#ifdef TCDEBUG
+#define debug(...) { \
+    printf("%s in %s:%d. ", __func__, __FILE__, __LINE__); \
+    printf(__VA_ARGS__); \
+}
+#else
+#define debug(...) 
+#endif
+
 typedef struct {
     float time;
     int32_t next_hop_id;
@@ -30,7 +50,17 @@ typedef struct {
     double lossrate;
 } qomet_param;
 
-struct METEOR_CONF {
+struct connection_list {
+    struct connection_list *next_ptr;
+    int32_t src_id;
+    int32_t dst_id;
+    uint16_t rec_i;
+};
+
+struct meteor_config {
+    struct nl_sock *nlsock;
+    struct nl_cache *cache;
+
     int32_t pif_index;
     int32_t ifb_index;
 
@@ -44,6 +74,8 @@ struct METEOR_CONF {
 
     FILE *deltaq_fd;
     FILE *settings_fd;
+    FILE *connection_fd;
+    FILE *logfd;
 
     struct bin_hdr_cls *bin_hdr;
     struct node_data *node_list_head;

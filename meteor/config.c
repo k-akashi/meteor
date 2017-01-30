@@ -1,4 +1,4 @@
-#include <json-c/json.h>
+#include <jansson.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -64,9 +64,10 @@ parse_macaddr(const char *val, uint8_t *mac)
 }
 
 int
-add_node_param(struct node_data *node, char *key, const char *val)
+add_node_param(struct node_data *node, const char *key, const char *val)
 {
     int ret;
+    char *ptr;
     //"node0" : { "interface": "mesh0", "id": 0, "ipaddr": "172.16.0.1/32", "macaddr": "00:00:00:00:00:01" }
 
     if (strncmp(key, "node", sizeof ("nod")) == 0) {
@@ -76,7 +77,7 @@ add_node_param(struct node_data *node, char *key, const char *val)
         strncpy(node->ifname, val, MAX_IFNAME_LEN);
     }
     else if (strncmp(key, "id", sizeof ("id")) == 0) {
-        node->id = atoi(val);
+        node->id = strtol(val, &ptr, 10);
     }
     else if (strncmp(key, "ipaddr", sizeof ("ipaddr")) == 0) {
         ret = parse_ipaddr(val, &(node->ipv4addr), &(node->ipv4prefix));
@@ -99,10 +100,14 @@ add_node_param(struct node_data *node, char *key, const char *val)
 int
 get_node_cnt(char *conf_file)
 {
+    const char *key;
     int node_cnt = 0;
-    struct json_object *fjson = json_object_from_file(conf_file);
+    json_t *fjson, *val;
+    json_error_t err;
 
-    json_object_object_foreach(fjson, key, val) {
+    fjson = json_load_file(conf_file, 0, &err);
+
+    json_object_foreach(fjson, key, val) {
         if (strncmp(key, "node", 4) == 0) {
             node_cnt++;
         }
@@ -114,19 +119,23 @@ get_node_cnt(char *conf_file)
 struct node_data *
 create_node_list(char *conf_file, int node_cnt)
 {
-    struct json_object *fjson = json_object_from_file(conf_file);
-
+    const char *key, *node_key;
+    json_t *fjson, *val, *node_val;
+    json_error_t err;
     struct node_data *node_list, *node_ptr;
     struct node_data *node;
+
+    fjson = json_load_file(conf_file, 0, &err);
+
     node_ptr = node_list = (struct node_data *)malloc(sizeof (struct node_data) * node_cnt);
     node = (struct node_data *)malloc(sizeof (struct node_data));
 
-    json_object_object_foreach(fjson, key, val) {
+    json_object_foreach(fjson, key, val) {
         if (strncmp(key, "node", 4) == 0) {
             memset(node, 0, sizeof (struct node_data));
-            add_node_param(node_ptr, key, json_object_to_json_string(val));
-            json_object_object_foreach(val, node_key, node_val) {
-                add_node_param(node_ptr, node_key, json_object_get_string(node_val));
+            add_node_param(node_ptr, key, json_string_value(val));
+            json_object_foreach(val, node_key, node_val) {
+                add_node_param(node_ptr, node_key, json_string_value(node_val));
             }
         }
         
