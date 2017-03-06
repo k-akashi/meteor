@@ -38,23 +38,23 @@
 //#define MESSAGE_DEBUG
 #define MESSAGE_INFO
 
-#ifdef MESSAGE_WARNING
+//#ifdef MESSAGE_WARNING
 #define WARNING(message...) do {                                          \
   fprintf(stderr, "show_bin WARNING: %s, line %d: ", __FILE__, __LINE__); \
   fprintf(stderr, message); fprintf(stderr,"\n");                         \
 } while(0)
-#else
-#define WARNING(message...)	/* message */
-#endif
+//#else
+//#define WARNING(message...)	/* message */
+//#endif
 
-#ifdef MESSAGE_DEBUG
+//#ifdef MESSAGE_DEBUG
 #define DEBUG(message...) do {                                          \
   fprintf(stdout, "show_bin DEBUG: %s, line %d: ", __FILE__, __LINE__); \
   fprintf(stdout, message); fprintf(stdout,"\n");                       \
 } while(0)
-#else
-#define DEBUG(message...)	/* message */
-#endif
+//#else
+//#define DEBUG(message...)	/* message */
+//#endif
 
 #ifdef MESSAGE_INFO
 #define INFO(message...) do {                                       \
@@ -121,6 +121,27 @@ print_systeminfo()
 
 }
 
+void
+io_bin_rec2gnuplot(
+        struct binary_record_class *binary_record, 
+        float time,
+        FILE *logfd)
+{
+      /*
+       *      printf ("-- Record: from_node=%d to_node=%d FER=%.4f num_retr=%.4f \
+       *           op_rate=%.2f bandwidth=%.2f loss_rate=%.4f delay=%.4f\n", binary_record->from_node,
+       *                binary_record->to_node, binary_record->frame_error_rate,
+       *                     binary_record->num_retransmissions, binary_record->operating_rate,
+       *                          binary_record->bandwidth, binary_record->loss_rate, binary_record->delay);
+       *                             */
+      fprintf (logfd, "%f %d %d %.4f %.4f %d %.2f %.2f %.4f %.4f\n",
+                time, 
+                binary_record->from_id, binary_record->to_id,
+                binary_record->frame_error_rate, binary_record->num_retransmissions,
+                binary_record->standard, binary_record->operating_rate,
+                binary_record->bandwidth, binary_record->loss_rate,
+                binary_record->delay);
+}
 int
 main(int argc, char *argv[])
 {
@@ -239,10 +260,10 @@ main(int argc, char *argv[])
             if(src_id == -1 || src_id == bin_recs[rec_i].from_id) {
                 if(dst_id == -1 || dst_id == bin_recs[rec_i].to_id) {
                     if(type == PRINT_SC) {
-                        //io_binary_print_record(&bin_recs[rec_i]);
+                        io_binary_print_record(&bin_recs[rec_i], stdout);
                     }
                     else if(type == PRINT_GNUPLOT) {
-                        //io_bin_rec2gnuplot(&bin_recs[rec_i], binary_time_record.time);
+                        io_bin_rec2gnuplot(&bin_recs[rec_i], binary_time_record.time, stdout);
                     }
                 }
             }

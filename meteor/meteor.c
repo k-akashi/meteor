@@ -61,6 +61,7 @@ int32_t division = 1;
 int32_t re_flag = FALSE;
 int32_t verbose_level = 0;
 int32_t my_id;
+int32_t busy = 0;
 int32_t loop = FALSE;
 int32_t direction;
 
@@ -113,7 +114,9 @@ timer_wait_rdtsc(struct timer_handle* handle, uint64_t time_in_us)
         if (re_flag == TRUE) {
             return 2;
         }
-        usleep(1000);
+	if (busy == 0) {
+       		usleep(1000);
+	}
         rdtsc(crt_time);
     } while (handle->next_event >= crt_time);
 
@@ -420,7 +423,7 @@ emulation_start:
             fprintf(logfd, "Aborting on input error (time record)\n");
             exit (1);
         }
-        io_binary_print_time_record(&bin_time_rec, logfd);
+        //io_binary_print_time_record(&bin_time_rec, logfd);
         crt_record_time = bin_time_rec.time;
 
         if (bin_time_rec.record_number > bin_recs_max_cnt) {
@@ -832,13 +835,16 @@ main(int argc, char **argv)
     i = 0;
     char ch;
     int index;
-    while ((ch = getopt_long(argc, argv, "a:b:c:dD:e:hi:I:lL:m:Mq:s:v", options, &index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "a:b:Bc:dD:e:hi:I:lL:m:Mq:s:v", options, &index)) != -1) {
         switch (ch) {
             case 'a':
                 assign_id = strtol(optarg, &p, 10);
                 break;
             case 'b':
                 strncpy(baddr, optarg, IP_ADDR_SIZE);
+                break;
+            case 'B':
+		busy = 1;
                 break;
             case 'c':
                 conn_fd = fopen(optarg, "r");
